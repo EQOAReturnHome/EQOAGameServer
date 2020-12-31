@@ -35,3 +35,11 @@ For a windows environment, a DNS redirect can be found here: http://wiki.eqoarev
 For a windows environment, A HTTP Server can be found here: http://wiki.eqoarevival.com/index.php/Server_Setup_Windows#HTTP_Server
 
 For Linux environments, A HTTP Server can be used through python's httpserve. Apache can also be used via a more traditional web server setup and seems to be more stable.
+
+Downloading and using Visual studio's, you need to clone the repo. Example of how to do this should be found here: https://docs.microsoft.com/en-us/visualstudio/get-started/tutorial-open-project-from-repo?view=vs-2019
+Upon cloning the repo, you should find a config file here -> EQOAGameServer\EQOA_Proto_C-sharp\EQOAProto-C-Sharp\app.config
+Modify the config file to have the appropriate IP's for your machine hosting the game server and the database.
+
+Once completed, opening two seperate instances of the repo in Visual Studio's, select and run both solution files from the drop down box.
+
+# Do not run everything on the same machine. At the minimum, the client should be a seperate machine or in a VM box. Otherwise it is likely the client won't connect
