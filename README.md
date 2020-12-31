@@ -24,6 +24,9 @@ Functions needing to be added:
 UDP server implementing the packet framework to handle packet requests up to character select, including creating and deleting characters.
 This server implements a keep alive which keeps the server select menu and Character select menu alive for a indefinite amount of time currently.
 
+Current paths forward include:
+- Starting the memory dump upon a character being selected
+- Reverse engineering the game map from the client to use server side for player tracking, collision detection, etc.
 
 
 # Set up
