@@ -27,7 +27,7 @@ For a windows environment, A HTTP Server can be found here: http://wiki.eqoarevi
 
 For Linux environments, A HTTP Server can be used through python's httpserve. Apache can also be used via a more traditional web server setup and seems to be more stable.
 
-#EQOA-Proto-C-Sharp
+#EQOA Proto C Sharp
 
 UDP server implementing the packet framework to handle packet requests up to character select, including creating and deleting characters.
 This server implements a keep alive which keeps the server select menu and Character select menu alive for a indefinite amount of time currently.
