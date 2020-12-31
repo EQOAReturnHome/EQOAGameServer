@@ -45,4 +45,6 @@ Modify the config file to have the appropriate IP's for your machine hosting the
 
 Once completed, opening two seperate instances of the repo in Visual Studio's, select and run both solution files from the drop down box.
 
+- Database to be added with a "trial" account
+
 # Do not run everything on the same machine. At the minimum, the client should be a seperate machine or in a VM box. Otherwise it is likely the client won't connect
