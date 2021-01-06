@@ -93,9 +93,11 @@ namespace SessManager
                         ///Create our session object instance
                         Session thisSession = new Session(ClientEndpoint, MyIPEndPoint, RemoteMaster, SessionPhase, SessionIDBase, SessionIDUp);
                         ///Session thisSession = new Session(ClientEndpoint, RemoteMaster, SessionPhase, SessionIDBase, SessionIDUp);
-
-                        ///Add our session to Session List
-                        SessionList.Add(thisSession);
+                        lock (SessionList)
+                        {
+                            ///Add our session to Session List
+                            SessionList.Add(thisSession);
+                        }
 
                         ProcessSession(thisSession, myPacket);
                     }
@@ -192,14 +194,19 @@ namespace SessManager
         {
             ///Simple enough, remove the session
             Logger.Info("Removing Session");
-
-            SessionList.Remove(MySession);
+            lock (SessionList)
+            {
+                SessionList.Remove(MySession);
+            }
         }
 
         public static void AddMasterSession(Session MyMasterSession)
         {
             Logger.Info("Adding Master Session To List");
-            SessionList.Add(MyMasterSession);
+            lock (SessionList)
+            {
+                SessionList.Add(MyMasterSession);
+            }
         }
 
         public static uint ObtainIDUp()

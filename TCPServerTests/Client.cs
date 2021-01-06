@@ -6,6 +6,7 @@ using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using MessageSpace;
 
 namespace EQOAClientSpace
 {
@@ -109,6 +110,10 @@ namespace EQOAClientSpace
                 case AccountMessageTypes.REQUEST_SUBSCRIPTION:
                 case AccountMessageTypes.REQUEST_UPDATE_ACCT:
                 case AccountMessageTypes.FORGOT_PASSWORD:
+                    //Let user know this is not supported
+                    Console.WriteLine("Received uncoded opcode");
+                    this.MessageType = AccountMessageTypes.DISABLED_FEATURE;
+                    new BadAttempt(this);
                     break;
 
                 default:

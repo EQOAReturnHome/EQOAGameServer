@@ -509,66 +509,65 @@ namespace RdpComm
 
         public static void PrepPacket(object source, ElapsedEventArgs e)
         {
-            
-            foreach (Session MySession in SessionManager.SessionList)
-            {
-                if ((MySession.RdpReport || MySession.RdpMessage) && MySession.ClientFirstConnect)
-                {
-                    ///If creating outgoing packet, write this data to new list to minimize writes to session
-                    List<byte> OutGoingMessage = new List<byte>();
 
-                    ///Create lock here while we grab this Sessions Message List
-                    lock (MySession)
+            lock (SessionManager.SessionList)
+            {
+                foreach (Session MySession in SessionManager.SessionList)
+                {
+                    if ((MySession.RdpReport || MySession.RdpMessage) && MySession.ClientFirstConnect)
                     {
+                        ///If creating outgoing packet, write this data to new list to minimize writes to session
+                        List<byte> OutGoingMessage = new List<byte>();
+
                         ///Add our SessionMessages to this list
                         OutGoingMessage.AddRange(MySession.SessionMessages);
+
                         ///Clear client session Message List
                         MySession.SessionMessages.Clear();
-                    }
 
-                    Logger.Info("Packing header into packet");
-                    ///Add RDPReport if applicable
-                    AddRDPReport(MySession, OutGoingMessage);
+                        Logger.Info("Packing header into packet");
+                        ///Add RDPReport if applicable
+                        AddRDPReport(MySession, OutGoingMessage);
 
-                    ///Bundle needs to be incremented after every sent packet, seems like a good spot?
-                    MySession.IncrementServerBundleNumber();
+                        ///Bundle needs to be incremented after every sent packet, seems like a good spot?
+                        MySession.IncrementServerBundleNumber();
 
-                    ///Add session ack here if it has not been done yet
-                    ///Lets client know we acknowledge session
-                    ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
-                    if (MySession.remoteMaster == 1)
-                    {
-                        if (MySession.SessionAck == false)
+                        ///Add session ack here if it has not been done yet
+                        ///Lets client know we acknowledge session
+                        ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
+                        if (MySession.remoteMaster == 1)
                         {
-                            ///To ack session, we just repeat session information as an ack
-                            AddSession(MySession, OutGoingMessage);
+                            if (MySession.SessionAck == false)
+                            {
+                                ///To ack session, we just repeat session information as an ack
+                                AddSession(MySession, OutGoingMessage);
+                            }
                         }
+
+                        ///Adds bundle type
+                        AddBundleType(MySession, OutGoingMessage);
+
+                        ///Get Packet Length
+                        ushort PacketLength = (ushort)OutGoingMessage.Count();
+
+                        ///Add Session Information
+                        AddSession(MySession, OutGoingMessage);
+
+                        ///Add the Session stuff here that has length built in with session stuff
+                        AddSessionHeader(MySession, OutGoingMessage, PacketLength);
+
+
+                        ///Done? Send to CommManagerOut
+                        CommManagerOut.AddEndPoints(MySession, OutGoingMessage);
                     }
 
-                    ///Adds bundle type
-                    AddBundleType(MySession, OutGoingMessage);
-
-                    ///Get Packet Length
-                    ushort PacketLength = (ushort)OutGoingMessage.Count();
-
-                    ///Add Session Information
-                    AddSession(MySession, OutGoingMessage);
-
-                    ///Add the Session stuff here that has length built in with session stuff
-                    AddSessionHeader(MySession, OutGoingMessage, PacketLength);
-
-
-                    ///Done? Send to CommManagerOut
-                    CommManagerOut.AddEndPoints(MySession, OutGoingMessage);
-                }
-
-                ///No packet needed to respond to client
-                else
-                {
-                    Logger.Info("No Packet needed to respond to last message from client");
+                    ///No packet needed to respond to client
+                    else
+                    {
+                        Logger.Info("No Packet needed to respond to last message from client");
+                    }
                 }
             }
-
         }
 
         ///Identifies if full RDPReport is needed or just the current bundle #

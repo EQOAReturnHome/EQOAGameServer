@@ -18,12 +18,12 @@ namespace MessageSpace
         {
 			//Get Packet Length, need to include the 4 bytes for the length also
 			int Length = ThisClient.ResponsePacket.Count + 4;
-
+			
 			//Add to beginning of List
 			ThisClient.ResponsePacket.InsertRange(0, Utilities.ReturnByteArray(Length));
-
+			
 			AsynchronousSocketListener.Send(ThisClient.Handler, ThisClient.ResponsePacket.ToArray());
-
+			
 			//Clear messages
 			ThisClient.ClearMessages();
 
@@ -68,7 +68,7 @@ namespace MessageSpace
 					break;
 
 				case AccountMessageTypes.DISABLED_FEATURE:
-					Response = "This option is disabled in order to bring you content faster. If you feel this is an error,please contact the developer team for further assistance.";
+					Response = "This option is disabled in order to bring you content faster. If you feel this is an error, please contact the developer team for further assistance.";
 					break;
 
 				default:
@@ -79,19 +79,21 @@ namespace MessageSpace
 
 			int StringLength = Response.Length;
 
+			Console.WriteLine(ThisClient.ResponsePacket);
+
 			//Response Code
 			ThisClient.ResponsePacket.AddRange(Utilities.ReturnByteArray(AccountMessageTypes.ACCT_CREATE_RESPONSE)); //LoginResponse
-			for(int i = 0; i < 4; i++)
+			for(int i = 0; i < 3; i++)
             {
 				ThisClient.ResponsePacket.AddRange(new byte[4]);
 			}
-
+			
 			//Add Our message
 			ThisClient.ResponsePacket.AddRange(Encoding.ASCII.GetBytes(Response));
-
+			
 			//256 bytes reserved, Add padding for remaining bytes
 			ThisClient.ResponsePacket.AddRange(new byte[256 - StringLength]);
-
+			
 			//Process Last bit of packet and send
 			SendMessage(ThisClient);
 		}
