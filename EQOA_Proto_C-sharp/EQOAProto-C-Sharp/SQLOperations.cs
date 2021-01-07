@@ -9,47 +9,11 @@ using System.Text;
 using Utility;
 using RdpComm;
 using Opcodes;
-using System.Threading;
-using System.Timers;
-using System.Threading.Tasks;
-using Timer = System.Timers.Timer;
-using System.Security.Policy;
-using System.Linq.Expressions;
-using System.ComponentModel;
 using System.Configuration;
+using Characters;
 
 namespace EQOASQL
 {
-
-    
-
-    //Inherited from Base Character class to satisfy unique needs of character creation only
-    public class NewCharacter : Character
-    {
-
-        public string TestCharName { get; set; }
-        public int StartingClass { get; set; }
-        public int Gender { get; set; }
-        //Note this is for holding the HumType from the client that is an int and base Character has a string HumType
-        public new int HumType { get; set; }
-        //Addxxxx attributes of the class are to hold a new characters initial allocated stat points in each category
-        public int AddStrength { get; set; }
-        public int AddStamina { get; set; }
-        public int AddAgility { get; set; }
-        public int AddDexterity { get; set; }
-        public int AddWisdom { get; set; }
-        public int AddIntelligence { get; set; }
-        public int AddCharisma { get; set; }
-        //Defaultxxx attributes of the class pulled from the defaultClass table in the DB for new character creation
-        public int DefaultStrength { get; set; }
-        public int DefaultStamina { get; set; }
-        public int DefaultAgility { get; set; }
-        public int DefaultDexterity { get; set; }
-        public int DefaultWisdom { get; set; }
-        public int DefaultIntelligence { get; set; }
-        public int DefaultCharisma { get; set; }
-
-    }
 
     //Creates character listing for character select screen
     public class ProcessCharacterList
