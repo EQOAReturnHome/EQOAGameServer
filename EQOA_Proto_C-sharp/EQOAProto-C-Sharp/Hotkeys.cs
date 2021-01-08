@@ -7,16 +7,17 @@ namespace Hotkey
 {
     class Hotkey
     {
-        private string Direction = null;
-        private string NLabel = null;
-        private string NMessage = null;
-        private string WLabel = null;
-        private string WMessage = null;
-        private string ELabel = null;
-        private string EMessage = null;
-        private string SLabel = null;
-        private string SMessage = null;
+        public string Direction { get; private set; }
+        public string NLabel { get; private set; }
+        public string NMessage { get; private set; }
+        public string WLabel { get; private set; }
+        public string WMessage { get; private set; }
+        public string ELabel { get; private set; }
+        public string EMessage { get; private set; }
+        public string SLabel { get; private set; }
+        public string SMessage { get; private set; }
         private List<byte> tempMessage = new List<byte> { };
+        private List<byte> ourMessage = new List<byte> { };
 
 
 
@@ -40,7 +41,8 @@ namespace Hotkey
 
         public List<byte> PullHotkey()
         {
-            List<byte> ourMessage = new List<byte> { };
+            //Make sure this is clear before gathering and sending
+            ourMessage.Clear();
 
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
