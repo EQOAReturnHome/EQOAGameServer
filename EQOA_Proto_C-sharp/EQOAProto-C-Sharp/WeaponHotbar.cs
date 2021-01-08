@@ -15,11 +15,11 @@ namespace WeaponHotbar
         private List<byte> ourMessage = new List<byte> { };
 
         //Default constructor
-        //Even if not hotbar data, these must be atleast 1
+        //Even if not hotbar data, these must be -1 (Techniqued is 1)
         public WeaponHotbar()
         {
-            PrimaryHandID = 1;
-            SecondaryHandID = 1;
+            PrimaryHandID = -1;
+            SecondaryHandID = -1;
         }
 
         public WeaponHotbar(string thisHotBarName, int thisPrimaryHandID, int thisSecondaryHandID)
