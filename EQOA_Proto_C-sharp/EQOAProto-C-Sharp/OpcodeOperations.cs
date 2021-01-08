@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Text;
 using Utility;
 using EQOASQL;
+using Characters;
+using System.Linq;
 
 namespace OpcodeOperations
 {
@@ -128,14 +130,14 @@ namespace OpcodeOperations
         private static void ProcessCreateChar(Session MySession, List<byte> myPacket)
         {
             //Create NewCharacter object
-            NewCharacter charCreation = new NewCharacter();
+            Character charCreation = new Character();
 
             //Log that a new character creation packet was received
             Logger.Info("Received Character Creation Packet");
 
             //Get length of characters name expected in packet
             int nameLength = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            
+
             //Remove nameLength from packet
             myPacket.RemoveRange(0, 4);
 
@@ -153,7 +155,8 @@ namespace OpcodeOperations
 
             //Before processing a full character creation check if the characters name already exists in the DB.
             //Later this will need to include a character/world combination if additional servers are spun up.
-            if (charCreation.CharName == SQLOperations.CheckName(charCreation.CharName)){
+            if (charCreation.CharName == SQLOperations.CheckName(charCreation.CharName))
+            {
                 //New character list to hold character objects
 
                 //List and assignment to hold game op code in bytes to send out
@@ -165,7 +168,8 @@ namespace OpcodeOperations
                 RdpCommOut.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.NameTaken);
             }
             //If name not found continue to actually create character
-            else {
+            else
+            {
 
                 //Get starting level
                 charCreation.Level = Utility_Funcs.Untechnique(myPacket[0]);
@@ -179,7 +183,7 @@ namespace OpcodeOperations
                 charCreation.HairLength = Utility_Funcs.Untechnique(myPacket[5]);
                 charCreation.HairStyle = Utility_Funcs.Untechnique(myPacket[6]);
                 charCreation.FaceOption = Utility_Funcs.Untechnique(myPacket[7]);
-                charCreation.HumType = Utility_Funcs.Untechnique(myPacket[8]);
+                charCreation.HumTypeNum = Utility_Funcs.Untechnique(myPacket[8]);
 
                 //Remove bytes for single byte attributes
                 myPacket.RemoveRange(0, 9);
@@ -340,5 +344,241 @@ namespace OpcodeOperations
             RdpCommOut.PackMessage(MySession, SecondMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.Camera2);
             MySession.ClientFirstConnect = true;
         }
+
+        public static void CreateCharacterList(List<Character> MyCharacterList, Session MySession)
+        {
+            //Holds list of characters pulled from the DB for the AccountID
+            List<byte> CharacterList = new List<byte>();
+
+            ///Gets our character count and uses technique to double it
+            CharacterList.AddRange(Utility_Funcs.Technique((byte)MyCharacterList.Count()));
+
+            //Iterates through each charcter in the list and converts attribute values to packet values
+            foreach (Character character in MyCharacterList)
+            {
+                ///Add the Character name length
+                CharacterList.AddRange(BitConverter.GetBytes((uint)character.CharName.Length));
+
+                ///Add character name
+                CharacterList.AddRange(Encoding.ASCII.GetBytes(character.CharName));
+
+                ///Add Server ID
+                CharacterList.AddRange(Utility_Funcs.Technique(character.ServerID));
+
+                ///Add Model
+                CharacterList.AddRange(Utility_Funcs.Technique((int)character.ModelID));
+
+                ///Add Class
+                CharacterList.AddRange(Utility_Funcs.Technique(character.TClass));
+
+                ///Add Race
+                CharacterList.AddRange(Utility_Funcs.Technique(character.Race));
+
+                ///Add Level
+                CharacterList.AddRange(Utility_Funcs.Technique(character.Level));
+
+                ///Add Hair color
+                CharacterList.AddRange(Utility_Funcs.Technique(character.HairColor));
+
+                ///Add Hair Length
+                CharacterList.AddRange(Utility_Funcs.Technique(character.HairLength));
+
+                ///Add Hair Style
+                CharacterList.AddRange(Utility_Funcs.Technique(character.HairStyle));
+
+                ///Add Face option
+                CharacterList.AddRange(Utility_Funcs.Technique(character.FaceOption));
+
+                ///Start processing gear
+                foreach (var Gear in character.GearList)
+                {
+                    ///Use a switch to sift through gear and add them properly
+                    switch (Gear.Item3)
+                    {
+                        ///Helm
+                        case 1:
+                            character.Helm = (byte)Gear.Item1;
+                            character.HelmColor = Gear.Item2;
+                            break;
+
+                        ///Robe
+                        case 2:
+                            character.Robe = (byte)Gear.Item1;
+                            character.RobeColor = Gear.Item2;
+                            break;
+
+                        ///Gloves
+                        case 19:
+                            character.Gloves = (byte)Gear.Item1;
+                            character.GlovesColor = Gear.Item2;
+                            break;
+
+                        ///Chest
+                        case 5:
+                            character.Chest = (byte)Gear.Item1;
+                            character.ChestColor = Gear.Item2;
+                            break;
+
+                        ///Bracers
+                        case 8:
+                            character.Bracer = (byte)Gear.Item1;
+                            character.BracerColor = Gear.Item2;
+                            break;
+
+                        ///Legs
+                        case 10:
+                            character.Legs = (byte)Gear.Item1;
+                            character.LegsColor = Gear.Item2;
+                            break;
+
+                        ///Feet
+                        case 11:
+                            character.Boots = (byte)Gear.Item1;
+                            character.BootsColor = Gear.Item2;
+                            break;
+
+                        ///Primary
+                        case 12:
+                            character.Primary = Gear.Item1;
+                            break;
+
+                        ///Secondary
+                        case 14:
+
+                            ///If we have a secondary equipped already, puts next secondary into primary slot
+                            if (character.Secondary > 0)
+                            {
+                                character.Primary = Gear.Item1;
+                            }
+
+                            ///If no secondary, add to secondary slot
+                            else
+                            {
+                                character.Secondary = Gear.Item1;
+                            }
+                            break;
+
+                        ///2 Hand
+                        case 15:
+                            character.Primary = Gear.Item1;
+                            break;
+
+                        ///Shield
+                        case 13:
+                            character.Shield = Gear.Item1;
+                            break;
+
+                        ///Bow
+                        case 16:
+                            character.Primary = Gear.Item1;
+                            break;
+
+                        ///Thrown
+                        case 17:
+                            character.Primary = Gear.Item1;
+                            break;
+
+                        ///Held
+                        case 18:
+                            ///If we have a secondary equipped already, puts next secondary into primary slot
+                            if (character.Secondary > 0)
+                            {
+                                character.Primary = Gear.Item1;
+                            }
+
+                            ///If no secondary, add to secondary slot
+                            else
+                            {
+                                character.Secondary = Gear.Item1;
+                            }
+                            break;
+
+                        default:
+                            Logger.Err("Equipment not in list, this may need to be changed");
+                            break;
+                    }
+                }
+
+                ///Add Robe
+                CharacterList.AddRange(BitConverter.GetBytes(character.Robe));
+
+                ///Add Primary
+                CharacterList.AddRange(BitConverter.GetBytes(character.Primary));
+
+                ///Add Secondary
+                CharacterList.AddRange(BitConverter.GetBytes(character.Secondary));
+
+                ///Add Shield
+                CharacterList.AddRange(BitConverter.GetBytes(character.Shield));
+
+                ///Add Character animation here, dumby for now
+                CharacterList.AddRange(BitConverter.GetBytes((ushort)0x0003));
+
+                ///unknown value?
+                CharacterList.Add((byte)0);
+
+                ///Chest Model
+                CharacterList.Add(character.Chest);
+
+                ///uBracer Model
+                CharacterList.Add(character.Bracer);
+
+                ///Glove Model
+                CharacterList.Add(character.Gloves);
+
+                ///Leg Model
+                CharacterList.Add(character.Legs);
+
+                ///Boot Model
+                CharacterList.Add(character.Boots);
+
+                ///Helm Model
+                CharacterList.Add(character.Helm);
+
+                ///unknown value?
+                CharacterList.AddRange(BitConverter.GetBytes((uint)0));
+
+                ///unknown value?
+                CharacterList.AddRange(BitConverter.GetBytes((ushort)0));
+
+                ///unknown value?
+                CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
+
+                ///unknown value?
+                CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
+
+                ///unknown value?
+                CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
+
+                ///Chest color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.ChestColor)));
+
+                ///Bracer color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BracerColor)));
+
+                ///Glove color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GlovesColor)));
+
+                ///Leg color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegsColor)));
+
+                ///Boot color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BootsColor)));
+
+                ///Helm color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.HelmColor)));
+
+                ///Robe color
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.RobeColor)));
+
+                Logger.Info($"Processed {character.CharName}");
+            }
+
+            ///Character list is complete
+            ///Handles packing message into outgoing packet
+            RdpCommOut.PackMessage(MySession, CharacterList, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.CharacterSelect);
+
+        }
     }
 }
+

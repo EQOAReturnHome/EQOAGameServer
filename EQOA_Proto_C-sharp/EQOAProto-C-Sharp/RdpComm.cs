@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using Utility;
+using Characters;
 
 namespace RdpComm
 {
@@ -240,7 +241,7 @@ namespace RdpComm
                 Logger.Info("Generating Character Select");
                 MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
-                ProcessCharacterList.CreateCharacterList(MyCharacterList, MySession);
+                ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
             }
 
 

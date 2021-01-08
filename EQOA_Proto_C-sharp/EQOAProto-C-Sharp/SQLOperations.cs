@@ -4,294 +4,18 @@ using System;
 using EQLogger;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using Utility;
-using RdpComm;
-using Opcodes;
 using System.Configuration;
 using Characters;
+using OpcodeOperations;
 
 namespace EQOASQL
 {
-
-    //Creates character listing for character select screen
-    public class ProcessCharacterList
-    {
-        ///Create Character Packet here
-        public static void CreateCharacterList(List<Character> MyCharacterList, Session MySession)
-        {
-            //Holds list of characters pulled from the DB for the AccountID
-            List<byte> CharacterList = new List<byte>();
-
-            ///Gets our character count and uses technique to double it
-            CharacterList.AddRange(Utility_Funcs.Technique((byte)MyCharacterList.Count()));
-
-            //Iterates through each charcter in the list and converts attribute values to packet values
-            foreach (Character character in MyCharacterList)
-            {
-                ///Add the Character name length
-                CharacterList.AddRange(BitConverter.GetBytes((uint)character.CharName.Length));
-
-                ///Add character name
-                CharacterList.AddRange(Encoding.ASCII.GetBytes(character.CharName));
-
-                ///Add Server ID
-                CharacterList.AddRange(Utility_Funcs.Technique(character.ServerID));
-
-                ///Add Model
-                CharacterList.AddRange(Utility_Funcs.Technique((int)character.ModelID));
-
-                ///Add Class
-                CharacterList.AddRange(Utility_Funcs.Technique(character.TClass));
-
-                ///Add Race
-                CharacterList.AddRange(Utility_Funcs.Technique(character.Race));
-
-                ///Add Level
-                CharacterList.AddRange(Utility_Funcs.Technique(character.Level));
-
-                ///Add Hair color
-                CharacterList.AddRange(Utility_Funcs.Technique(character.HairColor));
-
-                ///Add Hair Length
-                CharacterList.AddRange(Utility_Funcs.Technique(character.HairLength));
-
-                ///Add Hair Style
-                CharacterList.AddRange(Utility_Funcs.Technique(character.HairStyle));
-
-                ///Add Face option
-                CharacterList.AddRange(Utility_Funcs.Technique(character.FaceOption));
-
-                ///Start processing gear
-                foreach (var Gear in character.GearList)
-                {
-                    ///Use a switch to sift through gear and add them properly
-                    switch (Gear.Item3)
-                    {
-                        ///Helm
-                        case 1:
-                            character.Helm = (byte)Gear.Item1;
-                            character.HelmColor = Gear.Item2;
-                            break;
-
-                        ///Robe
-                        case 2:
-                            character.Robe = (byte)Gear.Item1;
-                            character.RobeColor = Gear.Item2;
-                            break;
-
-                        ///Gloves
-                        case 19:
-                            character.Gloves = (byte)Gear.Item1;
-                            character.GlovesColor = Gear.Item2;
-                            break;
-
-                        ///Chest
-                        case 5:
-                            character.Chest = (byte)Gear.Item1;
-                            character.ChestColor = Gear.Item2;
-                            break;
-
-                        ///Bracers
-                        case 8:
-                            character.Bracer = (byte)Gear.Item1;
-                            character.BracerColor = Gear.Item2;
-                            break;
-
-                        ///Legs
-                        case 10:
-                            character.Legs = (byte)Gear.Item1;
-                            character.LegsColor = Gear.Item2;
-                            break;
-
-                        ///Feet
-                        case 11:
-                            character.Boots = (byte)Gear.Item1;
-                            character.BootsColor = Gear.Item2;
-                            break;
-
-                        ///Primary
-                        case 12:
-                            character.Primary = Gear.Item1;
-                            break;
-
-                        ///Secondary
-                        case 14:
-
-                            ///If we have a secondary equipped already, puts next secondary into primary slot
-                            if (character.Secondary > 0)
-                            {
-                                character.Primary = Gear.Item1;
-                            }
-
-                            ///If no secondary, add to secondary slot
-                            else
-                            {
-                                character.Secondary = Gear.Item1;
-                            }
-                            break;
-
-                        ///2 Hand
-                        case 15:
-                            character.Primary = Gear.Item1;
-                            break;
-
-                        ///Shield
-                        case 13:
-                            character.Shield = Gear.Item1;
-                            break;
-
-                        ///Bow
-                        case 16:
-                            character.Primary = Gear.Item1;
-                            break;
-
-                        ///Thrown
-                        case 17:
-                            character.Primary = Gear.Item1;
-                            break;
-
-                        ///Held
-                        case 18:
-                            ///If we have a secondary equipped already, puts next secondary into primary slot
-                            if (character.Secondary > 0)
-                            {
-                                character.Primary = Gear.Item1;
-                            }
-
-                            ///If no secondary, add to secondary slot
-                            else
-                            {
-                                character.Secondary = Gear.Item1;
-                            }
-                            break;
-
-                        default:
-                            Logger.Err("Equipment not in list, this may need to be changed");
-                            break;
-                    }
-                }
-
-                ///Add Robe
-                CharacterList.AddRange(BitConverter.GetBytes(character.Robe));
-
-                ///Add Primary
-                CharacterList.AddRange(BitConverter.GetBytes(character.Primary));
-
-                ///Add Secondary
-                CharacterList.AddRange(BitConverter.GetBytes(character.Secondary));
-
-                ///Add Shield
-                CharacterList.AddRange(BitConverter.GetBytes(character.Shield));
-
-                ///Add Character animation here, dumby for now
-                CharacterList.AddRange(BitConverter.GetBytes((ushort)0x0003));
-
-                ///unknown value?
-                CharacterList.Add((byte)0);
-
-                ///Chest Model
-                CharacterList.Add(character.Chest);
-
-                ///uBracer Model
-                CharacterList.Add(character.Bracer);
-
-                ///Glove Model
-                CharacterList.Add(character.Gloves);
-
-                ///Leg Model
-                CharacterList.Add(character.Legs);
-
-                ///Boot Model
-                CharacterList.Add(character.Boots);
-
-                ///Helm Model
-                CharacterList.Add(character.Helm);
-
-                ///unknown value?
-                CharacterList.AddRange(BitConverter.GetBytes((uint)0));
-
-                ///unknown value?
-                CharacterList.AddRange(BitConverter.GetBytes((ushort)0));
-
-                ///unknown value?
-                CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
-
-                ///unknown value?
-                CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
-
-                ///unknown value?
-                CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
-
-                ///Chest color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.ChestColor)));
-
-                ///Bracer color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BracerColor)));
-
-                ///Glove color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GlovesColor)));
-
-                ///Leg color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegsColor)));
-
-                ///Boot color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BootsColor)));
-
-                ///Helm color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.HelmColor)));
-
-                ///Robe color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.RobeColor)));
-
-                ///Reset gear values to 0 for defaults
-                ProcessCharacterList.ClearGear(character);
-
-                Logger.Info($"Processed {character.CharName}");
-            }
-           
-            ///Character list is complete
-            ///Handles packing message into outgoing packet
-            RdpCommOut.PackMessage(MySession, CharacterList, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.CharacterSelect);
-
-        }
-
-        ///Clear gear here
-        private static void ClearGear(Character character)
-        {
-            ///Armor
-            character.Helm = 0;
-            character.Chest = 0;
-            character.Gloves = 0;
-            character.Bracer = 0;
-            character.Legs = 0;
-            character.Boots = 0;
-            character.Robe = 0;
-            character.Primary = 0;
-            character.Secondary = 0;
-            character.Shield = 0;
-
-            ///Armor color
-            character.HelmColor = 0;
-            character.ChestColor = 0;
-            character.GlovesColor = 0;
-            character.BracerColor = 0;
-            character.LegsColor = 0;
-            character.BootsColor = 0;
-            character.RobeColor = 0;
-        }
-
-    }
-
     //Class to handle all SQL Operations
     class SQLOperations
     {
+
         //Holds list of characters for whole class
         private static List<Character> characterData = new List<Character>();
-
-        //Connection string for SQL Queries. Needs to be moved to config file at some point
-        //private static string cs = @"server=192.168.6.53;userid=fooUser;password=fooPass;database=localeqoa;Allow User Variables=True";
 
         //Class to pull characters from DB via serverid
         public static List<Character> AccountCharacters(Session MySession)
@@ -400,7 +124,7 @@ namespace EQOASQL
             MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
             //Send Fresh Character Listing
-            ProcessCharacterList.CreateCharacterList(MyCharacterList, MySession);
+            ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
         }
 
         //Method to check if characters name exist in the DB
@@ -435,14 +159,14 @@ namespace EQOASQL
         }
 
         //Method to create new character for player's account
-        public static void CreateCharacter(Session MySession, NewCharacter charCreation)
+        public static void CreateCharacter(Session MySession, Character charCreation)
         {
 
             //Instantiate new list of Characters to return new character listing
-            
+
 
             //Local variables to get string values to store in the DB from dictionary keys received from client
-            string humType = charCreation.HumTypeDict[charCreation.HumType];
+            string humType = charCreation.HumTypeDict[charCreation.HumTypeNum];
             string classType = charCreation.CharClassDict[charCreation.StartingClass];
             string raceType = charCreation.CharRaceDict[charCreation.Race];
             string sexType = charCreation.CharSexDict[charCreation.Gender];
@@ -502,7 +226,7 @@ namespace EQOASQL
 
             //Add total strength from default plus added TP to each category. Not sure this is correct, may need to still add the TP from client
             charCreation.Strength = charCreation.DefaultStrength + charCreation.AddStrength;
-            charCreation.Stamina = charCreation.DefaultStamina + charCreation.AddStrength;
+            charCreation.Stamina = charCreation.DefaultStamina + charCreation.AddStamina;
             charCreation.Agility = charCreation.DefaultAgility + charCreation.AddAgility;
             charCreation.Dexterity = charCreation.DefaultDexterity + charCreation.AddDexterity;
             charCreation.Wisdom = charCreation.DefaultWisdom + charCreation.AddWisdom;
@@ -597,8 +321,8 @@ namespace EQOASQL
             MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
             //Send Fresh Character Listing
-            ProcessCharacterList.CreateCharacterList(MyCharacterList, MySession);
+            ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
         }
-
     }
 }
+
