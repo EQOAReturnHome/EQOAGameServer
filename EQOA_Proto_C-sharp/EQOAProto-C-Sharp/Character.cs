@@ -37,7 +37,6 @@ namespace Characters
 		public float YCoord { get; set; }
 		public float ZCoord { get; set; }
 		public float Facing { get; set; }
-		public float Unknown { get; set; }
 		public int Strength { get; set; }
 		public int Stamina { get; set; }
 		public int Agility { get; set; }
@@ -165,7 +164,14 @@ namespace Characters
 
         }
 
-        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int classIcon, int totalXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP, int world, float xCoord, float yCoord, float zCoord, float facing, float unknown, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC, int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2, int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2)
+        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, 
+			int hairLength, int hairStyle, int faceOption, int classIcon, int totalXP, int debt, int breath, int tunar, int bankTunar, 
+			int unusedTP, int totalAssignableTP, int world, float xCoord, float yCoord, float zCoord, float facing, int strength, 
+			int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower,
+			int maxPower, int healOT, int powerOT, int aC, int poisonResist, int diseaseResist, int fireResist, int coldResist, 
+			int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, 
+			int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2, int baseHP, int currentPower2, int basePower, 
+			int healOT2, int powerOT2)
         {
             CharName = charName;
             ServerID = serverID;
@@ -191,7 +197,6 @@ namespace Characters
             YCoord = yCoord;
             ZCoord = zCoord;
             Facing = facing;
-            Unknown = unknown;
             Strength = strength;
             Stamina = stamina;
             Agility = agility;

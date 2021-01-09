@@ -45,64 +45,121 @@ namespace EQOASQL
                 //Instantiate new character object, not to be confused with a newly created character
                 Character newCharacter = new Character
                 (
+                    //charName
                     rdr.GetString(0),
+                    //serverid
                     rdr.GetInt32(1),
+                    //modelid
                     rdr.GetInt32(2),
+                    //tclass
                     rdr.GetInt32(3),
+                    //race
                     rdr.GetInt32(4),
+                    //humType
                     rdr.GetString(5),
+                    //level
                     rdr.GetInt32(6),
+                    //haircolor
                     rdr.GetInt32(7),
+                    //hairlength
                     rdr.GetInt32(8),
+                    //hairstyle
                     rdr.GetInt32(9),
+                    //faceoption
                     rdr.GetInt32(10),
+                    //classIcon
                     rdr.GetInt32(11),
+                    //totalXP
                     rdr.GetInt32(12),
+                    //debt
                     rdr.GetInt32(13),
+                    //breath
                     rdr.GetInt32(14),
+                    //tunar
                     rdr.GetInt32(15),
+                    //bankTunar
                     rdr.GetInt32(16),
+                    //unusedTP
                     rdr.GetInt32(17),
+                    //totalTP
                     rdr.GetInt32(18),
+                    //world
                     rdr.GetInt32(19),
-                    rdr.GetInt32(20),
-                    rdr.GetInt32(21),
-                    rdr.GetInt32(22),
-                    rdr.GetInt32(23),
+                    //x
+                    rdr.GetFloat(20),
+                    //y
+                    rdr.GetFloat(21),
+                    //z
+                    rdr.GetFloat(22),
+                    //facing
+                    rdr.GetFloat(23),
+                    //strength
                     rdr.GetInt32(24),
+                    //stamina
                     rdr.GetInt32(25),
+                    //agility
                     rdr.GetInt32(26),
+                    //dexterity
                     rdr.GetInt32(27),
+                    //wisdom
                     rdr.GetInt32(28),
+                    //intel
                     rdr.GetInt32(29),
+                    //charisma
                     rdr.GetInt32(30),
+                    //currentHP
                     rdr.GetInt32(31),
+                    //maxHP
                     rdr.GetInt32(32),
+                    //currentPower
                     rdr.GetInt32(33),
+                    //maxPower
                     rdr.GetInt32(34),
+                    //healot
                     rdr.GetInt32(35),
+                    //powerot
                     rdr.GetInt32(36),
+                    //ac
                     rdr.GetInt32(37),
+                    //poisonr
                     rdr.GetInt32(38),
+                    //diseaser
                     rdr.GetInt32(39),
+                    //firer
                     rdr.GetInt32(40),
+                    //coldr
                     rdr.GetInt32(41),
+                    //lightningr
                     rdr.GetInt32(42),
+                    //arcaner
                     rdr.GetInt32(43),
+                    //fishing
                     rdr.GetInt32(44),
+                    //baseStr
                     rdr.GetInt32(45),
-                    rdr.GetInt32(45),
+                    //baseSta
                     rdr.GetInt32(46),
+                    //baseAgi
                     rdr.GetInt32(47),
+                    //baseDex
                     rdr.GetInt32(48),
+                    //baseWisdom
                     rdr.GetInt32(49),
+                    //baseIntel
                     rdr.GetInt32(50),
+                    //baseCha
                     rdr.GetInt32(51),
+                    //currentHP2
                     rdr.GetInt32(52),
+                    //baseHp
                     rdr.GetInt32(53),
+                    //currentPower2
                     rdr.GetInt32(54),
+                    //basePower
                     rdr.GetInt32(55),
+                    //healot2
                     rdr.GetInt32(56),
+                    //powerot2
                     rdr.GetInt32(57));
 
                 //Add character attribute data to charaterData List
