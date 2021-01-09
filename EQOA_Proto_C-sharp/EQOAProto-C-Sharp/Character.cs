@@ -1,5 +1,7 @@
-
-
+using Spells;
+using Hotkeys;
+using WeaponHotbars;
+using Items;
 using System;
 using System.Collections.Generic;
 
@@ -9,10 +11,11 @@ namespace Characters
 	{
 		//List to hold gear values for model, color, and equip location
 		public List<Tuple<uint, uint, byte>> GearList = new List<Tuple<uint, uint, byte>>();
+
 		//Attributes a character may have
 		public string CharName { get; set; }
 		public int ServerID { get; set; }
-		public long ModelID { get; set; }
+		public int ModelID { get; set; }
 		public int TClass { get; set; }
 		public int Race { get; set; }
 		public String HumType { get; set; }
@@ -28,10 +31,13 @@ namespace Characters
 		public int Tunar { get; set; }
 		public int BankTunar { get; set; }
 		public int UnusedTP { get; set; }
-		public int TotalTP { get; set; }
+		public int TotalAssignableTP { get; set; }
+		public int World { get; set; }
 		public float XCoord { get; set; }
 		public float YCoord { get; set; }
+		public float ZCoord { get; set; }
 		public float Facing { get; set; }
+		public float Unknown { get; set; }
 		public int Strength { get; set; }
 		public int Stamina { get; set; }
 		public int Agility { get; set; }
@@ -43,10 +49,9 @@ namespace Characters
 		public int MaxHP { get; set; }
 		public int CurrentPower { get; set; }
 		public int MaxPower { get; set; }
-		public float ZCoord { get; set; }
 		public int HealOT { get; set; }
 		public int PowerOT { get; set; }
-		public int Ac { get; set; }
+		public int AC { get; set; }
 		public int PoisonResist { get; set; }
 		public int DiseaseResist { get; set; }
 		public int FireResist { get; set; }
@@ -89,6 +94,13 @@ namespace Characters
 		public uint BootsColor = 0xFFFFFFFF;
 		public uint RobeColor = 0xFFFFFFFF;
 
+		//Our Lists for attributes of character
+		public List<Item> InventoryItems = new List<Item> { };
+		public List<Item> BankItems = new List<Item> { };
+		public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
+		public List<Hotkey> MyHotkeys = new List<Hotkey> { };
+		public List<Spell> MySpells = new List<Spell> { };
+
 		//Dictionary mapping the client value to the string value expected in the DB
 		//Eastern Human = 1, Western Human = 2, All non humans = 0
 		public readonly Dictionary<int, string> HumTypeDict = new Dictionary<int, string>
@@ -130,7 +142,7 @@ namespace Characters
 		public int AddStamina { get; set; }
 		public int AddAgility { get; set; }
 		public int AddDexterity { get; set; }
-		public int AddWisdom { get; set; }
+        public int AddWisdom { get; set; }
 		public int AddIntelligence { get; set; }
 		public int AddCharisma { get; set; }
 		//Defaultxxx attributes of the class pulled from the defaultClass table in the DB for new character creation
@@ -148,5 +160,85 @@ namespace Characters
 			return "Character Data: " + CharName;
 		}
 
+		public Character()
+        {
+
+        }
+
+        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int classIcon, int totalXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP, int world, float xCoord, float yCoord, float zCoord, float facing, float unknown, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC, int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2, int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2)
+        {
+            CharName = charName;
+            ServerID = serverID;
+            ModelID = modelID;
+            TClass = tClass;
+            Race = race;
+            HumType = humType;
+            Level = level;
+            HairColor = hairColor;
+            HairLength = hairLength;
+            HairStyle = hairStyle;
+            FaceOption = faceOption;
+            ClassIcon = classIcon;
+            TotalXP = totalXP;
+            Debt = debt;
+            Breath = breath;
+            Tunar = tunar;
+            BankTunar = bankTunar;
+            UnusedTP = unusedTP;
+            TotalAssignableTP = totalAssignableTP;
+            World = world;
+            XCoord = xCoord;
+            YCoord = yCoord;
+            ZCoord = zCoord;
+            Facing = facing;
+            Unknown = unknown;
+            Strength = strength;
+            Stamina = stamina;
+            Agility = agility;
+            Dexterity = dexterity;
+            Wisdom = wisdom;
+            Intelligence = intelligence;
+            Charisma = charisma;
+            CurrentHP = currentHP;
+            MaxHP = maxHP;
+            CurrentPower = currentPower;
+            MaxPower = maxPower;
+            HealOT = healOT;
+            PowerOT = powerOT;
+            AC = aC;
+            PoisonResist = poisonResist;
+            DiseaseResist = diseaseResist;
+            FireResist = fireResist;
+            ColdResist = coldResist;
+            LightningResist = lightningResist;
+            ArcaneResist = arcaneResist;
+            Fishing = fishing;
+            BaseStrength = baseStrength;
+            BaseStamina = baseStamina;
+            BaseAgility = baseAgility;
+            BaseDexterity = baseDexterity;
+            BaseWisdom = baseWisdom;
+            BaseIntelligence = baseIntelligence;
+            BaseCharisma = baseCharisma;
+            CurrentHP2 = currentHP2;
+            BaseHP = baseHP;
+            CurrentPower2 = currentPower2;
+            BasePower = basePower;
+            HealOT2 = healOT2;
+            PowerOT2 = powerOT2;
+        }
+
+		public void UpdateFeatures(int hairColor, int hairLength, int hairStyle, int faceOption)
+		{
+			HairColor = hairColor;
+			HairLength = hairLength;
+			HairStyle = hairStyle;
+			FaceOption = faceOption;
+		}
+
+		public void PullCharacter()
+        {
+
+        }
 	}
 }

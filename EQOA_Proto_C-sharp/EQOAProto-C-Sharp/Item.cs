@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Text;
 using Utility;
 
-namespace Item
+namespace Items
 {
-    class Item
+    public class Item
     {
         //Should these be public? How would we handle adding stats to character overall stats without 100 methods?
-        public byte StackLeft { get; private set; }
+        public int StackLeft { get; private set; }
         public int RemainingHP { get; private set; }
-        public byte Charges { get; private set; }
-        public byte EquipLocation { get; private set; }
+        public int Charges { get; private set; }
+        public int EquipLocation { get; private set; }
         public byte Location { get; private set; } //inventory, bank auction etc
         public int InventoryNumber { get; private set; } //Location in inventory, would location in List suffice for this?
         public int ItemID { get; private set; }
@@ -19,53 +19,53 @@ namespace Item
         public int Unk1 { get; private set; }
         public int ItemIcon { get; private set; }
         public int Unk2 { get; private set; }
-        public byte Equipslot { get; private set; }
+        public int Equipslot { get; private set; }
         public int Unk3 { get; private set; }
-        public byte Trade { get; private set; }
-        public byte Rent { get; private set; }
+        public int Trade { get; private set; }
+        public int Rent { get; private set; }
         public int Unk4 { get; private set; }
         public int Attacktype { get; private set; }
         public int Weapondamage { get; private set; }
         public int Unk5 { get; private set; }
-        public byte Levelreq { get; private set; }
-        public byte Maxstack { get; private set; }
+        public int Levelreq { get; private set; }
+        public int Maxstack { get; private set; }
         public int Maxhp { get; private set; }
-        public byte Duration { get; private set; }
-        public short Classuse { get; private set; }
-        public short Raceuse { get; private set; }
-        public byte Procanim { get; private set; }
-        public byte Lore { get; private set; }
+        public int Duration { get; private set; }
+        public int Classuse { get; private set; }
+        public int Raceuse { get; private set; }
+        public int Procanim { get; private set; }
+        public int Lore { get; private set; }
         public int Unk6 { get; private set; }
-        public byte Craft { get; private set; }
+        public int Craft { get; private set; }
         public string ItemName { get; private set; }
         public string ItemDesc { get; private set; }
         public int Model { get; private set; }
         public int Color { get; private set; }
 
         //Gear stats
-        public short Str { get; private set; }
-        public short Sta { get; private set; }
-        public short Agi { get; private set; }
-        public short Dex { get; private set; }
-        public short Wis { get; private set; }
-        public short Int { get; private set; }
-        public short Cha { get; private set; }
+        public int Str { get; private set; }
+        public int Sta { get; private set; }
+        public int Agi { get; private set; }
+        public int Dex { get; private set; }
+        public int Wis { get; private set; }
+        public int Int { get; private set; }
+        public int Cha { get; private set; }
         public int HPMax { get; private set; }
         public int POWMax { get; private set; }
-        public short PoT { get; private set; }
-        public short HoT { get; private set; }
+        public int PoT { get; private set; }
+        public int HoT { get; private set; }
         public int AC { get; private set; }
-        public short PR { get; private set; }
-        public short DR { get; private set; }
-        public short FR { get; private set; }
-        public short CR { get; private set; }
-        public short LR { get; private set; }
-        public short AR { get; private set; }
+        public int PR { get; private set; }
+        public int DR { get; private set; }
+        public int FR { get; private set; }
+        public int CR { get; private set; }
+        public int LR { get; private set; }
+        public int AR { get; private set; }
         private List<byte> ourMessage = new List<byte> { };
         private List<byte> ourStats = new List<byte> { };
 
         //Stat counter
-        private byte Counter;
+        private int Counter;
 
         //default constructor
         public Item()
@@ -74,8 +74,8 @@ namespace Item
         //This will instantiate an inventory object
         //Should we be able to instantiate a normal item and gear seperately? Seems the better choice
         //This is to instantiate 
-        public Item(byte thisStacksLeft, byte thisCharges, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, 
-                         byte thisTrade, byte thisRent, byte thisCraft, byte thisLore, byte thisLevelreq, byte thisMaxStack, string thisItemName, string thisItemDesc)
+        public Item(int thisStacksLeft, int thisCharges, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, 
+                         int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -96,9 +96,9 @@ namespace Item
         }
 
         //Constructor object for armour and weapons
-        public Item(int thisRemainingHP, byte thisStacksLeft, byte thisCharges, byte thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, byte thisEquipslot,
-                         int thisAttackType, int thisWeaponDamage, int thisMaxHP, byte thisTrade, byte thisRent, byte thisCraft, byte thisLore, byte thisLevelreq, byte thisMaxStack, string thisItemName, string thisItemDesc,
-                         byte thisDuration, short thisClassuse, short thisRaceuse, byte thisProcanim)
+        public Item(int thisRemainingHP, int thisStacksLeft, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisEquipslot,
+                         int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc,
+                         int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -167,6 +167,7 @@ namespace Item
             ourMessage.AddRange(BitConverter.GetBytes(ItemDesc.Length));
             ourMessage.AddRange(Encoding.Unicode.GetBytes(ItemDesc));
             PullStats();
+
             return ourMessage;
         }
 
@@ -174,7 +175,7 @@ namespace Item
         {
             
             //Gather stats if any exist
-            //Increment counter if if statement true, then add identifier byte for stat and then technique and add stat value
+            //Increment counter if if statement true, then add identifier int for stat and then technique and add stat value
 
             if (Str > 0)
             {
@@ -264,7 +265,7 @@ namespace Item
             {
                 Counter++;
                 ourStats.Add(44);
-                ourStats.AddRange(Utility_Funcs.Technique(PR);
+                ourStats.AddRange(Utility_Funcs.Technique(PR));
             }
 
             if (DR > 0)

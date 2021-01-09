@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using Utility;
 
-namespace WeaponHotbar
+namespace WeaponHotbars
 {
     //Memory dump always expects 4 weapon hotbars, even if it's just "null"
-    class WeaponHotbar
+    public class WeaponHotbar
     {
         public string HotbarName { get; private set; }
         public int PrimaryHandID { get; private set; }

@@ -7,6 +7,7 @@ using ServerSelect;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Characters;
 
 namespace SessManager
 {
@@ -281,6 +282,9 @@ namespace SessManager
 
         ///Clients IP Information
         public IPAddress MyIPInfo;
+
+        //Character List
+        public List<Character> CharacterData;
 
         ///Our Session object, when client makes the session we don't need AccopuntID
         public Session(ushort clientEndpoint, IPEndPoint MyIPEndPoint, ushort RemoteMaster, ushort SessionPhase, uint SessionIDBase, uint SessionIDUp)

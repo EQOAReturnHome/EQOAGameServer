@@ -43,22 +43,67 @@ namespace EQOASQL
             while (rdr.Read())
             {
                 //Instantiate new character object, not to be confused with a newly created character
-                var newCharacter = new Character
-                {
-
-                    //Assign character variables from DB values
-                    CharName = rdr.GetString(0),
-                    ServerID = rdr.GetInt32(1),
-                    ModelID = rdr.GetInt64(2),
-                    TClass = rdr.GetInt32(3),
-                    Race = rdr.GetInt32(4),
-                    HumType = rdr.GetString(5),
-                    Level = rdr.GetInt32(6),
-                    HairColor = rdr.GetInt32(7),
-                    HairLength = rdr.GetInt32(8),
-                    HairStyle = rdr.GetInt32(9),
-                    FaceOption = rdr.GetInt32(10)
-                };
+                Character newCharacter = new Character
+                (
+                    rdr.GetString(0),
+                    rdr.GetInt32(1),
+                    rdr.GetInt32(2),
+                    rdr.GetInt32(3),
+                    rdr.GetInt32(4),
+                    rdr.GetString(5),
+                    rdr.GetInt32(6),
+                    rdr.GetInt32(7),
+                    rdr.GetInt32(8),
+                    rdr.GetInt32(9),
+                    rdr.GetInt32(10),
+                    rdr.GetInt32(11),
+                    rdr.GetInt32(12),
+                    rdr.GetInt32(13),
+                    rdr.GetInt32(14),
+                    rdr.GetInt32(15),
+                    rdr.GetInt32(16),
+                    rdr.GetInt32(17),
+                    rdr.GetInt32(18),
+                    rdr.GetInt32(19),
+                    rdr.GetInt32(20),
+                    rdr.GetInt32(21),
+                    rdr.GetInt32(22),
+                    rdr.GetInt32(23),
+                    rdr.GetInt32(24),
+                    rdr.GetInt32(25),
+                    rdr.GetInt32(26),
+                    rdr.GetInt32(27),
+                    rdr.GetInt32(28),
+                    rdr.GetInt32(29),
+                    rdr.GetInt32(30),
+                    rdr.GetInt32(31),
+                    rdr.GetInt32(32),
+                    rdr.GetInt32(33),
+                    rdr.GetInt32(34),
+                    rdr.GetInt32(35),
+                    rdr.GetInt32(36),
+                    rdr.GetInt32(37),
+                    rdr.GetInt32(38),
+                    rdr.GetInt32(39),
+                    rdr.GetInt32(40),
+                    rdr.GetInt32(41),
+                    rdr.GetInt32(42),
+                    rdr.GetInt32(43),
+                    rdr.GetInt32(44),
+                    rdr.GetInt32(45),
+                    rdr.GetInt32(45),
+                    rdr.GetInt32(46),
+                    rdr.GetInt32(47),
+                    rdr.GetInt32(48),
+                    rdr.GetInt32(49),
+                    rdr.GetInt32(50),
+                    rdr.GetInt32(51),
+                    rdr.GetInt32(52),
+                    rdr.GetInt32(53),
+                    rdr.GetInt32(54),
+                    rdr.GetInt32(55),
+                    rdr.GetInt32(56),
+                    rdr.GetInt32(57));
 
                 //Add character attribute data to charaterData List
                 Console.WriteLine(newCharacter.CharName);
@@ -76,6 +121,10 @@ namespace EQOASQL
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
+
+                //foreach( Character Char in characterData)
+                //{ 
+                //}
                 //create newCharacter obbject to hold gear data
                 var newCharacter = new Character();
 
@@ -200,7 +249,7 @@ namespace EQOASQL
             {
                 charCreation.Tunar = rdr.GetInt32(5);
                 charCreation.UnusedTP = rdr.GetInt32(7);
-                charCreation.TotalTP = rdr.GetInt32(8);
+                charCreation.TotalAssignableTP = rdr.GetInt32(8);
                 charCreation.XCoord = rdr.GetFloat(9);
                 charCreation.ZCoord = rdr.GetFloat(10);
                 charCreation.YCoord = rdr.GetFloat(11);
@@ -212,14 +261,10 @@ namespace EQOASQL
                 charCreation.DefaultWisdom = rdr.GetInt32(18);
                 charCreation.DefaultIntelligence = rdr.GetInt32(19);
                 charCreation.DefaultCharisma = rdr.GetInt32(20);
-                charCreation.ModelID = rdr.GetInt64(21);
+                charCreation.ModelID = rdr.GetInt32(21);
             }
             rdr.Close();
             con.Close();
-
-            //Calculate totalTP maximum for new character
-            charCreation.TotalTP = charCreation.DefaultStrength + charCreation.DefaultStamina + charCreation.DefaultAgility + charCreation.DefaultDexterity + charCreation.DefaultWisdom +
-                                    charCreation.DefaultIntelligence + charCreation.DefaultCharisma + charCreation.UnusedTP;
 
             //Calculate Unused TP still available to character upon entering world.
             charCreation.UnusedTP = charCreation.UnusedTP - UsedTP;
@@ -264,7 +309,7 @@ namespace EQOASQL
             SecondCmd.Parameters.AddWithValue("Tunar", charCreation.Tunar);
             SecondCmd.Parameters.AddWithValue("BankTunar", charCreation.BankTunar);
             SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.UnusedTP);
-            SecondCmd.Parameters.AddWithValue("TotalTP", charCreation.TotalTP);
+            SecondCmd.Parameters.AddWithValue("TotalTP", 350);
             SecondCmd.Parameters.AddWithValue("X", charCreation.XCoord);
             SecondCmd.Parameters.AddWithValue("Y", charCreation.YCoord);
             SecondCmd.Parameters.AddWithValue("Z", charCreation.ZCoord);

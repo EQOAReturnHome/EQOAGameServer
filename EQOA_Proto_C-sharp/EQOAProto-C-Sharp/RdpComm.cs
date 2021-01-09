@@ -241,6 +241,9 @@ namespace RdpComm
                 Logger.Info("Generating Character Select");
                 MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
+                //Assign to our session
+                MySession.CharacterData = MyCharacterList;
+
                 ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
             }
 

@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using System.Text;
 using Utility;
 
-namespace Spell
+namespace Spells
 {
-    class Spell
+    public class Spell
     {
         public int SpellID { get; private set; }
-        public byte AddedOrder { get; private set; }
-        public byte OnHotBar { get; private set; }
-        public byte WhereOnHotBar { get; private set; }
+        public int AddedOrder { get; private set; }
+        public int OnHotBar { get; private set; }
+        public int WhereOnHotBar { get; private set; }
         public int Unk1 { get; private set; }
-        public byte ShowHide { get; private set; }
-        public byte AbilityLevel { get; private set; }
+        public int ShowHide { get; private set; }
+        public int AbilityLevel { get; private set; }
         public int Unk2 { get; private set; }
         public int Unk3 { get; private set; }
         public Half Range { get; private set; }
         public int CastTime { get; private set; }
-        public short Power { get; private set; }
+        public int Power { get; private set; }
         public int IconColor { get; private set; }
         public int Icon { get; private set; }
-        public byte Scope { get; private set; }
+        public int Scope { get; private set; }
         public int Recast { get; private set; }
         public int EqpRequirement { get; private set; }
         public string SpellName { get; private set; }
@@ -33,8 +33,8 @@ namespace Spell
         { }
 
         //Will instantiate a spell object
-        public Spell(int thisSpellID, byte thisAddedOrder, byte thisOnHotBar, byte thisWhereOnHotBar, int thisUnk1, byte thisShowHide, byte thisAbilityLevel, int thisUnk2, int thisUnk3,
-                     Half thisRange, int thisCastTime, short thisPower, int thisIconColor, int thisIcon, byte thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
+        public Spell(int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide, int thisAbilityLevel, int thisUnk2, int thisUnk3,
+                     Half thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;

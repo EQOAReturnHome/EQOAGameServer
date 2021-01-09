@@ -32,7 +32,7 @@ namespace Utility
                                                                                             {"WSNS" , 824}, {"WSWN" , 120}, {"WSWW" , 376}, {"WSWE" , 632}, {"WSWS" , 888},
                                                                                             {"WSEN" , 184}, {"WSEW" , 440}, {"WSEE" , 696}, {"WSES" , 952}, {"WSSN" ,248},
                                                                                             {"WSSW" , 504}, {"WSSE" , 760}, {"WSSS" , 1016}, {"ENNN" , 12}, {"ENNW" , 268},
-                                                                                            {"ENNE" , 524}, {"ENNS" , 780}, {"ENWN" , 76}, {"ENWW" , 332}, {"ENWE" , 588}, {
+                                                                                            {"ENNE" , 524}, {"ENNS" , 780}, {"ENWN" , 76}, {"ENWW" , 332}, {"ENWE" , 588},
                                                                                             {"ENWS" , 844}, {"ENEN" , 140}, {"ENEW" , 396}, {"ENEE" , 652}, {"ENES" , 908},
                                                                                             {"ENSN" , 204}, {"ENSW" , 460}, {"ENSE" , 716}, {"ENSS" , 972}, {"EWNN" , 28},
                                                                                             {"EWNW" , 284}, {"EWNE" , 540}, {"EWNS" , 796}, {"EWWN" , 92}, {"EWWW" , 348},

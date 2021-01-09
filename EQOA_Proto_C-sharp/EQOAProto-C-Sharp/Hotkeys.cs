@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Utility;
 
-namespace Hotkey
+namespace Hotkeys
 {
-    class Hotkey
+    public class Hotkey
     {
         public string Direction { get; private set; }
         public string NLabel { get; private set; }

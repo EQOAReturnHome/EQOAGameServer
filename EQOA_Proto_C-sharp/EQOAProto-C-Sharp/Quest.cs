@@ -1,7 +1,7 @@
 ﻿
-namespace Quest
+namespace Quests
 {
-    class Quest
+    public class Quest
     {
         public Quest()
         {

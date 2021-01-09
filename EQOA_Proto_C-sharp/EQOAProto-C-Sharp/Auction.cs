@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Auction
+namespace Auctions
 {
-    class Auction
+    public class Auction
     {
         public Auction()
         {

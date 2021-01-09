@@ -106,10 +106,42 @@ namespace OpcodeOperations
                     Logger.Info("Create Character Request");
                     ProcessCreateChar(MySession, myPacket);
                     break;
+                case GameOpcode.SELECTED_CHAR:
+                    //Checking sent data to verify no changes to character
+                    ProcessCharacterChanges(MySession, myPacket);
+                    Logger.Info("Character Selected, starting memory dump");
+                    ProcessMemoryDump(MySession, myPacket);
+                    break;
                 default:
                     Logger.Err("Unable to identify Bundle Type");
                     break;
             }
+        }
+
+        private static void ProcessCharacterChanges(Session mySession, List<byte> myPacket)
+        {
+            //Retrieve CharacterID from client
+            int ServerID = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
+            myPacket.RemoveRange(0, 4);
+            int HairColor = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
+            myPacket.RemoveRange(0, 4);
+            int HairLength = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
+            myPacket.RemoveRange(0, 4);
+            int HairStyle = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
+            myPacket.RemoveRange(0, 4);
+            int FaceOption = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
+            myPacket.RemoveRange(0, 4);
+
+            //Update these on our character
+            Character thisChar = mySession.CharacterData.Find(i => Equals(i.ServerID, ServerID));
+
+            //Got character, update changes
+            thisChar.UpdateFeatures(HairColor, HairLength, HairStyle, FaceOption);
+        }
+
+        private static void ProcessMemoryDump(Session mySession, List<byte> myPacket)
+        {
+            throw new NotImplementedException();
         }
 
         private static void ProcessDelChar(Session MySession, List<byte> myPacket)
@@ -366,7 +398,7 @@ namespace OpcodeOperations
                 CharacterList.AddRange(Utility_Funcs.Technique(character.ServerID));
 
                 ///Add Model
-                CharacterList.AddRange(Utility_Funcs.Technique((int)character.ModelID));
+                CharacterList.AddRange(Utility_Funcs.Technique(character.ModelID));
 
                 ///Add Class
                 CharacterList.AddRange(Utility_Funcs.Technique(character.TClass));
