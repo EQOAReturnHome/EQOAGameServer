@@ -4,6 +4,10 @@ using WeaponHotbars;
 using Items;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using Utility;
+using Auctions;
+using Quests;
 
 namespace Characters
 {
@@ -14,6 +18,7 @@ namespace Characters
 
 		//Attributes a character may have
 		public string CharName { get; set; }
+		private string Tunaria = "data\\tunaria.esf";
 		public int ServerID { get; set; }
 		public int ModelID { get; set; }
 		public int TClass { get; set; }
@@ -99,6 +104,11 @@ namespace Characters
 		public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
 		public List<Hotkey> MyHotkeys = new List<Hotkey> { };
 		public List<Spell> MySpells = new List<Spell> { };
+		public List<Auction> MySellingAuctions = new List<Auction> { };
+		public List<Auction> MyBuyingAuctions = new List<Auction> { };
+		public List<Quest> MyQuests = new List<Quest> { };
+
+		private List<byte> ourMessage = new List<byte> { };
 
 		//Dictionary mapping the client value to the string value expected in the DB
 		//Eastern Human = 1, Western Human = 2, All non humans = 0
@@ -241,9 +251,37 @@ namespace Characters
 			FaceOption = faceOption;
 		}
 
-		public void PullCharacter()
+		public List<byte> PullCharacter()
         {
+			//Clear List
+			ourMessage.Clear();
 
-        }
+			//Start pulling data together
+			ourMessage.Add(0);
+			ourMessage.AddRange(Utility_Funcs.Technique(World));
+			ourMessage.AddRange(BitConverter.GetBytes(Tunaria.Length));
+			ourMessage.AddRange(Encoding.Unicode.GetBytes(Tunaria));
+			ourMessage.AddRange(Utility_Funcs.Technique(ServerID));
+			ourMessage.AddRange(BitConverter.GetBytes(CharName.Length));
+			ourMessage.AddRange(Encoding.Unicode.GetBytes(CharName));
+			ourMessage.AddRange(Utility_Funcs.Technique(TClass));
+			ourMessage.AddRange(Utility_Funcs.Technique(Race));
+			ourMessage.AddRange(Utility_Funcs.Technique(Level));
+			ourMessage.AddRange(Utility_Funcs.Technique(TotalXP));
+			ourMessage.AddRange(Utility_Funcs.Technique(Debt));
+			ourMessage.Add((byte)Breath);
+			ourMessage.AddRange(Utility_Funcs.Technique(Tunar));
+			ourMessage.AddRange(Utility_Funcs.Technique(BankTunar));
+			ourMessage.AddRange(Utility_Funcs.Technique(UnusedTP)); 
+			ourMessage.AddRange(Utility_Funcs.Technique(World));
+			ourMessage.AddRange(BitConverter.GetBytes(XCoord));
+			ourMessage.AddRange(BitConverter.GetBytes(YCoord));
+			ourMessage.AddRange(BitConverter.GetBytes(ZCoord));
+			ourMessage.AddRange(BitConverter.GetBytes(Facing));
+			ourMessage.AddRange(BitConverter.GetBytes(Unknown));
+			ourMessage.AddRange(BitConverter.GetBytes(0.0f));
+
+			return ourMessage;
+		}
 	}
 }

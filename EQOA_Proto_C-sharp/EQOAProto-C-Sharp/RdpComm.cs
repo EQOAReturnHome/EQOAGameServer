@@ -402,6 +402,48 @@ namespace RdpComm
                     MySession.SessionMessages.AddRange(myMessage);
                 }
             }
+
+            ///0xFA Message type
+            else if (MessageOpcodeType == MessageOpcodeTypes.MultiShortReliableMessage)
+            {
+                ///Pack Message here into MySession.SessionMessages
+                ///Check message length first
+                if ((myMessage.Count + 2) > 255)
+                {
+                    ///Add out MessageType
+                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.LongUnreliableMessage));
+
+                    ///Add Message Length
+                    ///Swap endianness, then convert to bytes
+                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
+
+                    ///Add our opcode
+                    MySession.SessionMessages.InsertRange(MyCount + 3, BitConverter.GetBytes(Opcode));
+
+                    ///Finally, add our message
+                    MySession.SessionMessages.AddRange(myMessage);
+
+                }
+
+                ///Message is < 255
+                else
+                {
+                    ///Add out MessageType
+                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortUnreliableMessage);
+
+
+                    ///Add Message Length
+                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
+
+                    ///Add our opcode
+                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(Opcode));
+
+                    ///Finally, add our message
+                    MySession.SessionMessages.AddRange(myMessage);
+                }
+            }
+
+
             ///We are packing to send a message, set MySession.RdpMessage to true
             MySession.RdpMessage = true;
             ///Finished adding message, don't think we need to do anything else?
@@ -451,6 +493,40 @@ namespace RdpComm
 
                     ///Increment our internal message #
                     MySession.IncrementServerMessageNumber();
+
+                    ///Finally, add our message
+                    MySession.SessionMessages.AddRange(myMessage);
+                }
+            }
+
+            ///0xFA Message type
+            else if (MessageOpcodeType == MessageOpcodeTypes.MultiShortReliableMessage)
+            {
+                ///Pack Message here into MySession.SessionMessages
+                ///Check message length first
+                if ((myMessage.Count + 2) > 255)
+                {
+                    ///Add out MessageType
+                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.MultiLongReliableMessage));
+
+                    ///Add Message Length
+                    ///Swap endianness, then convert to bytes
+                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
+
+                    ///Finally, add our message
+                    MySession.SessionMessages.AddRange(myMessage);
+
+                }
+
+                ///Message is < 255
+                else
+                {
+                    ///Add out MessageType
+                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.MultiShortReliableMessage);
+
+
+                    ///Add Message Length
+                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
 
                     ///Finally, add our message
                     MySession.SessionMessages.AddRange(myMessage);

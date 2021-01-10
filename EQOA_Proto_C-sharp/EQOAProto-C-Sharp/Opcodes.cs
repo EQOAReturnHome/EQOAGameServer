@@ -15,6 +15,8 @@ namespace Opcodes
         public static readonly ushort ShortUnreliableMessage = 252; ///0xFC
         public static readonly ushort LongReliableMessage = 65531; ///0xFFFB
         public static readonly ushort ShortReliableMessage = 251; ///0xFB
+        public static readonly ushort MultiLongReliableMessage = 65530; ///0xFFFA
+        public static readonly ushort MultiShortReliableMessage = 250; ///0xFA
         public static readonly ushort UnknownMessage = 249; ///0xF9
     }
 

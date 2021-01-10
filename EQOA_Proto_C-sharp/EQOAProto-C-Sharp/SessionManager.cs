@@ -283,8 +283,11 @@ namespace SessManager
         ///Clients IP Information
         public IPAddress MyIPInfo;
 
-        //Character List
+        //Character List and dump stuff
+        public List<byte> MyDumpData = new List<byte> { };
+        public bool Dumpstarted = false;
         public List<Character> CharacterData;
+        public Character MyCharacter = null;
 
         ///Our Session object, when client makes the session we don't need AccopuntID
         public Session(ushort clientEndpoint, IPEndPoint MyIPEndPoint, ushort RemoteMaster, ushort SessionPhase, uint SessionIDBase, uint SessionIDUp)
