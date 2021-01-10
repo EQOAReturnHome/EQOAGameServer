@@ -8,6 +8,7 @@ using System.Text;
 using Utility;
 using Auctions;
 using Quests;
+using EQOASQL;
 
 namespace Characters
 {
@@ -278,8 +279,12 @@ namespace Characters
 			ourMessage.AddRange(BitConverter.GetBytes(YCoord));
 			ourMessage.AddRange(BitConverter.GetBytes(ZCoord));
 			ourMessage.AddRange(BitConverter.GetBytes(Facing));
-			ourMessage.AddRange(BitConverter.GetBytes(Unknown));
+			//Two unknown values must be packed on the end, can be updated later to
+			//include database values when we figure out what it does.
 			ourMessage.AddRange(BitConverter.GetBytes(0.0f));
+			ourMessage.AddRange(BitConverter.GetBytes(0.0f));
+
+            
 
 			return ourMessage;
 		}
