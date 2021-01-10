@@ -16,7 +16,7 @@ namespace Spells
         public int AbilityLevel { get; private set; }
         public int Unk2 { get; private set; }
         public int Unk3 { get; private set; }
-        public Half Range { get; private set; }
+        public Half SpellRange { get; private set; }
         public int CastTime { get; private set; }
         public int Power { get; private set; }
         public int IconColor { get; private set; }
@@ -45,7 +45,7 @@ namespace Spells
             AbilityLevel = thisAbilityLevel;
             Unk2 = thisUnk2;
             Unk3 = thisUnk3;
-            Range = thisRange;
+            SpellRange = thisRange;
             CastTime = thisCastTime;
             Power = thisPower;
             IconColor = thisIconColor;
@@ -70,7 +70,7 @@ namespace Spells
             ourMessage.AddRange(Utility_Funcs.Technique(AbilityLevel));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk2));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk3));
-            byte[] MyRange = BitConverter.GetBytes((float)Range);
+            byte[] MyRange = BitConverter.GetBytes((float)SpellRange);
             ourMessage.AddRange(MyRange[2..3]);
             ourMessage.AddRange(Utility_Funcs.Technique(CastTime));
             ourMessage.AddRange(Utility_Funcs.Technique(Power));
