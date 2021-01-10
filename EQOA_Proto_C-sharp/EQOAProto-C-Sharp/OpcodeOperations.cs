@@ -667,7 +667,7 @@ namespace OpcodeOperations
                 CharacterList.AddRange(BitConverter.GetBytes(character.Shield));
 
                 ///Add Character animation here, dumby for now
-                CharacterList.AddRange(BitConverter.GetBytes((ushort)0x0003));
+                CharacterList.AddRange(BitConverter.GetBytes((ushort)0x0006));
 
                 ///unknown value?
                 CharacterList.Add((byte)0);

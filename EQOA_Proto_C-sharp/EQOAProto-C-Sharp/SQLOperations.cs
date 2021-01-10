@@ -164,7 +164,7 @@ namespace EQOASQL
                     rdr.GetInt32(57));
 
                 //Add character attribute data to charaterData List
-                Console.WriteLine(newCharacter.CharName);
+                //Console.WriteLine(newCharacter.CharName);
                 characterData.Add(newCharacter);
             }
             //Close first reader
