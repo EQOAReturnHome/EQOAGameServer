@@ -544,57 +544,57 @@ namespace OpcodeOperations
                 ///Add Face option
                 CharacterList.AddRange(Utility_Funcs.Technique(character.FaceOption));
 
-                ///Start processing gear
-                foreach (var Gear in character.GearList)
+                ///Start processing MyItem
+                foreach (Item MyItem in character.InventoryItems)
                 {
-                    ///Use a switch to sift through gear and add them properly
-                    switch (Gear.Item3)
+                    ///Use a switch to sift through MyItem and add them properly
+                    switch (MyItem.EquipLocation)
                     {
                         ///Helm
                         case 1:
-                            character.Helm = (byte)Gear.Item1;
-                            character.HelmColor = Gear.Item2;
+                            character.Helm = (byte)MyItem.Model;
+                            character.HelmColor = MyItem.Color;
                             break;
 
                         ///Robe
                         case 2:
-                            character.Robe = (byte)Gear.Item1;
-                            character.RobeColor = Gear.Item2;
+                            character.Robe = (byte)MyItem.Model;
+                            character.RobeColor = MyItem.Color;
                             break;
 
                         ///Gloves
                         case 19:
-                            character.Gloves = (byte)Gear.Item1;
-                            character.GlovesColor = Gear.Item2;
+                            character.Gloves = (byte)MyItem.Model;
+                            character.GlovesColor = MyItem.Color;
                             break;
 
                         ///Chest
                         case 5:
-                            character.Chest = (byte)Gear.Item1;
-                            character.ChestColor = Gear.Item2;
+                            character.Chest = (byte)MyItem.Model;
+                            character.ChestColor = MyItem.Color;
                             break;
 
                         ///Bracers
                         case 8:
-                            character.Bracer = (byte)Gear.Item1;
-                            character.BracerColor = Gear.Item2;
+                            character.Bracer = (byte)MyItem.Model;
+                            character.BracerColor = MyItem.Color;
                             break;
 
                         ///Legs
                         case 10:
-                            character.Legs = (byte)Gear.Item1;
-                            character.LegsColor = Gear.Item2;
+                            character.Legs = (byte)MyItem.Model;
+                            character.LegsColor = MyItem.Color;
                             break;
 
                         ///Feet
                         case 11:
-                            character.Boots = (byte)Gear.Item1;
-                            character.BootsColor = Gear.Item2;
+                            character.Boots = (byte)MyItem.Model;
+                            character.BootsColor = MyItem.Color;
                             break;
 
                         ///Primary
                         case 12:
-                            character.Primary = Gear.Item1;
+                            character.Primary = MyItem.Model;
                             break;
 
                         ///Secondary
@@ -603,34 +603,34 @@ namespace OpcodeOperations
                             ///If we have a secondary equipped already, puts next secondary into primary slot
                             if (character.Secondary > 0)
                             {
-                                character.Primary = Gear.Item1;
+                                character.Primary = MyItem.Model;
                             }
 
                             ///If no secondary, add to secondary slot
                             else
                             {
-                                character.Secondary = Gear.Item1;
+                                character.Secondary = MyItem.Model;
                             }
                             break;
 
                         ///2 Hand
                         case 15:
-                            character.Primary = Gear.Item1;
+                            character.Primary = MyItem.Model;
                             break;
 
                         ///Shield
                         case 13:
-                            character.Shield = Gear.Item1;
+                            character.Shield = MyItem.Model;
                             break;
 
                         ///Bow
                         case 16:
-                            character.Primary = Gear.Item1;
+                            character.Primary = MyItem.Model;
                             break;
 
                         ///Thrown
                         case 17:
-                            character.Primary = Gear.Item1;
+                            character.Primary = MyItem.Model;
                             break;
 
                         ///Held
@@ -638,13 +638,13 @@ namespace OpcodeOperations
                             ///If we have a secondary equipped already, puts next secondary into primary slot
                             if (character.Secondary > 0)
                             {
-                                character.Primary = Gear.Item1;
+                                character.Primary = MyItem.Model;
                             }
 
                             ///If no secondary, add to secondary slot
                             else
                             {
-                                character.Secondary = Gear.Item1;
+                                character.Secondary = MyItem.Model;
                             }
                             break;
 
@@ -667,7 +667,7 @@ namespace OpcodeOperations
                 CharacterList.AddRange(BitConverter.GetBytes(character.Shield));
 
                 ///Add Character animation here, dumby for now
-                CharacterList.AddRange(BitConverter.GetBytes((ushort)0x0006));
+                CharacterList.AddRange(BitConverter.GetBytes((ushort)0x0004));
 
                 ///unknown value?
                 CharacterList.Add((byte)0);
@@ -706,25 +706,25 @@ namespace OpcodeOperations
                 CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
 
                 ///Chest color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.ChestColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.ChestColor).Reverse());
 
                 ///Bracer color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BracerColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.BracerColor).Reverse());
 
                 ///Glove color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GlovesColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.GlovesColor).Reverse());
 
                 ///Leg color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegsColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.LegsColor).Reverse());
 
                 ///Boot color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BootsColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.BootsColor).Reverse());
 
                 ///Helm color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.HelmColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.HelmColor).Reverse());
 
                 ///Robe color
-                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.RobeColor)));
+                CharacterList.AddRange(BitConverter.GetBytes(character.RobeColor).Reverse());
 
                 Logger.Info($"Processed {character.CharName}");
             }

@@ -40,7 +40,7 @@ namespace Items
         public string ItemName { get; private set; }
         public string ItemDesc { get; private set; }
         public int Model { get; private set; }
-        public int Color { get; private set; }
+        public uint Color { get; private set; }
 
         //Gear stats
         public int Str { get; private set; }
@@ -98,7 +98,8 @@ namespace Items
         //Constructor object for armour and weapons
         public Item(int thisRemainingHP, int thisStacksLeft, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisEquipslot,
                          int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc,
-                         int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim)
+                         int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim, int Strength, int Stamina, int Agility, int Dexterity, int Wisdom, int Intelligence, int Charisma, int HpMax, int PowMax, 
+                         int pot, int hot, int ac, int pr, int dr, int fr, int cr, int lr, int ar, int model, uint color)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -127,6 +128,29 @@ namespace Items
             Classuse = thisClassuse;
             Raceuse = thisRaceuse;
             Procanim = thisProcanim;
+
+            Color = color;
+            Model = model;
+
+            //Stats if any
+            Str = Strength;
+            Sta = Stamina;
+            Agi = Agility;
+            Dex = Dexterity;
+            Wis = Wisdom;
+            Int = Intelligence;
+            Cha = Charisma;
+            HPMax = HpMax;
+            POWMax = PowMax;
+            PoT = pot;
+            HoT = hot;
+            AC = ac;
+            PR = pr;
+            DR = dr;
+            FR = fr;
+            CR = cr;
+            LR = lr;
+            AR = ar;
         }
 
         public List<byte> PullItem()

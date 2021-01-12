@@ -16,7 +16,7 @@ namespace Spells
         public int AbilityLevel { get; private set; }
         public int Unk2 { get; private set; }
         public int Unk3 { get; private set; }
-        public Half SpellRange { get; private set; }
+        public float SpellRange { get; private set; }
         public int CastTime { get; private set; }
         public int Power { get; private set; }
         public int IconColor { get; private set; }
@@ -34,7 +34,7 @@ namespace Spells
 
         //Will instantiate a spell object
         public Spell(int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide, int thisAbilityLevel, int thisUnk2, int thisUnk3,
-                     Half thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
+                     float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;
@@ -70,7 +70,7 @@ namespace Spells
             ourMessage.AddRange(Utility_Funcs.Technique(AbilityLevel));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk2));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk3));
-            byte[] MyRange = BitConverter.GetBytes((float)SpellRange);
+            byte[] MyRange = BitConverter.GetBytes(SpellRange);
             ourMessage.AddRange(MyRange[2..3]);
             ourMessage.AddRange(Utility_Funcs.Technique(CastTime));
             ourMessage.AddRange(Utility_Funcs.Technique(Power));

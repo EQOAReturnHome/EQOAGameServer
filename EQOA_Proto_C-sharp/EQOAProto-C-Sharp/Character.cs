@@ -85,10 +85,10 @@ namespace Characters
 		public byte Bracer = 0;
 		public byte Legs = 0;
 		public byte Boots = 0;
-		public uint Robe = 0xFFFFFFFF;
-		public uint Primary = 0;
-		public uint Secondary = 0;
-		public uint Shield = 0;
+		public int Robe = -1;
+		public int Primary = 0;
+		public int Secondary = 0;
+		public int Shield = 0;
 
 		///Armor color
 		public uint HelmColor = 0xFFFFFFFF;
@@ -102,6 +102,7 @@ namespace Characters
 		//Our Lists for attributes of character
 		public List<Item> InventoryItems = new List<Item> { };
 		public List<Item> BankItems = new List<Item> { };
+		public List<Item> AuctionItems = new List<Item> { };
 		public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
 		public List<Hotkey> MyHotkeys = new List<Hotkey> { };
 		public List<Spell> MySpells = new List<Spell> { };

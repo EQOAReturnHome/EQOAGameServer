@@ -8,6 +8,7 @@ using System.Configuration;
 using Characters;
 using OpcodeOperations;
 using Spells;
+using Items;
 
 namespace EQOASQL
 {
@@ -179,25 +180,121 @@ namespace EQOASQL
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
-
-                //foreach( Character Char in characterData)
-                //{ 
-                //}
-                //create newCharacter obbject to hold gear data
-                var newCharacter = new Character();
-
                 //Hold charactervalue so we have names to compare against 
                 charName = SecondRdr.GetString(0);
+
                 //Iterate through characterData list finding charnames that exist
                 Character thisChar = characterData.Find(i => Equals(i.CharName, charName));
 
-                //Add Character gear data here
-                uint model = SecondRdr.GetUInt32(1);
-                uint color = SecondRdr.GetUInt32(2);
-                byte equipslot = SecondRdr.GetByte(3);
+                Item ThisItem = new Item(
+                  //Stacksleft
+                  SecondRdr.GetInt32(1),
+                  //RemainingHP
+                  SecondRdr.GetInt32(2),
+                  //Charges
+                  SecondRdr.GetInt32(3),
+                  //Equipment Location
+                  SecondRdr.GetInt32(4),
+                  //Location (Bank, self, auction etc)
+                  SecondRdr.GetByte(5),
+                  //Location in inventory
+                  SecondRdr.GetInt32(6),
+                  //ItemID
+                  SecondRdr.GetInt32(7),
+                  //Item cost 
+                  SecondRdr.GetInt32(8),
+                  //ItemIcon
+                  SecondRdr.GetInt32(9),
+                  //Itempattern equipslot
+                  SecondRdr.GetInt32(10),
+                  //Attack Type 
+                  SecondRdr.GetInt32(11),
+                  //WeaponDamage
+                  SecondRdr.GetInt32(12),
+                  //MaxHP of item 
+                  SecondRdr.GetInt32(13),
+                  //Tradeable?
+                  SecondRdr.GetInt32(14),
+                  //Rentable
+                  SecondRdr.GetInt32(15),
+                  //Craft Item
+                  SecondRdr.GetInt32(16),
+                  //Lore item 
+                  SecondRdr.GetInt32(17),
+                  //Level requirement 
+                  SecondRdr.GetInt32(18),
+                  //Max stack of item 
+                  SecondRdr.GetInt32(19),
+                  //ItemName
+                  SecondRdr.GetString(20),
+                  //Item Description
+                  SecondRdr.GetString(21),
+                  //Duration
+                  SecondRdr.GetInt32(22),
+                  //useable classes
+                  SecondRdr.GetInt32(23),
+                  //useable races
+                  SecondRdr.GetInt32(24),
+                  //Proc Animation
+                  SecondRdr.GetInt32(25),
+                  //Strength
+                  SecondRdr.GetInt32(26),
+                  //Stamina
+                  SecondRdr.GetInt32(27),
+                  //Agility
+                  SecondRdr.GetInt32(28),
+                  //Dexterity
+                  SecondRdr.GetInt32(29),
+                  //Wisdom
+                  SecondRdr.GetInt32(30),
+                  //Intelligence
+                  SecondRdr.GetInt32(31),
+                  //Charisma
+                  SecondRdr.GetInt32(32),
+                  //HPMax
+                  SecondRdr.GetInt32(33),
+                  //POWMax
+                  SecondRdr.GetInt32(34),
+                  //Powerot
+                  SecondRdr.GetInt32(35),
+                  //Healot
+                  SecondRdr.GetInt32(36),
+                  //Ac
+                  SecondRdr.GetInt32(37),
+                  //PR 
+                  SecondRdr.GetInt32(38),
+                  //DR 
+                  SecondRdr.GetInt32(39),
+                  //FR 
+                  SecondRdr.GetInt32(40),
+                  //CR 
+                  SecondRdr.GetInt32(41),
+                  //LR 
+                  SecondRdr.GetInt32(42),
+                  //AR 
+                  SecondRdr.GetInt32(43),
+                  //Model
+                  SecondRdr.GetInt32(44),
+                  //Color
+                  SecondRdr.GetUInt32(45));
 
-                //Append the previously pulled DB data to tuples in the gear list for each character with gear.
-                thisChar.GearList.Add(Tuple.Create(model, color, equipslot));
+                //If this is 1, it needs to go to inventory
+                if (ThisItem.Location == 1)
+                {
+                    thisChar.InventoryItems.Add(ThisItem);
+                }
+
+                //If this is 2, it needs to go to the Bank
+                else if(ThisItem.Location == 2)
+                {
+                    thisChar.BankItems.Add(ThisItem);
+                }
+
+                //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
+                else if(ThisItem.Location == 4)
+                {
+                    thisChar.AuctionItems.Add(ThisItem);
+                }
             }
             SecondRdr.Close();
             //foreach (Character character in characterData.OrderBy(newCharacter => newCharacter.CharName)) Console.WriteLine(character);
@@ -250,7 +347,7 @@ namespace EQOASQL
                      //Unk3
                      rdr.GetInt32(8),
                      //SpellRange
-                     (Half)rdr.GetInt32(9),
+                     rdr.GetInt32(9),
                      //CastTime
                      rdr.GetInt32(10),
                      //Power
