@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using Utility;
 using EQOASQL;
+using DNP3;
 using Characters;
 using System.Linq;
 using Hotkeys;
@@ -16,6 +17,7 @@ using Items;
 using WeaponHotbars;
 using Auctions;
 using Spells;
+using Sessions;
 
 namespace OpcodeOperations
 {
@@ -34,17 +36,6 @@ namespace OpcodeOperations
                 MessageLength = (ushort)myPacket[0];
                 ///Remove read byte
                 myPacket.RemoveRange(0, 1);
-            }
-
-            ///Should be captured in RDPComm now?
-            else if (MessageTypeOpcode == MessageOpcodeTypes.UnknownMessage)
-            {
-                MessageLength = (ushort)myPacket[0];
-                ///Remove read byte
-                myPacket.RemoveRange(0, 1);
-
-                ///We don't want to process further if F9 received.
-                return;
             }
 
             ///Long message, 2 bytes for message length
@@ -116,20 +107,14 @@ namespace OpcodeOperations
                     break;
 
                 case GameOpcode.SELECTED_CHAR:
-                    //After Dumpstarted is true, we will only send the next chunk of the dump
-                    if (MySession.Dumpstarted)
-                    {
-                        ProcessMemoryDump(MySession, myPacket);
-                    }
+                    //Checking sent data to verify no changes to character
+                    ProcessCharacterChanges(MySession, myPacket);
+                    Logger.Info("Character Selected, starting memory dump");
 
-                    //Need to make 1 pass at this to set new character attributes incase of changes
-                    else
-                    {
-                        //Checking sent data to verify no changes to character
-                        ProcessCharacterChanges(MySession, myPacket);
-                        Logger.Info("Character Selected, starting memory dump");
-                        ProcessMemoryDump(MySession, myPacket);
-                    }
+                    //Start new session 
+                    Session thisSession = new Session(MySession.clientEndpoint, MySession.MyIPEndPoint, MySession.remoteMaster, MySession.AccountID, MySession.sessionIDUp, MySession.MyCharacter);
+                    SessionManager.AddMasterSession(thisSession);
+                    ProcessMemoryDump(thisSession);
                     break;
 
                 default:
@@ -162,92 +147,92 @@ namespace OpcodeOperations
             thisChar.UpdateFeatures(HairColor, HairLength, HairStyle, FaceOption);
         }
 
-        private static void ProcessMemoryDump(Session MySession, List<byte> myPacket)
+        public static void ProcessMemoryDump(Session MySession)
         {
-            if(MySession.Dumpstarted)
+            
+            //Let's get remaining character data before preparing it for transport
+            //Hotkeys
+            SQLOperations.GetPlayerHotkeys(MySession);
+
+            //Quests, skip for now
+            //Weaponhotbars
+            SQLOperations.GetPlayerWeaponHotbar(MySession);
+
+            //Auctions go here, skip for now
+            //Spells
+            SQLOperations.GetPlayerSpells(MySession);
+
+            MySession.MyDumpData.AddRange(MySession.MyCharacter.PullCharacter());
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyHotkeys.Count() * 2));
+               
+            //cycle over all our hotkeys and append them
+            foreach(Hotkey MyHotkey in MySession.MyCharacter.MyHotkeys)
             {
-                List<byte> ThisChunk = MySession.MyDumpData.GetRange(0, 1024);
-                MySession.MyDumpData.RemoveRange(0, 1024);
-
-                //Let client know more data is coming
-                if (MySession.MyDumpData.Count() > 0)
-                {
-                    ///Handles packing message into outgoing packet
-                    RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage);
-                }
-
-                //End of dump
-                else
-                {
-                    ///Handles packing message into outgoing packet
-                    RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.ShortReliableMessage);
-                }
+                MySession.MyDumpData.AddRange(MyHotkey.PullHotkey());
+            }
+            //Unknown at this time 4 byte null
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(0));
+                
+            //Unknown at this time 4 byte null
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(0));
+                
+            //Quest Count
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.MyQuests.Count()));
+                
+            //Iterate over quest data and append (Should be 0 for now...)
+            foreach(Quest MyQuest in MySession.MyCharacter.MyQuests)
+            {
+                MySession.MyDumpData.AddRange(MyQuest.PullQuest());
+            }
+                
+            //Get Inventory Item count
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.InventoryItems.Count() * 2));
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.InventoryItems.Count()));
+            foreach( Item MyItem in MySession.MyCharacter.InventoryItems)
+            {
+                MySession.MyDumpData.AddRange(MyItem.PullItem());
             }
 
-            //Get all the data together and inject to Dump List
-            else
+            foreach(WeaponHotbar MyWeaponHotbar in MySession.MyCharacter.WeaponHotbars)
             {
-                MySession.MyDumpData.AddRange(MySession.MyCharacter.PullCharacter());
-                MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyHotkeys.Count() * 2));
+                MySession.MyDumpData.AddRange(MyWeaponHotbar.PullWeaponHotbar());
+            }
                 
-                //cycle over all our hotkeys and append them
-                foreach(Hotkey MyHotkey in MySession.MyCharacter.MyHotkeys)
-                {
-                    MySession.MyDumpData.AddRange(MyHotkey.PullHotkey());
-                }
-                //Unknown at this time 4 byte null
-                MySession.MyDumpData.AddRange(BitConverter.GetBytes(0));
-                //Unknown at this time 4 byte null
-                MySession.MyDumpData.AddRange(BitConverter.GetBytes(0));
-                //Quest Count
-                MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.MyQuests.Count()));
-                //Iterate over quest data and append (Should be 0 for now...)
-                foreach(Quest MyQuest in MySession.MyCharacter.MyQuests)
-                {
-                    MySession.MyDumpData.AddRange(MyQuest.PullQuest());
-                }
-                //Get Inventory Item count
-                MySession.MyDumpData.Add((byte)(MySession.MyCharacter.InventoryItems.Count() * 2));
-                MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.InventoryItems.Count()));
-                foreach( Item MyItem in MySession.MyCharacter.InventoryItems)
-                {
-                    MySession.MyDumpData.AddRange(MyItem.PullItem());
-                }
-
-                foreach(WeaponHotbar MyWeaponHotbar in MySession.MyCharacter.WeaponHotbars)
-                {
-                    MySession.MyDumpData.AddRange(MyWeaponHotbar.PullWeaponHotbar());
-                }
-                //Get Bank Item count
-                MySession.MyDumpData.Add((byte)(MySession.MyCharacter.BankItems.Count() * 2));
-                MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count()));
-                foreach (Item MyItem in MySession.MyCharacter.BankItems)
-                {
-                    MySession.MyDumpData.AddRange(MyItem.PullItem());
-                }
-                // end of bank? or could be something else for memory dump
+            //Get Bank Item count
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.BankItems.Count() * 2));
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count()));
+            foreach (Item MyItem in MySession.MyCharacter.BankItems)
+            {
+                MySession.MyDumpData.AddRange(MyItem.PullItem());
+            }
+                
+            // end of bank? or could be something else for memory dump
+            MySession.MyDumpData.Add((byte)0);
+                
+            //Buying auctions
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyBuyingAuctions.Count()));
+            foreach (Auction MyAuction in MySession.MyCharacter.MyBuyingAuctions)
+            {
+                MySession.MyDumpData.AddRange(MyAuction.PullAuction());
+            }
+                
+            //Selling auctions
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MySellingAuctions.Count()));
+            foreach (Auction MyAuction in MySession.MyCharacter.MySellingAuctions)
+            {
+                MySession.MyDumpData.AddRange(MyAuction.PullAuction());
+            }
+               
+            //Spell count and Spells
+            MySession.MyDumpData.AddRange(Utility_Funcs.Technique(MySession.MyCharacter.MySpells.Count()));
+            foreach(Spell MySpell in MySession.MyCharacter.MySpells)
+            {
+                MySession.MyDumpData.AddRange(MySpell.PullSpell());
+                //Indicates end of spell?
                 MySession.MyDumpData.Add((byte)0);
-                //Buying auctions
-                MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyBuyingAuctions.Count()));
-                foreach (Auction MyAuction in MySession.MyCharacter.MyBuyingAuctions)
-                {
-                    MySession.MyDumpData.AddRange(MyAuction.PullAuction());
-                }
-                //Selling auctions
-                MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MySellingAuctions.Count()));
-                foreach (Auction MyAuction in MySession.MyCharacter.MySellingAuctions)
-                {
-                    MySession.MyDumpData.AddRange(MyAuction.PullAuction());
-                }
-                //Spell count and Spells
-                MySession.MyDumpData.AddRange(Utility_Funcs.Technique(MySession.MyCharacter.MySpells.Count()));
-                foreach(Spell MySpell in MySession.MyCharacter.MySpells)
-                {
-                    MySession.MyDumpData.AddRange(MySpell.PullSpell());
-                    //Indicates end of spell?
-                    MySession.MyDumpData.Add((byte)0);
-                }
-                MySession.MyDumpData.AddRange(new byte[] {0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+            }
+                
+            MySession.MyDumpData.AddRange(new byte[] {0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
                                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
                                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
                                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00,
@@ -259,23 +244,47 @@ namespace OpcodeOperations
                                                           0x01, 0x00, 0x00, 0x00, 0xe8, 0x07, 0x00, 0x5a, 0x00, 0x00, 0x04, 0x00, 0x0c, 0x4f, 0x00,
                                                           0x00, 0x00, 0x00, 0x00, 0x00, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa, 0x01, 0x00, 0x00, 0x00});
 
-                MySession.Dumpstarted = true;
-                List<byte> ThisChunk = MySession.MyDumpData.GetRange(0, 1024);
-                MySession.MyDumpData.RemoveRange(0, 1024);
+            MySession.Dumpstarted = true;
+
+            //Get our timestamp opcode in queue
+            RdpCommOut.PackMessage(MySession, DNP3Creation.CreateDNP3TimeStamp(), MessageOpcodeTypes.ShortUnreliableMessage, GameOpcode.Time);
+
+            List<byte> ThisChunk;
+
+            //Gather our dump data
+            if (MySession.MyDumpData.Count() > 1156)
+            {
+                ThisChunk = MySession.MyDumpData.GetRange(0, 1156);
+                MySession.MyDumpData.RemoveRange(0, 1156);
+
+                //Set this to true to send packet to client
+                MySession.ClientFirstConnect = true;
+
                 ///Handles packing message into outgoing packet
                 RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage, GameOpcode.MemoryDump);
-            }   
+            }
+
+            //Dump data is smaller then 1156 bytes
+            else
+            {
+                ThisChunk = MySession.MyDumpData.GetRange(0, MySession.MyDumpData.Count());
+                MySession.MyDumpData.Clear();
+
+                //Set this to true to send packet to client
+                MySession.ClientFirstConnect = true;
+
+                //Appears dump is short, end it here
+                MySession.Dumpstarted = false;
+
+                ///Handles packing message into outgoing packet
+                RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.MemoryDump);
+            }
         }
 
         private static void ProcessDelChar(Session MySession, List<byte> myPacket)
         {
-
-            //Gets serverID of character to be deleted sent by client
-            int clientServID = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            //Removes 4 read bytes
-            myPacket.RemoveRange(0, 4);
-            //Convert serverID fromm client to untechniqued value.
-            clientServID = (int)Utility_Funcs.Untechnique(clientServID);
+            //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
+            int clientServID = (int)Utility_Funcs.Untechnique(myPacket);
             //Call SQL delete method to actually process the delete.
             SQLOperations.DeleteCharacter(clientServID, MySession);
 
@@ -327,37 +336,27 @@ namespace OpcodeOperations
             {
 
                 //Get starting level
-                charCreation.Level = Utility_Funcs.Untechnique(myPacket[0]);
+                charCreation.Level = Utility_Funcs.Untechnique(myPacket);
 
                 //Divide startLevel by 2 because client doubles it
                 //Get single byte attributes
-                charCreation.Race = Utility_Funcs.Untechnique(myPacket[1]);
-                charCreation.StartingClass = Utility_Funcs.Untechnique(myPacket[2]);
-                charCreation.Gender = Utility_Funcs.Untechnique(myPacket[3]);
-                charCreation.HairColor = Utility_Funcs.Untechnique(myPacket[4]);
-                charCreation.HairLength = Utility_Funcs.Untechnique(myPacket[5]);
-                charCreation.HairStyle = Utility_Funcs.Untechnique(myPacket[6]);
-                charCreation.FaceOption = Utility_Funcs.Untechnique(myPacket[7]);
-                charCreation.HumTypeNum = Utility_Funcs.Untechnique(myPacket[8]);
-
-                //Remove bytes for single byte attributes
-                myPacket.RemoveRange(0, 9);
+                charCreation.Race = Utility_Funcs.Untechnique(myPacket);
+                charCreation.StartingClass = Utility_Funcs.Untechnique(myPacket);
+                charCreation.Gender = Utility_Funcs.Untechnique(myPacket);
+                charCreation.HairColor = Utility_Funcs.Untechnique(myPacket);
+                charCreation.HairLength = Utility_Funcs.Untechnique(myPacket);
+                charCreation.HairStyle = Utility_Funcs.Untechnique(myPacket);
+                charCreation.FaceOption = Utility_Funcs.Untechnique(myPacket);
+                charCreation.HumTypeNum = Utility_Funcs.Untechnique(myPacket);
 
                 //Get player attributes from packet and remove bytes after reading into variable
                 charCreation.AddStrength = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
                 charCreation.AddStamina = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
                 charCreation.AddAgility = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
                 charCreation.AddDexterity = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
                 charCreation.AddWisdom = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
                 charCreation.AddIntelligence = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
                 charCreation.AddCharisma = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                myPacket.RemoveRange(0, 4);
 
                 //Call SQL method for character creation
                 SQLOperations.CreateCharacter(MySession, charCreation);

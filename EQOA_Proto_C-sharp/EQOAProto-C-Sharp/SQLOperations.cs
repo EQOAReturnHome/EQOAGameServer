@@ -9,6 +9,10 @@ using Characters;
 using OpcodeOperations;
 using Spells;
 using Items;
+using Hotkeys;
+using WeaponHotbars;
+using System.Linq;
+using Sessions;
 
 namespace EQOASQL
 {
@@ -303,9 +307,8 @@ namespace EQOASQL
             return characterData;
         }
 
-        public static void GetPlayerSpells(int ServerID, Session MySession)
+        public static void GetPlayerSpells(Session MySession)
         {
-            characterData.Clear();
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
             //Set connection property from connection string and open connection
@@ -317,16 +320,13 @@ namespace EQOASQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharSpells", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.AccountID);
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
-
-            Character thisChar = characterData.Find(i => Equals(i.ServerID, ServerID));
-
 
             while (rdr.Read())
             {
                 //Instantiate new character object, not to be confused with a newly created character
-                Spell newSpell = new Spell
+                Spell thisSpell = new Spell
                 (
                     //SpellID
                      rdr.GetInt32(0),
@@ -367,13 +367,107 @@ namespace EQOASQL
                      //SpellDesc
                      rdr.GetString(18)
                 );
+
+                //Add these spells to player book
+                MySession.MyCharacter.MySpells.Add(thisSpell);
+            }
+
+            rdr.Close();
+        }
+
+        public static void GetPlayerHotkeys(Session MySession)
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
+
+            //Set connection property from connection string and open connection
+            using MySqlConnection con = new MySqlConnection(connectionString);
+            con.Open();
+
+            //Queries DB for all characters and their necessary attributes  to generate character select
+            //Later should convert to a SQL stored procedure if possible.
+            //Currently pulls ALL charcters, will pull characters based on accountID.
+            using var cmd = new MySqlCommand("GetCharHotkeys", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                //Instantiate new character object, not to be confused with a newly created character
+                Hotkey thisHotkey= new Hotkey
+                (
+                     //direction
+                     rdr.GetString(0),
+                     //Nlabel
+                     rdr.GetString(1),
+                     //Nmessage
+                     rdr.GetString(2),
+                     //Wlabel
+                     rdr.GetString(3),
+                     //Wmessage
+                     rdr.GetString(4),
+                     //Elabel
+                     rdr.GetString(5),
+                     //Emessage
+                     rdr.GetString(6),
+                     //Slabel
+                     rdr.GetString(7),
+                     //Smessage
+                     rdr.GetString(8)
+                );
+
+                //Add these spells to player book
+                MySession.MyCharacter.MyHotkeys.Add(thisHotkey);
+            }
+            rdr.Close();
+        }
+
+        public static void GetPlayerWeaponHotbar(Session MySession)
+        {
+            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
+
+            //Set connection property from connection string and open connection
+            using MySqlConnection con = new MySqlConnection(connectionString);
+            con.Open();
+
+            //Queries DB for all characters and their necessary attributes  to generate character select
+            //Later should convert to a SQL stored procedure if possible.
+            //Currently pulls ALL charcters, will pull characters based on accountID.
+            using var cmd = new MySqlCommand("GetCharWeaponHotbar", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                //Instantiate new character object, not to be confused with a newly created character
+                WeaponHotbar thisHotbar = new WeaponHotbar
+                (
+                     //Hotbar name
+                     rdr.GetString(0),
+                     //primaryID
+                     rdr.GetInt32(1),
+                     //secondaryID
+                     rdr.GetInt32(2)
+                );
+
+                //Add these weapon hotbars
+                MySession.MyCharacter.WeaponHotbars.Add(thisHotbar);
+            }
+            rdr.Close();
+
+            //If less then 4 weapon hotbars, need constructor dummies untill 4 total
+            if (MySession.MyCharacter.WeaponHotbars.Count() < 4)
+            {
+                for (int i = 0; i <= (4 - MySession.MyCharacter.WeaponHotbars.Count()); i++)
+                {
+                    MySession.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
+                }
             }
         }
 
-
-
-            //Method to delete character from player's account
-            public static void DeleteCharacter(int serverid, Session MySession)
+        //Method to delete character from player's account
+        public static void DeleteCharacter(int serverid, Session MySession)
             {
                 //Opens new Sql connection using connection parameters
                 var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;

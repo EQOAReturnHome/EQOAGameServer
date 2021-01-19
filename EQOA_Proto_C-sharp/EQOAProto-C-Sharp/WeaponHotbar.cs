@@ -18,6 +18,7 @@ namespace WeaponHotbars
         //Even if not hotbar data, these must be -1 (Techniqued is 1)
         public WeaponHotbar()
         {
+            HotbarName = "";
             PrimaryHandID = -1;
             SecondaryHandID = -1;
         }

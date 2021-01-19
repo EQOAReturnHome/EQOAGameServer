@@ -50,41 +50,41 @@ namespace Hotkeys
 
             //North HK
             ourMessage.Add(0);
-            ourMessage.AddRange(ConvertHotKey(NLabel, NMessage));
+            ourMessage.AddRange(ConvertHotKey(NMessage, NLabel));
 
             //West HK
             ourMessage.Add(2);
-            ourMessage.AddRange(ConvertHotKey(WLabel, WMessage));
+            ourMessage.AddRange(ConvertHotKey(WMessage, WLabel));
 
             //East HK
             ourMessage.Add(4);
-            ourMessage.AddRange(ConvertHotKey(ELabel, EMessage));
+            ourMessage.AddRange(ConvertHotKey(EMessage, ELabel));
 
             //South HK
             ourMessage.Add(6);
-            ourMessage.AddRange(ConvertHotKey(SLabel, SMessage));
+            ourMessage.AddRange(ConvertHotKey(SMessage, SLabel));
 
             return ourMessage;
         }
 
-        private List<byte> ConvertHotKey(string label, string message)
+        private List<byte> ConvertHotKey(string message, string label)
         {
             //Clear out TempMessage Holder
             tempMessage.Clear();
 
             //If message
-            if(message != null)
+            if(label != null)
             {
                 //Add string length, 4 bytes then string as utf-16-le
-                tempMessage.AddRange(BitConverter.GetBytes(message.Length));
-                tempMessage.AddRange(Encoding.Unicode.GetBytes(message));
+                tempMessage.AddRange(BitConverter.GetBytes(label.Length));
+                tempMessage.AddRange(Encoding.Unicode.GetBytes(label));
 
                 //If label
-                if (label != null)
+                if (message != null)
                 {
                     //Add string length, 4 bytes then string as utf-16-le
-                    tempMessage.AddRange(BitConverter.GetBytes(label.Length));
-                    tempMessage.AddRange(Encoding.Unicode.GetBytes(label));
+                    tempMessage.AddRange(BitConverter.GetBytes(message.Length));
+                    tempMessage.AddRange(Encoding.Unicode.GetBytes(message));
                 }
 
                 //no label
@@ -102,11 +102,11 @@ namespace Hotkeys
                 tempMessage.AddRange(BitConverter.GetBytes(0));
 
                 //If label
-                if (NLabel != null)
+                if (message != null)
                 {
                     //Add string length, 4 bytes then string as utf-16-le
-                    tempMessage.AddRange(BitConverter.GetBytes(label.Length));
-                    tempMessage.AddRange(Encoding.Unicode.GetBytes(label));
+                    tempMessage.AddRange(BitConverter.GetBytes(message.Length));
+                    tempMessage.AddRange(Encoding.Unicode.GetBytes(message));
                 }
 
                 //no label

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Utility;
 
 namespace DNP3
@@ -10,13 +11,22 @@ namespace DNP3
         /// Should we just return our DNP3 Byte array here?
         /// </summary>
         /// <returns></returns>
-        public static ulong CreateDNP3()
+        public static ulong CreateDNP3(int val)
         { 
             ///Gets our time since epoch
-            ulong Date1 = DateTime.Now.GetUnixEpoch();
+            ulong Date1 = DateTime.Now.GetUnixEpoch() + (ulong)val;
 
             ///return time * 1000 for milliseconds
             return (ulong)(Date1 * 1000);
+        }
+
+        public static List<byte> CreateDNP3TimeStamp()
+        {
+            List<byte> newList = new List<byte> { };
+            newList.AddRange(BitConverter.GetBytes(CreateDNP3(0)));
+            newList.AddRange(BitConverter.GetBytes(CreateDNP3(1350000)));
+
+            return newList;
         }
 
         /// <summary>
@@ -28,7 +38,7 @@ namespace DNP3
             ///Gets our time since epoch
             ulong Date1 = DateTime.Now.GetUnixEpoch();
 
-            return (uint)(ByteSwaps.SwapBytes(Date1 * 1000) >> 32);
+            return (uint)(((Date1 * 1000) << 32) >> 32);
         }
 
     }

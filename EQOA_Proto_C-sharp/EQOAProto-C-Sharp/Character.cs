@@ -260,12 +260,11 @@ namespace Characters
 
 			//Start pulling data together
 			ourMessage.Add(0);
-			ourMessage.AddRange(Utility_Funcs.Technique(World));
 			ourMessage.AddRange(BitConverter.GetBytes(Tunaria.Length));
-			ourMessage.AddRange(Encoding.Unicode.GetBytes(Tunaria));
+			ourMessage.AddRange(Encoding.UTF8.GetBytes(Tunaria));
 			ourMessage.AddRange(Utility_Funcs.Technique(ServerID));
 			ourMessage.AddRange(BitConverter.GetBytes(CharName.Length));
-			ourMessage.AddRange(Encoding.Unicode.GetBytes(CharName));
+			ourMessage.AddRange(Encoding.UTF8.GetBytes(CharName));
 			ourMessage.AddRange(Utility_Funcs.Technique(TClass));
 			ourMessage.AddRange(Utility_Funcs.Technique(Race));
 			ourMessage.AddRange(Utility_Funcs.Technique(Level));
@@ -274,7 +273,8 @@ namespace Characters
 			ourMessage.Add((byte)Breath);
 			ourMessage.AddRange(Utility_Funcs.Technique(Tunar));
 			ourMessage.AddRange(Utility_Funcs.Technique(BankTunar));
-			ourMessage.AddRange(Utility_Funcs.Technique(UnusedTP)); 
+			ourMessage.AddRange(Utility_Funcs.Technique(UnusedTP));
+			ourMessage.AddRange(Utility_Funcs.Technique(TotalAssignableTP));
 			ourMessage.AddRange(Utility_Funcs.Technique(World));
 			ourMessage.AddRange(BitConverter.GetBytes(XCoord));
 			ourMessage.AddRange(BitConverter.GetBytes(YCoord));

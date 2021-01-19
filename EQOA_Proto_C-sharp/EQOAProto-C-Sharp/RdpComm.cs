@@ -10,6 +10,7 @@ using System.Linq;
 using System.Timers;
 using Utility;
 using Characters;
+using Sessions;
 
 namespace RdpComm
 {
@@ -24,8 +25,7 @@ namespace RdpComm
 
         public static void ProcessBundle(Session MySession, List<byte> MyPacket)
         {
-            ///Should this be here? Maybe, maybe not
-            MySession.IncrementClientBundleNumber();
+            
             ///Grab our bundle type
             sbyte BundleType = (sbyte)MyPacket[0];
             Logger.Info($"BundleType is {BundleType}");
@@ -53,10 +53,6 @@ namespace RdpComm
                 case BundleOpcode.NewProcessMessages:
                 case BundleOpcode.ProcessMessages:
                     Message_Bundle = true;
-
-                    ///Temporarily placed here...
-                    ///Remove read 2 bytes, this Is the Bundle # when there is only message type
-                    MyPacket.RemoveRange(0, 2);
                     Logger.Info("Processing Message Bundle");
                     break;
 
@@ -91,6 +87,13 @@ namespace RdpComm
 
             if (Message_Bundle == true)
             {
+                //Read client bundle here. Accept client bundle as is because packets could be lost or dropped, client bundle# should not be "tracked"
+                //considerations could be to track it for possible drop/lost rates
+                MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
+
+                ///Remove read byte
+                MyPacket.RemoveRange(0, 2);
+
                 ///Process Message Bundle here
                 ProcessMessageBundle(MySession, MyPacket);
             }
@@ -139,18 +142,7 @@ namespace RdpComm
 
                         if (MySession.InGame == false && (MyPacket[0] == 0x12))
                         {
-                            /*
-                            List<byte> MyMessage = new List<byte>() { 0x12 };
-
-                            Timer t = new Timer();
-                            t.Interval = 3000; // In milliseconds
-                            t.AutoReset = false; // Stops it from repeating
-                            t.Elapsed += (__, _) => RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.UnknownMessage);
-                            t.Start();
-                            */
-                            ///Do stuff here?
-                            ///Handles packing message into outgoing packet
-                            //RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.UnknownMessage);
+                            //Nothing needed here I suppose?
                         }
 
                         else if (MySession.InGame == true && (MyPacket[0] == 0x14))
@@ -190,7 +182,6 @@ namespace RdpComm
                 
             }
             MySession.RdpReport = true;
-            Logger.Info($"RDPReport set to {MySession.RdpReport}");
             MySession.ClientFirstConnect = true;
 
             Logger.Info("Done processing messages in packet");
@@ -199,14 +190,15 @@ namespace RdpComm
             ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's
         }
 
-
         private static void ProcessRdpReport(Session MySession, List<byte> MyPacket)
         {
-            ushort ThisBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
+            //Read client bundle here. Accept client bundle as is because packets could be lost or dropped, client bundle# should not be "tracked"
+            //considerations could be to track it for possible drop/lost rates
+            MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
             ushort LastRecvBundleNumber = (ushort)(MyPacket[3] << 8 | MyPacket[2]);
             ushort LastRecvMessageNumber = (ushort)(MyPacket[5] << 8 | MyPacket[4]);
 
-            MyPacket.RemoveRange(0, 5);
+            MyPacket.RemoveRange(0, 6);
             ///Only one that really matters, should tie into our packet resender stuff
             if (MySession.serverMessageNumber >= LastRecvMessageNumber)
             {
@@ -217,26 +209,26 @@ namespace RdpComm
             }
 
             ///Trigger Server Select with this?
-            if ((MySession.clientEndpoint == MySession.sessionIDBase) && MySession.SessionAck && MySession.sessionPhase == 6 && MySession.serverSelect == false)
-            {
-                MySession.serverSelect = true;
-            }
-
-            ///Triggers creating master session
-            else if ((MySession.clientEndpoint + 1 == MySession.sessionIDBase) && MySession.SessionAck && MySession.sessionPhase == 6 && MySession.serverSelect == false)
+            if (((MySession.clientEndpoint + 1) == (MySession.sessionIDBase & 0x0000FFFF)) && MySession.SessionAck && MySession.serverSelect == false)
             {
                 ///Key point here for character select is (MySession.clientEndpoint + 1 == MySession.sessionIDBase)
                 ///SessionIDBase is 1 more then clientEndPoint
                 ///Assume it's Create Master session?
-                Session NewMasterSession = new Session(MySession.clientEndpoint, MySession.MyIPEndPoint, 0, 7, MySession.AccountID);
+                Session NewMasterSession = new Session(MySession.clientEndpoint, MySession.MyIPEndPoint, MySession.AccountID);
 
                 SessionManager.AddMasterSession(NewMasterSession);
+            }
 
+            ///Triggers creating master session
+            else if ((MySession.clientEndpoint == (MySession.sessionIDBase & 0x0000FFFF)) && MySession.SessionAck && MySession.serverSelect == false)
+            {
+                MySession.serverSelect = true;
             }
 
             ///Triggers Character select
-            else if (ThisBundleNumber == 1 && (MySession.clientEndpoint != MySession.sessionIDBase) && MySession.sessionPhase == 7)
+            else if (MySession.CharacterSelect && (MySession.clientEndpoint != MySession.sessionIDBase))
             {
+                MySession.CharacterSelect = false;
                 List<Character> MyCharacterList = new List<Character>();
                 Logger.Info("Generating Character Select");
                 MyCharacterList = SQLOperations.AccountCharacters(MySession);
@@ -247,7 +239,29 @@ namespace RdpComm
                 ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
             }
 
+            else if (MySession.Dumpstarted)
+            {
+                //Let client know more data is coming
+                if (MySession.MyDumpData.Count() > 1156)
+                {
+                    List<byte> ThisChunk = MySession.MyDumpData.GetRange(0, 1156);
+                    MySession.MyDumpData.RemoveRange(0, 1156);
 
+                    ///Handles packing message into outgoing packet
+                    RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage);
+                }
+
+                //End of dump
+                else
+                {
+                    List<byte> ThisChunk = MySession.MyDumpData.GetRange(0, MySession.MyDumpData.Count());
+                    MySession.MyDumpData.Clear();
+                    ///Handles packing message into outgoing packet
+                    RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.ShortReliableMessage);
+                    //turn dump off
+                    MySession.Dumpstarted = false;
+                }
+            }
 
             else
             {
@@ -262,12 +276,14 @@ namespace RdpComm
             if (SessionAck == MySession.sessionIDBase)
             {
                 MySession.ClientAck = true;
+                MySession.Instance = true;
                 /// Trigger Character select here
                 Logger.Info("Beginning Character Select creation");
             }
 
             else
             {
+                Console.WriteLine("Error");
                 Logger.Err("Error occured with Session Ack Check...");
             }
 
@@ -411,14 +427,20 @@ namespace RdpComm
                 if ((myMessage.Count + 2) > 255)
                 {
                     ///Add out MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.LongUnreliableMessage));
+                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.MultiLongReliableMessage));
 
                     ///Add Message Length
                     ///Swap endianness, then convert to bytes
                     MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
 
+                    ///Add Message #
+                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
+
+                    ///Increment our internal message #
+                    MySession.IncrementServerMessageNumber();
+
                     ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 3, BitConverter.GetBytes(Opcode));
+                    MySession.SessionMessages.InsertRange(MyCount + 6, BitConverter.GetBytes(Opcode));
 
                     ///Finally, add our message
                     MySession.SessionMessages.AddRange(myMessage);
@@ -429,20 +451,25 @@ namespace RdpComm
                 else
                 {
                     ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortUnreliableMessage);
+                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.MultiLongReliableMessage);
 
 
                     ///Add Message Length
                     MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
 
+                    ///Add Message #
+                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(MySession.serverMessageNumber));
+
+                    ///Increment our internal message #
+                    MySession.IncrementServerMessageNumber();
+
                     ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(Opcode));
+                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(Opcode));
 
                     ///Finally, add our message
                     MySession.SessionMessages.AddRange(myMessage);
                 }
             }
-
 
             ///We are packing to send a message, set MySession.RdpMessage to true
             MySession.RdpMessage = true;
@@ -454,14 +481,14 @@ namespace RdpComm
             int MyCount = MySession.SessionMessages.Count();
 
             ///0xFB Message type
-            if (MessageOpcodeType == MessageOpcodeTypes.UnknownMessage)
+            if (MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage)
             {
                 ///Pack Message here into MySession.SessionMessages
                 ///Check message length first
                 if ((myMessage.Count + 2) > 255)
                 {
                     ///Add our MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.UnknownMessage));
+                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.LongReliableMessage));
 
                     ///Add Message Length
                     ///Swap endianness, then convert to bytes
@@ -482,7 +509,7 @@ namespace RdpComm
                 else
                 {
                     ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.UnknownMessage);
+                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortReliableMessage);
 
 
                     ///Add Message Length
@@ -511,7 +538,14 @@ namespace RdpComm
 
                     ///Add Message Length
                     ///Swap endianness, then convert to bytes
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
+                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count())));
+                    
+
+                    ///Add Message #
+                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
+
+                    ///Increment our internal message #
+                    MySession.IncrementServerMessageNumber();
 
                     ///Finally, add our message
                     MySession.SessionMessages.AddRange(myMessage);
@@ -524,9 +558,13 @@ namespace RdpComm
                     ///Add out MessageType
                     MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.MultiShortReliableMessage);
 
+                    MySession.SessionMessages.InsertRange(MyCount + 1, BitConverter.GetBytes((ushort)(myMessage.Count())));
 
-                    ///Add Message Length
-                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
+                    ///Add Message #
+                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
+
+                    ///Increment our internal message #
+                    MySession.IncrementServerMessageNumber();
 
                     ///Finally, add our message
                     MySession.SessionMessages.AddRange(myMessage);
@@ -589,7 +627,6 @@ namespace RdpComm
 
         public static void PrepPacket(object source, ElapsedEventArgs e)
         {
-
             lock (SessionManager.SessionList)
             {
                 foreach (Session MySession in SessionManager.SessionList)
@@ -615,7 +652,7 @@ namespace RdpComm
                         ///Add session ack here if it has not been done yet
                         ///Lets client know we acknowledge session
                         ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
-                        if (MySession.remoteMaster == 1)
+                        if (!MySession.remoteMaster)
                         {
                             if (MySession.SessionAck == false)
                             {
@@ -741,13 +778,10 @@ namespace RdpComm
         public static void AddSession(Session MySession, List<byte> OutGoingMessage)
         {
             Logger.Info("Adding Session Data");
-            if (MySession.remoteMaster == 1)
+            if (!MySession.remoteMaster)
             {
-                ///Ack session, first add 2nd portion of Session
-                OutGoingMessage.InsertRange(0, BitConverter.GetBytes((ushort)MySession.sessionIDUp));
-
                 ///Add first portion of session
-                OutGoingMessage.InsertRange(0, BitConverter.GetBytes((ushort)MySession.sessionIDBase));
+                OutGoingMessage.InsertRange(0, BitConverter.GetBytes(MySession.sessionIDBase));
             }
 
             else
@@ -763,53 +797,66 @@ namespace RdpComm
 
         public static void AddSessionHeader(Session MySession, List<byte> OutGoingMessage, ushort PacketLength)
         {
-            ushort BundleLength = 0;
-            ushort OutPhase = 0;
+            uint value = 0;
             Logger.Info("Adding Session Header");
-            ///If Client is master....
-            if (MySession.remoteMaster == 1)
+
+            if (!MySession.Instance) //When server initiates instance with the client, it will use this
             {
-                Logger.Info("Client is Master, using proper Session header");
-
-                ///Get the Phase
-                OutPhase = (ushort)(MySession.sessionPhase << 12);
-
+                value |= 0x80000;
             }
 
-            ///When Server is master
-            else
-            {
-                if (MySession.ClientAck == false)
-                {
-                    ///Says new session with client
-                    OutGoingMessage.Insert(0, 0x21);
-                    OutPhase = (ushort)((MySession.sessionPhase + 0x05) << 12);
-                    
-                }
+            //This would be if we want to cancel the connection... Client handles this in most cases? For now.
+            //if (MySession.CancelConnection) // 
+            //{
+            //    value += 0x10000;
+            //}
 
+            if (MySession.remoteMaster) // Purely a guess.... Something is 0x4000 in this and seems to correspond the initator of the session
+            {
+                value |= 0x04000;
+            }
+
+            else // Server is not master, seems to always have this when not in control
+            {
+                value |= 0x01000;
+            }
+
+            if(MySession.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
+            {
+                value |= 0x02000;
+            }
+
+            //Add bundle length in
+            value |= PacketLength;
+
+            //Work some magic. Basic VLI
+            List<byte> myList = new List<byte> { };
+
+            int myVal = 0;
+            int shift = 0;
+            do
+            {
+                byte lower7bits = (byte)(value & 0x7f);
+                value >>= 7;
+                if (value > 0)
+                {
+                    myVal |= (lower7bits |= 128) << shift;
+                    shift += 8;
+                }
                 else
                 {
-                    ///Says continuing session with client
-                    OutGoingMessage.Insert(0, 0x1);
-                    OutPhase = (ushort)((MySession.sessionPhase + 0x05) << 12);
+                    myVal |= lower7bits << shift;
                 }
+            } while (value > 0);
 
-                ///Logger.Err("Unknown Session information at this moment");
-            }
-
-            ///Get Bundle Length
-            BundleLength = BunLenEncode(PacketLength);
+            myList.AddRange(BitConverter.GetBytes(myVal));
+            int i = myList.Count - 1;
+            int j = 0;
+            while (myList[i] == 0) { j++; --i; }
+            myList.RemoveRange(i + 1, j);
 
             ///Combine, switch endianness and place into Packet
-            OutGoingMessage.InsertRange(0, BitConverter.GetBytes((ushort)(BundleLength + OutPhase)));
-        }
-
-        private static ushort BunLenEncode(ushort PacketLength)
-        {
-            ushort top = (ushort)((PacketLength << 1) & 0x0F00);
-            ushort bottom = (ushort)((0x007F & PacketLength) + 0x80);
-
-            return (ushort)(top + bottom);
+            OutGoingMessage.InsertRange(0, myList);
         }
     }
 }

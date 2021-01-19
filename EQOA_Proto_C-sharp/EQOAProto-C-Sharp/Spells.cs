@@ -53,6 +53,8 @@ namespace Spells
             Scope = thisScope;
             Recast = thisRecast;
             EqpRequirement = thisEqpRequirement;
+            SpellName = thisSpellName;
+            SpellDesc = thisSpellDesc;
         }
 
         public List<byte> PullSpell()

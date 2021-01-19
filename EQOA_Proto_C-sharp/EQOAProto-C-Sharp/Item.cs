@@ -96,7 +96,7 @@ namespace Items
         }
 
         //Constructor object for armour and weapons
-        public Item(int thisRemainingHP, int thisStacksLeft, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisEquipslot,
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisEquipslot,
                          int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc,
                          int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim, int Strength, int Stamina, int Agility, int Dexterity, int Wisdom, int Intelligence, int Charisma, int HpMax, int PowMax, 
                          int pot, int hot, int ac, int pr, int dr, int fr, int cr, int lr, int ar, int model, uint color)
@@ -160,13 +160,14 @@ namespace Items
             //Start adding attributes to list for this item
             ourMessage.AddRange(Utility_Funcs.Technique(StackLeft));
             ourMessage.AddRange(Utility_Funcs.Technique(RemainingHP));
+            ourMessage.AddRange(Utility_Funcs.Technique(Charges));
             ourMessage.AddRange(Utility_Funcs.Technique(EquipLocation));
             ourMessage.Add(Location);
             ourMessage.AddRange(BitConverter.GetBytes(InventoryNumber));
             ourMessage.AddRange(Utility_Funcs.Technique(ItemID));
             ourMessage.AddRange(Utility_Funcs.Technique(ItemCost));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk1));
-            ourMessage.AddRange(Utility_Funcs.Technique(ItemCost));
+            ourMessage.AddRange(Utility_Funcs.Technique(ItemIcon));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk2));
             ourMessage.AddRange(Utility_Funcs.Technique(Equipslot));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk3));

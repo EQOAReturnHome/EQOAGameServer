@@ -140,79 +140,38 @@ namespace Utility
             return NewValue;
         }
 
-        public static int Untechnique(long val)
+        public static int Untechnique(List<byte> MyPacket)
         {
-            return (int)RealUntechnique((long)val);
-        }
-
-        public static int Untechnique(int val)
-        {
-            return (int)RealUntechnique((long)val);
-        }
-
-        public static int Untechnique(short val)
-        {
-            return (int)RealUntechnique((long)val);
-        }
-
-        public static int Untechnique(byte val)
-        {
-            return (int)RealUntechnique((long)val);
-        }
-
-        public static int RealUntechnique(long val)
-        {
-            //Cast to long
-            long value = (long)val;
-
-            //Create a list to store our bytes
-            List<byte> TechniqueVal = new List<byte> { };
             bool isNegative = false;
 
-            //First check to see if value is negative
-            if ((value & 1) == 1)
-            {
-                isNegative = true;
-                //Remove bit making it negative
-                value += 1;
-            }
+            //Check if value is negative, is so add 1 to first byte and check bool
+            if ((MyPacket[0] & 1) == 1) { MyPacket[0] = (byte)(MyPacket[0] + 1); isNegative = true; }
 
-            //Loop over techniqued value to break it down
-            while (value != 0)
+            //Work some magic
+            uint value = 0;
+            int shift = 0;
+            while (shift * 7 < 0x40)
             {
-                if (value > 0x80)
+                foreach (byte b in MyPacket)
                 {
-                    TechniqueVal.Add((byte)(value & 0x7F));
-                    value >>= 8;
+                    value |= (uint)((b & 0x7f) << shift);
+                    
+                    if ((b & 0x80) == 0) break;
+                    shift += 7;
                 }
-
-                else
-                {
-                    TechniqueVal.Add((byte)value);
-                    value >>= 8;
-                }
+                break;
             }
 
-            //Get # of bytes in List
-            int length = TechniqueVal.Count;
+            //Divide the unsigned value by 2 and cast to an integer
+            int newVal = (int)(value / 2);
 
-            //temp variable to store value, as it may be bigger then an int untill final steps
-            long temp = 0;
+            //If its supposed to be negative do this
+            if (isNegative) { newVal *= -1; }
 
-            //Console.WriteLine(TechniqueVal[length - 1]);
-            for (int i = 1; i < length + 1; i++)
-            {
-                temp = (temp << 7) | TechniqueVal[length - i];
-                //Console.WriteLine(Convert.ToString(NewValue, 2));
-            }
+            //Remove read bytes from Packet
+            MyPacket.RemoveRange(0, (shift / 7) + 1);
 
-            //Divide the result by 2 to have the original value
-            int OldValue =(int)(temp / 2);
-
-            //Check if value was negative
-            if (isNegative) { OldValue *= -1; }
-
-            return OldValue;
+            return newVal;
         }
     }
 

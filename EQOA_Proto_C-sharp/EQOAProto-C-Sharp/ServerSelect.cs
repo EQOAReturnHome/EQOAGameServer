@@ -9,6 +9,7 @@ using System.Text;
 using RdpComm;
 using Opcodes;
 using System.Linq;
+using Sessions;
 
 namespace ServerSelect
 {
