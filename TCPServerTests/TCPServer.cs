@@ -120,12 +120,6 @@ namespace EQOATCPServer
                 //Verify its within the realm of our game somewhat, not foolproof ofc
                 if (bytesRead < 1024)
                 {
-
-                    foreach (byte b in state.buffer)
-                    {
-                        Console.Write(" " + b);
-                    }
-
                     //Add buffer to Client Packet Processing List
                     state.EQOAStateClient.ClientPacket.AddRange(state.buffer[0..bytesRead]);
                     state.EQOAStateClient.CheckClientRequest();
