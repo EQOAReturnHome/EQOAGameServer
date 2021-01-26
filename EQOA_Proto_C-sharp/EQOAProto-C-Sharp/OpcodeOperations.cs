@@ -23,7 +23,7 @@ namespace OpcodeOperations
 {
     class ProcessOpcode
     {
-        public static void ProcessOpcodes(Session MySession, short MessageTypeOpcode, List<byte> myPacket)
+        public static void ProcessOpcodes(Session MySession, ushort MessageTypeOpcode, List<byte> myPacket)
         {
             ///Expected message length
             ushort MessageLength;
@@ -31,7 +31,7 @@ namespace OpcodeOperations
             ushort Opcode;
 
             ///Short message, 1 byte for message length
-            if (MessageTypeOpcode == MessageOpcodeTypes.ShortReliableMessage)
+            if ((MessageTypeOpcode == MessageOpcodeTypes.ShortReliableMessage) || (MessageTypeOpcode == MessageOpcodeTypes.UnknownMessage))
             {
                 MessageLength = (ushort)myPacket[0];
                 ///Remove read byte
@@ -55,6 +55,13 @@ namespace OpcodeOperations
                 ///Increment for every message read, in order.
                 MySession.IncrementClientMessageNumber();
 
+                //If F9 type, no opcode process it seperately.
+                if (MessageTypeOpcode == MessageOpcodeTypes.UnknownMessage)
+                {
+                    myPacket.RemoveRange(0, 2);
+                    ProcessPingRequest(MySession, myPacket);
+                    return;
+                }
 
                 Opcode = (ushort)(myPacket[3] << 8 | myPacket[2]);
 
@@ -497,6 +504,30 @@ namespace OpcodeOperations
             ///Handles packing message into outgoing packet
             RdpCommOut.PackMessage(MySession, SecondMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.Camera2);
             MySession.ClientFirstConnect = true;
+        }
+
+        private static void ProcessPingRequest(Session MySession, List<byte> MyPacket)
+        {
+            if (MySession.InGame == false && (MyPacket[0] == 0x12))
+            {
+                //Nothing needed here I suppose?
+            }
+
+            else if (MySession.InGame == true && (MyPacket[0] == 0x14))
+            {
+                List<byte> MyMessage = new List<byte>() { 0x14 };
+                ///Do stuff here?
+                ///Handles packing message into outgoing packet
+                RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.UnknownMessage);
+            }
+
+            else
+            {
+                Logger.Err($"Received an F9 with unknown value {MyPacket[0]}");
+            }
+
+            ///Remove single byte
+            MyPacket.RemoveRange(0, 1);
         }
 
         public static void CreateCharacterList(List<Character> MyCharacterList, Session MySession)

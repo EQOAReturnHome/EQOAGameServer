@@ -2,16 +2,29 @@
 using DNP3;
 using EQLogger;
 using OpcodeOperations;
+using Opcodes;
+using RdpComm;
 using ServerSelect;
 using SessManager;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
+using System.Timers;
+using MessageStruct;
 
 namespace Sessions
 {
     /// This is individual client session object
     public class Session
     {
+        //Session dependant timer
+        Timer myTimer = new Timer();
+
+        //Message List
+        public List<Message> MyMessageList = new List<Message> { };
+
         ///SessionList Objects, probably need bundle information here too?
         private bool RemoteMaster;
         private ushort ClientEndpoint;
@@ -22,7 +35,7 @@ namespace Sessions
         public IPEndPoint MyIPEndPoint;
 
         ///Game version information
-        private int GameVersion;
+        private int GameVersion; // Code be useful later on if implementing code to support vanilla or other versions.
         private bool GameVersionAck = false;
 
         ///Our Received RDP Information
@@ -40,6 +53,61 @@ namespace Sessions
         ///Our RDP Information, should always start with 1...
         private ushort ServerRecvBundleNumber = 1;
         private ushort ServerRecvMessageNumber = 1;
+
+        //Should these be stored here?
+        public ushort Channel0Message = 0;
+        public bool Channel0Ack = false;
+        public ushort Channel1Message = 0;
+        public bool Channel1Ack = false;
+        public ushort Channel2Message = 0;
+        public bool Channel2Ack = false;
+        public ushort Channel3Message = 0;
+        public bool Channel3Ack = false;
+        public ushort Channel4Message = 0;
+        public bool Channel4Ack = false;
+        public ushort Channel5Message = 0;
+        public bool Channel5Ack = false;
+        public ushort Channel6Message = 0;
+        public bool Channel6Ack = false;
+        public ushort Channel7Message = 0;
+        public bool Channel7Ack = false;
+        public ushort Channel8Message = 0;
+        public bool Channel9Ack = false;
+        public ushort Channel10Message = 0;
+        public bool Channel10Ack = false;
+        public ushort Channel11Message = 0;
+        public bool Channel11Ack = false;
+        public ushort Channel12Message = 0;
+        public bool Channel12Ack = false;
+        public ushort Channel13Message = 0;
+        public bool Channel13Ack = false; 
+        public ushort Channel14Message = 0;
+        public bool Channel14Ack = false; 
+        public ushort Channel15Message = 0;
+        public bool Channel15Ack = false; 
+        public ushort Channel16Message = 0;
+        public bool Channel16Ack = false; 
+        public ushort Channel17Message = 0;
+        public bool Channel17Ack = false; 
+        public ushort Channel18Message = 0;
+        public bool Channel18Ack = false; 
+        public ushort Channel19Message = 0;
+        public bool Channel19Ack = false; 
+        public ushort Channel20Message = 0;
+        public bool Channel20Ack = false; 
+        public ushort Channel21Message = 0;
+        public bool Channel21Ack = false; 
+        public ushort Channel22Message = 0;
+        public bool Channel22Ack = false; 
+        public ushort Channel23Message = 0;
+        public bool Channel23Ack = false;
+        public ushort Channel40Message = 0;
+        public bool Channel40Ack = false;
+        public ushort Channel42Message = 0;
+        public bool Channel42Ack = false;
+        public ushort Channel43Message = 0;
+        public bool Channel43Ack = false;
+
 
         ///Server Select trigger
         private bool ServerSelect = false;
@@ -86,11 +154,12 @@ namespace Sessions
         ///public Session(ushort clientEndpoint, ushort RemoteMaster, ushort SessionPhase, uint SessionIDBase, uint SessionIDUp)
         {
             //Client initiated, so we are ack'ing and setting this to true
-            this.Instance = true;
-            this.ClientEndpoint = clientEndpoint;
+            Instance = true;
+            ClientEndpoint = clientEndpoint;
             this.MyIPEndPoint = MyIPEndPoint;
-            this.RemoteMaster = false;
+            RemoteMaster = false;
             this.SessionIDBase = SessionIDBase;
+            //StartTimer(5000);
         }
 
         ///When server creates internal master sessions, key difference is AccountID atm.... Maybe need to be more complicated eventually
@@ -116,6 +185,7 @@ namespace Sessions
 
             ///Trigger contact with client inside session
             ProcessOpcode.GenerateClientContact(this);
+            //StartTimer(5000);
         }
 
         public Session(ushort clientEndpoint, IPEndPoint MyIPEndPoint, bool RemoteMaster, int AccountID, uint SessionIDUp, Character MyCharacter)
@@ -139,6 +209,7 @@ namespace Sessions
             ///We don't need to ack a session this Time, we do however need client to ack our's, should this be tracked? yes it should
             this.SessionAck = true;
             this.MyCharacter = MyCharacter;
+            //StartTimer(5000);
         }
 
         public int AccountID
@@ -309,7 +380,56 @@ namespace Sessions
         {
             RdpReport = false;
             RdpMessage = false;
+        }
 
+        private void StartTimer(int interval)
+        {
+            myTimer.Interval = interval;
+            myTimer.AutoReset = true;
+            myTimer.Elapsed += new ElapsedEventHandler(Timer_Elapsed);
+            myTimer.Start();
+        }
+
+        public void ResetTimer()
+        {
+            myTimer.Stop();
+            myTimer.Start();
+        }
+        //Utilize this timer per session to check for client responses.
+        //Will include F9's and message check here
+        private void Timer_Elapsed(Object source, ElapsedEventArgs e)
+        {
+            //Check and see if any messages need an ack
+            if (MyMessageList.Count() > 0)
+            {
+                for (int i = 0; i < MyMessageList.Count(); i++)
+                {
+                    //Should we verify these messages are not less then what client has ack'd?
+                    SessionMessages.AddRange(MyMessageList[i].ThisMessage);
+                    RdpMessage = true;
+                }
+            }
+
+            
+            else
+            {
+                if (!InGame)
+                {
+                    //Pack up a ping request and send to client
+                    RdpCommOut.PackMessage(this, new List<byte> { 0x12 }, MessageOpcodeTypes.UnknownMessage);
+                }
+
+                else
+                {
+                    //Pack up a ping request and send to client
+                    RdpCommOut.PackMessage(this, new List<byte> { 0x14 }, MessageOpcodeTypes.UnknownMessage);
+                }
+            }
+        }
+
+        public void AddMessage(ushort num, List<byte> MyMessage)
+        {
+            MyMessageList.Add(new Message(num, MyMessage));
         }
     }
 }

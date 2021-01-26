@@ -66,6 +66,4 @@ namespace EQOAAccountMessageTypes
         public const byte GOOD = 0x08;
 
     }
-
-
 }

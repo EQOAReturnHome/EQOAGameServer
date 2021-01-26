@@ -43,6 +43,8 @@ namespace Characters
 		public float YCoord { get; set; }
 		public float ZCoord { get; set; }
 		public float Facing { get; set; }
+		public short Animation { get; set; }
+		public int Target { get; set; }
 		public int Strength { get; set; }
 		public int Stamina { get; set; }
 		public int Agility { get; set; }
@@ -98,6 +100,10 @@ namespace Characters
 		public uint LegsColor = 0xFFFFFFFF;
 		public uint BootsColor = 0xFFFFFFFF;
 		public uint RobeColor = 0xFFFFFFFF;
+
+		//Client Object updates
+		public List<byte> BaseUpdate;
+		//public List<List<byte>> Ourup
 
 		//Our Lists for attributes of character
 		public List<Item> InventoryItems = new List<Item> { };

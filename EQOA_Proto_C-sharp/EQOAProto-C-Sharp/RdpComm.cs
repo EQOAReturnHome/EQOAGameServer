@@ -11,6 +11,7 @@ using System.Timers;
 using Utility;
 using Characters;
 using Sessions;
+using Unreliable;
 
 namespace RdpComm
 {
@@ -60,7 +61,6 @@ namespace RdpComm
                     Message_Bundle = true;
                     RDP_Report = true;
                     Logger.Info("Processing Messages and Reports");
-
                     break;
 
                 default:
@@ -112,77 +112,36 @@ namespace RdpComm
             while (MyPacket.Count() > 0)
             {
                 ///Get our Message Type
-                short MessageTypeOpcode = GrabOpcode(MyPacket);
-
-                ///FB message type
-                if (MessageTypeOpcode == MessageOpcodeTypes.ShortReliableMessage || MessageTypeOpcode == MessageOpcodeTypes.LongReliableMessage)
+                ushort MessageTypeOpcode = GrabOpcode(MyPacket);
+                switch (MessageTypeOpcode)
                 {
-                    ///Work on processing this opcode
-                    ProcessOpcode.ProcessOpcodes(MySession, MessageTypeOpcode, MyPacket);
-                }
+                    //General opcodes (0xFB, 0xF9's)
+                    case MessageOpcodeTypes.ShortReliableMessage:
+                    case MessageOpcodeTypes.LongReliableMessage:
+                    case MessageOpcodeTypes.UnknownMessage:
+                        ///Work on processing this opcode
+                        ProcessOpcode.ProcessOpcodes(MySession, MessageTypeOpcode, MyPacket);
+                        break;
 
-                ///F9 message type
-                else if (MessageTypeOpcode == MessageOpcodeTypes.UnknownMessage)
-                {
-                    ///Just quickly process this here
-                    ///As far as we know, every F9 is 1 byte long
-                    ushort MessageLength = (ushort)(MyPacket[0]);
+                    //Client Actor update (0x4029's)
+                    case UnreliableTypes.ClientActorUpdate:
+                        ProcessUnreliable.ProcessUnreliables(MySession, MessageTypeOpcode, MyPacket);
+                        break;
 
-                    ///Remove 2 read bytes
-                    MyPacket.RemoveRange(0, 1);
 
-                    ///Make sure Message number is expected, needs to be in order.
-                    ushort MessageNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
-                    if (MySession.clientMessageNumber + 1 == MessageNumber)
-                    {
-                        ///Increment for every message read, in order.
-                        MySession.IncrementClientMessageNumber();
+                    default:
+                        //Shouldn't get here?
+                        Console.WriteLine($"Received unknown Message: {MessageTypeOpcode}");
 
-                        MyPacket.RemoveRange(0, 2);
-
-                        if (MySession.InGame == false && (MyPacket[0] == 0x12))
-                        {
-                            //Nothing needed here I suppose?
-                        }
-
-                        else if (MySession.InGame == true && (MyPacket[0] == 0x14))
-                        {
-                            List<byte> MyMessage = new List<byte>() { 0x14 };
-                            ///Do stuff here?
-                            ///Handles packing message into outgoing packet
-                            RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.UnknownMessage);
-                        }
-
-                        else
-                        {
-                            Logger.Err($"Received an F9 with unknown value {MyPacket[0]}");
-                        }
-
-                        ///Remove single byte
-                        MyPacket.RemoveRange(0, 1);
-                    }
-
-                    ///Message out of order?
-                    else
-                    {
-                        Console.WriteLine("Received message out of order, dropping");
-                        ///Clear remaining data, not relevant if not received in order?
-                        MyPacket.Clear();
-                        ///Once done, return method
-                        return;
-                    }
-                }
-
-                else
-                {
-                    Console.WriteLine($"Received unknown Message: {MessageTypeOpcode}");
-                }
-                ///Processed messages, should we perform rdpreport here?
-                ///Set session bool to true for rdp report
-                
+                        //Should we consume the whole message here if it is unknown so we can keep processing?
+                        break;
+                }  
             }
             MySession.RdpReport = true;
             MySession.ClientFirstConnect = true;
+
+            //Reset ack timer
+            MySession.ResetTimer();
 
             Logger.Info("Done processing messages in packet");
             ///Should we just initiate responses to clients through here for now?
@@ -197,6 +156,18 @@ namespace RdpComm
             MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
             ushort LastRecvBundleNumber = (ushort)(MyPacket[3] << 8 | MyPacket[2]);
             ushort LastRecvMessageNumber = (ushort)(MyPacket[5] << 8 | MyPacket[4]);
+
+            //Check our list  of reliable messages to remove
+            for (int i = 0; i < MySession.MyMessageList.Count(); i++)
+            {
+                //If our message stored is less then client ack, need to remove it!
+                if(MySession.MyMessageList[i-i].ThisMessagenumber <= LastRecvMessageNumber)
+                { MySession.MyMessageList.RemoveAt(0); }
+
+                //Need to keep remaining messages, move on
+                else { break; }
+            }
+            
 
             MyPacket.RemoveRange(0, 6);
             ///Only one that really matters, should tie into our packet resender stuff
@@ -292,14 +263,14 @@ namespace RdpComm
         }
 
         ///This grabs the full Message Type. Checks for FF, if FF is present, then grab proceeding byte (FA or FB)
-        private static short GrabOpcode(List<byte> MyPacket)
+        private static ushort GrabOpcode(List<byte> MyPacket)
         {
-            short Opcode = (short)MyPacket[0];
+            ushort Opcode = (ushort)MyPacket[0];
             ///If Message is > 255 bytes, Message type is prefixed with FF to indeificate this
             if (Opcode == 255)
             {
                 Logger.Info("Received Long Message type (> 255 bytes)");
-                Opcode = (short)(MyPacket[1] << 8 | MyPacket[0]);
+                Opcode = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
 
                 ///Remove 2 read bytes
                 MyPacket.RemoveRange(0, 2);
@@ -324,303 +295,157 @@ namespace RdpComm
         ///Message processing for outbound section
         public static void PackMessage(Session MySession, List<byte> myMessage, ushort MessageOpcodeType, ushort Opcode)
         {
-
-            int MyCount = MySession.SessionMessages.Count();
-
-            ///0xFB Message type
-            if (MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage)
+            ///0xFB/FA type Message type
+            if ((MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage) || (MessageOpcodeType == MessageOpcodeTypes.MultiShortReliableMessage))
             {
+                ///Add our opcode
+                myMessage.InsertRange(0, BitConverter.GetBytes(Opcode));
+
+                ///Add Message #
+                myMessage.InsertRange(0, BitConverter.GetBytes(MySession.serverMessageNumber));
+
                 ///Pack Message here into MySession.SessionMessages
                 ///Check message length first
-                if ((myMessage.Count + 2) > 255)
+                if ((myMessage.Count()) > 255)
                 {
-                    ///Add out MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.LongReliableMessage));
-
                     ///Add Message Length
-                    ///Swap endianness, then convert to bytes
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
+                    myMessage.InsertRange(0, BitConverter.GetBytes((ushort)(myMessage.Count() - 2)));
 
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 6, BitConverter.GetBytes(Opcode));
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-
+                    ///Add out MessageType
+                    myMessage.InsertRange(0, BitConverter.GetBytes((ushort)(0xFF00 ^ MessageOpcodeType)));
                 }
 
                 ///Message is < 255
                 else
                 {
-                    ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortReliableMessage);
-
-
                     ///Add Message Length
-                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
+                    myMessage.Insert(0, (byte)(myMessage.Count() - 2));
 
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(Opcode));
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
+                    ///Add out MessageType
+                    myMessage.Insert(0, (byte)MessageOpcodeType);
                 }
+
+                //Add reliable Message to reliablemessage ack list
+                MySession.AddMessage(MySession.serverMessageNumber, myMessage);
+
+                //Increment server message #
+                MySession.IncrementServerMessageNumber();
             }
 
             ///0xFC Message type
             else if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
             {
-                ///Pack Message here into MySession.SessionMessages
+                ///Add our opcode
+                myMessage.InsertRange(0, BitConverter.GetBytes(Opcode));
+
                 ///Check message length first
-                if ((myMessage.Count + 2) > 255)
+                if ((myMessage.Count()) > 255)
                 {
-                    ///Add out MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.LongUnreliableMessage));
-
                     ///Add Message Length
-                    ///Swap endianness, then convert to bytes
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
+                    myMessage.InsertRange(0, BitConverter.GetBytes((ushort)(myMessage.Count())));
 
-                    ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 3, BitConverter.GetBytes(Opcode));
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-
+                    ///Add out MessageType
+                    myMessage.InsertRange(0, BitConverter.GetBytes(0xFF00 ^ MessageOpcodeType));
                 }
 
                 ///Message is < 255
                 else
                 {
-                    ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortUnreliableMessage);
-
-
                     ///Add Message Length
-                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
+                    myMessage.Insert(0, (byte)(myMessage.Count()));
 
-                    ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(Opcode));
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
+                    ///Add out MessageType
+                    myMessage.Insert(0, (byte)MessageOpcodeType);
                 }
             }
-
-            ///0xFA Message type
-            else if (MessageOpcodeType == MessageOpcodeTypes.MultiShortReliableMessage)
-            {
-                ///Pack Message here into MySession.SessionMessages
-                ///Check message length first
-                if ((myMessage.Count + 2) > 255)
-                {
-                    ///Add out MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.MultiLongReliableMessage));
-
-                    ///Add Message Length
-                    ///Swap endianness, then convert to bytes
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count() + 2)));
-
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 6, BitConverter.GetBytes(Opcode));
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-
-                }
-
-                ///Message is < 255
-                else
-                {
-                    ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.MultiLongReliableMessage);
-
-
-                    ///Add Message Length
-                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count() + 2));
-
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Add our opcode
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(Opcode));
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-                }
-            }
+            ///Finally, add our message
+            MySession.SessionMessages.AddRange(myMessage);
 
             ///We are packing to send a message, set MySession.RdpMessage to true
             MySession.RdpMessage = true;
-            ///Finished adding message, don't think we need to do anything else?
         }
 
         public static void PackMessage(Session MySession, List<byte> myMessage, ushort MessageOpcodeType)
         {
-            int MyCount = MySession.SessionMessages.Count();
-
-            ///0xFB Message type
-            if (MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage)
+            //Technically shouldn't need this if statement? But to be safe
+            ///0xFB/FA/F9 Message type
+            if ((MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage) || (MessageOpcodeType == MessageOpcodeTypes.MultiShortReliableMessage) || (MessageOpcodeType == MessageOpcodeTypes.UnknownMessage))
             {
+                ///Add Message #
+                myMessage.InsertRange(0, BitConverter.GetBytes(MySession.serverMessageNumber));
+
                 ///Pack Message here into MySession.SessionMessages
                 ///Check message length first
-                if ((myMessage.Count + 2) > 255)
+                if ((myMessage.Count()) > 255)
                 {
+                    ///Add Message Length
+                    ///Swap endianness, then convert to bytes
+                    myMessage.InsertRange(0, BitConverter.GetBytes((ushort)(myMessage.Count() - 2)));
+
                     ///Add our MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.LongReliableMessage));
-
-                    ///Add Message Length
-                    ///Swap endianness, then convert to bytes
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count())));
-
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-
+                    myMessage.InsertRange(0, BitConverter.GetBytes((ushort)(0xFF00 ^ MessageOpcodeType)));
                 }
 
                 ///Message is < 255
                 else
                 {
+
+                    ///Add Message Length (Remove the message #)
+                    myMessage.Insert(0, (byte)(myMessage.Count() - 2));
+
                     ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortReliableMessage);
-
-
-                    ///Add Message Length
-                    MySession.SessionMessages.Insert(MyCount + 1, (byte)(myMessage.Count()));
-
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
+                    myMessage.Insert(0, (byte)MessageOpcodeType);
                 }
+
+                //Add reliable Message to reliablemessage ack list
+                MySession.AddMessage(MySession.serverMessageNumber, myMessage);
+
+                ///Increment our internal message #
+                MySession.IncrementServerMessageNumber();
             }
 
-            ///0xFA Message type
-            else if (MessageOpcodeType == MessageOpcodeTypes.MultiShortReliableMessage)
-            {
-                ///Pack Message here into MySession.SessionMessages
-                ///Check message length first
-                if ((myMessage.Count + 2) > 255)
-                {
-                    ///Add out MessageType
-                    MySession.SessionMessages.InsertRange(MyCount, BitConverter.GetBytes(MessageOpcodeTypes.MultiLongReliableMessage));
+            ///Finally, add our message
+            MySession.SessionMessages.AddRange(myMessage);
 
-                    ///Add Message Length
-                    ///Swap endianness, then convert to bytes
-                    MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes((ushort)(myMessage.Count())));
-                    
-
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-
-                }
-
-                ///Message is < 255
-                else
-                {
-                    ///Add out MessageType
-                    MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.MultiShortReliableMessage);
-
-                    MySession.SessionMessages.InsertRange(MyCount + 1, BitConverter.GetBytes((ushort)(myMessage.Count())));
-
-                    ///Add Message #
-                    MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(MySession.serverMessageNumber));
-
-                    ///Increment our internal message #
-                    MySession.IncrementServerMessageNumber();
-
-                    ///Finally, add our message
-                    MySession.SessionMessages.AddRange(myMessage);
-                }
-            }
             ///We are packing to send a message, set MySession.RdpMessage to true
             MySession.RdpMessage = true;
-            ///Finished adding message, don't think we need to do anything else?
         }
 
         ///Message processing for outbound section
         public static void PackMessage(Session MySession, ushort MessageOpcodeType, ushort Opcode)
         {
+            List<byte> myMessage = new List<byte> { };
 
-            int MyCount = MySession.SessionMessages.Count();
+            ///Add our opcode
+            myMessage.InsertRange(0, BitConverter.GetBytes(Opcode));
+
+            //Add Message Length
+            myMessage.Insert(0, 2);
 
             ///0xFB Message type
             if (MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage)
             {
-                ///Pack Message here into MySession.SessionMessages
-                ///Check message length first
+                ///Add Message #
+                myMessage.InsertRange(0, BitConverter.GetBytes(MySession.serverMessageNumber));
 
                 ///Add out MessageType
-                MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortReliableMessage);
+                myMessage.Insert(0, (byte)MessageOpcodeType);
 
-
-                //Add Message Length
-                MySession.SessionMessages.Insert(MyCount + 1, (byte)2);
-
-                ///Add Message #
-                MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(MySession.serverMessageNumber));
+                //Add reliable Message to reliablemessage ack list
+                MySession.AddMessage(MySession.serverMessageNumber, myMessage);
 
                 ///Increment our internal message #
                 MySession.IncrementServerMessageNumber();
-
-                ///Add our opcode
-                MySession.SessionMessages.InsertRange(MyCount + 4, BitConverter.GetBytes(Opcode));
             }
 
             ///0xFC Message type
             else if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
             {
-                ///Pack Message here into MySession.SessionMessages
-                ///Check message length first
-
-                ///Add out MessageType
-                MySession.SessionMessages.Insert(MyCount, (byte)MessageOpcodeTypes.ShortUnreliableMessage);
-
-
-                ///Add Message Length
-                MySession.SessionMessages.Insert(MyCount + 1, (byte)2);
-
-                ///Add our opcode
-                MySession.SessionMessages.InsertRange(MyCount + 2, BitConverter.GetBytes(Opcode));
+                ///Add our MessageType
+                myMessage.Insert(0, (byte)MessageOpcodeType);
             }
 
+            MySession.SessionMessages.AddRange(myMessage);
             ///We are packing to send a message, set MySession.RdpMessage to true
             MySession.RdpMessage = true;
         }
@@ -673,7 +498,6 @@ namespace RdpComm
                         ///Add the Session stuff here that has length built in with session stuff
                         AddSessionHeader(MySession, OutGoingMessage, PacketLength);
 
-
                         ///Done? Send to CommManagerOut
                         CommManagerOut.AddEndPoints(MySession, OutGoingMessage);
                     }
@@ -703,6 +527,14 @@ namespace RdpComm
 
                 ///This swaps endianness of our Bundle, then converts to bytes
                 OutGoingMessage.InsertRange(0, BitConverter.GetBytes(MySession.serverBundleNumber));
+                
+                //If ingame, include 4029 ack's
+                if (MySession.InGame)
+                {
+                    OutGoingMessage.Insert(6, 0x40);
+                    OutGoingMessage.InsertRange(7, BitConverter.GetBytes(MySession.Channel40Message));
+                    OutGoingMessage.Insert(9, 0xF8);
+                }
             }
 
             ///We should only add Servers current Bundle #, only when no messages received from client

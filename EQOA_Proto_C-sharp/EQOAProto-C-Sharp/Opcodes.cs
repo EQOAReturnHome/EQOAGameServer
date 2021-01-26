@@ -8,16 +8,21 @@ namespace Opcodes
     /// </summary>
     public static class MessageOpcodeTypes
     {
+        public const ushort serverTransfer = 65535; ///0xFFFF
+        public const ushort NewConnection = 65534; ///0xFFFE
+        public const ushort LongUnreliableMessage = 65532; ///0xFFFC
+        public const byte ShortUnreliableMessage = 252; ///0xFC
+        public const ushort LongReliableMessage = 65531; ///0xFFFB
+        public const byte ShortReliableMessage = 251; ///0xFB
+        public const ushort MultiLongReliableMessage = 65530; ///0xFFFA
+        public const byte MultiShortReliableMessage = 250; ///0xFA
+        public const byte UnknownMessage = 249; ///0xF9
+    }
 
-        public static readonly sbyte serverTransfer = -1; ///0xFFFF
-        public static readonly sbyte NewConnection = -2; ///0xFFFE
-        public static readonly ushort LongUnreliableMessage = 65532; ///0xFFFC
-        public static readonly ushort ShortUnreliableMessage = 252; ///0xFC
-        public static readonly ushort LongReliableMessage = 65531; ///0xFFFB
-        public static readonly ushort ShortReliableMessage = 251; ///0xFB
-        public static readonly ushort MultiLongReliableMessage = 65530; ///0xFFFA
-        public static readonly ushort MultiShortReliableMessage = 250; ///0xFA
-        public static readonly ushort UnknownMessage = 249; ///0xF9
+    public static class UnreliableTypes
+    {
+
+        public const byte ClientActorUpdate = 64; //0x40 Client Actor update
     }
 
     public static class GameOpcode
