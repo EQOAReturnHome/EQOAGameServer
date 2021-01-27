@@ -150,7 +150,7 @@ CREATE TABLE `Characters` (
   KEY `CharModel_idx` (`modelid`),
   CONSTRAINT `accountid` FOREIGN KEY (`accountid`) REFERENCES `AccountInfo` (`accountid`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `modelid` FOREIGN KEY (`modelid`) REFERENCES `characterModel` (`modelid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1260599 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1260600 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -159,7 +159,7 @@ CREATE TABLE `Characters` (
 
 LOCK TABLES `Characters` WRITE;
 /*!40000 ALTER TABLE `Characters` DISABLE KEYS */;
-INSERT INTO `Characters` VALUES ('Dallasdevin',2,1224955,1893243078,0,0,'Other',60,6,3,3,0,0,180923385,0,255,500000000,100000000,10,350,0,25334.179687500000,15748.388671875000,54.125904083252,-1.546252727509,0.000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),('Beebster',2,1260510,-511108617,7,1,'Other',60,7,2,3,2,7,25029476,1,255,345647345,35000000,15,234,0,25321.500000000000,15746.799804687500,54.200000762939,0.000000000000,0.000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),('Leukocyte',2,1260511,1282385202,10,5,'Other',60,6,3,3,0,20,45834723,0,255,0,25000,20,12,0,25321.500000000000,15746.799804687500,54.200000762939,0.000000000000,0.000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),('Aaaaa',2,1260583,1640644319,6,6,'Other',1,2,2,3,2,6,0,0,255,5000,0,20,475,0,13115.000000000000,4316.310058593750,54.399398803711,2.924910068512,0.000000000000,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0),('Cccc',3,1260589,1640644319,6,6,'Other',1,2,2,3,2,6,0,0,255,5000,0,20,475,0,13115.000000000000,4316.310058593750,54.399398803711,2.924910068512,0.000000000000,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0),('Bbbbb',3,1260593,-1436875705,9,4,'Other',1,0,1,2,0,9,0,0,255,5000,0,20,475,0,15445.900390625000,8743.750000000000,82.967201232910,1.505380034447,0.000000000000,70,70,55,55,85,50,70,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,70,70,55,55,85,50,70,1000,1000,500,500,0,20,10,0,0),('Beebs',2,1260594,-511108617,14,1,'Other',1,2,3,1,0,14,0,0,255,5000,0,20,475,0,18909.000000000000,6567.839843750000,53.875999450684,0.027663400397,0.000000000000,50,60,55,70,80,80,60,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,50,60,55,70,80,80,60,1000,1000,500,500,0,20,10,0,0),('Aabb',2,1260597,-1001728746,6,6,'Other',1,4,2,2,2,6,0,0,255,5000,0,-8,350,0,13115.000000000000,4316.310058593750,54.399398803711,2.924910068512,0.000000000000,79,74,74,84,54,59,59,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0);
+INSERT INTO `Characters` VALUES ('Dallasdevin',2,1224955,1893243078,0,0,'Other',60,6,3,3,0,0,180923385,0,255,500000000,100000000,10,350,0,25334.179687500000,54.125904083252,15748.388671875000,-1.546252727509,0.000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),('Beebster',2,1260510,-511108617,7,1,'Other',60,7,2,3,2,7,25029476,1,255,345647345,35000000,15,234,0,25321.500000000000,54.200000762939,15746.799804687500,0.000000000000,0.000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),('Leukocyte',2,1260511,1282385202,10,5,'Other',60,6,3,3,0,20,45834723,0,255,0,25000,20,12,0,25321.500000000000,54.200000762939,15746.799804687500,0.000000000000,0.000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),('Aaaaa',2,1260583,1640644319,6,6,'Other',1,2,2,3,2,6,0,0,255,5000,0,20,475,0,13115.000000000000,54.399398803711,4316.310058593750,2.924910068512,0.000000000000,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0),('Cccc',3,1260589,1640644319,6,6,'Other',1,2,2,3,2,6,0,0,255,5000,0,20,475,0,13115.000000000000,54.399398803711,4316.310058593750,2.924910068512,0.000000000000,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,75,70,70,80,50,55,55,1000,1000,500,500,0,20,10,0,0),('Bbbbb',3,1260593,-1436875705,9,4,'Other',1,0,1,2,0,9,0,0,255,5000,0,20,475,0,15445.900390625000,82.967201232910,8743.750000000000,1.505380034447,0.000000000000,70,70,55,55,85,50,70,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,70,70,55,55,85,50,70,1000,1000,500,500,0,20,10,0,0),('Beebs',2,1260594,-511108617,14,1,'Other',1,2,3,1,0,14,0,0,255,5000,0,20,475,0,18909.000000000000,53.875999450684,6567.839843750000,0.027663400397,0.000000000000,50,60,55,70,80,80,60,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,50,60,55,70,80,80,60,1000,1000,500,500,0,20,10,0,0),('Aweesome',2,1260599,-2071956336,3,9,'Other',1,2,3,1,0,3,0,0,255,5000,0,-15,350,0,9379.490234375000,30.382200241089,7134.560058593750,1.799309968948,0.000000000000,95,95,65,65,55,60,55,1000,1000,500,500,0,20,10,0,0,0,0,0,0,0,0,10,10,10,10,10,10,0,90,90,60,60,50,55,50,1000,1000,500,500,0,20,10,0,0);
 /*!40000 ALTER TABLE `Characters` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -534,6 +534,213 @@ LOCK TABLES `weaponHotBar` WRITE;
 INSERT INTO `weaponHotBar` VALUES (1,1224955,'Perfect Combo',31002,31003),(2,1224955,'Combo Perfect',31003,31002);
 /*!40000 ALTER TABLE `weaponHotBar` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'eqoabase'
+--
+
+--
+-- Dumping routines for database 'eqoabase'
+--
+/*!50003 DROP PROCEDURE IF EXISTS `CheckName` */;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `CheckName`(in CharacterName varchar(32))
+BEGIN
+SELECT charName FROM Characters where charName = CharacterName;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
+/*!50003 DROP PROCEDURE IF EXISTS `CreateCharacter` */;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `CreateCharacter`(in charName varchar(32), AccountID int, ModelID bigint, TClass int,
+			Race int, HumType varchar(12), Level int, HairColor int, HairLength int, HairStyle int, FaceOption int, ClassIcon int, TotalXP int, Debt int, Breath int, Tunar int, BankTunar int, UnusedTP int, TotalTP int, X float(17,12),
+			Y float(17,12), Z float(17,12), Facing float(17,12), Strength int, Stamina int, Agility int, Dexterity int, Wisdom int, Intelligence int, Charisma int, CurrentHP int, MaxHP int, CurrentPower int, MaxPower int, Healot int, Powerot int,
+			Ac int, PoisonR int, DiseaseR int, FireR int, ColdR int, LightningR int, ArcaneR int, Fishing int, Base_Strength int, Base_Stamina int, Base_Agility int, Base_Dexterity int, Base_Wisdom int,
+			Base_Intelligence int, Base_Charisma int, CurrentHP2 int, BaseHP int, CurrentPower2 int, basePower int, Healot2 int, Powerot2 int)
+INSERT INTO Characters(charName, accountid, modelid, tclass, race, humType, level, haircolor, hairlength, hairstyle, faceoption, classIcon, totalXP, debt,  
+			breath, tunar, bankTunar, unusedTP, totalTP, x, y, z, facing, strength, stamina, agility, dexterity, wisdom, intel, charisma, currentHP, maxHP, currentPower,
+			maxPower, healot, powerot, ac, poisonr, diseaser, firer, coldr, lightningr, arcaner, fishing, base_strength, base_stamina, base_agility, base_dexterity,
+			base_wisdom, base_intel, base_charisma, currentHP2, baseHP, currentPower2, basePower, healot2, powerot2) VALUES (charName, AccountID, ModelID, TClass,
+			Race, HumType, Level, HairColor, HairLength, HairStyle, FaceOption, ClassIcon, TotalXP, Debt, Breath, Tunar, BankTunar, UnusedTP, TotalTP, X,
+			Y, Z, Facing, Strength, Stamina, Agility, Dexterity, Wisdom, Intelligence, Charisma, CurrentHP, MaxHP, CurrentPower, MaxPower, Healot, Powerot,
+			Ac, PoisonR, DiseaseR, FireR, ColdR, LightningR, ArcaneR, Fishing, Base_Strength, Base_Stamina, Base_Agility, Base_Dexterity, Base_Wisdom,
+			Base_Intelligence, Base_Charisma, CurrentHP2, BaseHP, CurrentPower2, basePower, Healot2, Powerot2) ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
+/*!50003 DROP PROCEDURE IF EXISTS `DeleteCharacter` */;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `DeleteCharacter`(in cServerID int)
+DELETE FROM Characters WHERE serverid = cServerID ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetAccountCharacters` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `GetAccountCharacters`(in pAccountID int)
+SELECT charName, serverID, modelID, tClass, race, humType, level, hairColor, hairLength, hairStyle, faceOption,
+classIcon, totalXP, debt, breath, tunar, bankTunar, unusedTP, totalTP, world, x, y, z, facing,
+strength, stamina, agility, dexterity, wisdom, intel, charisma, currentHP, maxHP, currentPower, maxPower, healot, powerot, ac,
+poisonr, diseaser, firer, coldr, lightningr, arcaner, fishing, base_Strength, base_Stamina, base_Agility,
+base_Dexterity, base_Wisdom, base_Intel, base_Charisma, currentHP2, baseHP, currentPower2, basePower, healot2, powerot2
+ FROM Characters c WHERE accountid = pAccountID ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetCharacterGear` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `GetCharacterGear`(in pAccountID int)
+BEGIN
+SELECT c.charName, ci.stackleft, ci.remainHP, ci.remaincharge, ci.equiploc, ci.location, ci.listnumber, ip.patternid, ip.patternfam, ip.itemicon, ip.equipslot, ip.attacktype, ip.weapondamage,
+       ip.maxhp, ip.trade, ip.rent, ip.craft, ip.lore, ip.levelreq, ip.maxstack, ip.itemname, ip.itemdesc, ip.duration, ip.classuse, ip.raceuse, ip.procanim, ip.str, ip.sta, ip.agi, ip.dex, ip.wis,
+       ip.int, ip.cha, ip.HPMAX, ip.POWMAX, ip.PoT, ip.HoT, ip.AC, ip.PR, ip.DR, ip.FR, ip.CR, ip.LR, ip.AR, ip.model, ip.color from charInventory ci JOIN Characters c ON c.serverid = ci.serverid
+                                JOIN itemPattern ip ON ip.patternid = ci.patternid WHERE c.accountid = pAccountID ORDER BY ci.listnumber;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetCharHotkeys` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `GetCharHotkeys`(in charID int)
+BEGIN
+SELECT HK.direction, HK. Nlabel, HK.Nmessage, HK.Wlabel, HK.Wmessage, HK.Elabel, HK.Emessage, HK.Slabel, HK.smessage
+FROM Hotkeys HK WHERE HK.serverid = 1224955;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetCharModel` */;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = '' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `GetCharModel`(in RaceType varchar(8), ClassType varchar(6), HumType varchar(12), SexType varchar(16))
+BEGIN
+select dc.*, cm.modelid FROM defaultCharacter dc INNER JOIN characterModel cm ON dc.race = cm.race 
+WHERE dc.race = RaceType and dc.tclass = ClassType and dc.humType= HumType and cm.sex = SexType;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+ALTER DATABASE `eqoabase` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetCharSpells` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `GetCharSpells`(in charID int)
+BEGIN
+SELECT S.SpellID,S.AddedOrder,S.OnHotBar,
+S.WhereOnBar, S.Unk1, S.ShowHide, SP.AbilityLvl, SP.Unk2,
+SP.Unk3, SP.Range, SP.CastTime, SP.Power, SP.IconColor, SP.Icon,
+SP.Scope, SP.Recast, SP.EqpRequire, SP.SpellName, SP.SpellDesc
+FROM Spells S JOIN spellPattern SP ON S.SpellID=SP.SpellID WHERE S.ServerID = charID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `GetCharWeaponHotbar` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`fooUser`@`%` PROCEDURE `GetCharWeaponHotbar`(in charID int)
+BEGIN
+SELECT HB.hotbarname, HB.weaponID, HB.secondaryID
+FROM weaponHotBar HB WHERE HB.ServerID = charID;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -544,4 +751,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-01-19 12:56:39
+-- Dump completed on 2021-01-27 15:09:04
