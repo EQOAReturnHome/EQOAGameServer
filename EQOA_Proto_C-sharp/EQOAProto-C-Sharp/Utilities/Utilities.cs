@@ -173,6 +173,53 @@ namespace Utility
 
             return newVal;
         }
+
+        static public uint Unpack(List<byte> myPacket)
+        {
+            uint val = 0;
+            int shift = 0;
+
+            foreach (byte b in myPacket)
+            {
+                val |= (uint)((b & 0x7f) << (shift * 7));
+                if ((b & 0x80) == 0) break;
+                shift += 1;
+            }
+
+            //Remove read bytes here
+            myPacket.RemoveRange(0, shift + 1);
+            return val;
+        }
+
+        static public List<byte> Pack(uint value)
+        {
+            //Work some magic. Basic VLI
+            List<byte> myList = new List<byte> { };
+
+            int myVal = 0;
+            int shift = 0;
+            do
+            {
+                byte lower7bits = (byte)(value & 0x7f);
+                value >>= 7;
+                if (value > 0)
+                {
+                    myVal |= (lower7bits |= 128) << shift;
+                    shift += 8;
+                }
+                else
+                {
+                    myVal |= lower7bits << shift;
+                }
+            } while (value > 0);
+
+            myList.AddRange(BitConverter.GetBytes(myVal));
+            int i = myList.Count - 1;
+            int j = 0;
+            while (myList[i] == 0) { j++; --i; }
+            myList.RemoveRange(i + 1, j);
+            return myList;
+        }
     }
 
     public class ByteSwaps

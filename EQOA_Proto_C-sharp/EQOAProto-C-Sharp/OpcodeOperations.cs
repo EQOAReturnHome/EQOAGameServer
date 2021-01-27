@@ -70,20 +70,25 @@ namespace OpcodeOperations
                 ///Remove 4 read bytes (Opcode and Message #)
                 myPacket.RemoveRange(0, 4);
 
+                //Remove the opcode bytes we read
+                MessageLength -= 2;
+
                 ///Pass remaining to opcode checker for more processing
-                OpcodeChecker(MySession, Opcode, myPacket);
+                OpcodeChecker(MySession, Opcode, myPacket, MessageLength);
             }
 
             ///Not expected order?
             ///Expand on eventually
             else
             {
+                //Remove packet# and message bytes
+                myPacket.RemoveRange(0, MessageLength + 2);
                 return;
             }
         }
 
         ///Big switch statement to process Opcodes.
-        private static void OpcodeChecker(Session MySession, ushort Opcode, List<byte> myPacket)
+        private static void OpcodeChecker(Session MySession, ushort Opcode, List<byte> myPacket, int MessageLength)
         {
             switch (Opcode)
             {
@@ -126,6 +131,12 @@ namespace OpcodeOperations
 
                 default:
                     Logger.Err("Unable to identify Bundle Type");
+                    //Remove unknwon opcodes here
+                    //Eventually add logic to send unknwon opcodes to client via chat
+                    if (MessageLength > 0)
+                    {
+                        myPacket.RemoveRange(0, MessageLength);
+                    }
                     break;
             }
         }
@@ -254,15 +265,15 @@ namespace OpcodeOperations
             MySession.Dumpstarted = true;
 
             //Get our timestamp opcode in queue
-            RdpCommOut.PackMessage(MySession, DNP3Creation.CreateDNP3TimeStamp(), MessageOpcodeTypes.ShortUnreliableMessage, GameOpcode.Time);
+            RdpCommOut.PackMessage(MySession, DNP3Creation.CreateDNP3TimeStamp(), MessageOpcodeTypes.ShortReliableMessage, GameOpcode.Time);
 
             List<byte> ThisChunk;
 
             //Gather our dump data
-            if (MySession.MyDumpData.Count() > 1156)
+            if (MySession.MyDumpData.Count() > 500)
             {
-                ThisChunk = MySession.MyDumpData.GetRange(0, 1156);
-                MySession.MyDumpData.RemoveRange(0, 1156);
+                ThisChunk = MySession.MyDumpData.GetRange(0, 500);
+                MySession.MyDumpData.RemoveRange(0, 500);
 
                 //Set this to true to send packet to client
                 MySession.ClientFirstConnect = true;
@@ -271,7 +282,7 @@ namespace OpcodeOperations
                 RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage, GameOpcode.MemoryDump);
             }
 
-            //Dump data is smaller then 1156 bytes
+            //Dump data is smaller then 500 bytes
             else
             {
                 ThisChunk = MySession.MyDumpData.GetRange(0, MySession.MyDumpData.Count());
@@ -328,8 +339,7 @@ namespace OpcodeOperations
             //Later this will need to include a character/world combination if additional servers are spun up.
             if (charCreation.CharName == SQLOperations.CheckName(charCreation.CharName))
             {
-                //New character list to hold character objects
-
+                myPacket.Clear();
                 //List and assignment to hold game op code in bytes to send out
                 List<byte> NameTaken = new List<byte>();
                 NameTaken.AddRange(BitConverter.GetBytes(GameOpcode.NameTaken));
@@ -762,7 +772,20 @@ namespace OpcodeOperations
             ///Character list is complete
             ///Handles packing message into outgoing packet
             RdpCommOut.PackMessage(MySession, CharacterList, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.CharacterSelect);
+        }
 
+        public static void IgnoreList(Session MySession)
+        {
+            //For now send no ignored people
+            RdpCommOut.PackMessage(MySession, new List<byte>{0}, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.IgnoreList);
+        }
+
+        public static void ActorSpeed(Session MySession)
+        {
+            List<byte> CharacterSpeed = new List<byte> { };
+            CharacterSpeed.AddRange(BitConverter.GetBytes(25.0f));
+            //For now send a standard speed
+            RdpCommOut.PackMessage(MySession, CharacterSpeed, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.ActorSpeed);
         }
     }
 }

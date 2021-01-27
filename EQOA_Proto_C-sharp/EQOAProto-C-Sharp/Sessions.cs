@@ -159,7 +159,7 @@ namespace Sessions
             this.MyIPEndPoint = MyIPEndPoint;
             RemoteMaster = false;
             this.SessionIDBase = SessionIDBase;
-            //StartTimer(5000);
+            //StartTimer(2000);
         }
 
         ///When server creates internal master sessions, key difference is AccountID atm.... Maybe need to be more complicated eventually
@@ -185,29 +185,29 @@ namespace Sessions
 
             ///Trigger contact with client inside session
             ProcessOpcode.GenerateClientContact(this);
-            //StartTimer(5000);
+            //StartTimer(2000);
         }
 
         public Session(ushort clientEndpoint, IPEndPoint MyIPEndPoint, bool RemoteMaster, int AccountID, uint SessionIDUp, Character MyCharacter)
         {
             Logger.Info("Creating Master Session");
-            this.ClientEndpoint = clientEndpoint;
+            ClientEndpoint = clientEndpoint;
             this.RemoteMaster = RemoteMaster;
             this.MyIPEndPoint = MyIPEndPoint;
 
             ///Need to perform some leg work here to create this internal master session
-            this.SessionIDBase = DNP3Creation.DNP3Session();
+            SessionIDBase = DNP3Creation.DNP3Session();
 
             ///This will now relate to Our ingame character ID. When we first create our master session, (character ingame ID / 2) - 1 should be our IDUp
             ///Once we start memory dump, IDUp + 1's to be half ingame ID
             /////This isn't quite right.. consider rework of some kind
             this.SessionIDUp = SessionIDUp + 1;
-            this._AccountID = AccountID;
+            _AccountID = AccountID;
 
-            this.CharacterSelect = false;
+            CharacterSelect = false;
 
             ///We don't need to ack a session this Time, we do however need client to ack our's, should this be tracked? yes it should
-            this.SessionAck = true;
+            SessionAck = true;
             this.MyCharacter = MyCharacter;
             //StartTimer(5000);
         }
@@ -255,7 +255,12 @@ namespace Sessions
         {
 
             get { return ClientBundleNumber; }
-            set { ClientBundleNumber = value; }
+            set { ClientBundleNumber = value;
+                if (ClientBundleNumber == 17)
+                {
+                    BundleTypeTransition = true;
+                }
+            }
         }
 
         ///Allows us to update last known Client Bundle Number
@@ -266,7 +271,7 @@ namespace Sessions
             set
             {
                 ClientMessageNumber = value;
-                if (ClientMessageNumber == 18)
+                if (ClientMessageNumber == 17)
                 {
                     BundleTypeTransition = true;
                 }
@@ -278,7 +283,14 @@ namespace Sessions
         {
 
             get { return ServerBundleNumber; }
-            set { ServerBundleNumber = value; }
+            set
+            {
+                ServerBundleNumber = value;
+                if (ServerBundleNumber == 17)
+                {
+                    BundleTypeTransition = true;
+                }
+            }
         }
 
         ///Allows us to update last known Server Message Number

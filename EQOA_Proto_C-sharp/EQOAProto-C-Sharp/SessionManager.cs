@@ -1,5 +1,6 @@
 ﻿using EQLogger;
 using RdpComm;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using Utility;
@@ -10,7 +11,7 @@ namespace SessManager
     public class SessionManager
     {
         ///Our IDUP Starter for now
-        private static uint SessionIDUpStarter = 100009;
+        private static uint SessionIDUpStarter = 220760;
 
         ///This is our sessionList
         public static List<Session> SessionList = new List<Session>();
@@ -26,18 +27,7 @@ namespace SessManager
             bool InstanceHeader = false;
             bool ResetInstance = false;
 
-            uint val = 0;
-            int shift = 0;
-
-            foreach (byte b in myPacket)
-            {
-                val |= (uint)((b & 0x7f) << (shift * 7));
-                if ((b & 0x80) == 0) break;
-                shift += 1;
-            }
-
-            //Remove read bytes here
-            myPacket.RemoveRange(0, shift + 1);
+            uint val = Utility_Funcs.Unpack(myPacket);
 
             //Get's this bundle length
             int BundleLength = (int)(val & 0x7FF);
@@ -119,6 +109,11 @@ namespace SessManager
                     //Grab session
                     Session thisSession = SessionList.Find(i => Equals(i.clientEndpoint, ClientEndpoint) && Equals(i.MyIPEndPoint, MyIPEndPoint) && Equals(i.sessionIDBase, SessionIDBase));
 
+                    if(thisSession == null)
+                    {
+                        Console.WriteLine("Error Finding Session, maybe transition to memory dump? Ignore for now");
+                        return;
+                    }
                     //If server is master/initiated the session we need to remove the 3 byte session Identifier from packet
                     if (thisSession.remoteMaster)
                     {

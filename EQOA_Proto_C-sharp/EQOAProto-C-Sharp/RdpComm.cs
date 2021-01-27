@@ -20,13 +20,9 @@ namespace RdpComm
     /// </summary>
     class RdpCommIn
     {
-        private static bool Session_Ack = false;
-        private static bool RDP_Report = false;
-        private static bool Message_Bundle = false;
 
         public static void ProcessBundle(Session MySession, List<byte> MyPacket)
         {
-            
             ///Grab our bundle type
             sbyte BundleType = (sbyte)MyPacket[0];
             Logger.Info($"BundleType is {BundleType}");
@@ -38,70 +34,45 @@ namespace RdpComm
             switch (BundleType)
             {
                 case BundleOpcode.ProcessAll:
-                    Session_Ack = true;
-                    RDP_Report = true;
-                    ///Message_Bundle = true;
 
+                    ProcessSessionAck(MySession, MyPacket);
+                    ProcessRdpReport(MySession, MyPacket, false);
+                    ProcessMessageBundle(MySession, MyPacket);
                     Logger.Info("Processing Session Ack, Rdp Report and Message Bundle");
                     break;
 
                 case BundleOpcode.NewProcessReport:
+                    ProcessRdpReport(MySession, MyPacket, false);
+                    ProcessMessageBundle(MySession, MyPacket);
+                    Logger.Info("Processing Rdp Report and messages");
+                    break;
+
                 case BundleOpcode.ProcessReport:
-                    RDP_Report = true;
+                    ProcessRdpReport(MySession, MyPacket, false);
                     Logger.Info("Processing Rdp Report");
                     break;
 
                 case BundleOpcode.NewProcessMessages:
                 case BundleOpcode.ProcessMessages:
-                    Message_Bundle = true;
+
+                    MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
+                    ///Remove read byte
+                    
+                    MyPacket.RemoveRange(0, 2);
+                    ProcessMessageBundle(MySession, MyPacket);
                     Logger.Info("Processing Message Bundle");
                     break;
 
                 case BundleOpcode.ProcessMessageAndReport:
-                    Message_Bundle = true;
-                    RDP_Report = true;
-                    Logger.Info("Processing Messages and Reports");
+                    ProcessRdpReport(MySession, MyPacket, true);
+                    ProcessMessageBundle(MySession, MyPacket);
+                    Logger.Info("Processing unreliable Rdp Report and messages");
                     break;
 
                 default:
                     Logger.Err("Unable to identify Bundle Type");
                     break;
             }
-
-            /*
-             Should this be placed within the switch? May look cleaner/less code
-             */
-
-            if (Session_Ack == true)
-            {
-                ///Process Session Acks here
-                ProcessSessionAck(MySession, MyPacket);
-
-            }
-
-            if (RDP_Report == true)
-            {
-                ///Process RDP Report
-                ProcessRdpReport(MySession, MyPacket);
-            }
-
-            if (Message_Bundle == true)
-            {
-                //Read client bundle here. Accept client bundle as is because packets could be lost or dropped, client bundle# should not be "tracked"
-                //considerations could be to track it for possible drop/lost rates
-                MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
-
-                ///Remove read byte
-                MyPacket.RemoveRange(0, 2);
-
-                ///Process Message Bundle here
-                ProcessMessageBundle(MySession, MyPacket);
-            }
-
-            ///Set Bools to false, done processing
-            Session_Ack = false;
-            RDP_Report = false;
-            Message_Bundle = false;
         }
 
         public static void ProcessMessageBundle(Session MySession, List<byte> MyPacket)
@@ -149,8 +120,10 @@ namespace RdpComm
             ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's
         }
 
-        private static void ProcessRdpReport(Session MySession, List<byte> MyPacket)
+        private static void ProcessRdpReport(Session MySession, List<byte> MyPacket, bool UnreliableReport)
         {
+            //Eventually incorporate UnreliableReport to cycle through unreliables and update accordingly
+
             //Read client bundle here. Accept client bundle as is because packets could be lost or dropped, client bundle# should not be "tracked"
             //considerations could be to track it for possible drop/lost rates
             MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
@@ -179,7 +152,7 @@ namespace RdpComm
                 MySession.clientRecvMessageNumber = LastRecvMessageNumber;
             }
 
-            ///Trigger Server Select with this?
+            ///Triggers creating master session
             if (((MySession.clientEndpoint + 1) == (MySession.sessionIDBase & 0x0000FFFF)) && MySession.SessionAck && MySession.serverSelect == false)
             {
                 ///Key point here for character select is (MySession.clientEndpoint + 1 == MySession.sessionIDBase)
@@ -190,7 +163,7 @@ namespace RdpComm
                 SessionManager.AddMasterSession(NewMasterSession);
             }
 
-            ///Triggers creating master session
+            ///Trigger Server Select with this?
             else if ((MySession.clientEndpoint == (MySession.sessionIDBase & 0x0000FFFF)) && MySession.SessionAck && MySession.serverSelect == false)
             {
                 MySession.serverSelect = true;
@@ -213,10 +186,10 @@ namespace RdpComm
             else if (MySession.Dumpstarted)
             {
                 //Let client know more data is coming
-                if (MySession.MyDumpData.Count() > 1156)
+                if (MySession.MyDumpData.Count() > 500)
                 {
-                    List<byte> ThisChunk = MySession.MyDumpData.GetRange(0, 1156);
-                    MySession.MyDumpData.RemoveRange(0, 1156);
+                    List<byte> ThisChunk = MySession.MyDumpData.GetRange(0, 500);
+                    MySession.MyDumpData.RemoveRange(0, 500);
 
                     ///Handles packing message into outgoing packet
                     RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage);
@@ -231,6 +204,15 @@ namespace RdpComm
                     RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.ShortReliableMessage);
                     //turn dump off
                     MySession.Dumpstarted = false;
+
+                    //Gather remaining data to send in dump
+                    //ignore list
+                    ProcessOpcode.IgnoreList(MySession);
+                    //Randommessage
+                    //RandomFriend
+                    //characterSpeed
+                    ProcessOpcode.ActorSpeed(MySession);
+                    //Some opcode
                 }
             }
 
@@ -419,14 +401,14 @@ namespace RdpComm
             ///Add our opcode
             myMessage.InsertRange(0, BitConverter.GetBytes(Opcode));
 
-            //Add Message Length
-            myMessage.Insert(0, 2);
-
             ///0xFB Message type
             if (MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage)
             {
                 ///Add Message #
                 myMessage.InsertRange(0, BitConverter.GetBytes(MySession.serverMessageNumber));
+
+                //Add Message Length
+                myMessage.Insert(0, 2);
 
                 ///Add out MessageType
                 myMessage.Insert(0, (byte)MessageOpcodeType);
@@ -441,6 +423,9 @@ namespace RdpComm
             ///0xFC Message type
             else if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
             {
+                //Add Message Length
+                myMessage.Insert(0, 2);
+
                 ///Add our MessageType
                 myMessage.Insert(0, (byte)MessageOpcodeType);
             }
@@ -529,7 +514,7 @@ namespace RdpComm
                 OutGoingMessage.InsertRange(0, BitConverter.GetBytes(MySession.serverBundleNumber));
                 
                 //If ingame, include 4029 ack's
-                if (MySession.InGame)
+                if (MySession.Channel40Ack)
                 {
                     OutGoingMessage.Insert(6, 0x40);
                     OutGoingMessage.InsertRange(7, BitConverter.GetBytes(MySession.Channel40Message));
@@ -555,21 +540,22 @@ namespace RdpComm
             if (MySession.BundleTypeTransition)
             {
                 ///If all 3 are true
-                if (MySession.SessionAck == true && MySession.RdpMessage && MySession.RdpReport)
+                if (MySession.Channel40Ack)
                 {
                     Logger.Info("Adding Bundle Type 0x13");
                     OutGoingMessage.Insert(0, 0x13);
+                    MySession.Channel40Ack = false;
                 }
 
                 ///Message only packet, no RDP Report
-                else if (MySession.SessionAck == true && MySession.RdpMessage && MySession.RdpReport == false)
+                else if (MySession.RdpMessage && !MySession.RdpReport && !MySession.Channel40Ack)
                 {
                     Logger.Info("Adding Bundle Type 0x00");
                     OutGoingMessage.Insert(0, 0x00);
                 }
 
                 ///RDP Report only
-                else if (MySession.SessionAck == true && MySession.RdpMessage == false && MySession.RdpReport)
+                else if (MySession.RdpReport)
                 {
                     Logger.Info("Adding Bundle Type 0x03");
                     OutGoingMessage.Insert(0, 0x03);
@@ -619,7 +605,7 @@ namespace RdpComm
             else
             {
                 ///Ack session, first add 2nd portion of Session
-                OutGoingMessage.InsertRange(0, Utility_Funcs.Technique(MySession.sessionIDUp));
+                OutGoingMessage.InsertRange(0, Utility_Funcs.Pack(MySession.sessionIDUp));
 
                 ///Add first portion of session
                 OutGoingMessage.InsertRange(0, BitConverter.GetBytes(MySession.sessionIDBase));
@@ -661,34 +647,8 @@ namespace RdpComm
             //Add bundle length in
             value |= PacketLength;
 
-            //Work some magic. Basic VLI
-            List<byte> myList = new List<byte> { };
-
-            int myVal = 0;
-            int shift = 0;
-            do
-            {
-                byte lower7bits = (byte)(value & 0x7f);
-                value >>= 7;
-                if (value > 0)
-                {
-                    myVal |= (lower7bits |= 128) << shift;
-                    shift += 8;
-                }
-                else
-                {
-                    myVal |= lower7bits << shift;
-                }
-            } while (value > 0);
-
-            myList.AddRange(BitConverter.GetBytes(myVal));
-            int i = myList.Count - 1;
-            int j = 0;
-            while (myList[i] == 0) { j++; --i; }
-            myList.RemoveRange(i + 1, j);
-
             ///Combine, switch endianness and place into Packet
-            OutGoingMessage.InsertRange(0, myList);
+            OutGoingMessage.InsertRange(0, Utility_Funcs.Pack(value));
         }
     }
 }

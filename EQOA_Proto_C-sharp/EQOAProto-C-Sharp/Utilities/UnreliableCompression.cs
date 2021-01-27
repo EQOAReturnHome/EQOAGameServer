@@ -7,6 +7,7 @@ namespace RunningLengthCompression
     static class Compression
     {
         //For uncompress
+        private static int readBytes = 0;
         private static int myBytes = 0;
         private static int padding = 0;
         private static int realBytes = 0;
@@ -105,54 +106,63 @@ namespace RunningLengthCompression
         //Pass in Unreliable message and expected unreliable length
         public static void UncompressUnreliable(List<byte> arg, int length)
         {
+            byte[] myByteArray = new byte[length + 1];
             do
             {
                 padding = 0;
                 realBytes = 0;
 
-                if (arg[myBytes] >= 128)
+                if (arg[readBytes] >= 128)
                 {
                     ///2 bytes define compression
                     ///Grab real bytes, in this case x-128
-                    realBytes = arg[myBytes] | 128;
+                    realBytes = arg[readBytes] ^ 128;
                     ///padding is padding here
-                    padding = arg[myBytes + 1];
-                    ///Console.WriteLine("RealBytes {0:G}, Padding {1:N}", realBytes, padding);
-                    ///Start index at 0 and remove 2 bytes, shaving off compression byte
-                    arg.RemoveRange(myBytes, 2);
-                    ///Iterate over total padding and add x padding bytes
+                    padding = arg[readBytes + 1];
+
                     for (int i = 0; i < padding; i++)
-                    {
-                        arg.Insert(myBytes, 0);
-                    }
-                    ///Add our padding and realbytes
-                    myBytes += padding + realBytes;
+                    { myByteArray[i + myBytes] = 0; }
+
+                    myBytes += padding;
+                    readBytes += 2;
+
+                    for (int i = 0; i < realBytes; i++)
+                    { myByteArray[i + myBytes] = arg[readBytes + i]; }
+
+                    readBytes += realBytes;
+                    myBytes += realBytes;
                 }
 
                 else
                 {
                     ///Single byte for compression
-                    ///Realbytes can be found with / 16, or drop the first 4 bits (padding) by shifting right 4
+                    ///Realbytes can be found with / 16
                     ///Padding is found with remainder of x % 16
-                    realBytes = arg[myBytes] >> 4;
-                    padding = arg[myBytes] & 0x0F;
-                    ///Console.WriteLine("RealBytes {0:G}, Padding {1:N}", realBytes, padding);
-                    ///Start index at 0 and remove 2 bytes, shaving off compression byte
-                    arg.RemoveAt(myBytes);
-                    ///Iterate over total padding and add x padding bytes
+                    realBytes = arg[readBytes] / 16;
+                    padding = arg[readBytes] % 16;
+
                     for (int i = 0; i < padding; i++)
-                    {
-                        arg.Insert(myBytes, 0);
-                    }
-                    ///Add our padding and realbytes
-                    myBytes += padding + realBytes;
+                    { myByteArray[i + myBytes] = 0; }
+
+                    myBytes += padding;
+                    readBytes += 1;
+
+                    for (int i = 0; i < realBytes; i++)
+                    { myByteArray[i + myBytes] = arg[readBytes + i]; }
+
+                    readBytes += realBytes;
+                    myBytes += realBytes;
                 }
             } while (myBytes < length);
 
             //Reset these before next uncompress
             myBytes = 0;
+            readBytes = 0;
             padding = 0;
             realBytes = 0;
+            //Clear packet here... unreliable should be last message... reliably... :^)
+            arg.Clear();
+            arg.AddRange(myByteArray);
         }
     }
 }

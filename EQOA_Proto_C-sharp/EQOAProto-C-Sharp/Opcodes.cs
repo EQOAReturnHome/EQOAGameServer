@@ -41,6 +41,8 @@ namespace Opcodes
         public const ushort SELECTED_CHAR = 42; // 0x002A
         public const ushort MemoryDump = 13; //0x000D
         public const ushort Time = 19; //0x0013
+        public const ushort IgnoreList = 4101; //0x1005
+        public const ushort ActorSpeed = 248; //0x00F8
 
     }
 
