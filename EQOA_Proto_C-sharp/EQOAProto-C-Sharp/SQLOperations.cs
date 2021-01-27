@@ -457,12 +457,9 @@ namespace EQOASQL
             rdr.Close();
 
             //If less then 4 weapon hotbars, need constructor dummies untill 4 total
-            if (MySession.MyCharacter.WeaponHotbars.Count() < 4)
+            for (int i = MySession.MyCharacter.WeaponHotbars.Count(); i < 4; i++)
             {
-                for (int i = 0; i <= (4 - MySession.MyCharacter.WeaponHotbars.Count()); i++)
-                {
-                    MySession.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
-                }
+                MySession.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
             }
         }
 

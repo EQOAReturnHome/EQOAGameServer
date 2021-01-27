@@ -73,7 +73,7 @@ namespace Spells
             ourMessage.AddRange(Utility_Funcs.Technique(Unk2));
             ourMessage.AddRange(Utility_Funcs.Technique(Unk3));
             byte[] MyRange = BitConverter.GetBytes(SpellRange);
-            ourMessage.AddRange(MyRange[2..3]);
+            ourMessage.AddRange(MyRange[2..4]);
             ourMessage.AddRange(Utility_Funcs.Technique(CastTime));
             ourMessage.AddRange(Utility_Funcs.Technique(Power));
             ourMessage.AddRange(Utility_Funcs.Technique(IconColor));

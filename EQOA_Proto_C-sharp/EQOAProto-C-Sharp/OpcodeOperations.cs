@@ -130,15 +130,34 @@ namespace OpcodeOperations
                     break;
 
                 default:
-                    Logger.Err("Unable to identify Bundle Type");
+                    Logger.Err($"Unable to identify Opcode: {Opcode}");
                     //Remove unknwon opcodes here
                     //Eventually add logic to send unknwon opcodes to client via chat
+                    byte[] MyOpcodeMessage = new byte[MessageLength + 1];
+                    myPacket.CopyTo(0, MyOpcodeMessage, 0, MessageLength);
+
+                    //Log opcode message and contents
+                    Logger.Info(MyOpcodeMessage);
+
+                    ClientOpcodeUnknown(MySession, Opcode);
+
                     if (MessageLength > 0)
                     {
                         myPacket.RemoveRange(0, MessageLength);
                     }
                     break;
             }
+        }
+
+        private static void ClientOpcodeUnknown(Session MySession, ushort opcode)
+        {
+            string theMessage = $"Unknown Opcode: {opcode.ToString("X")}";
+            List<byte> MyMessage = new List<byte> { };
+            MyMessage.AddRange(BitConverter.GetBytes(theMessage.Length));
+            MyMessage.AddRange(Encoding.Unicode.GetBytes(theMessage));
+
+            //Send Message
+            RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.ClientMessage);
         }
 
         private static void ProcessCharacterChanges(Session MySession, List<byte> myPacket)

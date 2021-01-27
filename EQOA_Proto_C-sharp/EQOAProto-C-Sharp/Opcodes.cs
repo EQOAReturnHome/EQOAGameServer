@@ -43,6 +43,7 @@ namespace Opcodes
         public const ushort Time = 19; //0x0013
         public const ushort IgnoreList = 4101; //0x1005
         public const ushort ActorSpeed = 248; //0x00F8
+        public const ushort ClientMessage = 2682; //0x0A7A
 
     }
 

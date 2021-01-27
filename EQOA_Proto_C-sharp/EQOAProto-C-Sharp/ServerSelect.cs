@@ -24,7 +24,7 @@ namespace ServerSelect
             List<byte> MyServerList = ServerList;
 
             Logger.Info("Collecting Server select list for client");
-            RdpCommOut.PackMessage(MySession, MyServerList, MessageOpcodeTypes.ShortUnreliableMessage, GameOpcode.GameServers);
+            RdpCommOut.PackMessage(MySession, new List<byte>(MyServerList), MessageOpcodeTypes.ShortUnreliableMessage, GameOpcode.GameServers);
         }
 
         static public void ReadConfig()
