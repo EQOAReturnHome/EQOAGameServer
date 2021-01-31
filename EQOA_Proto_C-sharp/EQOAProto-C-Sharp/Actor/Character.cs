@@ -43,6 +43,9 @@ namespace Characters
 		public float YCoord { get; set; }
 		public float ZCoord { get; set; }
 		public float Facing { get; set; }
+		public byte FirstPerson = 0;
+		public float ModelSize = 1.0f;
+		public byte Turning = 0;
 		public short Animation { get; set; }
 		public int Target { get; set; }
 		public int Strength { get; set; }

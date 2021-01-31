@@ -19,7 +19,7 @@ namespace EQOAProto
 
         ///Shared queue between udpServer and commManager
         public static Queue<(IPEndPoint, List<byte>)> IncomingQueue = new Queue<(IPEndPoint, List<byte>)>();
-        ///public static Queue<List<byte>> IncomingQueue = new Queue<List<byte>>();
+
         public static void Main(string[] args)
         {
 
@@ -71,12 +71,6 @@ namespace EQOAProto
             ///Start commManager
             ///Test
             StartOutBoundTimer();
-            ///Logger.Info("Placing Bytes into queue");
-            ///IncomingQueue.Enqueue((remEndpoint, ClientConnect));
-            ///IncomingQueue.Enqueue((remEndpoint, ClientResponse));
-            ///IncomingQueue.Enqueue((remEndpoint, ClientDelSession));
-            ///IncomingQueue.Enqueue((remEndpoint, ClientConnect2));
-            ///IncomingQueue.Enqueue((remEndpoint, ClientResponse2));
         }
         
         public static void StartOutBoundTimer()
@@ -84,7 +78,7 @@ namespace EQOAProto
             ///Our timer for outbound queue
             OutBoundTimer.Elapsed += new ElapsedEventHandler(RdpCommOut.PrepPacket);
             ///Check 10x/second
-            OutBoundTimer.Interval = 200;
+            OutBoundTimer.Interval = 100;
             ///Enable timer
             OutBoundTimer.Start();
         }

@@ -9,8 +9,8 @@ namespace MessageStruct
 
         public  Message(ushort num, List<byte> MyMessage)
         {
-            this.ThisMessage = MyMessage;
-            this.ThisMessagenumber = num;
+            ThisMessage = new List<byte>(MyMessage);
+            ThisMessagenumber = num;
         }
     }
 }

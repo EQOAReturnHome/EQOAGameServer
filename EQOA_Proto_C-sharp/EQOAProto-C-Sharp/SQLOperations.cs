@@ -566,8 +566,8 @@ namespace EQOASQL
                     charCreation.UnusedTP = rdr.GetInt32(7);
                     charCreation.TotalAssignableTP = rdr.GetInt32(8);
                     charCreation.XCoord = rdr.GetFloat(9);
-                    charCreation.ZCoord = rdr.GetFloat(10);
-                    charCreation.YCoord = rdr.GetFloat(11);
+                    charCreation.YCoord = rdr.GetFloat(10);
+                    charCreation.ZCoord = rdr.GetFloat(11);
                     charCreation.Facing = rdr.GetFloat(12);
                     charCreation.DefaultStrength = rdr.GetInt32(14);
                     charCreation.DefaultStamina = rdr.GetInt32(15);

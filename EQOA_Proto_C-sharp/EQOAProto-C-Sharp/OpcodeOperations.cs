@@ -129,6 +129,14 @@ namespace OpcodeOperations
                     ProcessMemoryDump(thisSession);
                     break;
 
+                case GameOpcode.DisconnectClient:
+                    //Client is disconnecting from the game world
+                    //Add logic here to save character data, position etc
+
+                    //Drop the session
+                    SessionManager.DropSession(MySession);
+                    break;
+
                 default:
                     Logger.Err($"Unable to identify Opcode: {Opcode}");
                     //Remove unknwon opcodes here
@@ -164,15 +172,11 @@ namespace OpcodeOperations
         {
             //Retrieve CharacterID from client
             int ServerID = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            myPacket.RemoveRange(0, 4);
-            int HairColor = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            myPacket.RemoveRange(0, 4);
-            int HairLength = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            myPacket.RemoveRange(0, 4);
-            int HairStyle = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            myPacket.RemoveRange(0, 4);
-            int FaceOption = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-            myPacket.RemoveRange(0, 4);
+            int FaceOption = myPacket[7] << 24 | myPacket[6] << 16 | myPacket[5] << 8 | myPacket[4];
+            int HairStyle = myPacket[11] << 24 | myPacket[10] << 16 | myPacket[9] << 8 | myPacket[8];
+            int HairLength = myPacket[15] << 24 | myPacket[14] << 16 | myPacket[13] << 8 | myPacket[12];
+            int HairColor = myPacket[19] << 24 | myPacket[18] << 16 | myPacket[17] << 8 | myPacket[16];
+            myPacket.RemoveRange(0, 20);
 
             //Update these on our character
             Character thisChar = MySession.CharacterData.Find(i => Equals(i.ServerID, ServerID));
@@ -387,12 +391,14 @@ namespace OpcodeOperations
 
                 //Get player attributes from packet and remove bytes after reading into variable
                 charCreation.AddStrength = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                charCreation.AddStamina = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                charCreation.AddAgility = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                charCreation.AddDexterity = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                charCreation.AddWisdom = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                charCreation.AddIntelligence = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
-                charCreation.AddCharisma = myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0];
+                charCreation.AddStamina = myPacket[7] << 24 | myPacket[6] << 16 | myPacket[5] << 8 | myPacket[4];
+                charCreation.AddAgility = myPacket[11] << 24 | myPacket[10] << 16 | myPacket[9] << 8 | myPacket[8];
+                charCreation.AddDexterity = myPacket[15] << 24 | myPacket[14] << 16 | myPacket[13] << 8 | myPacket[12];
+                charCreation.AddWisdom = myPacket[19] << 24 | myPacket[18] << 16 | myPacket[17] << 8 | myPacket[16];
+                charCreation.AddIntelligence = myPacket[23] << 24 | myPacket[22] << 16 | myPacket[21] << 8 | myPacket[20];
+                charCreation.AddCharisma = myPacket[27] << 24 | myPacket[26] << 16 | myPacket[25] << 8 | myPacket[24];
+
+                myPacket.RemoveRange(0, 28);
 
                 //Call SQL method for character creation
                 SQLOperations.CreateCharacter(MySession, charCreation);

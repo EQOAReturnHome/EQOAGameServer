@@ -340,11 +340,8 @@ namespace RdpComm
                     myMessage.Insert(0, (byte)MessageOpcodeType);
                 }
             }
-            ///Finally, add our message
-            MySession.SessionMessages.AddRange(myMessage);
 
-            ///We are packing to send a message, set MySession.RdpMessage to true
-            MySession.RdpMessage = true;
+            AddMessage(MySession, myMessage);
         }
 
         public static void PackMessage(Session MySession, List<byte> myMessage, ushort MessageOpcodeType)
@@ -386,11 +383,7 @@ namespace RdpComm
                 MySession.IncrementServerMessageNumber();
             }
 
-            ///Finally, add our message
-            MySession.SessionMessages.AddRange(myMessage);
-
-            ///We are packing to send a message, set MySession.RdpMessage to true
-            MySession.RdpMessage = true;
+            AddMessage(MySession, myMessage);
         }
 
         ///Message processing for outbound section
@@ -430,9 +423,18 @@ namespace RdpComm
                 myMessage.Insert(0, (byte)MessageOpcodeType);
             }
 
-            MySession.SessionMessages.AddRange(myMessage);
-            ///We are packing to send a message, set MySession.RdpMessage to true
-            MySession.RdpMessage = true;
+            AddMessage(MySession, myMessage);
+        }
+
+        private static void AddMessage(Session MySession, List<byte> MyMessage)
+        {
+            lock (MySession.SessionMessages)
+            {
+                MySession.SessionMessages.AddRange(MyMessage);
+                ///We are packing to send a message, set MySession.RdpMessage to true
+
+                MySession.RdpMessage = true;
+            }
         }
 
         public static void PrepPacket(object source, ElapsedEventArgs e)
@@ -446,12 +448,14 @@ namespace RdpComm
                         ///If creating outgoing packet, write this data to new list to minimize writes to session
                         List<byte> OutGoingMessage = new List<byte>();
 
-                        ///Add our SessionMessages to this list
-                        OutGoingMessage.AddRange(MySession.SessionMessages);
+                        lock (MySession.SessionMessages)
+                        {
+                            ///Add our SessionMessages to this list
+                            OutGoingMessage.AddRange(MySession.SessionMessages);
 
-                        ///Clear client session Message List
-                        MySession.SessionMessages.Clear();
-
+                            ///Clear client session Message List
+                            MySession.SessionMessages.Clear();
+                        }
                         Logger.Info("Packing header into packet");
                         ///Add RDPReport if applicable
                         AddRDPReport(MySession, OutGoingMessage);

@@ -44,6 +44,7 @@ namespace Opcodes
         public const ushort IgnoreList = 4101; //0x1005
         public const ushort ActorSpeed = 248; //0x00F8
         public const ushort ClientMessage = 2682; //0x0A7A
+        public const ushort DisconnectClient = 2480; //0x09B0
 
     }
 

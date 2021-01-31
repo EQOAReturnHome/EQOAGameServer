@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using Utility;
 using Sessions;
+using System.Linq;
 
 namespace SessManager
 {
@@ -17,12 +18,10 @@ namespace SessManager
         public static List<Session> SessionList = new List<Session>();
 
         ///When a new session is identified, we add this into our endpoint/session list
-        public static void ProcessSession(List<byte> myPacket, IPEndPoint MyIPEndPoint)
+        public static void ProcessSession(List<byte> myPacket, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
         ///public static void ProcessSession(List<byte> myPacket, bool NewSession)
         {
-            ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
-            myPacket.RemoveRange(0, 4);
-
+            bool RemoteEndPoint = false;
             bool NewInstance = false;
             bool InstanceHeader = false;
             bool ResetInstance = false;
@@ -33,19 +32,24 @@ namespace SessManager
             int BundleLength = (int)(val & 0x7FF);
             int value = (int)(val - (val & 0x7FF));
 
-            if ((value & 0x80000) != 0)//Requesting instance ack, starting a new session/instance from client
+            if ((value & 0x80000) != 0) //Requesting instance ack, starting a new session/instance from client
             {
                 NewInstance = true;
             }
 
-            if ((value & 0x02000) != 0)//Has instance in header
+            if ((value & 0x02000) != 0) //Has instance in header
             {
                 InstanceHeader = true;
             }
 
-            if ((value & 0x10000) != 0)// reset connection?
+            if ((value & 0x10000) != 0) // reset connection?
             {
                 ResetInstance = true;
+            }
+
+            if ((value & 0x0800) != 0)
+            {
+                RemoteEndPoint = true;
             }
 
             //if false, means 4 byte instance header has been removed and only need to read the 3 byte character ID (If server is master
@@ -64,6 +68,22 @@ namespace SessManager
                     {
                         ///This finds our session by utilizing endpoints and IPEndPoint info (IP and Port) and drops it
                         DropSession(SessionList.Find(i => Equals(i.clientEndpoint, ClientEndpoint) && Equals(i.MyIPEndPoint, MyIPEndPoint) && Equals(i.sessionIDBase, SessionIDBase)));
+                        
+                        //Remove the double session information
+                        myPacket.RemoveRange(0, 4);
+
+                        if (RemoteEndPoint)
+                        {
+                            //Remove the 3 byte "Object ID"
+                            myPacket.RemoveRange(0, 3);
+                        }
+
+                        //if mutliple bundles, process next one
+                        if(myPacket.Count() > 10)
+                        {
+                            //Process next bundle
+                            ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
+                        }
                     }
 
                     catch
@@ -172,6 +192,10 @@ namespace SessManager
         {
             ///Simple enough, remove the session
             Logger.Info("Removing Session");
+
+            //Stop the timers
+            MySession.StopTimers();
+
             lock (SessionList)
             {
                 SessionList.Remove(MySession);

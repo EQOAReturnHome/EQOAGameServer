@@ -13,6 +13,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Timers;
 using MessageStruct;
+using System.Text;
 
 namespace Sessions
 {
@@ -21,6 +22,9 @@ namespace Sessions
     {
         //Session dependant timer
         Timer myTimer = new Timer();
+
+        //Coordinate Debugger
+        Timer myTimer2 = new Timer();
 
         //Message List
         public List<Message> MyMessageList = new List<Message> { };
@@ -55,7 +59,7 @@ namespace Sessions
         private ushort ServerRecvMessageNumber = 1;
 
         //Should these be stored here?
-        public ushort Channel0Message = 0;
+        public ushort Channel0Message = 1;
         public bool Channel0Ack = false;
         public ushort Channel1Message = 0;
         public bool Channel1Ack = false;
@@ -101,8 +105,10 @@ namespace Sessions
         public bool Channel22Ack = false; 
         public ushort Channel23Message = 0;
         public bool Channel23Ack = false;
-        public ushort Channel40Message = 0;
         public bool Channel40Ack = false;
+        public ushort Channel40Message = 0;
+        public Message Channel40Base;
+        public List<Message> Channel40BaseList = new List<Message> { }; 
         public ushort Channel42Message = 0;
         public bool Channel42Ack = false;
         public ushort Channel43Message = 0;
@@ -114,7 +120,7 @@ namespace Sessions
         public bool CharacterSelect = false;
 
         /// Indicates if session is "in game"
-        public bool InGame = false;
+        private bool _InGame = false;
 
         //Server always has instance... eventually, once in world awhile, we could remove this and save on packet length
         public bool hasInstance = true;
@@ -159,7 +165,7 @@ namespace Sessions
             this.MyIPEndPoint = MyIPEndPoint;
             RemoteMaster = false;
             this.SessionIDBase = SessionIDBase;
-            //StartTimer(2000);
+            StartTimer(2000);
         }
 
         ///When server creates internal master sessions, key difference is AccountID atm.... Maybe need to be more complicated eventually
@@ -185,7 +191,7 @@ namespace Sessions
 
             ///Trigger contact with client inside session
             ProcessOpcode.GenerateClientContact(this);
-            //StartTimer(2000);
+            StartTimer(2000);
         }
 
         public Session(ushort clientEndpoint, IPEndPoint MyIPEndPoint, bool RemoteMaster, int AccountID, uint SessionIDUp, Character MyCharacter)
@@ -209,7 +215,7 @@ namespace Sessions
             ///We don't need to ack a session this Time, we do however need client to ack our's, should this be tracked? yes it should
             SessionAck = true;
             this.MyCharacter = MyCharacter;
-            //StartTimer(5000);
+            StartTimer(2000);
         }
 
         public int AccountID
@@ -367,6 +373,20 @@ namespace Sessions
             }
         }
 
+        public bool InGame
+        {
+            get { return _InGame; }
+            set
+            {
+                _InGame = value;
+
+                if(_InGame)
+                {
+                    //StartCoordinateDebugging(10000);
+                }
+            }
+        }
+
         public void IncrementServerMessageNumber()
         {
             ServerMessageNumber += 1;
@@ -402,10 +422,32 @@ namespace Sessions
             myTimer.Start();
         }
 
+        private void StartCoordinateDebugging(int interval)
+        {
+            myTimer2.Interval = interval;
+            myTimer2.AutoReset = true;
+            myTimer2.Elapsed += new ElapsedEventHandler(Timer_Elapsed2);
+            myTimer2.Start();
+        }
+
         public void ResetTimer()
         {
             myTimer.Stop();
             myTimer.Start();
+        }
+
+        public void StopTimers()
+        {
+            try
+            {
+                myTimer.Stop();
+                myTimer2.Stop();
+            }
+
+            catch
+            {
+                Console.WriteLine("Error occured stopping timers");
+            }
         }
         //Utilize this timer per session to check for client responses.
         //Will include F9's and message check here
@@ -416,8 +458,11 @@ namespace Sessions
             {
                 for (int i = 0; i < MyMessageList.Count(); i++)
                 {
-                    //Should we verify these messages are not less then what client has ack'd?
-                    SessionMessages.AddRange(MyMessageList[i].ThisMessage);
+                    lock (SessionMessages)
+                    {
+                        //Should we verify these messages are not less then what client has ack'd?
+                        SessionMessages.AddRange(MyMessageList[i].ThisMessage);
+                    }
                     RdpMessage = true;
                 }
             }
@@ -434,12 +479,23 @@ namespace Sessions
                 else
                 {
                     //Pack up a ping request and send to client
-                    RdpCommOut.PackMessage(this, new List<byte> { 0x14 }, MessageOpcodeTypes.UnknownMessage);
+                    RdpCommOut.PackMessage(this, new List<byte> { 0x12 }, MessageOpcodeTypes.UnknownMessage);
                 }
             }
         }
 
-        public void AddMessage(ushort num, List<byte> MyMessage)
+        private void Timer_Elapsed2(Object source, ElapsedEventArgs e)
+        {
+            string theMessage = $"Coordinate Update: X-{MyCharacter.XCoord} Y-{MyCharacter.YCoord} Z-{MyCharacter.ZCoord}";
+            List<byte> MyMessage = new List<byte> { };
+            MyMessage.AddRange(BitConverter.GetBytes(theMessage.Length));
+            MyMessage.AddRange(Encoding.Unicode.GetBytes(theMessage));
+
+            //Send Message
+            RdpCommOut.PackMessage(this, MyMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.ClientMessage);
+        }
+
+            public void AddMessage(ushort num, List<byte> MyMessage)
         {
             MyMessageList.Add(new Message(num, MyMessage));
         }

@@ -26,7 +26,6 @@ namespace EQOAProto
             ///Catch method in a loop to receive packets
             while (true)
             {
-
                 ///If UDPServer placed data, let's process it
                 if (udpServer.IncomingQueue.Count > 0)
                 {
@@ -42,7 +41,7 @@ namespace EQOAProto
                     Logger.Info("Grabbed item from queue");
 
                     ///Grab destination endpoint
-                    short EPDest = (short)((myPacket[3] << 8) | myPacket[2]);
+                    ushort EPDest = (ushort)((myPacket[3] << 8) | myPacket[2]);
 
                     ///Check if server transfer
                     if (MessageOpcodeTypes.serverTransfer == EPDest)
@@ -76,9 +75,11 @@ namespace EQOAProto
                         if (PacketCRC.SequenceEqual(CRC.calculateCRC(CRCCheck)))
                         {
                             Logger.Info("CRC Passed, processing");
-                            
-                            
-                            SessionManager.ProcessSession(myPacket, MyIPEndPoint);
+
+                            ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
+                            myPacket.RemoveRange(0, 4);
+
+                            SessionManager.ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
                             ///SessionManager.ProcessSession(myPacket, false);
                             
                         }
