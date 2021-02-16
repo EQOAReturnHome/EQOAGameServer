@@ -1,10 +1,12 @@
 ﻿using EQLogger;
 using ServerSelect;
 using System.Net;
-using System.Collections.Generic;
 using System.Threading;
 using System.Timers;
 using RdpComm;
+using System.Net.Sockets;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace EQOAProto
 {
@@ -17,20 +19,22 @@ namespace EQOAProto
 
         public static System.Timers.Timer OutBoundTimer = new System.Timers.Timer();
 
-        ///Shared queue between udpServer and commManager
-        public static Queue<(IPEndPoint, List<byte>)> IncomingQueue = new Queue<(IPEndPoint, List<byte>)>();
-
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
+            ///Shared queue between udpServer and commManager
+            var channel = Channel.CreateUnbounded<UdpReceiveResult>();
+            
+            ///Load in config for Server Select stuff
+            SelectServer.ReadConfig();
+
+            //Start UDPServer async
+            UDPListener.StartListener(channel.Writer);
 
             IPEndPoint remEndpoint = new IPEndPoint(IPAddress.Any, 9764);
             Logger.Info("Starting commManager");
-            Thread commManager = new Thread(() => CommManager.ProcPacket());
+            await Task.Run(async () => await CommManager.ProcPacket(channel.Reader));
 
-            ///Start the Thread
-            commManager.Start();
-            Thread.Sleep(1000);
-
+            /*
             List<byte> ClientConnect = new List<byte>{0xea, 0xa0, 0xfe, 0xff, 0xca, 0xe0, 0x21, 0xea, 0xa0, 0x03, 0x00, 0x20, 0x01, 0x00, 0xfb, 
                                                         0x06, 0x01, 0x00, 0x00, 0x00, 0x25, 0x00, 0x00, 0x00, 0xfb, 0x39, 0x02, 0x00, 0x04, 0x09, 
                                                         0x00, 0x03, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x45, 0x51, 0x4f, 0x41, 0x05, 0x00, 
@@ -59,17 +63,8 @@ namespace EQOAProto
             List<byte> ClientResponse2 = new List<byte> {0x12, 0x22, 0xb0, 0x73, 0x87, 0xe0, 0x01, 0x13, 0x22, 0x12, 0x00, 0x23, 0x03, 0x00, 0x01, 
                                                          0x00, 0x01, 0x00, 0x5a, 0xc9, 0x57, 0x16};
 
+            */
 
-            ///Load in config for Server Select stuff
-            SelectServer.ReadConfig();
-
-            ///Instantiate our UdpListener and toss it into it's own thread
-            ///Allows for uninterrupted incoming/outgoing packets
-            Thread newListener = new Thread(() => UDPListener.StartListener(IncomingQueue));
-            ///Start the Thread
-            newListener.Start();
-            ///Start commManager
-            ///Test
             StartOutBoundTimer();
         }
         

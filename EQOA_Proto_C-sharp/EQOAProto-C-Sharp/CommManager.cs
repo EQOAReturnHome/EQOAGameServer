@@ -7,6 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Sessions;
+using System.Net.Sockets;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace EQOAProto
 {
@@ -20,90 +23,74 @@ namespace EQOAProto
         We will also need to create an endpoint class to 
         store each connecting clients endpoint, IP, Port
         */
-        public static void ProcPacket()
+        public static async Task ProcPacket(ChannelReader<UdpReceiveResult> ChannelReader)
         {
             Logger.Info("commManager loop started");
             ///Catch method in a loop to receive packets
             while (true)
             {
-                ///If UDPServer placed data, let's process it
-                if (udpServer.IncomingQueue.Count > 0)
+
+                UdpReceiveResult MyObject = await ChannelReader.ReadAsync();
+                
+                Logger.Info("Queue count > 0");
+
+                List<byte> myPacket = new List<byte>(MyObject.Buffer);
+                IPEndPoint MyIPEndPoint = MyObject.RemoteEndPoint;
+
+                ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
+                Logger.Info("Grabbed item from queue");
+
+                ///Grab destination endpoint
+                ushort EPDest = (ushort)((myPacket[3] << 8) | myPacket[2]);
+                
+                ///Check if server transfer
+                if (MessageOpcodeTypes.serverTransfer == EPDest)
                 {
-                    Logger.Info("Queue count > 0");
-
-                    ///Remove item from queue for now
-                    var MyObject = udpServer.IncomingQueue.Dequeue();
-
-                    List<byte> myPacket = MyObject.Item2;
-                    IPEndPoint MyIPEndPoint = MyObject.Item1;
-
-                    ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
-                    Logger.Info("Grabbed item from queue");
-
-                    ///Grab destination endpoint
-                    ushort EPDest = (ushort)((myPacket[3] << 8) | myPacket[2]);
-
-                    ///Check if server transfer
-                    if (MessageOpcodeTypes.serverTransfer == EPDest)
-                    {
-                        ///If server transfer, do server transfer stuff
-                        Logger.Info("Received server Transfer");
-                        break;
-                    }
-
-                    ///Is not server transfer, let's check CRC
-                    else
-                    {
-                        Logger.Info("No Server transfer, processing");
-
-
-                        ///Make byte array for CRC
-                        byte[] PacketCRC = new byte[4];
-
-                        ///Save our CRC
-                        myPacket.CopyTo(myPacket.Count() - 4, PacketCRC, 0, 4);
-
-                        ///Remove CRC off our packet
-                        myPacket.RemoveRange(myPacket.Count - 4, 4);
-
-                        byte[] CRCCheck = new byte[myPacket.Count()];
-
-                        ///Copy our list to array for Crc check
-                        myPacket.CopyTo(CRCCheck);
-
-                        ///If CRC passes, continue
-                        if (PacketCRC.SequenceEqual(CRC.calculateCRC(CRCCheck)))
-                        {
-                            Logger.Info("CRC Passed, processing");
-
-                            ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
-                            myPacket.RemoveRange(0, 4);
-
-                            SessionManager.ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
-                            ///SessionManager.ProcessSession(myPacket, false);
-                            
-                        }
-
-                        ///CRC Failed, drop packet
-                        else
-                        {
-                            ///Break for now
-                            ///Probably need to log for time being
-                            Logger.Err("Dropping Packet, CRC failed");
-                            break;
-                        }
-                    }
+                    ///If server transfer, do server transfer stuff
+                    Logger.Info("Received server Transfer");
+                    break;
                 }
 
-                ///No data in queue
+                ///Is not server transfer, let's check CRC
                 else
                 {
-                    /*
-                    ///If no incoming packets, sleep task
-                    await Task.Delay(200);
-                    */
-                }
+                    Logger.Info("No Server transfer, processing");
 
+                    ///Make byte array for CRC
+                    byte[] PacketCRC = new byte[4];
+
+                    ///Save our CRC
+                    myPacket.CopyTo(myPacket.Count() - 4, PacketCRC, 0, 4);
+
+                    ///Remove CRC off our packet
+                    myPacket.RemoveRange(myPacket.Count - 4, 4);
+
+                    byte[] CRCCheck = new byte[myPacket.Count()];
+
+                    ///Copy our list to array for Crc check
+                    myPacket.CopyTo(CRCCheck);
+
+                    ///If CRC passes, continue
+                    if (PacketCRC.SequenceEqual(CRC.calculateCRC(CRCCheck)))
+                    {
+                        Logger.Info("CRC Passed, processing");
+
+                        ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
+                        myPacket.RemoveRange(0, 4);
+
+                        SessionManager.ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
+                        ///SessionManager.ProcessSession(myPacket, false);
+                    }
+
+                    ///CRC Failed, drop packet
+                    else
+                    {
+                        ///Break for now
+                        ///Probably need to log for time being
+                        Logger.Err("Dropping Packet, CRC failed");
+                        break;
+                    }
+                }
             }
         }
     }
