@@ -36,7 +36,6 @@ namespace EQOAProto
                 channelWriter.TryWrite(result);
                 channelWriter.Complete();
             }
-
         }
 
         public static void SendPacket(byte[] MyData, IPEndPoint Client)
@@ -53,7 +52,6 @@ namespace EQOAProto
             {
                 Console.WriteLine($"Received socket error: {e}");
             }
-
         }
     }
 }

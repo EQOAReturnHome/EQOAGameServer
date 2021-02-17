@@ -32,16 +32,17 @@ namespace EQOAProto
 
         public static void ProcPacket(UdpReceiveResult MyObject)
         {
-            List<byte> myPacket = new List<byte>(MyObject.Buffer);
-            IPEndPoint MyIPEndPoint = MyObject.RemoteEndPoint;
-
-            ReadOnlySpan<byte> OurPacket = MyObject.Buffer.AsSpan();
+            int offset = 0;
+            ReadOnlySpan<byte> ClientPacket = MyObject.Buffer.AsSpan();
             
             ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
             Logger.Info("Grabbed item from queue");
 
+            ///Grab Client Endpoint
+            ushort ClientEndpoint = BinaryPrimitiveWrapper.GetBEUShort(ClientPacket, ref offset);
+
             ///Grab destination endpoint
-            ushort EPDest = (ushort)((myPacket[3] << 8) | myPacket[2]);
+            ushort EPDest = BinaryPrimitiveWrapper.GetBEUShort(ClientPacket, ref offset);
                 
             ///Check if server transfer
             if (MessageOpcodeTypes.serverTransfer == EPDest)
@@ -56,29 +57,12 @@ namespace EQOAProto
             {
                 Logger.Info("No Server transfer, processing");
 
-                ///Make byte array for CRC
-                byte[] PacketCRC = new byte[4];
-
-                ///Save our CRC
-                myPacket.CopyTo(myPacket.Count() - 4, PacketCRC, 0, 4);
-
-                ///Remove CRC off our packet
-                myPacket.RemoveRange(myPacket.Count - 4, 4);
-
-                byte[] CRCCheck = new byte[myPacket.Count()];
-
-                ///Copy our list to array for Crc check
-                myPacket.CopyTo(CRCCheck);
-
                 ///If CRC passes, continue
-                if (PacketCRC.SequenceEqual(CRC.calculateCRC(CRCCheck)))
+                if (ClientPacket[(ClientPacket.Length-4)..ClientPacket.Length].SequenceEqual(CRC.calculateCRC(ClientPacket[0..(ClientPacket.Length - 4)])))
                 {
                     Logger.Info("CRC Passed, processing");
 
-                    ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
-                    myPacket.RemoveRange(0, 4);
-
-                    SessionManager.ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
+                    SessionManager.ProcessSession(ClientPacket, offset, MyObject.RemoteEndPoint, ClientEndpoint);
                     ///SessionManager.ProcessSession(myPacket, false);
                 }
 

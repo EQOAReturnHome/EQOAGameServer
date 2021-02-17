@@ -18,7 +18,7 @@ namespace SessManager
         public static List<Session> SessionList = new List<Session>();
 
         ///When a new session is identified, we add this into our endpoint/session list
-        public static void ProcessSession(List<byte> myPacket, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
+        public static void ProcessSession(ReadOnlySpan<byte> myPacket, int offset, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
         ///public static void ProcessSession(List<byte> myPacket, bool NewSession)
         {
             bool RemoteEndPoint = false;
