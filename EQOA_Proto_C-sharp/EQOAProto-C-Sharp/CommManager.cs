@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EQOAProto
 {
-    public class CommManager
+    public class HandleIncPacket
     {
         ///private static readonly int AsyncDelay      = 200;
 
@@ -23,80 +23,79 @@ namespace EQOAProto
         We will also need to create an endpoint class to 
         store each connecting clients endpoint, IP, Port
         */
-        public static async Task ProcPacket(ChannelReader<UdpReceiveResult> ChannelReader)
+        public static async Task AcceptPacket(ChannelReader<UdpReceiveResult> ChannelReader)
         {
-            Logger.Info("commManager loop started");
-            ///Catch method in a loop to receive packets
-            while (true)
+            while (await ChannelReader.WaitToReadAsync())
+                while (ChannelReader.TryRead(out UdpReceiveResult item))
+                    ProcPacket(item);
+        }
+
+        public static void ProcPacket(UdpReceiveResult MyObject)
+        {
+            List<byte> myPacket = new List<byte>(MyObject.Buffer);
+            IPEndPoint MyIPEndPoint = MyObject.RemoteEndPoint;
+
+            ReadOnlySpan<byte> OurPacket = MyObject.Buffer.AsSpan();
+            
+            ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
+            Logger.Info("Grabbed item from queue");
+
+            ///Grab destination endpoint
+            ushort EPDest = (ushort)((myPacket[3] << 8) | myPacket[2]);
+                
+            ///Check if server transfer
+            if (MessageOpcodeTypes.serverTransfer == EPDest)
             {
+                ///If server transfer, do server transfer stuff
+                Logger.Info("Received server Transfer");
+                return;
+            }
 
-                UdpReceiveResult MyObject = await ChannelReader.ReadAsync();
-                
-                Logger.Info("Queue count > 0");
+            ///Is not server transfer, let's check CRC
+            else
+            {
+                Logger.Info("No Server transfer, processing");
 
-                List<byte> myPacket = new List<byte>(MyObject.Buffer);
-                IPEndPoint MyIPEndPoint = MyObject.RemoteEndPoint;
+                ///Make byte array for CRC
+                byte[] PacketCRC = new byte[4];
 
-                ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
-                Logger.Info("Grabbed item from queue");
+                ///Save our CRC
+                myPacket.CopyTo(myPacket.Count() - 4, PacketCRC, 0, 4);
 
-                ///Grab destination endpoint
-                ushort EPDest = (ushort)((myPacket[3] << 8) | myPacket[2]);
-                
-                ///Check if server transfer
-                if (MessageOpcodeTypes.serverTransfer == EPDest)
+                ///Remove CRC off our packet
+                myPacket.RemoveRange(myPacket.Count - 4, 4);
+
+                byte[] CRCCheck = new byte[myPacket.Count()];
+
+                ///Copy our list to array for Crc check
+                myPacket.CopyTo(CRCCheck);
+
+                ///If CRC passes, continue
+                if (PacketCRC.SequenceEqual(CRC.calculateCRC(CRCCheck)))
                 {
-                    ///If server transfer, do server transfer stuff
-                    Logger.Info("Received server Transfer");
-                    break;
+                    Logger.Info("CRC Passed, processing");
+
+                    ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
+                    myPacket.RemoveRange(0, 4);
+
+                    SessionManager.ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
+                    ///SessionManager.ProcessSession(myPacket, false);
                 }
 
-                ///Is not server transfer, let's check CRC
+                ///CRC Failed, drop packet
                 else
                 {
-                    Logger.Info("No Server transfer, processing");
-
-                    ///Make byte array for CRC
-                    byte[] PacketCRC = new byte[4];
-
-                    ///Save our CRC
-                    myPacket.CopyTo(myPacket.Count() - 4, PacketCRC, 0, 4);
-
-                    ///Remove CRC off our packet
-                    myPacket.RemoveRange(myPacket.Count - 4, 4);
-
-                    byte[] CRCCheck = new byte[myPacket.Count()];
-
-                    ///Copy our list to array for Crc check
-                    myPacket.CopyTo(CRCCheck);
-
-                    ///If CRC passes, continue
-                    if (PacketCRC.SequenceEqual(CRC.calculateCRC(CRCCheck)))
-                    {
-                        Logger.Info("CRC Passed, processing");
-
-                        ushort ClientEndpoint = (ushort)(myPacket[1] << 8 | myPacket[0]);
-                        myPacket.RemoveRange(0, 4);
-
-                        SessionManager.ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
-                        ///SessionManager.ProcessSession(myPacket, false);
-                    }
-
-                    ///CRC Failed, drop packet
-                    else
-                    {
-                        ///Break for now
-                        ///Probably need to log for time being
-                        Logger.Err("Dropping Packet, CRC failed");
-                        break;
-                    }
+                    ///Break for now
+                    ///Probably need to log for time being
+                    Logger.Err("Dropping Packet, CRC failed");
+                    return;
                 }
             }
         }
     }
 
     ///Outbound CommManager
-    public class CommManagerOut
+    public class HandleOutPacket
     {
         ///Final touches
         ///Adds Endpoints to front and appends CRC

@@ -488,7 +488,7 @@ namespace RdpComm
                         AddSessionHeader(MySession, OutGoingMessage, PacketLength);
 
                         ///Done? Send to CommManagerOut
-                        CommManagerOut.AddEndPoints(MySession, OutGoingMessage);
+                        HandleOutPacket.AddEndPoints(MySession, OutGoingMessage);
                     }
 
                     ///No packet needed to respond to client

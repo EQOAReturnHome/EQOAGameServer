@@ -34,6 +34,7 @@ namespace EQOAProto
             {
                 UdpReceiveResult result = await listener.ReceiveAsync();
                 channelWriter.TryWrite(result);
+                channelWriter.Complete();
             }
 
         }

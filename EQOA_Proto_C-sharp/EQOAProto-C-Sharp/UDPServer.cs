@@ -32,7 +32,8 @@ namespace EQOAProto
 
             IPEndPoint remEndpoint = new IPEndPoint(IPAddress.Any, 9764);
             Logger.Info("Starting commManager");
-            await Task.Run(async () => await CommManager.ProcPacket(channel.Reader));
+
+            await Task.Run(async () => await HandleIncPacket.AcceptPacket(channel.Reader));
 
             /*
             List<byte> ClientConnect = new List<byte>{0xea, 0xa0, 0xfe, 0xff, 0xca, 0xe0, 0x21, 0xea, 0xa0, 0x03, 0x00, 0x20, 0x01, 0x00, 0xfb, 
