@@ -8,6 +8,7 @@ using ObjectUpdates;
 using Characters;
 using System.Linq;
 using MessageStruct;
+using EQOAProto;
 
 namespace Unreliable
 {
@@ -17,40 +18,32 @@ namespace Unreliable
         private static ushort XorMessage = 0;
         private static byte XorByte = 0;
 
-        public static void ProcessUnreliables(Session Mysession, ushort MessageType, List<byte> MyPacket)
+        public static void ProcessUnreliables(Session Mysession, ushort MessageType, ReadOnlySpan<byte> ClientPacket, ref int offset)
         {
             if (MessageType == UnreliableTypes.ClientActorUpdate)
             {
-                ProcessUnreliableClientUpdate(Mysession, MyPacket);
+                ProcessUnreliableClientUpdate(Mysession, ClientPacket, ref offset);
             }
         }
 
         //Uncompress and process update
-        private static void ProcessUnreliableClientUpdate(Session MySession, List<byte> MyPacket)
+        private static void ProcessUnreliableClientUpdate(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
         {
             //Get Unreliable length
-            UnreliableLength = MyPacket[0];
+            UnreliableLength = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
 
             //Get Message # we are acknowledging
-            XorMessage = (ushort)(MyPacket[2] << 8 | MyPacket[1]);
+            XorMessage = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
 
             //Get xor byte /Technically not needed...? Tells us what message to xor with but that should be the last message we xor'd... right?
-            XorByte = MyPacket[3];
-
-            //Remove read bytes
-            MyPacket.RemoveRange(0, 4);
+            XorByte = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
 
             //This means that this is a deprecated packet that may of got lost on the way, base xor is behind current basexor
             //Let's not bother to even process it
-            if (MySession.Channel40Base.ThisMessagenumber > (XorMessage - XorByte))
-            {
-                //clear packet
-                MyPacket.Clear();
-                return;
-            }
+            if (MySession.Channel40Base.ThisMessagenumber > (XorMessage - XorByte)) return;
 
             //Uncompress the packet
-            Compression.UncompressUnreliable(MyPacket, UnreliableLength);
+            List<byte> MyPacket = new List<byte> (Compression.UncompressUnreliable(ClientPacket, ref offset, UnreliableLength));
 
             //First 0x4029 from client
             if (XorByte == 0)

@@ -1,7 +1,6 @@
 ﻿using CRC32Calc;
 using EQLogger;
 using Opcodes;
-using System.Net;
 using SessManager;
 using System;
 using System.Collections.Generic;
@@ -30,19 +29,19 @@ namespace EQOAProto
                     ProcPacket(item);
         }
 
-        public static void ProcPacket(UdpReceiveResult MyObject)
+        public static void ProcPacket(UdpReceiveResult myObject)
         {
             int offset = 0;
-            ReadOnlySpan<byte> ClientPacket = MyObject.Buffer.AsSpan();
+            ReadOnlySpan<byte> ClientPacket = myObject.Buffer.AsSpan();
             
             ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
             Logger.Info("Grabbed item from queue");
 
             ///Grab Client Endpoint
-            ushort ClientEndpoint = BinaryPrimitiveWrapper.GetBEUShort(ClientPacket, ref offset);
+            ushort ClientEndpoint = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
 
             ///Grab destination endpoint
-            ushort EPDest = BinaryPrimitiveWrapper.GetBEUShort(ClientPacket, ref offset);
+            ushort EPDest = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
                 
             ///Check if server transfer
             if (MessageOpcodeTypes.serverTransfer == EPDest)
@@ -58,11 +57,11 @@ namespace EQOAProto
                 Logger.Info("No Server transfer, processing");
 
                 ///If CRC passes, continue
-                if (ClientPacket[(ClientPacket.Length-4)..ClientPacket.Length].SequenceEqual(CRC.calculateCRC(ClientPacket[0..(ClientPacket.Length - 4)])))
+                if (ClientPacket.Slice(ClientPacket.Length - 4, 4).SequenceEqual(CRC.calculateCRC(ClientPacket.Slice(0, ClientPacket.Length - 4))))
                 {
                     Logger.Info("CRC Passed, processing");
 
-                    SessionManager.ProcessSession(ClientPacket, offset, MyObject.RemoteEndPoint, ClientEndpoint);
+                    SessionManager.ProcessSession(ClientPacket, offset, myObject.RemoteEndPoint, ClientEndpoint);
                     ///SessionManager.ProcessSession(myPacket, false);
                 }
 

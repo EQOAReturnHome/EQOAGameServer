@@ -1,12 +1,11 @@
 ﻿using EQLogger;
 using ServerSelect;
 using System.Net;
-using System.Threading;
-using System.Timers;
 using RdpComm;
-using System.Net.Sockets;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using System;
+using System.Net.Sockets;
 
 namespace EQOAProto
 {
@@ -23,17 +22,14 @@ namespace EQOAProto
         {
             ///Shared queue between udpServer and commManager
             var channel = Channel.CreateUnbounded<UdpReceiveResult>();
-            
+
             ///Load in config for Server Select stuff
             SelectServer.ReadConfig();
 
             //Start UDPServer async
-            UDPListener.StartListener(channel.Writer);
+            UDPListener.StartServer(channel.Writer);
 
-            IPEndPoint remEndpoint = new IPEndPoint(IPAddress.Any, 9764);
-            Logger.Info("Starting commManager");
-
-            await Task.Run(async () => await HandleIncPacket.AcceptPacket(channel.Reader));
+            Task.Run(async () => await HandleIncPacket.AcceptPacket(channel.Reader));
 
             /*
             List<byte> ClientConnect = new List<byte>{0xea, 0xa0, 0xfe, 0xff, 0xca, 0xe0, 0x21, 0xea, 0xa0, 0x03, 0x00, 0x20, 0x01, 0x00, 0xfb, 
@@ -67,12 +63,13 @@ namespace EQOAProto
             */
 
             StartOutBoundTimer();
+            string stuff = Console.ReadLine();
         }
         
         public static void StartOutBoundTimer()
         {
             ///Our timer for outbound queue
-            OutBoundTimer.Elapsed += new ElapsedEventHandler(RdpCommOut.PrepPacket);
+            OutBoundTimer.Elapsed += (sender, e) => RdpCommOut.PrepPacket(sender, e);
             ///Check 10x/second
             OutBoundTimer.Interval = 100;
             ///Enable timer

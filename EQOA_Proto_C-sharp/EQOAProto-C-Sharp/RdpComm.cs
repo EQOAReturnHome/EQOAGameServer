@@ -12,6 +12,7 @@ using Utility;
 using Characters;
 using Sessions;
 using Unreliable;
+using System.Net.Sockets;
 
 namespace RdpComm
 {
@@ -21,51 +22,47 @@ namespace RdpComm
     class RdpCommIn
     {
 
-        public static void ProcessBundle(Session MySession, List<byte> MyPacket)
+        public static void ProcessBundle(Session MySession, ReadOnlySpan<byte> ClientPacket, int offset)
         {
             ///Grab our bundle type
-            sbyte BundleType = (sbyte)MyPacket[0];
+            byte BundleType = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
             Logger.Info($"BundleType is {BundleType}");
-
-            ///Remove read byte
-            MyPacket.RemoveRange(0, 1);
 
             ///Perform a check to find what switch statement is true
             switch (BundleType)
             {
                 case BundleOpcode.ProcessAll:
 
-                    ProcessSessionAck(MySession, MyPacket);
-                    ProcessRdpReport(MySession, MyPacket, false);
-                    ProcessMessageBundle(MySession, MyPacket);
+                    ProcessSessionAck(MySession, ClientPacket, ref offset);
+                    ProcessRdpReport(MySession, ClientPacket, ref offset, false);
+                    ProcessMessageBundle(MySession, ClientPacket, offset);
                     Logger.Info("Processing Session Ack, Rdp Report and Message Bundle");
                     break;
 
                 case BundleOpcode.NewProcessReport:
-                    ProcessRdpReport(MySession, MyPacket, false);
-                    ProcessMessageBundle(MySession, MyPacket);
+                    ProcessRdpReport(MySession, ClientPacket, ref offset, false);
+                    ProcessMessageBundle(MySession, ClientPacket, offset);
                     Logger.Info("Processing Rdp Report and messages");
                     break;
 
                 case BundleOpcode.ProcessReport:
-                    ProcessRdpReport(MySession, MyPacket, false);
+                    ProcessRdpReport(MySession, ClientPacket, ref offset, false);
                     Logger.Info("Processing Rdp Report");
                     break;
 
                 case BundleOpcode.NewProcessMessages:
                 case BundleOpcode.ProcessMessages:
 
-                    MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
-                    ///Remove read byte
+                    //2 bytes for Bundle #, is it relevant to track?
+                    offset += 2;
                     
-                    MyPacket.RemoveRange(0, 2);
-                    ProcessMessageBundle(MySession, MyPacket);
+                    ProcessMessageBundle(MySession, ClientPacket, offset);
                     Logger.Info("Processing Message Bundle");
                     break;
 
                 case BundleOpcode.ProcessMessageAndReport:
-                    ProcessRdpReport(MySession, MyPacket, true);
-                    ProcessMessageBundle(MySession, MyPacket);
+                    ProcessRdpReport(MySession, ClientPacket, ref offset, true);
+                    ProcessMessageBundle(MySession, ClientPacket, offset);
                     Logger.Info("Processing unreliable Rdp Report and messages");
                     break;
 
@@ -75,15 +72,15 @@ namespace RdpComm
             }
         }
 
-        public static void ProcessMessageBundle(Session MySession, List<byte> MyPacket)
+        public static void ProcessMessageBundle(Session MySession, ReadOnlySpan<byte> ClientPacket, int offset)
         {
             ///Need to consider how many messages could be in here, and message types
             ///FB/FA/40/F9
             ///
-            while (MyPacket.Count() > 0)
+            while (ClientPacket.Length > (offset + 4))
             {
                 ///Get our Message Type
-                ushort MessageTypeOpcode = GrabOpcode(MyPacket);
+                ushort MessageTypeOpcode = GrabOpcode(ClientPacket, ref offset);
                 switch (MessageTypeOpcode)
                 {
                     //General opcodes (0xFB, 0xF9's)
@@ -91,12 +88,12 @@ namespace RdpComm
                     case MessageOpcodeTypes.LongReliableMessage:
                     case MessageOpcodeTypes.UnknownMessage:
                         ///Work on processing this opcode
-                        ProcessOpcode.ProcessOpcodes(MySession, MessageTypeOpcode, MyPacket);
+                        ProcessOpcode.ProcessOpcodes(MySession, MessageTypeOpcode, ClientPacket, ref offset);
                         break;
 
                     //Client Actor update (0x4029's)
                     case UnreliableTypes.ClientActorUpdate:
-                        ProcessUnreliable.ProcessUnreliables(MySession, MessageTypeOpcode, MyPacket);
+                        ProcessUnreliable.ProcessUnreliables(MySession, MessageTypeOpcode, ClientPacket, ref offset);
                         break;
 
 
@@ -120,15 +117,15 @@ namespace RdpComm
             ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's
         }
 
-        private static void ProcessRdpReport(Session MySession, List<byte> MyPacket, bool UnreliableReport)
+        private static void ProcessRdpReport(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset, bool UnreliableReport)
         {
             //Eventually incorporate UnreliableReport to cycle through unreliables and update accordingly
 
             //Read client bundle here. Accept client bundle as is because packets could be lost or dropped, client bundle# should not be "tracked"
             //considerations could be to track it for possible drop/lost rates
-            MySession.clientBundleNumber = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
-            ushort LastRecvBundleNumber = (ushort)(MyPacket[3] << 8 | MyPacket[2]);
-            ushort LastRecvMessageNumber = (ushort)(MyPacket[5] << 8 | MyPacket[4]);
+            MySession.clientBundleNumber = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
+            ushort LastRecvBundleNumber = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
+            ushort LastRecvMessageNumber = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
 
             //Check our list  of reliable messages to remove
             for (int i = 0; i < MySession.MyMessageList.Count(); i++)
@@ -140,9 +137,7 @@ namespace RdpComm
                 //Need to keep remaining messages, move on
                 else { break; }
             }
-            
 
-            MyPacket.RemoveRange(0, 6);
             ///Only one that really matters, should tie into our packet resender stuff
             if (MySession.serverMessageNumber >= LastRecvMessageNumber)
             {
@@ -222,10 +217,10 @@ namespace RdpComm
             }
         }
 
-        private static void ProcessSessionAck(Session MySession, List<byte> MyPacket)
+        private static void ProcessSessionAck(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
         {
             ///We are here
-            uint SessionAck = (uint)(MyPacket[3] << 24 | MyPacket[2] << 16 | MyPacket[1] << 8 | MyPacket[0]);
+            uint SessionAck = BinaryPrimitiveWrapper.GetLEUint(ClientPacket, ref offset);
             if (SessionAck == MySession.sessionIDBase)
             {
                 MySession.ClientAck = true;
@@ -239,23 +234,19 @@ namespace RdpComm
                 Console.WriteLine("Error");
                 Logger.Err("Error occured with Session Ack Check...");
             }
-
-            ///Remove these 4 bytes
-            MyPacket.RemoveRange(0, 4);
         }
 
         ///This grabs the full Message Type. Checks for FF, if FF is present, then grab proceeding byte (FA or FB)
-        private static ushort GrabOpcode(List<byte> MyPacket)
+        private static ushort GrabOpcode(ReadOnlySpan<byte> ClientPacket, ref int offset)
         {
-            ushort Opcode = (ushort)MyPacket[0];
+            ushort Opcode = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
             ///If Message is > 255 bytes, Message type is prefixed with FF to indeificate this
             if (Opcode == 255)
             {
                 Logger.Info("Received Long Message type (> 255 bytes)");
-                Opcode = (ushort)(MyPacket[1] << 8 | MyPacket[0]);
+                //Read an additional byte and flip them
+                Opcode = (ushort)(BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset) << 8 | Opcode);
 
-                ///Remove 2 read bytes
-                MyPacket.RemoveRange(0, 2);
                 return Opcode;
             }
 
@@ -263,9 +254,6 @@ namespace RdpComm
             else
             {
                 Logger.Info("Received Normal Message type (< 255 bytes)");
-
-                ///Remove read byte
-                MyPacket.RemoveRange(0, 1);
                 return Opcode;
             }
         }
@@ -439,9 +427,9 @@ namespace RdpComm
 
         public static void PrepPacket(object source, ElapsedEventArgs e)
         {
-            lock (SessionManager.SessionList)
+            lock (SessionManager.SessionDict)
             {
-                foreach (Session MySession in SessionManager.SessionList)
+                foreach (Session MySession in SessionManager.SessionDict.Values)
                 {
                     if ((MySession.RdpReport || MySession.RdpMessage) && MySession.ClientFirstConnect)
                     {

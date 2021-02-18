@@ -43,7 +43,7 @@ namespace Sessions
         private bool GameVersionAck = false;
 
         ///Our Received RDP Information
-        private ushort ClientBundleNumber = 0;
+        private ushort ClientBundleNumber = 1;
         private ushort ClientMessageNumber = 0;
 
         ///Our Received RDP Information

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
@@ -15,26 +16,19 @@ namespace EQOAProto
         ///For now hard code port, config file eventually
         private const int listenPort = 10070;
         public const ushort ServerEndPoint = 0x73B0;
-
+        public static UdpClient socket = null;
         ///Instantiate our udp Listener for any ip address and specified port
-        private static UdpClient listener = new UdpClient(listenPort);
+        //private static UdpClient listener = new UdpClient(listenPort);
         private static IPEndPoint remEndpoint = new IPEndPoint(IPAddress.Any, listenPort);
+        ManualResetEvent completed = new ManualResetEvent(false);
 
-        public static void StartListener(ChannelWriter<UdpReceiveResult> channelWriter)
+        public static async Task StartServer(ChannelWriter<UdpReceiveResult> channelWriter)
         {
-            ///Instantiate our udp Listener for any ip address and specified port
-            Logger.Info($"Listening on {remEndpoint}...");
-
-            _ = ReceiveAsync(channelWriter);
-        }
-
-        private static async ValueTask ReceiveAsync(ChannelWriter<UdpReceiveResult> channelWriter)
-        { 
+            socket = new UdpClient(listenPort);
             while (true)
             {
-                UdpReceiveResult result = await listener.ReceiveAsync();
-                channelWriter.TryWrite(result);
-                channelWriter.Complete();
+                UdpReceiveResult MyUDPResult = await socket.ReceiveAsync();
+                channelWriter.TryWrite(MyUDPResult);
             }
         }
 
@@ -44,7 +38,7 @@ namespace EQOAProto
             {
                 ///Try to send data to client
                 Logger.Info($"Sending to IP: {Client.Address}, Port: {Client.Port}");
-                listener.Send(MyData, MyData.Length, Client);
+                socket.Send(MyData, MyData.Length, Client);
             }
             
             ///If a socket error occurs, udp server closes

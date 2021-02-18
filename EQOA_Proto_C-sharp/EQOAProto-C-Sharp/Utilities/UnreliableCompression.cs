@@ -104,8 +104,14 @@ namespace RunningLengthCompression
         }
 
         //Pass in Unreliable message and expected unreliable length
-        public static void UncompressUnreliable(List<byte> arg, int length)
+        public static byte[] UncompressUnreliable(ReadOnlySpan<byte> arg, ref int offset, int length)
         {
+            //Make sure these values are 0 before starting
+            myBytes = 0;
+            readBytes = 0;
+            padding = 0;
+            realBytes = 0;
+
             byte[] myByteArray = new byte[length + 1];
             do
             {
@@ -155,14 +161,8 @@ namespace RunningLengthCompression
                 }
             } while (myBytes < length);
 
-            //Reset these before next uncompress
-            myBytes = 0;
-            readBytes = 0;
-            padding = 0;
-            realBytes = 0;
             //Clear packet here... unreliable should be last message... reliably... :^)
-            arg.Clear();
-            arg.AddRange(myByteArray);
+            return myByteArray;
         }
     }
 }

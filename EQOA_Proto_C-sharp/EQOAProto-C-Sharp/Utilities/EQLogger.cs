@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace EQLogger
 {
@@ -29,9 +30,9 @@ namespace EQLogger
 
             ///Writes lists into logs for us
             writer.Write($"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")} :");
-            foreach (byte b in logMessage)
+            for(int i = 0; i < logMessage.Length; i++)
             {
-                writer.Write($" {b.ToString("X")}");
+                writer.Write($" {logMessage[i].ToString("X")}");
             }
 
             ///Ends our current list/message line
@@ -42,9 +43,27 @@ namespace EQLogger
         {
             ///Writes lists into logs for us
             writer.Write($"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")} :");
-            foreach (byte b in logMessage)
+            for( int i = 0; i < logMessage.Count(); i++)
+            { 
+                writer.Write($" {logMessage[i].ToString("X")}");
+            }
+
+            ///Ends our current list/message line
+            writer.WriteLine("");
+        }
+
+        public static void Info(ReadOnlySpan<byte> logMessage)
+        {
+            if (writer.AutoFlush == false)
             {
-                writer.Write($" {b.ToString("X")}");
+                writer.AutoFlush = true;
+            }
+
+            ///Writes lists into logs for us
+            writer.Write($"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")} :");
+            for (int i = 0; i < logMessage.Length; i++)
+            {
+                writer.Write($" {logMessage[i].ToString("X")}");
             }
 
             ///Ends our current list/message line

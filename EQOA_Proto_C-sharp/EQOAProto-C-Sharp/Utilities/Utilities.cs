@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Utility
 {
@@ -140,54 +141,69 @@ namespace Utility
             return NewValue;
         }
 
-        public static int Untechnique(List<byte> MyPacket)
+        public static int Untechnique(ReadOnlySpan<byte> MyPacket, ref int offset)
         {
             bool isNegative = false;
 
             //Check if value is negative, is so add 1 to first byte and check bool
-            if ((MyPacket[0] & 1) == 1) { MyPacket[0] = (byte)(MyPacket[0] + 1); isNegative = true; }
+            if ((MyPacket[offset] & 1) == 1) isNegative = true; 
 
             //Work some magic
             uint value = 0;
-            int shift = 0;
-            while (shift * 7 < 0x40)
+            uint val = 0;
+
+            //Loop over our packet
+            for (int i = 0; i < MyPacket.Length; i++)
             {
-                foreach (byte b in MyPacket)
+                Console.WriteLine(i);
+                //Grab the current byte and shift i * 7
+                val |= (uint)((MyPacket[offset] & 0x7f) << (i * 7));
+
+                //Keep processing if true
+                if (!((MyPacket[offset] & 0x80) == 0))
                 {
-                    value |= (uint)((b & 0x7f) << shift);
-                    
-                    if ((b & 0x80) == 0) break;
-                    shift += 7;
+                    offset += 1;
+                    continue;
                 }
+
+                offset += 1;
                 break;
             }
+
+            //If value is supposed to be negative, add 1
+            if (isNegative) value += 1;
 
             //Divide the unsigned value by 2 and cast to an integer
             int newVal = (int)(value / 2);
 
-            //If its supposed to be negative do this
+            //If its supposed to be negative, make it so
             if (isNegative) { newVal *= -1; }
-
-            //Remove read bytes from Packet
-            MyPacket.RemoveRange(0, (shift / 7) + 1);
 
             return newVal;
         }
 
-        static public uint Unpack(List<byte> myPacket)
+        //This method unpacks VLI data
+        static public uint Unpack(ReadOnlySpan<byte> ClientPacket, ref int offset)
         {
             uint val = 0;
-            int shift = 0;
 
-            foreach (byte b in myPacket)
+            //Loop over our packet
+            for (int i = 0; i < ClientPacket.Length; i++)
             {
-                val |= (uint)((b & 0x7f) << (shift * 7));
-                if ((b & 0x80) == 0) break;
-                shift += 1;
+                //Grab the current byte and shift i * 7
+                val |= (uint)((ClientPacket[offset] & 0x7f) << (i * 7));
+
+                //Keep processing if true
+                if (!((ClientPacket[offset] & 0x80) == 0))
+                {
+                    offset += 1;
+                    continue;
+                }
+
+                offset += 1;
+                break;
             }
 
-            //Remove read bytes here
-            myPacket.RemoveRange(0, shift + 1);
             return val;
         }
 
@@ -219,6 +235,15 @@ namespace Utility
             while (myList[i] == 0) { j++; --i; }
             myList.RemoveRange(i + 1, j);
             return myList;
+        }
+
+        public static string GetSpanString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)
+        {
+            try
+            { return Encoding.Default.GetString(ClientPacket.Slice(offset, stringLength)); }
+
+            finally
+            { offset += stringLength; }
         }
     }
 

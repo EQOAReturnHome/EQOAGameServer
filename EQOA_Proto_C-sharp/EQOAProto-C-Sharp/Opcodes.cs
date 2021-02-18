@@ -1,4 +1,8 @@
 ﻿
+using Sessions;
+using System;
+using System.Collections.Generic;
+
 namespace Opcodes
 {
     /// <summary>
@@ -25,9 +29,8 @@ namespace Opcodes
         public const byte ClientActorUpdate = 64; //0x40 Client Actor update
     }
 
-    public static class GameOpcode
+    public class GameOpcode
     {
-
         public const ushort DiscVersion = 0; ///0x0000
         public const ushort Authenticate2 = 1; ///0x0001
         public const ushort CharacterSelect = 44; ///0x002C
@@ -45,8 +48,9 @@ namespace Opcodes
         public const ushort ActorSpeed = 248; //0x00F8
         public const ushort ClientMessage = 2682; //0x0A7A
         public const ushort DisconnectClient = 2480; //0x09B0
-
     }
+
+    
 
     public static class GameVersions
     {
@@ -68,11 +72,11 @@ namespace Opcodes
 
     public static class BundleOpcode
     {
-        public const sbyte ProcessAll = 99; ///Client requesting new session
-        public const sbyte ProcessReport = 35; ///Client requesting to close session
-        public const sbyte ProcessMessages = 32; ///Client is continuing session
-        public const sbyte ProcessMessageAndReport = 13; ///Client is continuing session
-        public const sbyte NewProcessReport = 3; ///Client is continuing session
-        public const sbyte NewProcessMessages = 0; ///Client is continuing session
+        public const byte ProcessAll = 99; ///Client requesting new session
+        public const byte ProcessReport = 35; ///Client requesting to close session
+        public const byte ProcessMessages = 32; ///Client is continuing session
+        public const byte ProcessMessageAndReport = 13; ///Client is continuing session
+        public const byte NewProcessReport = 3; ///Client is continuing session
+        public const byte NewProcessMessages = 0; ///Client is continuing session
     }
 }

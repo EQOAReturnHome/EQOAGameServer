@@ -1,4 +1,5 @@
 ﻿using EQLogger;
+using EQOAProto;
 using RdpComm;
 using System;
 using System.Collections.Generic;
@@ -15,10 +16,10 @@ namespace SessManager
         private static uint SessionIDUpStarter = 220760;
 
         ///This is our sessionList
-        public static List<Session> SessionList = new List<Session>();
+        public static Dictionary<IPEndPoint, Session> SessionDict = new Dictionary<IPEndPoint, Session>();
 
         ///When a new session is identified, we add this into our endpoint/session list
-        public static void ProcessSession(ReadOnlySpan<byte> myPacket, int offset, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
+        public static void ProcessSession(ReadOnlySpan<byte> ClientPacket, int offset, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
         ///public static void ProcessSession(List<byte> myPacket, bool NewSession)
         {
             bool RemoteEndPoint = false;
@@ -26,7 +27,7 @@ namespace SessManager
             bool InstanceHeader = false;
             bool ResetInstance = false;
 
-            uint val = Utility_Funcs.Unpack(myPacket);
+            uint val = Utility_Funcs.Unpack(ClientPacket, ref offset);
 
             //Get's this bundle length
             int BundleLength = (int)(val & 0x7FF);
@@ -57,8 +58,7 @@ namespace SessManager
             if (InstanceHeader)
             {
 
-                uint SessionIDBase = (uint)(myPacket[3] << 24 | myPacket[2] << 16 | myPacket[1] << 8 | myPacket[0]);
-                myPacket.RemoveRange(0, 4);
+                uint SessionIDBase = BinaryPrimitiveWrapper.GetLEUint(ClientPacket, ref offset);
 
                 //If not reset instance, start processing packet data
                 if (ResetInstance)
@@ -67,22 +67,23 @@ namespace SessManager
                     try
                     {
                         ///This finds our session by utilizing endpoints and IPEndPoint info (IP and Port) and drops it
-                        DropSession(SessionList.Find(i => Equals(i.clientEndpoint, ClientEndpoint) && Equals(i.MyIPEndPoint, MyIPEndPoint) && Equals(i.sessionIDBase, SessionIDBase)));
-                        
-                        //Remove the double session information
-                        myPacket.RemoveRange(0, 4);
+                        DropSession(SessionDict[MyIPEndPoint]);
+
+                        //skip double session info here..
+                        offset += 4;
 
                         if (RemoteEndPoint)
                         {
-                            //Remove the 3 byte "Object ID"
-                            myPacket.RemoveRange(0, 3);
+                            //Skip "Object ID"
+                            offset += 3;
                         }
 
-                        //if mutliple bundles, process next one
-                        if(myPacket.Count() > 10)
+                        //Once we finish processing prior bundle, if the offset is still less then the Packet Length, must be another bundle?
+                        //Add + 4 to offset on check to account for CRC at end
+                        if(ClientPacket.Length > offset + 4)
                         {
                             //Process next bundle
-                            ProcessSession(myPacket, MyIPEndPoint, ClientEndpoint);
+                            ProcessSession(ClientPacket, offset, MyIPEndPoint, ClientEndpoint);
                         }
                     }
 
@@ -98,15 +99,11 @@ namespace SessManager
                 else if (NewInstance)
                 {
                     Logger.Info("Checking if session \"exists\"");
-                    bool SessionExistence = SessionList.Exists(i => Equals(i.clientEndpoint, ClientEndpoint) && Equals(i.MyIPEndPoint, MyIPEndPoint) && Equals(i.sessionIDBase, SessionIDBase));
-
-                    ///If it exists, returns to drop this request
-                    if (SessionExistence)
+                    //Check if there is a session tied to this IP/Port
+                    //if so... Ignore the request?
+                    if(SessionDict.ContainsKey(MyIPEndPoint))
                     {
-                        ///This "drops" the packet
-                        ///If a client from x IPAddress tries to connect with the same endpoint and IP
-                        ///and we will drop and wait for clients next endpoint
-                        ///Client will do the leg work to "remove" the session
+                        //Ignoring
                         return;
                     }
 
@@ -120,14 +117,14 @@ namespace SessManager
                     AddMasterSession(thisSession);
 
                     //Process remaining data
-                    ProcessSession(thisSession, myPacket);
+                    ProcessBundle(thisSession, ClientPacket, offset);
                 }
 
                 //Continue processing session
                 else
                 {
                     //Grab session
-                    Session thisSession = SessionList.Find(i => Equals(i.clientEndpoint, ClientEndpoint) && Equals(i.MyIPEndPoint, MyIPEndPoint) && Equals(i.sessionIDBase, SessionIDBase));
+                    Session thisSession = SessionDict[MyIPEndPoint];
 
                     if(thisSession == null)
                     {
@@ -144,11 +141,11 @@ namespace SessManager
                         //else{ //Note exception and fail gracefully?}
 
                         //Will read our Session Identifier and remove it off the packet for us
-                        int SessionIDUp = Utility_Funcs.Untechnique(myPacket);
+                        int SessionIDUp = Utility_Funcs.Untechnique(ClientPacket, ref offset);
                     }
 
                     //If remote master is 0, doesn't really matter... means client is "master" and will not have the 3 byte characterInstanceID
-                    ProcessSession(thisSession, myPacket);
+                    ProcessBundle(thisSession, ClientPacket, offset);
 
                 }
             }
@@ -159,7 +156,7 @@ namespace SessManager
                 //Assumption would be this must be an ongoing session, so should never expect a new session without the instance header
                 //Grab session
                 //Will this always be correct? Shouldn't have duplicate client endpoints so should be...
-                Session thisSession = SessionList.Find(i => Equals(i.clientEndpoint, ClientEndpoint) && Equals(i.MyIPEndPoint, MyIPEndPoint));
+                Session thisSession = SessionDict[MyIPEndPoint];
 
                 //If server is master/initiated the session we need to remove the 3 byte session Identifier from packet
                 if (thisSession.remoteMaster)
@@ -171,21 +168,21 @@ namespace SessManager
                     //else{ //Note exception and fail gracefully?}
 
                     //Will read our Session Identifier and remove it off the packet for us
-                    int SessionIDUp = Utility_Funcs.Untechnique(myPacket);
+                    int SessionIDUp = Utility_Funcs.Untechnique(ClientPacket, ref offset);
                 }
 
                 //If remote master is 0, doesn't really matter... means client is "master" and will not have the 3 byte characterInstanceID
-                ProcessSession(thisSession, myPacket);
+                ProcessBundle(thisSession, ClientPacket, offset);
             }
         }
 
         ///Is this really needed?
-        public static void ProcessSession(Session MySession, List<byte> myPacket)
+        public static void ProcessBundle(Session MySession, ReadOnlySpan<byte> ClientPacket, int offset)
         {
             ///Send to RdpCommunicate
 
             ///SQLOperations.AccountCharacters(MySession);
-            RdpCommIn.ProcessBundle(MySession, myPacket);
+            RdpCommIn.ProcessBundle(MySession, ClientPacket, offset);
         }
 
         public static void DropSession(Session MySession)
@@ -196,18 +193,18 @@ namespace SessManager
             //Stop the timers
             MySession.StopTimers();
 
-            lock (SessionList)
+            lock (SessionDict)
             {
-                SessionList.Remove(MySession);
+                SessionDict.Remove(MySession.MyIPEndPoint);
             }
         }
 
         public static void AddMasterSession(Session MyMasterSession)
         {
             Logger.Info("Adding Master Session To List");
-            lock (SessionList)
+            lock (SessionDict)
             {
-                SessionList.Add(MyMasterSession);
+                SessionDict.Add(MyMasterSession.MyIPEndPoint, MyMasterSession);
             }
         }
 
