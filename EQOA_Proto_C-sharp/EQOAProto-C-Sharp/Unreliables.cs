@@ -18,7 +18,7 @@ namespace Unreliable
         private static ushort XorMessage = 0;
         private static byte XorByte = 0;
 
-        public static void ProcessUnreliables(Session Mysession, ushort MessageType, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessUnreliables(Session Mysession, ushort MessageType, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             if (MessageType == UnreliableTypes.ClientActorUpdate)
             {
@@ -27,7 +27,7 @@ namespace Unreliable
         }
 
         //Uncompress and process update
-        private static void ProcessUnreliableClientUpdate(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        private static void ProcessUnreliableClientUpdate(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             //Get Unreliable length
             UnreliableLength = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
@@ -43,7 +43,7 @@ namespace Unreliable
             if (MySession.Channel40Base.ThisMessagenumber > (XorMessage - XorByte)) return;
 
             //Uncompress the packet
-            List<byte> MyPacket = new List<byte> (Compression.UncompressUnreliable(ClientPacket, ref offset, UnreliableLength));
+            List<byte> MyPacket = new List<byte> (Compression.UncompressUnreliable(ClientPacket.Span, ref offset, UnreliableLength));
 
             //First 0x4029 from client
             if (XorByte == 0)

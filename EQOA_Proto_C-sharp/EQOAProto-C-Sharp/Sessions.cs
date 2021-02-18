@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using System.Timers;
 using MessageStruct;
 using System.Text;
@@ -41,6 +40,8 @@ namespace Sessions
         ///Game version information
         private int GameVersion; // Code be useful later on if implementing code to support vanilla or other versions.
         private bool GameVersionAck = false;
+
+        public bool CreateMasterSession = false;
 
         ///Our Received RDP Information
         private ushort ClientBundleNumber = 1;
@@ -492,7 +493,7 @@ namespace Sessions
             MyMessage.AddRange(Encoding.Unicode.GetBytes(theMessage));
 
             //Send Message
-            RdpCommOut.PackMessage(this, MyMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.ClientMessage);
+            RdpCommOut.PackMessage(this, MyMessage, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.ClientMessage);
         }
 
             public void AddMessage(ushort num, List<byte> MyMessage)

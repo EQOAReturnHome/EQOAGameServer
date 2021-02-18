@@ -237,7 +237,7 @@ namespace Utility
             return myList;
         }
 
-        public static string GetSpanString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)
+        public static string GetMemoryString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)
         {
             try
             { return Encoding.Default.GetString(ClientPacket.Slice(offset, stringLength)); }

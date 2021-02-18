@@ -19,7 +19,7 @@ namespace SessManager
         public static Dictionary<IPEndPoint, Session> SessionDict = new Dictionary<IPEndPoint, Session>();
 
         ///When a new session is identified, we add this into our endpoint/session list
-        public static void ProcessSession(ReadOnlySpan<byte> ClientPacket, int offset, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
+        public static void ProcessSession(ReadOnlyMemory<byte> ClientPacket, int offset, IPEndPoint MyIPEndPoint, ushort ClientEndpoint)
         ///public static void ProcessSession(List<byte> myPacket, bool NewSession)
         {
             bool RemoteEndPoint = false;
@@ -27,7 +27,7 @@ namespace SessManager
             bool InstanceHeader = false;
             bool ResetInstance = false;
 
-            uint val = Utility_Funcs.Unpack(ClientPacket, ref offset);
+            uint val = Utility_Funcs.Unpack(ClientPacket.Span, ref offset);
 
             //Get's this bundle length
             int BundleLength = (int)(val & 0x7FF);
@@ -141,7 +141,7 @@ namespace SessManager
                         //else{ //Note exception and fail gracefully?}
 
                         //Will read our Session Identifier and remove it off the packet for us
-                        int SessionIDUp = Utility_Funcs.Untechnique(ClientPacket, ref offset);
+                        int SessionIDUp = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
                     }
 
                     //If remote master is 0, doesn't really matter... means client is "master" and will not have the 3 byte characterInstanceID
@@ -168,7 +168,7 @@ namespace SessManager
                     //else{ //Note exception and fail gracefully?}
 
                     //Will read our Session Identifier and remove it off the packet for us
-                    int SessionIDUp = Utility_Funcs.Untechnique(ClientPacket, ref offset);
+                    int SessionIDUp = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
                 }
 
                 //If remote master is 0, doesn't really matter... means client is "master" and will not have the 3 byte characterInstanceID
@@ -177,7 +177,7 @@ namespace SessManager
         }
 
         ///Is this really needed?
-        public static void ProcessBundle(Session MySession, ReadOnlySpan<byte> ClientPacket, int offset)
+        public static void ProcessBundle(Session MySession, ReadOnlyMemory<byte> ClientPacket, int offset)
         {
             ///Send to RdpCommunicate
 

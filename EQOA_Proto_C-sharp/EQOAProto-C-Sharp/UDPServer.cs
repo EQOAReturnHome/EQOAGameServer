@@ -6,6 +6,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System;
 using System.Net.Sockets;
+using System.Timers;
 
 namespace EQOAProto
 {
@@ -62,14 +63,14 @@ namespace EQOAProto
 
             */
 
-            StartOutBoundTimer();
+            Task.Run(async () => await StartOutBoundTimer());
             string stuff = Console.ReadLine();
         }
         
-        public static void StartOutBoundTimer()
+        public static async Task StartOutBoundTimer()
         {
             ///Our timer for outbound queue
-            OutBoundTimer.Elapsed += (sender, e) => RdpCommOut.PrepPacket(sender, e);
+            OutBoundTimer.Elapsed += new ElapsedEventHandler((sender, e) => RdpCommOut.PrepPacket(sender, e));
             ///Check 10x/second
             OutBoundTimer.Interval = 100;
             ///Enable timer

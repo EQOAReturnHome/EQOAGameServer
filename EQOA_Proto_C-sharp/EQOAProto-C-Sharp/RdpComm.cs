@@ -22,7 +22,7 @@ namespace RdpComm
     class RdpCommIn
     {
 
-        public static void ProcessBundle(Session MySession, ReadOnlySpan<byte> ClientPacket, int offset)
+        public static void ProcessBundle(Session MySession, ReadOnlyMemory<byte> ClientPacket, int offset)
         {
             ///Grab our bundle type
             byte BundleType = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
@@ -72,7 +72,7 @@ namespace RdpComm
             }
         }
 
-        public static void ProcessMessageBundle(Session MySession, ReadOnlySpan<byte> ClientPacket, int offset)
+        public static void ProcessMessageBundle(Session MySession, ReadOnlyMemory<byte> ClientPacket, int offset)
         {
             ///Need to consider how many messages could be in here, and message types
             ///FB/FA/40/F9
@@ -117,7 +117,7 @@ namespace RdpComm
             ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's
         }
 
-        private static void ProcessRdpReport(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset, bool UnreliableReport)
+        private static void ProcessRdpReport(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset, bool UnreliableReport)
         {
             //Eventually incorporate UnreliableReport to cycle through unreliables and update accordingly
 
@@ -217,7 +217,7 @@ namespace RdpComm
             }
         }
 
-        private static void ProcessSessionAck(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        private static void ProcessSessionAck(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             ///We are here
             uint SessionAck = BinaryPrimitiveWrapper.GetLEUint(ClientPacket, ref offset);
@@ -237,7 +237,7 @@ namespace RdpComm
         }
 
         ///This grabs the full Message Type. Checks for FF, if FF is present, then grab proceeding byte (FA or FB)
-        private static ushort GrabOpcode(ReadOnlySpan<byte> ClientPacket, ref int offset)
+        private static ushort GrabOpcode(ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             ushort Opcode = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
             ///If Message is > 255 bytes, Message type is prefixed with FF to indeificate this
@@ -306,7 +306,7 @@ namespace RdpComm
             else if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
             {
                 ///Add our opcode
-                myMessage.InsertRange(0, BitConverter.GetBytes(Opcode));
+                myMessage.InsertRange(0, BitConverter.GetBytes((ushort)Opcode));
 
                 ///Check message length first
                 if ((myMessage.Count()) > 255)
@@ -375,12 +375,12 @@ namespace RdpComm
         }
 
         ///Message processing for outbound section
-        public static void PackMessage(Session MySession, ushort MessageOpcodeType, ushort Opcode)
+        public static void PackMessage(Session MySession, ushort MessageOpcodeType, GameOpcode Opcode)
         {
             List<byte> myMessage = new List<byte> { };
 
             ///Add our opcode
-            myMessage.InsertRange(0, BitConverter.GetBytes(Opcode));
+            myMessage.InsertRange(0, BitConverter.GetBytes((ushort)Opcode));
 
             ///0xFB Message type
             if (MessageOpcodeType == MessageOpcodeTypes.ShortReliableMessage)
@@ -425,7 +425,7 @@ namespace RdpComm
             }
         }
 
-        public static void PrepPacket(object source, ElapsedEventArgs e)
+        public static async void PrepPacket(object source, ElapsedEventArgs e)
         {
             lock (SessionManager.SessionDict)
             {

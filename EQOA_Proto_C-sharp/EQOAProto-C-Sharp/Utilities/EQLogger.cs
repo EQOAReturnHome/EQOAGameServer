@@ -52,8 +52,9 @@ namespace EQLogger
             writer.WriteLine("");
         }
 
-        public static void Info(ReadOnlySpan<byte> logMessage)
+        public static void Info(ReadOnlyMemory<byte> LogMessage)
         {
+            ReadOnlySpan<byte> logMessage = LogMessage.Span;
             if (writer.AutoFlush == false)
             {
                 writer.AutoFlush = true;

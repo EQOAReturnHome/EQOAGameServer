@@ -24,7 +24,7 @@ namespace OpcodeOperations
 {
     class ProcessOpcode
     {
-        public static void ProcessOpcodes(Session MySession, ushort MessageTypeOpcode, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessOpcodes(Session MySession, ushort MessageTypeOpcode, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             ///Expected message length
             ushort MessageLength;
@@ -64,7 +64,8 @@ namespace OpcodeOperations
                 Logger.Info($"Message Length: {MessageLength}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
 
                 ///Pass remaining to opcode checker for more processing
-                OpcodeChecker(MySession, Opcode, ClientPacket, ref offset, MessageLength);
+                //OpcodeChecker(MySession, Opcode, ClientPacket, ref offset, MessageLength);
+                OpcodeTypes.OpcodeDictionary[(GameOpcode)Opcode].Invoke(MySession, ClientPacket.Slice(offset, MessageLength - 2));
             }
 
             ///Not expected order?
@@ -76,11 +77,11 @@ namespace OpcodeOperations
                 return;
             }
         }
-
+        /*
         ///Big switch statement to process Opcodes.
-        private static void OpcodeChecker(Session MySession, ushort Opcode, ReadOnlySpan<byte> ClientPacket, ref int offset, int MessageLength)
+        public static void OpcodeChecker(Session MySession, ushort Opcode, ReadOnlyMemory<byte> ClientPacket, ref int offset, int MessageLength)
         {
-            switch (Opcode)
+            switch ((Opcode)
             {
                 ///Game Disc Version
                 case GameOpcode.DiscVersion:
@@ -113,10 +114,6 @@ namespace OpcodeOperations
                     ProcessCharacterChanges(MySession, ClientPacket, ref offset);
                     Logger.Info("Character Selected, starting memory dump");
 
-                    //Start new session 
-                    Session thisSession = new Session(MySession.clientEndpoint, MySession.MyIPEndPoint, MySession.remoteMaster, MySession.AccountID, MySession.sessionIDUp, MySession.MyCharacter);
-                    SessionManager.AddMasterSession(thisSession);
-                    ProcessMemoryDump(thisSession);
                     break;
 
                 case GameOpcode.DisconnectClient:
@@ -141,9 +138,9 @@ namespace OpcodeOperations
                     offset += (MessageLength - 2);
                     break;
             }
-        }
+        }*/
 
-        private static void ClientOpcodeUnknown(Session MySession, ushort opcode)
+        public static void ClientOpcodeUnknown(Session MySession, GameOpcode opcode)
         {
             string theMessage = $"Unknown Opcode: {opcode.ToString("X")}";
             List<byte> MyMessage = new List<byte> { };
@@ -151,11 +148,13 @@ namespace OpcodeOperations
             MyMessage.AddRange(Encoding.Unicode.GetBytes(theMessage));
 
             //Send Message
-            RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.ClientMessage);
+            RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.ClientMessage);
         }
 
-        private static void ProcessCharacterChanges(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessCharacterChanges(Session MySession, ReadOnlyMemory<byte> ClientPacket)
         {
+            int offset = 0;
+
             //Retrieve CharacterID from client
             int ServerID = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
             int FaceOption = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
@@ -171,6 +170,11 @@ namespace OpcodeOperations
 
             //Got character, update changes
             thisChar.UpdateFeatures(HairColor, HairLength, HairStyle, FaceOption);
+
+            //Start new session 
+            Session thisSession = new Session(MySession.clientEndpoint, MySession.MyIPEndPoint, MySession.remoteMaster, MySession.AccountID, MySession.sessionIDUp, MySession.MyCharacter);
+            SessionManager.AddMasterSession(thisSession);
+            ProcessMemoryDump(thisSession);
         }
 
         public static void ProcessMemoryDump(Session MySession)
@@ -273,7 +277,7 @@ namespace OpcodeOperations
             MySession.Dumpstarted = true;
 
             //Get our timestamp opcode in queue
-            RdpCommOut.PackMessage(MySession, DNP3Creation.CreateDNP3TimeStamp(), MessageOpcodeTypes.ShortReliableMessage, GameOpcode.Time);
+            RdpCommOut.PackMessage(MySession, DNP3Creation.CreateDNP3TimeStamp(), MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.Time);
 
             List<byte> ThisChunk;
 
@@ -287,7 +291,7 @@ namespace OpcodeOperations
                 MySession.ClientFirstConnect = true;
 
                 ///Handles packing message into outgoing packet
-                RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage, GameOpcode.MemoryDump);
+                RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.MultiShortReliableMessage, (ushort)GameOpcode.MemoryDump);
             }
 
             //Dump data is smaller then 500 bytes
@@ -303,21 +307,25 @@ namespace OpcodeOperations
                 MySession.Dumpstarted = false;
 
                 ///Handles packing message into outgoing packet
-                RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.MemoryDump);
+                RdpCommOut.PackMessage(MySession, ThisChunk, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.MemoryDump);
             }
         }
 
-        private static void ProcessDelChar(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessDelChar(Session MySession, ReadOnlyMemory<byte> ClientPacket)
         {
+            int offset = 0;
+
             //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
-            int clientServID = Utility_Funcs.Untechnique(ClientPacket, ref offset);
+            int clientServID = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
             //Call SQL delete method to actually process the delete.
             SQLOperations.DeleteCharacter(clientServID, MySession);
         }
 
         //Method to create new character when new character opcode is received
-        private static void ProcessCreateChar(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessCreateChar(Session MySession, ReadOnlyMemory<byte> ClientPacket)
         {
+            int offset = 0;
+
             //Create NewCharacter object
             Character charCreation = new Character();
 
@@ -328,7 +336,7 @@ namespace OpcodeOperations
             int nameLength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
 
             //Get Character Name
-            charCreation.CharName = Utility_Funcs.GetSpanString(ClientPacket, ref offset, nameLength);
+            charCreation.CharName = Utility_Funcs.GetMemoryString(ClientPacket.Span, ref offset, nameLength);
 
             //Before processing a full character creation check if the characters name already exists in the DB.
             //Later this will need to include a character/world combination if additional servers are spun up.
@@ -336,7 +344,7 @@ namespace OpcodeOperations
             {
                 //List and assignment to hold game op code in bytes to send out
                 List<byte> NameTaken = new List<byte>();
-                NameTaken.AddRange(BitConverter.GetBytes(GameOpcode.NameTaken));
+                NameTaken.AddRange(BitConverter.GetBytes((ushort)GameOpcode.NameTaken));
 
                 //Log character name taken and send out RDP message to pop up that name is taken.
                 Console.WriteLine("Character Name Already Taken");
@@ -347,18 +355,18 @@ namespace OpcodeOperations
             {
 
                 //Get starting level
-                charCreation.Level = Utility_Funcs.Untechnique(ClientPacket, ref offset);
+                charCreation.Level = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
 
                 //Divide startLevel by 2 because client doubles it
                 //Get single byte attributes
-                charCreation.Race = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.StartingClass = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.Gender = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.HairColor = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.HairLength = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.HairStyle = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.FaceOption = Utility_Funcs.Untechnique(ClientPacket, ref offset);
-                charCreation.HumTypeNum = Utility_Funcs.Untechnique(ClientPacket, ref offset);
+                charCreation.Race = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.StartingClass = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.Gender = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.HairColor = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.HairLength = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.HairStyle = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.FaceOption = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+                charCreation.HumTypeNum = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
 
                 //Get player attributes from packet and remove bytes after reading into variable
                 charCreation.AddStrength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
@@ -375,8 +383,9 @@ namespace OpcodeOperations
         }
 
         ///Game Disc Version
-        private static void ProcessGameDisc(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessGameDisc(Session MySession, ReadOnlyMemory<byte> ClientPacket)
         {
+            int offset = 0;
             ///Gets Gameversion sent by client
             int GameVersion = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
 
@@ -407,15 +416,15 @@ namespace OpcodeOperations
             GameVersionResponse.AddRange(GameVersionList);
 
             ///Handles packing message into outgoing packet
-            RdpCommOut.PackMessage(MySession, GameVersionResponse, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.DiscVersion);
+            RdpCommOut.PackMessage(MySession, GameVersionResponse, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.DiscVersion);
 
         }
 
         ///Authentication check
-        private static void ProcessAuthenticate(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset, bool CreateMasterSession)
+        public static void ProcessAuthenticate(Session MySession, ReadOnlyMemory<byte> ClientPacket)
         {
-            if (!CreateMasterSession) { Logger.Info("Processing Authentication (Server Select)"); }
-            else { Logger.Info("Processing Authentication (Character Select)"); }
+            int offset = 0;
+            Logger.Info("Processing Authentication");
             ///Opcode option? just skip for now
             offset += 1;
 
@@ -426,7 +435,7 @@ namespace OpcodeOperations
             int GameCodeLength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
 
             ///the actual gamecode
-            string GameCode = Utility_Funcs.GetSpanString(ClientPacket, ref offset, GameCodeLength);
+            string GameCode = Utility_Funcs.GetMemoryString(ClientPacket.Span, ref offset, GameCodeLength);
 
             if (GameCode == "EQOA")
             {
@@ -437,7 +446,7 @@ namespace OpcodeOperations
                 int AccountNameLength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
 
                 ///the actual gamecode
-                string AccountName = Utility_Funcs.GetSpanString(ClientPacket, ref offset, AccountNameLength);
+                string AccountName = Utility_Funcs.GetMemoryString(ClientPacket.Span, ref offset, AccountNameLength);
 
                 Logger.Info($"Received Account Name: {AccountName}");
 
@@ -477,22 +486,22 @@ namespace OpcodeOperations
         {
             List<byte> FirstMessage = new List<byte>() { 0x03, 0x00, 0x00, 0x00 };
             ///Handles packing message into outgoing packet
-            RdpCommOut.PackMessage(MySession, FirstMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.Camera1);
+            RdpCommOut.PackMessage(MySession, FirstMessage, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.Camera1);
 
             List<byte> SecondMessage = new List<byte>() { 0x1B, 0x00, 0x00, 0x00 };
             ///Handles packing message into outgoing packet
-            RdpCommOut.PackMessage(MySession, SecondMessage, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.Camera2);
+            RdpCommOut.PackMessage(MySession, SecondMessage, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.Camera2);
             MySession.ClientFirstConnect = true;
         }
 
-        private static void ProcessPingRequest(Session MySession, ReadOnlySpan<byte> ClientPacket, ref int offset)
+        public static void ProcessPingRequest(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
-            if (MySession.InGame == false && (ClientPacket[offset] == 0x12))
+            if (MySession.InGame == false && (ClientPacket.Span[offset] == 0x12))
             {
                 //Nothing needed here I suppose?
             }
 
-            else if (MySession.InGame == true && (ClientPacket[offset] == 0x14))
+            else if (MySession.InGame == true && (ClientPacket.Span[offset] == 0x14))
             {
                 List<byte> MyMessage = new List<byte>() { 0x14 };
                 ///Do stuff here?
@@ -502,7 +511,7 @@ namespace OpcodeOperations
 
             else
             {
-                Logger.Err($"Received an F9 with unknown value {ClientPacket[offset]}");
+                Logger.Err($"Received an F9 with unknown value {ClientPacket.Span[offset]}");
             }
 
             offset += 1;
@@ -739,13 +748,13 @@ namespace OpcodeOperations
 
             ///Character list is complete
             ///Handles packing message into outgoing packet
-            RdpCommOut.PackMessage(MySession, CharacterList, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.CharacterSelect);
+            RdpCommOut.PackMessage(MySession, CharacterList, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.CharacterSelect);
         }
 
         public static void IgnoreList(Session MySession)
         {
             //For now send no ignored people
-            RdpCommOut.PackMessage(MySession, new List<byte>{0}, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.IgnoreList);
+            RdpCommOut.PackMessage(MySession, new List<byte>{0}, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.IgnoreList);
         }
 
         public static void ActorSpeed(Session MySession)
@@ -753,7 +762,7 @@ namespace OpcodeOperations
             List<byte> CharacterSpeed = new List<byte> { };
             CharacterSpeed.AddRange(BitConverter.GetBytes(25.0f));
             //For now send a standard speed
-            RdpCommOut.PackMessage(MySession, CharacterSpeed, MessageOpcodeTypes.ShortReliableMessage, GameOpcode.ActorSpeed);
+            RdpCommOut.PackMessage(MySession, CharacterSpeed, MessageOpcodeTypes.ShortReliableMessage, (ushort)GameOpcode.ActorSpeed);
         }
     }
 }

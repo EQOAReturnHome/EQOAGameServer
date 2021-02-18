@@ -108,7 +108,8 @@ namespace RunningLengthCompression
         {
             //Make sure these values are 0 before starting
             myBytes = 0;
-            readBytes = 0;
+            //Start with offset here
+            readBytes = offset;
             padding = 0;
             realBytes = 0;
 

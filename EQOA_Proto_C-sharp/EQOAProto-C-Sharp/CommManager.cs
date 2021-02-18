@@ -32,7 +32,7 @@ namespace EQOAProto
         public static void ProcPacket(UdpReceiveResult myObject)
         {
             int offset = 0;
-            ReadOnlySpan<byte> ClientPacket = myObject.Buffer.AsSpan();
+            ReadOnlyMemory<byte> ClientPacket = myObject.Buffer;
             
             ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
             Logger.Info("Grabbed item from queue");
@@ -57,7 +57,7 @@ namespace EQOAProto
                 Logger.Info("No Server transfer, processing");
 
                 ///If CRC passes, continue
-                if (ClientPacket.Slice(ClientPacket.Length - 4, 4).SequenceEqual(CRC.calculateCRC(ClientPacket.Slice(0, ClientPacket.Length - 4))))
+                if (ClientPacket.Span.Slice(ClientPacket.Length - 4, 4).SequenceEqual(CRC.calculateCRC(ClientPacket.Span.Slice(0, ClientPacket.Length - 4))))
                 {
                     Logger.Info("CRC Passed, processing");
 

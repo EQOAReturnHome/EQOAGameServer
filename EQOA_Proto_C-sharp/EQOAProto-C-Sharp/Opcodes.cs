@@ -1,4 +1,5 @@
 ﻿
+using OpcodeOperations;
 using Sessions;
 using System;
 using System.Collections.Generic;
@@ -29,25 +30,38 @@ namespace Opcodes
         public const byte ClientActorUpdate = 64; //0x40 Client Actor update
     }
 
-    public class GameOpcode
+    public enum GameOpcode : ushort
     {
-        public const ushort DiscVersion = 0; ///0x0000
-        public const ushort Authenticate2 = 1; ///0x0001
-        public const ushort CharacterSelect = 44; ///0x002C
-        public const ushort Camera1 = 2001; /// 0x07D1
-        public const ushort Camera2 = 2037; ///0x07F5
-        public const ushort Authenticate = 2308; ///0x0904
-        public const ushort GameServers = 1971; ///0x07B3
-        public const ushort DelCharacter = 45; ///0x002D
-        public const ushort CreateCharacter = 43; ///0x002B
-        public const ushort NameTaken = 47; ///0x002F
-        public const ushort SELECTED_CHAR = 42; // 0x002A
-        public const ushort MemoryDump = 13; //0x000D
-        public const ushort Time = 19; //0x0013
-        public const ushort IgnoreList = 4101; //0x1005
-        public const ushort ActorSpeed = 248; //0x00F8
-        public const ushort ClientMessage = 2682; //0x0A7A
-        public const ushort DisconnectClient = 2480; //0x09B0
+         DiscVersion = 0x00, //0
+         Authenticate2 = 0x01, ///1
+         CharacterSelect = 0x2C, ///44
+         Camera1 = 0x07D1, ///2001
+         Camera2 = 0x07F5, ///2037
+         Authenticate = 0x0904, ///2308
+         GameServers = 0x07B3, ///1971
+         DelCharacter = 0x2D, ///45
+         CreateCharacter = 0x2B, ///43
+         NameTaken = 0x2F, ///47
+         SELECTED_CHAR = 0x2A, // 42
+         MemoryDump = 0x0D, //13
+         Time = 0x13, //19
+         IgnoreList = 0x1005, //4101
+         ActorSpeed = 0xF8, //248
+         ClientMessage = 0x0A7A, //2682
+         DisconnectClient = 0x09B0 //2480
+    }
+
+    public class OpcodeTypes
+    {
+        public static Dictionary<GameOpcode, Action<Session, ReadOnlyMemory<byte>>> OpcodeDictionary = new()
+        {
+            { GameOpcode.DiscVersion, ProcessOpcode.ProcessGameDisc },
+            { GameOpcode.Authenticate, ProcessOpcode.ProcessAuthenticate},
+            { GameOpcode.Authenticate2, ProcessOpcode.ProcessAuthenticate},
+            { GameOpcode.SELECTED_CHAR, ProcessOpcode.ProcessCharacterChanges},
+            { GameOpcode.DelCharacter, ProcessOpcode.ProcessDelChar },
+            { GameOpcode.CreateCharacter, ProcessOpcode.ProcessCreateChar}
+        };
     }
 
     
