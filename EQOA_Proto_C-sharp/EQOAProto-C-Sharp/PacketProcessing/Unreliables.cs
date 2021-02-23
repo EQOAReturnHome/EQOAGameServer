@@ -68,7 +68,7 @@ namespace Unreliable
                 MySession.Channel40Base = new Message(XorMessage, MyPacket);
 
                 //Should we generate a C9 here?
-                List<byte> MyObject = Compression.CompressUnreliable(new List<byte>(ObjectUpdate.GatherObjectUpdate(MySession.MyCharacter, MySession.sessionIDUp)));
+                List<byte> MyObject = Compression.CompressUnreliable(new List<byte>(ObjectUpdate.GatherObjectUpdate(MySession.MyCharacter, MySession.SessionID)));
                 MyObject.Insert(0, 0);
                 MyObject.InsertRange(0, BitConverter.GetBytes(MySession.Channel0Message));
                 MyObject.Insert(0, 0xC9);

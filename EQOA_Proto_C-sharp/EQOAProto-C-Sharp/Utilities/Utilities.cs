@@ -171,10 +171,10 @@ namespace Utility
             }
 
             //If value is supposed to be negative, add 1
-            if (isNegative) value += 1;
+            if (isNegative) val += 1;
 
             //Divide the unsigned value by 2 and cast to an integer
-            int newVal = (int)(value / 2);
+            int newVal = (int)(val / 2);
 
             //If its supposed to be negative, make it so
             if (isNegative) { newVal *= -1; }

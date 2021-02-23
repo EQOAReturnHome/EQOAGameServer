@@ -11,7 +11,6 @@ using Utility;
 using EQOASQL;
 using DNP3;
 using Characters;
-using System.Linq;
 using Hotkeys;
 using Quests;
 using Items;
@@ -19,6 +18,7 @@ using WeaponHotbars;
 using Auctions;
 using Spells;
 using Sessions;
+using System.Linq;
 
 namespace OpcodeOperations
 {
@@ -31,114 +31,30 @@ namespace OpcodeOperations
             ushort MessageNumber;
             ushort Opcode;
 
-            ///Short message, 1 byte for message length
-            if ((MessageTypeOpcode == MessageOpcodeTypes.ShortReliableMessage) || (MessageTypeOpcode == MessageOpcodeTypes.UnknownMessage))
-            {
-                MessageLength = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
-            }
-
-            ///Long message, 2 bytes for message length
-            else
-            {
-                MessageLength = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
-            }
+            MessageLength = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset) == 0xFF ? BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset) : ClientPacket.Span[offset - 1];
 
             ///Make sure Message number is expected, needs to be in order.
             MessageNumber = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
 
-
-            if (MySession.clientMessageNumber + 1 == MessageNumber)
+            //If client message order was not expected, increment offset and drop it
+            if (!(MySession.clientMessageNumber + 1 == MessageNumber))
             {
-                ///Increment for every message read, in order.
-                MySession.IncrementClientMessageNumber();
-
-                //If F9 type, no opcode process it seperately.
-                if (MessageTypeOpcode == MessageOpcodeTypes.UnknownMessage)
-                {
-                    ProcessPingRequest(MySession, ClientPacket, ref offset);
-                    return;
-                }
-
-                Opcode = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
-
-                Logger.Info($"Message Length: {MessageLength}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
-
-                ///Pass remaining to opcode checker for more processing
-                //OpcodeChecker(MySession, Opcode, ClientPacket, ref offset, MessageLength);
-                OpcodeTypes.OpcodeDictionary[(GameOpcode)Opcode].Invoke(MySession, ClientPacket.Slice(offset, MessageLength - 2));
-            }
-
-            ///Not expected order?
-            ///Expand on eventually
-            else
-            {
-                //If out of order, add Message length -2(opcode we already read) to offset and move on
                 offset += (MessageLength - 2);
                 return;
             }
+
+            ///Increment for every message read, in order.
+            MySession.IncrementClientMessageNumber();
+
+            //grab our opcode
+            Opcode = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
+
+            Logger.Info($"Message Length: {MessageLength}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
+
+            OpcodeTypes.OpcodeDictionary[(GameOpcode)Opcode].Invoke(MySession, ClientPacket.Slice(offset, MessageLength - 2));
+            offset += MessageLength - 2;
         }
-        /*
-        ///Big switch statement to process Opcodes.
-        public static void OpcodeChecker(Session MySession, ushort Opcode, ReadOnlyMemory<byte> ClientPacket, ref int offset, int MessageLength)
-        {
-            switch ((Opcode)
-            {
-                ///Game Disc Version
-                case GameOpcode.DiscVersion:
-                    Logger.Info("Processing Game Disc Version");
-                    ProcessGameDisc(MySession, ClientPacket, ref offset);
-                    break;
 
-                case GameOpcode.Authenticate:
-                    Logger.Info("Server Select Authentication");
-                    ProcessAuthenticate(MySession, ClientPacket, ref offset, false);
-                    break;
-
-                case GameOpcode.Authenticate2:
-                    Logger.Info("Character Select Authentication");
-                    ProcessAuthenticate(MySession, ClientPacket, ref offset, true);
-                    break;
-
-                case GameOpcode.DelCharacter:
-                    Logger.Info("Character Deletion Request");
-                    ProcessDelChar(MySession, ClientPacket, ref offset);
-                    break;
-
-                case GameOpcode.CreateCharacter:
-                    Logger.Info("Create Character Request");
-                    ProcessCreateChar(MySession, ClientPacket, ref offset);
-                    break;
-
-                case GameOpcode.SELECTED_CHAR:
-                    //Checking sent data to verify no changes to character
-                    ProcessCharacterChanges(MySession, ClientPacket, ref offset);
-                    Logger.Info("Character Selected, starting memory dump");
-
-                    break;
-
-                case GameOpcode.DisconnectClient:
-                    //Client is disconnecting from the game world
-                    //Add logic here to save character data, position etc
-
-                    //Drop the session
-                    SessionManager.DropSession(MySession);
-                    break;
-
-                default:
-                    Logger.Err($"Unable to identify Opcode: {Opcode}");
-                    //Remove unknwon opcodes here
-                    //Eventually add logic to send unknwon opcodes to client via chat
-                    //Log opcode message and contents
-                    Logger.Info(ClientPacket.Slice(offset, (MessageLength - 2)));
-
-                    ClientOpcodeUnknown(MySession, Opcode);
-
-
-                    //increment offset and jump past this message
-                    offset += (MessageLength - 2);
-                    break;
-            }
-        }*/
 
         public static void ClientOpcodeUnknown(Session MySession, GameOpcode opcode)
         {
@@ -165,16 +81,19 @@ namespace OpcodeOperations
             //Update these on our character
             Character thisChar = MySession.CharacterData.Find(i => Equals(i.ServerID, ServerID));
 
-            //Add Selected character to Session
-            MySession.MyCharacter = thisChar;
-
             //Got character, update changes
             thisChar.UpdateFeatures(HairColor, HairLength, HairStyle, FaceOption);
 
             //Start new session 
-            Session thisSession = new Session(MySession.clientEndpoint, MySession.MyIPEndPoint, MySession.remoteMaster, MySession.AccountID, MySession.sessionIDUp, MySession.MyCharacter);
-            SessionManager.AddMasterSession(thisSession);
-            ProcessMemoryDump(thisSession);
+            Session thisSession = new Session(MySession.MyIPEndPoint, DNP3Creation.DNP3Session());
+            thisSession.ClientEndpoint = MySession.ClientEndpoint;
+            thisSession.RemoteMaster = MySession.RemoteMaster;
+            thisSession.AccountID = MySession.AccountID;
+            thisSession.SessionID =  MySession.SessionID + 1;
+            thisSession.MyCharacter = thisChar;
+
+            if(SessionManager.SessionHash.TryAdd(thisSession))
+                ProcessMemoryDump(thisSession);
         }
 
         public static void ProcessMemoryDump(Session MySession)
@@ -193,7 +112,7 @@ namespace OpcodeOperations
             SQLOperations.GetPlayerSpells(MySession);
 
             MySession.MyDumpData.AddRange(MySession.MyCharacter.PullCharacter());
-            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyHotkeys.Count() * 2));
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyHotkeys.Count * 2));
                
             //cycle over all our hotkeys and append them
             foreach(Hotkey MyHotkey in MySession.MyCharacter.MyHotkeys)
@@ -207,7 +126,7 @@ namespace OpcodeOperations
             MySession.MyDumpData.AddRange(BitConverter.GetBytes(0));
                 
             //Quest Count
-            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.MyQuests.Count()));
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.MyQuests.Count));
                 
             //Iterate over quest data and append (Should be 0 for now...)
             foreach(Quest MyQuest in MySession.MyCharacter.MyQuests)
@@ -216,8 +135,8 @@ namespace OpcodeOperations
             }
                 
             //Get Inventory Item count
-            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.InventoryItems.Count() * 2));
-            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.InventoryItems.Count()));
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.InventoryItems.Count * 2));
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.InventoryItems.Count));
             foreach( Item MyItem in MySession.MyCharacter.InventoryItems)
             {
                 MySession.MyDumpData.AddRange(MyItem.PullItem());
@@ -229,8 +148,8 @@ namespace OpcodeOperations
             }
                 
             //Get Bank Item count
-            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.BankItems.Count() * 2));
-            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count()));
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.BankItems.Count * 2));
+            MySession.MyDumpData.AddRange(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count));
             foreach (Item MyItem in MySession.MyCharacter.BankItems)
             {
                 MySession.MyDumpData.AddRange(MyItem.PullItem());
@@ -240,21 +159,21 @@ namespace OpcodeOperations
             MySession.MyDumpData.Add((byte)0);
                 
             //Buying auctions
-            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyBuyingAuctions.Count()));
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MyBuyingAuctions.Count));
             foreach (Auction MyAuction in MySession.MyCharacter.MyBuyingAuctions)
             {
                 MySession.MyDumpData.AddRange(MyAuction.PullAuction());
             }
                 
             //Selling auctions
-            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MySellingAuctions.Count()));
+            MySession.MyDumpData.Add((byte)(MySession.MyCharacter.MySellingAuctions.Count));
             foreach (Auction MyAuction in MySession.MyCharacter.MySellingAuctions)
             {
                 MySession.MyDumpData.AddRange(MyAuction.PullAuction());
             }
                
             //Spell count and Spells
-            MySession.MyDumpData.AddRange(Utility_Funcs.Technique(MySession.MyCharacter.MySpells.Count()));
+            MySession.MyDumpData.AddRange(Utility_Funcs.Technique(MySession.MyCharacter.MySpells.Count));
             foreach(Spell MySpell in MySession.MyCharacter.MySpells)
             {
                 MySession.MyDumpData.AddRange(MySpell.PullSpell());
@@ -282,7 +201,7 @@ namespace OpcodeOperations
             List<byte> ThisChunk;
 
             //Gather our dump data
-            if (MySession.MyDumpData.Count() > 500)
+            if (MySession.MyDumpData.Count > 500)
             {
                 ThisChunk = MySession.MyDumpData.GetRange(0, 500);
                 MySession.MyDumpData.RemoveRange(0, 500);
@@ -297,7 +216,7 @@ namespace OpcodeOperations
             //Dump data is smaller then 500 bytes
             else
             {
-                ThisChunk = MySession.MyDumpData.GetRange(0, MySession.MyDumpData.Count());
+                ThisChunk = MySession.MyDumpData.GetRange(0, MySession.MyDumpData.Count);
                 MySession.MyDumpData.Clear();
 
                 //Set this to true to send packet to client
@@ -394,7 +313,6 @@ namespace OpcodeOperations
                 ///Game Disc Version
                 case GameVersions.EQOA_FRONTIERS:
                     Logger.Info("EQOA Frontiers Selected.");
-                    MySession.gameVersion = GameVersion;
                     break;
 
                 case GameVersions.EQOA_VANILLA:
@@ -496,22 +414,33 @@ namespace OpcodeOperations
 
         public static void ProcessPingRequest(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
-            if (MySession.InGame == false && (ClientPacket.Span[offset] == 0x12))
+            //Verify the ping only has 1 byte of data
+            if (BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset) == 1)
             {
-                //Nothing needed here I suppose?
-            }
+                //Verify the message is in order
+                if (BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset) == MySession.clientMessageNumber + 1)
+                {
+                    ///Increment for every message read, in order.
+                    MySession.IncrementClientMessageNumber();
 
-            else if (MySession.InGame == true && (ClientPacket.Span[offset] == 0x14))
-            {
-                List<byte> MyMessage = new List<byte>() { 0x14 };
-                ///Do stuff here?
-                ///Handles packing message into outgoing packet
-                RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.UnknownMessage);
-            }
+                    if (MySession.InGame == false && (ClientPacket.Span[offset] == 0x12))
+                    {
+                        //Nothing needed here I suppose?
+                    }
 
-            else
-            {
-                Logger.Err($"Received an F9 with unknown value {ClientPacket.Span[offset]}");
+                    else if (MySession.InGame == true && (ClientPacket.Span[offset] == 0x14))
+                    {
+                        List<byte> MyMessage = new List<byte>() { 0x14 };
+                        ///Do stuff here?
+                        ///Handles packing message into outgoing packet
+                        RdpCommOut.PackMessage(MySession, MyMessage, MessageOpcodeTypes.UnknownMessage);
+                    }
+
+                    else
+                    {
+                        Logger.Err($"Received an F9 with unknown value {ClientPacket.Span[offset]}");
+                    }
+                }
             }
 
             offset += 1;
@@ -523,7 +452,7 @@ namespace OpcodeOperations
             List<byte> CharacterList = new List<byte>();
 
             ///Gets our character count and uses technique to double it
-            CharacterList.AddRange(Utility_Funcs.Technique((byte)MyCharacterList.Count()));
+            CharacterList.AddRange(Utility_Funcs.Technique((byte)MyCharacterList.Count));
 
             //Iterates through each charcter in the list and converts attribute values to packet values
             foreach (Character character in MyCharacterList)
@@ -723,25 +652,24 @@ namespace OpcodeOperations
                 CharacterList.AddRange(BitConverter.GetBytes(0xFFFFFFFF));
 
                 ///Chest color
-                CharacterList.AddRange(BitConverter.GetBytes(character.ChestColor).Reverse());
-
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.ChestColor)));
                 ///Bracer color
-                CharacterList.AddRange(BitConverter.GetBytes(character.BracerColor).Reverse());
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BracerColor)));
 
                 ///Glove color
-                CharacterList.AddRange(BitConverter.GetBytes(character.GlovesColor).Reverse());
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GlovesColor)));
 
                 ///Leg color
-                CharacterList.AddRange(BitConverter.GetBytes(character.LegsColor).Reverse());
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegsColor)));
 
                 ///Boot color
-                CharacterList.AddRange(BitConverter.GetBytes(character.BootsColor).Reverse());
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BootsColor)));
 
                 ///Helm color
-                CharacterList.AddRange(BitConverter.GetBytes(character.HelmColor).Reverse());
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.HelmColor)));
 
                 ///Robe color
-                CharacterList.AddRange(BitConverter.GetBytes(character.RobeColor).Reverse());
+                CharacterList.AddRange(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.RobeColor)));
 
                 Logger.Info($"Processed {character.CharName}");
             }

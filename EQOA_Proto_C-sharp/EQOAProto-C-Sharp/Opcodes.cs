@@ -13,15 +13,16 @@ namespace Opcodes
     /// </summary>
     public static class MessageOpcodeTypes
     {
-        public const ushort serverTransfer = 65535; ///0xFFFF
-        public const ushort NewConnection = 65534; ///0xFFFE
-        public const ushort LongUnreliableMessage = 65532; ///0xFFFC
-        public const byte ShortUnreliableMessage = 252; ///0xFC
-        public const ushort LongReliableMessage = 65531; ///0xFFFB
-        public const byte ShortReliableMessage = 251; ///0xFB
-        public const ushort MultiLongReliableMessage = 65530; ///0xFFFA
-        public const byte MultiShortReliableMessage = 250; ///0xFA
-        public const byte UnknownMessage = 249; ///0xF9
+        public const ushort serverTransfer = 0xFFFF;
+        public const ushort NewConnection = 0xFFFE;
+        public const ushort LongUnreliableMessage = 0xFFFC;
+        public const byte ShortUnreliableMessage = 0xFC;
+        public const ushort LongReliableMessage = 0xFFFB; 
+        public const byte ShortReliableMessage = 0xFB;
+        public const ushort MultiLongReliableMessage = 0xFFFA;
+        public const byte MultiShortReliableMessage = 0xFA;
+        public const byte PingMessage = 0xF9;
+        public const byte UnknownMessage = 0xF8;
     }
 
     public static class UnreliableTypes

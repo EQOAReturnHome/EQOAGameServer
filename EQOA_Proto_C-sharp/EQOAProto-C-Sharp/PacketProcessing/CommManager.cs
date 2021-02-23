@@ -4,11 +4,12 @@ using Opcodes;
 using SessManager;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Sessions;
-using System.Net.Sockets;
+using Exodus.Collections.Concurrent;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using System.Net;
+using Utility;
 
 namespace EQOAProto
 {
@@ -22,17 +23,17 @@ namespace EQOAProto
         We will also need to create an endpoint class to 
         store each connecting clients endpoint, IP, Port
         */
-        public static async Task AcceptPacket(ChannelReader<UdpReceiveResult> ChannelReader)
+        public static async Task AcceptPacket(ChannelReader<Tuple<byte[], IPEndPoint>> ChannelReader)
         {
             while (await ChannelReader.WaitToReadAsync())
-                while (ChannelReader.TryRead(out UdpReceiveResult item))
+                while (ChannelReader.TryRead(out Tuple<byte[], IPEndPoint> item))
                     ProcPacket(item);
         }
 
-        public static void ProcPacket(UdpReceiveResult myObject)
+        public static void ProcPacket(Tuple<byte[], IPEndPoint> myObject)
         {
             int offset = 0;
-            ReadOnlyMemory<byte> ClientPacket = myObject.Buffer;
+            ReadOnlyMemory<byte> ClientPacket = myObject.Item1;
             
             ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
             Logger.Info("Grabbed item from queue");
@@ -61,7 +62,9 @@ namespace EQOAProto
                 {
                     Logger.Info("CRC Passed, processing");
 
-                    SessionManager.ProcessSession(ClientPacket, offset, myObject.RemoteEndPoint, ClientEndpoint);
+                    uint val = Utility_Funcs.Unpack(ClientPacket.Span, ref offset);
+
+                    SessionManager.ProcessSession(ClientPacket, offset, ClientEndpoint, myObject.Item2, val);
                     ///SessionManager.ProcessSession(myPacket, false);
                 }
 
@@ -85,7 +88,7 @@ namespace EQOAProto
         public static void AddEndPoints(Session MySession, List<byte> OutGoingMessages)
         {
             ///Insert Client Endpoint
-            OutGoingMessages.InsertRange(0, BitConverter.GetBytes(MySession.clientEndpoint));
+            OutGoingMessages.InsertRange(0, BitConverter.GetBytes(MySession.ClientEndpoint));
 
             Logger.Info("Adding Client Endpoint");
 
