@@ -2,15 +2,24 @@
 using System.Diagnostics;
 using System.Threading;
 using RdpComm;
+using SessManager;
 
 namespace EQOAProto
 {
-    class OurGameServer
+    class GameTick
     {
-        private static Stopwatch gameTimer;
-        private static int serverTick = 1000 / 10;
+        private Stopwatch gameTimer;
+        private int serverTick = 1000 / 10;
+        private readonly RdpCommOut _rdpCommOut;
+        private readonly SessionManager _sessionManager;
 
-        public static void GameLoop()
+        public GameTick(UDPListener udpListener, SessionManager sessionManager)
+        {
+            _sessionManager = sessionManager;
+            _rdpCommOut = new(udpListener, sessionManager);
+        }
+
+        public void GameLoop()
         {
             gameTimer = new Stopwatch();
 
@@ -19,7 +28,7 @@ namespace EQOAProto
                 gameTimer.Restart();
                 
                 ///Loop over Sessions and send updates if available
-                RdpCommOut.PrepPacket();
+                _rdpCommOut.PrepPacket();
 
                 gameTimer.Stop();
 

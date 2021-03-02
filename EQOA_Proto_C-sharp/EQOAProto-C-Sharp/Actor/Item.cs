@@ -153,7 +153,7 @@ namespace Items
             AR = ar;
         }
 
-        public List<byte> PullItem()
+        public byte[] PullItem()
         {
             ourMessage.Clear();
 
@@ -193,7 +193,7 @@ namespace Items
             ourMessage.AddRange(Encoding.Unicode.GetBytes(ItemDesc));
             PullStats();
 
-            return ourMessage;
+            return ourMessage.ToArray();
         }
 
         private void PullStats()

@@ -12,11 +12,11 @@ namespace Auctions
 
         }
 
-        public List<byte> PullAuction()
+        public byte[] PullAuction()
         {
             ourMessage.Clear();
 
-            return ourMessage;
+            return ourMessage.ToArray();
         }
     }
 }

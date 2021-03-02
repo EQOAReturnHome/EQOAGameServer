@@ -3,7 +3,8 @@ using System.Net;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System;
-using System.Timers;
+using SessManager;
+using System.Threading;
 
 namespace EQOAProto
 {
@@ -13,23 +14,29 @@ namespace EQOAProto
     */
     public class GameServer
     {
-
-        public static Timer OutBoundTimer = new Timer();
-
         public static async Task Main(string[] args)
         {
             ///Shared Channel between udpServer and commManager
-            var channel = Channel.CreateUnbounded<Tuple<byte[], IPEndPoint>>();
+            var channel = Channel.CreateUnbounded<UdpPacketStruct>();
 
             ///Load in config for Server Select stuff
             SelectServer.ReadConfig();
 
+            SessionManager sessionManager = new();
+
+            HandleIncPacket handle = new(sessionManager);
+            Thread th = new Thread((_) => handle.AcceptPacket(channel.Reader));
+            th.Start();
+
+            UDPListener udpListener = new();
+
+            GameTick gameTick = new(udpListener, sessionManager);
+            Thread th2 = new Thread(gameTick.GameLoop);
+            th2.Start();
+
+            // Start UDP Server Last
             //Start UDPServer async
-            UDPListener.StartServer(channel.Writer);
-
-            Task.Run(async() => HandleIncPacket.AcceptPacket(channel.Reader));
-
-            OurGameServer.GameLoop();
+            udpListener.StartServer(channel.Writer);
             string stuff = Console.ReadLine();
         }
     }

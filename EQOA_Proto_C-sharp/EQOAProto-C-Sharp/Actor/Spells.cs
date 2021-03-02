@@ -57,7 +57,7 @@ namespace Spells
             SpellDesc = thisSpellDesc;
         }
 
-        public List<byte> PullSpell()
+        public byte[] PullSpell()
         {
             //Make sure this is empty before pulling new data
             ourMessage.Clear();
@@ -85,8 +85,9 @@ namespace Spells
             ourMessage.AddRange(Encoding.Unicode.GetBytes(SpellName));
             ourMessage.AddRange(BitConverter.GetBytes(SpellDesc.Length));
             ourMessage.AddRange(Encoding.Unicode.GetBytes(SpellDesc));
+            ourMessage.Add(0);
 
-            return ourMessage;
+            return ourMessage.ToArray();
         }
     }
 }

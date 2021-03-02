@@ -30,7 +30,7 @@ namespace WeaponHotbars
             SecondaryHandID = thisSecondaryHandID;
         }
 
-        public List<byte> PullWeaponHotbar()
+        public byte[] PullWeaponHotbar()
         {
             //Ensure this is empty
             ourMessage.Clear();
@@ -40,7 +40,7 @@ namespace WeaponHotbars
             ourMessage.AddRange(BitConverter.GetBytes(HotbarName.Length));
             ourMessage.AddRange(Encoding.Unicode.GetBytes(HotbarName));
 
-            return ourMessage;
+            return ourMessage.ToArray();
         }
     }
 }

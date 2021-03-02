@@ -1,8 +1,9 @@
-﻿using Microsoft.VisualBasic.CompilerServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using EQOAProto;
 
 namespace Utility
 {
@@ -17,7 +18,7 @@ namespace Utility
         }
 
         ///Helper function encompassing the technique with overloads
-        public static List<byte> Technique(byte val)
+        public static byte[] Technique(byte val)
         {
             byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
 
@@ -25,11 +26,11 @@ namespace Utility
 
             if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
             else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal.ToList();
+            return MyVal;
         }
 
         ///Helper function encompassing the technique with overloads
-        public static List<byte> Technique(sbyte val)
+        public static byte[] Technique(sbyte val)
         {
             byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
 
@@ -37,11 +38,11 @@ namespace Utility
 
             if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
             else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal.ToList();
+            return MyVal;
         }
 
         ///Helper function encompassing the technique with overloads
-        public static List<byte> Technique(short val)
+        public static byte[] Technique(short val)
         {
             byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
 
@@ -49,11 +50,11 @@ namespace Utility
 
             if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
             else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal.ToList();
+            return MyVal;
         }
 
         ///Helper function encompassing the technique with overloads
-        public static List<byte> Technique(ushort val)
+        public static byte[] Technique(ushort val)
         {
             byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
 
@@ -61,11 +62,11 @@ namespace Utility
 
             if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
             else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal.ToList();
+            return MyVal;
         }
 
         ///Helper function encompassing the technique with overloads
-        public static List<byte> Technique(int val)
+        public static byte[] Technique(int val)
         {
             byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
 
@@ -73,11 +74,11 @@ namespace Utility
 
             if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
             else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal.ToList();
+            return MyVal;
         }
 
         ///Helper function encompassing the technique with overloads
-        public static List<byte> Technique(uint val)
+        public static byte[] Technique(uint val)
         {
             byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
 
@@ -85,7 +86,7 @@ namespace Utility
 
             if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
             else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal.ToList();
+            return MyVal;
         }
 
         ///Performs the actual Technique for us
@@ -149,13 +150,11 @@ namespace Utility
             if ((MyPacket[offset] & 1) == 1) isNegative = true; 
 
             //Work some magic
-            uint value = 0;
             uint val = 0;
 
             //Loop over our packet
             for (int i = 0; i < MyPacket.Length; i++)
             {
-                Console.WriteLine(i);
                 //Grab the current byte and shift i * 7
                 val |= (uint)((MyPacket[offset] & 0x7f) << (i * 7));
 
@@ -207,7 +206,7 @@ namespace Utility
             return val;
         }
 
-        static public List<byte> Pack(uint value)
+        static public byte[] Pack(uint value)
         {
             //Work some magic. Basic VLI
             List<byte> myList = new List<byte> { };
@@ -234,7 +233,7 @@ namespace Utility
             int j = 0;
             while (myList[i] == 0) { j++; --i; }
             myList.RemoveRange(i + 1, j);
-            return myList;
+            return myList.ToArray();
         }
 
         public static string GetMemoryString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)
@@ -244,6 +243,23 @@ namespace Utility
 
             finally
             { offset += stringLength; }
+        }
+
+        public static void WriteToBuffer<T>(this Memory<byte> buffer, T value, ref int offset) where T : unmanaged
+        {
+            Span<T> span = MemoryMarshal.CreateSpan(ref value, 1);
+            Span<byte> data = MemoryMarshal.AsBytes(span);
+            int size = data.Length;
+            data.CopyTo(buffer[offset..(offset + size)].Span);
+            for (int i = 0; i < size; i++)
+            {
+                if (data[i] == 0)
+                {
+                    size = i;
+                    break;
+                }
+            }
+            offset += size;
         }
     }
 

@@ -1,16 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
-namespace MessageStruct
+namespace Packet
 {
-    public struct Message
+    public readonly struct MessageStruct
     {
-        public List<byte> ThisMessage { private set; get; }
-        public ushort ThisMessagenumber { private set; get; }
+        public readonly Memory<byte> Message;
+        public readonly ushort Messagenumber;
+        public readonly long Time;
 
-        public  Message(ushort num, List<byte> MyMessage)
+        public MessageStruct(ushort num, Memory<byte> MyMessage)
         {
-            ThisMessage = new List<byte>(MyMessage);
-            ThisMessagenumber = num;
+            Message = MyMessage;
+            Messagenumber = num;
+            Time = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        }
+
+        public MessageStruct(Memory<byte> MyMessage)
+        {
+            Message = MyMessage;
+            Messagenumber = 0;
+            Time = 0;
         }
     }
 }

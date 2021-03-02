@@ -3,39 +3,37 @@ using EQLogger;
 using Opcodes;
 using SessManager;
 using System;
-using System.Collections.Generic;
 using Sessions;
 using Exodus.Collections.Concurrent;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Net;
 using Utility;
+using System.Runtime.InteropServices;
 
 namespace EQOAProto
 {
     public class HandleIncPacket
     {
-        ///private static readonly int AsyncDelay      = 200;
+        private readonly SessionManager _sessionManager;
 
+        public HandleIncPacket(SessionManager sessionManager)
+        {
+            _sessionManager = sessionManager;
+        }
 
-        /*
-        Eventually become it's own class
-        We will also need to create an endpoint class to 
-        store each connecting clients endpoint, IP, Port
-        */
-        public static async Task AcceptPacket(ChannelReader<Tuple<byte[], IPEndPoint>> ChannelReader)
+        public async Task AcceptPacket(ChannelReader<UdpPacketStruct> ChannelReader)
         {
             while (await ChannelReader.WaitToReadAsync())
-                while (ChannelReader.TryRead(out Tuple<byte[], IPEndPoint> item))
+                while (ChannelReader.TryRead(out UdpPacketStruct item))
                     ProcPacket(item);
         }
 
-        public static void ProcPacket(Tuple<byte[], IPEndPoint> myObject)
+        public void ProcPacket(UdpPacketStruct myObject)
         {
             int offset = 0;
-            ReadOnlyMemory<byte> ClientPacket = myObject.Item1;
+            ReadOnlyMemory<byte> ClientPacket = myObject.PacketMemory;
             
-            ///List<byte> myPacket = new List<byte>(udpServer.IncomingQueue.Dequeue());
             Logger.Info("Grabbed item from queue");
 
             ///Grab Client Endpoint
@@ -64,7 +62,7 @@ namespace EQOAProto
 
                     uint val = Utility_Funcs.Unpack(ClientPacket.Span, ref offset);
 
-                    SessionManager.ProcessSession(ClientPacket, offset, ClientEndpoint, myObject.Item2, val);
+                    _sessionManager.ProcessSession(ClientPacket, offset, ClientEndpoint, myObject.PacketIP, val);
                     ///SessionManager.ProcessSession(myPacket, false);
                 }
 
@@ -83,36 +81,33 @@ namespace EQOAProto
     ///Outbound CommManager
     public class HandleOutPacket
     {
+        private readonly UDPListener _udpListener;
+        public HandleOutPacket(UDPListener udpListener)
+        {
+            _udpListener = udpListener;
+        }
         ///Final touches
         ///Adds Endpoints to front and appends CRC
-        public static void AddEndPoints(Session MySession, List<byte> OutGoingMessages)
+        public void AddEndPoints(Session MySession, byte[] SessionHeader)
         {
+            Memory<byte> Packet = new byte[4 + SessionHeader.Length + MySession.packetCreator.ReadBytes + 4];
+
             ///Insert Client Endpoint
-            OutGoingMessages.InsertRange(0, BitConverter.GetBytes(MySession.ClientEndpoint));
-
             Logger.Info("Adding Client Endpoint");
-
-            ///Insert Server Endpoint
-            ///Hard Code Server endpoint for now...
-            OutGoingMessages.InsertRange(0, BitConverter.GetBytes(UDPListener.ServerEndPoint));
+            BitConverter.GetBytes(UDPListener.ServerEndPoint).CopyTo(Packet[0..2]);
 
             Logger.Info("Adding Server Endpoint");
+            BitConverter.GetBytes(MySession.ClientEndpoint).CopyTo(Packet[2..4]);
+            SessionHeader.CopyTo(Packet[4..(4 + SessionHeader.Length)]);
+            ReadOnlyMemory<byte> MyPacket = MySession.packetCreator.PacketReader();
+            MyPacket.CopyTo(Packet[(4 + SessionHeader.Length)..(Packet.Length - 4)]);
 
             Logger.Info("Calculating CRC");
-
-            ///Append CRC now
-            byte[] PacketCRC = CRC.calculateCRC(OutGoingMessages.ToArray());
-
             Logger.Info("Appending CRC to packet");
+            ///Append CRC now
+            CRC.calculateCRC(Packet.Span[0..(Packet.Length - 4)]).CopyTo(Packet[(Packet.Length - 4)..Packet.Length]);
 
-            ///Append CRC to our packet
-            OutGoingMessages.AddRange(PacketCRC);
-
-            Logger.Info(OutGoingMessages);
-
-            ///Packet should be done, send to UDP Listener out function
-            byte[] MyArray = OutGoingMessages.ToArray();
-            UDPListener.SendPacket(MyArray, MySession.MyIPEndPoint);
+            _udpListener.SendPacket(Packet, MySession.MyIPEndPoint);
         }     
     }
 }

@@ -20,13 +20,13 @@ namespace DNP3
             return (ulong)(Date1 * 1000);
         }
 
-        public static List<byte> CreateDNP3TimeStamp()
+        public static byte[] CreateDNP3TimeStamp()
         {
             List<byte> newList = new List<byte> { };
             newList.AddRange(BitConverter.GetBytes(CreateDNP3(0)));
             newList.AddRange(BitConverter.GetBytes(CreateDNP3(1350000)));
 
-            return newList;
+            return newList.ToArray();
         }
 
         /// <summary>

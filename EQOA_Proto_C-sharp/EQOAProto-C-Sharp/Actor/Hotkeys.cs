@@ -39,7 +39,7 @@ namespace Hotkeys
             SMessage = thisSMessage;
         }
 
-        public List<byte> PullHotkey()
+        public byte[] PullHotkey()
         {
             //Make sure this is clear before gathering and sending
             ourMessage.Clear();
@@ -64,7 +64,7 @@ namespace Hotkeys
             ourMessage.Add(6);
             ourMessage.AddRange(ConvertHotKey(SMessage, SLabel));
 
-            return ourMessage;
+            return ourMessage.ToArray();
         }
 
         private List<byte> ConvertHotKey(string message, string label)

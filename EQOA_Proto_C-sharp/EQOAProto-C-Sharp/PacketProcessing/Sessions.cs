@@ -1,12 +1,14 @@
 ﻿using Characters;
 using DNP3;
 using EQLogger;
-using MessageStruct;
+using Packet;
 using OpcodeOperations;
 using ServerSelect;
 using SessManager;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using EQOAProto;
 
 namespace Sessions
 {
@@ -14,7 +16,8 @@ namespace Sessions
     public class Session
     {
         //Message List
-        public List<Message> MyMessageList = new List<Message> { };
+        public ConcurrentQueue<MessageStruct> OutGoingMessageQueue = new();
+        public ConcurrentQueue<MessageStruct> ResendMessageQueue = new();
 
         ///SessionList Objects, probably need bundle information here too?
         public bool RemoteMaster;
@@ -30,6 +33,7 @@ namespace Sessions
         public bool GameVersionAck = false;
 
         public bool CreateMasterSession = false;
+        public bool StartMemoryDump;
 
         ///Our Received RDP Information
         public ushort ClientBundleNumber = 1;
@@ -72,36 +76,39 @@ namespace Sessions
         public ushort Channel12Message = 0;
         public bool Channel12Ack = false;
         public ushort Channel13Message = 0;
-        public bool Channel13Ack = false; 
+        public bool Channel13Ack = false;
         public ushort Channel14Message = 0;
-        public bool Channel14Ack = false; 
+        public bool Channel14Ack = false;
         public ushort Channel15Message = 0;
-        public bool Channel15Ack = false; 
+        public bool Channel15Ack = false;
         public ushort Channel16Message = 0;
-        public bool Channel16Ack = false; 
+        public bool Channel16Ack = false;
         public ushort Channel17Message = 0;
-        public bool Channel17Ack = false; 
+        public bool Channel17Ack = false;
         public ushort Channel18Message = 0;
-        public bool Channel18Ack = false; 
+        public bool Channel18Ack = false;
         public ushort Channel19Message = 0;
-        public bool Channel19Ack = false; 
+        public bool Channel19Ack = false;
         public ushort Channel20Message = 0;
-        public bool Channel20Ack = false; 
+        public bool Channel20Ack = false;
         public ushort Channel21Message = 0;
-        public bool Channel21Ack = false; 
+        public bool Channel21Ack = false;
         public ushort Channel22Message = 0;
-        public bool Channel22Ack = false; 
+        public bool Channel22Ack = false;
         public ushort Channel23Message = 0;
         public bool Channel23Ack = false;
         public bool Channel40Ack = false;
         public ushort Channel40Message = 0;
-        public Message Channel40Base;
-        public List<Message> Channel40BaseList = new List<Message> { }; 
+        public MessageStruct Channel40Base;
+        public List<MessageStruct> Channel40BaseList = new List<MessageStruct> { };
         public ushort Channel42Message = 0;
         public bool Channel42Ack = false;
         public ushort Channel43Message = 0;
         public bool Channel43Ack = false;
 
+        //Message/Packet stuff
+        public PacketCreator packetCreator = new();
+        public MessageCreator messageCreator = new();
 
         ///Server Select trigger
         public bool ServerSelect = false;
@@ -130,15 +137,10 @@ namespace Sessions
         ///Once we receive account ID, this should never change...
         public int AccountID;
 
-        ///Session outgoing packet
-        public List<byte> SessionInformation = new List<byte>();
-        public List<byte> SessionMessages = new List<byte>();
-
         ///Clients IP Information
         public IPAddress MyIPInfo;
 
         //Character List and dump stuff
-        public List<byte> MyDumpData = new List<byte> { };
         public bool Dumpstarted = false;
         public List<Character> CharacterData;
         public Character MyCharacter = null;
@@ -204,7 +206,7 @@ namespace Sessions
                 if (ServerSelect)
                 {
                     ///Should generate our server list.
-                    SelectServer.GenerateServerSelect(this);
+                    //SelectServer.GenerateServerSelect(this);
                 }
             }
         }

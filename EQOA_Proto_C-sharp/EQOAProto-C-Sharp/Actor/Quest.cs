@@ -11,13 +11,12 @@ namespace Quests
 
         }
 
-        public List<byte> PullQuest()
+        public byte[] PullQuest()
         {
             //Clear List
             ourMessage.Clear();
 
-            return ourMessage;
-
+            return ourMessage.ToArray();
         }
     }
 }

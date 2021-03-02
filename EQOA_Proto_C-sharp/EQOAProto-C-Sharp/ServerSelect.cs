@@ -10,6 +10,7 @@ using RdpComm;
 using Opcodes;
 using System.Linq;
 using Sessions;
+using EQOAProto;
 
 namespace ServerSelect
 {
@@ -18,13 +19,13 @@ namespace ServerSelect
         private static Encoding unicode = Encoding.Unicode;
         private static List<byte> ServerList = new List<byte>();
 
-        public static void GenerateServerSelect(Session MySession)
+        public static void GenerateServerSelect(SessionQueueMessages sessionQueueMessages,Session MySession)
         {
             ///Grab the server List
-            List<byte> MyServerList = ServerList;
+            MySession.messageCreator.MessageWriter(ServerList.ToArray());
 
             Logger.Info("Collecting Server select list for client");
-            RdpCommOut.PackMessage(MySession, new List<byte>(MyServerList), MessageOpcodeTypes.ShortUnreliableMessage, (ushort)GameOpcode.GameServers);
+            sessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortUnreliableMessage);
         }
 
         static public void ReadConfig()
@@ -38,7 +39,10 @@ namespace ServerSelect
                 string result = appSettings["Servercount"] ?? "Not Found";
 
                 ///Check if results were found
-                if (result == "Not Found") { Logger.Err("Config file not found, is it present?"); }
+                if (result == "Not Found")
+                {
+                    Logger.Err("Config file not found, is it present?");
+                }
 
                 else
                 {
@@ -50,6 +54,7 @@ namespace ServerSelect
                         ///Convert our result to an int
                         int ServerCount = Int32.Parse(result);
 
+                        ServerList.AddRange(BitConverter.GetBytes((ushort)GameOpcode.GameServers));
                         ///Add Server count to our preformed packet
                         ServerList.AddRange(Utility_Funcs.Technique(ServerCount));
 

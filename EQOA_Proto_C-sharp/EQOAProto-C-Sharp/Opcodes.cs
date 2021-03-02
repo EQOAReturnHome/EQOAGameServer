@@ -52,21 +52,6 @@ namespace Opcodes
          DisconnectClient = 0x09B0 //2480
     }
 
-    public class OpcodeTypes
-    {
-        public static Dictionary<GameOpcode, Action<Session, ReadOnlyMemory<byte>>> OpcodeDictionary = new()
-        {
-            { GameOpcode.DiscVersion, ProcessOpcode.ProcessGameDisc },
-            { GameOpcode.Authenticate, ProcessOpcode.ProcessAuthenticate},
-            { GameOpcode.Authenticate2, ProcessOpcode.ProcessAuthenticate},
-            { GameOpcode.SELECTED_CHAR, ProcessOpcode.ProcessCharacterChanges},
-            { GameOpcode.DelCharacter, ProcessOpcode.ProcessDelChar },
-            { GameOpcode.CreateCharacter, ProcessOpcode.ProcessCreateChar}
-        };
-    }
-
-    
-
     public static class GameVersions
     {
 

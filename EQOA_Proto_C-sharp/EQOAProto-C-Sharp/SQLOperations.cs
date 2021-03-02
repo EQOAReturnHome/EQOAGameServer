@@ -464,7 +464,7 @@ namespace EQOASQL
         }
 
         //Method to delete character from player's account
-        public static void DeleteCharacter(int serverid, Session MySession)
+        public static void DeleteCharacter(SessionManager sessionManager, int serverid, Session MySession)
             {
                 //Opens new Sql connection using connection parameters
                 var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
@@ -488,7 +488,7 @@ namespace EQOASQL
                 MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
                 //Send Fresh Character Listing
-                ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
+                ProcessOpcode.CreateCharacterList(sessionManager, MyCharacterList, MySession);
             }
 
             //Method to check if characters name exist in the DB
@@ -523,7 +523,7 @@ namespace EQOASQL
             }
 
             //Method to create new character for player's account
-            public static void CreateCharacter(Session MySession, Character charCreation)
+            public static void CreateCharacter(SessionManager sessionManager, Session MySession, Character charCreation)
             {
 
                 //Instantiate new list of Characters to return new character listing
@@ -675,13 +675,13 @@ namespace EQOASQL
                 SecondCon.Close();
 
                 //Log which character serverid was created
-                Console.WriteLine($"Created Character with Name: {charCreation.CharName}");
+                //Console.WriteLine($"Created Character with Name: {charCreation.CharName}");
 
                 List<Character> MyCharacterList = new List<Character>();
                 MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
                 //Send Fresh Character Listing
-                ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
+                ProcessOpcode.CreateCharacterList(sessionManager, MyCharacterList, MySession);
             }
         }
     }

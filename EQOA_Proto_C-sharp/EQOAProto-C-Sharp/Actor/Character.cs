@@ -9,6 +9,8 @@ using Utility;
 using Auctions;
 using Quests;
 using EQOASQL;
+using SessManager;
+using Sessions;
 
 namespace Characters
 {
@@ -254,15 +256,18 @@ namespace Characters
             PowerOT2 = powerOT2;
         }
 
-		public void UpdateFeatures(int hairColor, int hairLength, int hairStyle, int faceOption)
+		public void UpdateFeatures(Session MySession, int hairColor, int hairLength, int hairStyle, int faceOption)
 		{
 			HairColor = hairColor;
 			HairLength = hairLength;
 			HairStyle = hairStyle;
 			FaceOption = faceOption;
-		}
+            MySession.MyCharacter = this;
 
-		public List<byte> PullCharacter()
+            //Need to add a Database push here also
+        }
+
+		public byte[] PullCharacter()
         {
 			//Clear List
 			ourMessage.Clear();
@@ -294,9 +299,7 @@ namespace Characters
 			ourMessage.AddRange(BitConverter.GetBytes(0.0f));
 			ourMessage.AddRange(BitConverter.GetBytes(0.0f));
 
-            
-
-			return ourMessage;
+            return ourMessage.ToArray(); ;
 		}
 	}
 }

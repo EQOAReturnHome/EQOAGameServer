@@ -7,7 +7,7 @@ using RdpComm;
 using ObjectUpdates;
 using Characters;
 using System.Linq;
-using MessageStruct;
+using Packet;
 using EQOAProto;
 
 namespace Unreliable
@@ -40,7 +40,7 @@ namespace Unreliable
 
             //This means that this is a deprecated packet that may of got lost on the way, base xor is behind current basexor
             //Let's not bother to even process it
-            if (MySession.Channel40Base.ThisMessagenumber > (XorMessage - XorByte)) return;
+            if (MySession.Channel40Base.Messagenumber > (XorMessage - XorByte)) return;
 
             //Uncompress the packet
             List<byte> MyPacket = new List<byte> (Compression.UncompressUnreliable(ClientPacket.Span, ref offset, UnreliableLength));
@@ -65,7 +65,7 @@ namespace Unreliable
                 MySession.InGame = true;
 
                 //Add xor base message to our list to track
-                MySession.Channel40Base = new Message(XorMessage, MyPacket);
+                MySession.Channel40Base = new MessageStruct(XorMessage, new Memory<byte>(MyPacket.ToArray()));
 
                 //Should we generate a C9 here?
                 List<byte> MyObject = Compression.CompressUnreliable(new List<byte>(ObjectUpdate.GatherObjectUpdate(MySession.MyCharacter, MySession.SessionID)));
@@ -75,51 +75,49 @@ namespace Unreliable
                 MyObject.Insert(0, 0);
                 //Add 0 on to end to denote end of this channel
                 MyObject.Add(0);
-                lock (MySession.SessionMessages)
-                {
-                    MySession.SessionMessages.AddRange(MyObject);
-                }
+
+                //MySession.SessionMessages.AddRange(MyObject);
                 MyObject.Clear();
 
             }
-
+            /*
             //Following client updates MySession.Channel40Base.ThisMessage
             //Lots of xor'ing...
             else
             {
-                MySession.MyCharacter.World = (byte)(MySession.Channel40Base.ThisMessage[0] ^ MyPacket[0]);
+                MySession.MyCharacter.World = (byte)(MySession.Channel40Base.Message.Span[0] ^ MyPacket[0]);
 
                 //This should match what we have stored for the character? Let's verify this?
-                MySession.MyCharacter.XCoord = ConvertXZ(Get3ByteIntXOR((byte)(MySession.Channel40Base.ThisMessage[1] ^ MyPacket[1]), (byte)(MySession.Channel40Base.ThisMessage[2] ^ MyPacket[2]), (byte)(MySession.Channel40Base.ThisMessage[3] ^ MyPacket[3])));
-                MySession.MyCharacter.YCoord = ConvertY(Get3ByteIntXOR((byte)(MySession.Channel40Base.ThisMessage[4] ^ MyPacket[4]), (byte)(MySession.Channel40Base.ThisMessage[5] ^ MyPacket[5]), (byte)(MySession.Channel40Base.ThisMessage[6] ^ MyPacket[6])));
-                MySession.MyCharacter.ZCoord = ConvertXZ(Get3ByteIntXOR((byte)(MySession.Channel40Base.ThisMessage[7] ^ MyPacket[7]), (byte)(MySession.Channel40Base.ThisMessage[8] ^ MyPacket[8]), (byte)(MySession.Channel40Base.ThisMessage[9] ^ MyPacket[9])));
+                MySession.MyCharacter.XCoord = ConvertXZ(Get3ByteIntXOR((byte)(MySession.Channel40Base.Message.Span[1] ^ MyPacket[1]), (byte)(MySession.Channel40Base.Message.Span[2] ^ MyPacket[2]), (byte)(MySession.Channel40Base.Message.Span[3] ^ MyPacket[3])));
+                MySession.MyCharacter.YCoord = ConvertY(Get3ByteIntXOR((byte)(MySession.Channel40Base.Message.Span[4] ^ MyPacket[4]), (byte)(MySession.Channel40Base.Message.Span[5] ^ MyPacket[5]), (byte)(MySession.Channel40Base.Message.Span[6] ^ MyPacket[6])));
+                MySession.MyCharacter.ZCoord = ConvertXZ(Get3ByteIntXOR((byte)(MySession.Channel40Base.Message.Span[7] ^ MyPacket[7]), (byte)(MySession.Channel40Base.Message.Span[8] ^ MyPacket[8]), (byte)(MySession.Channel40Base.Message.Span[9] ^ MyPacket[9])));
 
                 //Skip 12 bytes...
-                MySession.MyCharacter.Facing = ConvertFacing((byte)(MySession.Channel40Base.ThisMessage[22] ^ MyPacket[22]));
+                MySession.MyCharacter.Facing = ConvertFacing((byte)(MySession.Channel40Base.Message.Span[22] ^ MyPacket[22]));
 
                 //Skip 12 bytes...
-                MySession.MyCharacter.Animation = (short)(GetShortXOR((byte)(MySession.Channel40Base.ThisMessage[35] ^ MyPacket[35]), (byte)(MySession.Channel40Base.ThisMessage[36] ^ MyPacket[36])));
-                MySession.MyCharacter.Target = Get4ByteIntXOR((byte)(MySession.Channel40Base.ThisMessage[37] ^ MyPacket[37]), (byte)(MySession.Channel40Base.ThisMessage[38] ^ MyPacket[38]), (byte)(MySession.Channel40Base.ThisMessage[39] ^ MyPacket[39]), (byte)(MySession.Channel40Base.ThisMessage[40] ^ MyPacket[40]));
+                MySession.MyCharacter.Animation = (short)(GetShortXOR((byte)(MySession.Channel40Base.Message.Span[35] ^ MyPacket[35]), (byte)(MySession.Channel40Base.Message.Span[36] ^ MyPacket[36])));
+                MySession.MyCharacter.Target = Get4ByteIntXOR((byte)(MySession.Channel40Base.Message.Span[37] ^ MyPacket[37]), (byte)(MySession.Channel40Base.Message.Span[38] ^ MyPacket[38]), (byte)(MySession.Channel40Base.Message.Span[39] ^ MyPacket[39]), (byte)(MySession.Channel40Base.Message.Span[40] ^ MyPacket[40]));
                 
                 //Means client has started a new basemessage, follow suit
-                if (MySession.Channel40Base.ThisMessagenumber < (XorMessage - XorByte))
+                if (MySession.Channel40Base.Messagenumber < (XorMessage - XorByte))
                 {
                     //Grab new base message to xor against
-                    Message NewBaseMessage = MySession.Channel40BaseList.Find(i => i.ThisMessagenumber == (XorMessage - XorByte));
+                    MessageStruct NewBaseMessage = MySession.Channel40BaseList.Find(i => i.Messagenumber == (XorMessage - XorByte));
 
                     //Add our new xor'd base message and start over
-                    MySession.Channel40Base = new Message(XorMessage, GetArrayXOR(NewBaseMessage.ThisMessage, MyPacket));
+                    MySession.Channel40Base = new MessageStruct(XorMessage, GetArrayXOR(NewBaseMessage.Message.Span, MyPacket));
 
                     //Remove all other possible base messages
                     MySession.Channel40BaseList.Clear();
                 }
 
                 //Means update is based off same xor base
-                else if (MySession.Channel40Base.ThisMessagenumber == (XorMessage - XorByte))
+                else if (MySession.Channel40Base.Messagenumber == (XorMessage - XorByte))
                 {
-                    MySession.Channel40BaseList.Add(new Message(XorMessage, GetArrayXOR(MySession.Channel40Base.ThisMessage, MyPacket)));
+                    MySession.Channel40BaseList.Add(new MessageStruct(XorMessage, GetArrayXOR(MySession.Channel40Base.Message.Span, MyPacket)));
                 }
-            }
+            }*/
 
             //Let outbound rdpreport know to include this to outbound ack's
             //This is purely as inbetween for message ack's
