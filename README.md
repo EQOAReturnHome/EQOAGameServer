@@ -1,7 +1,7 @@
 # EQOAGameServer
 The /current/ overall eqoa game server, not so complex, complex.
 
-# TCPServerTests
+# Authentication Server
 
 EQOA Account server.
 Utilizing TCP server in C#, able to process and interact with a few requests of the client.
@@ -19,15 +19,21 @@ Functions needing to be added:
 - Authenticating old password and replacing it with new password if correct.
 - Receiving create account requests, checking for username availability and writing the information to the database.
 
-# EQOA-Proto-C-Sharp
+# ReturnHome
 
 UDP server implementing the packet framework to handle packet requests up to character select, including creating and deleting characters.
 This server implements a keep alive which keeps the server select menu and Character select menu alive for a indefinite amount of time currently.
 
-Current paths forward include:
-- Starting the memory dump upon a character being selected
-- Reverse engineering the game map from the client to use server side for player tracking, collision detection, etc.
+Able to get in world with a character, and run around
 
+Current paths forward include:
+- ~~Starting the memory dump upon a character being selected~~ This is mostly in place now, for atleast a starting point
+- ~~Reverse engineering the game map from the client to use server side for player tracking, collision detection, etc.~~ This is done thanks to xylof
+- Create a generic program for server instances to spool zones up with. These would load map data such as navmesh. Along with creating octtree's for nearby player/npc interaction. Good starting point for multiplayer
+- too much to really list..
+
+# Side Goals
+- Crack the patch encryption. This would be critical to pushing final live game patches to clients and would allow physical ps2's to connect via this server.
 
 # Set up
 
