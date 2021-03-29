@@ -28,7 +28,8 @@ namespace ReturnHome.Utilities
 
             //Considerations... Channel, MessageLength, Message #, Xor Back #
             _meassgeCreator.MessageWriter(new byte[] { 0x00, 0xC9 });
-            _meassgeCreator.MessageWriter(BitConverter.GetBytes(MySession.Channel40Message));
+            _meassgeCreator.MessageWriter(BitConverter.GetBytes(MySession.ActorUpdatMessageCount));
+            MySession.ActorUpdatMessageCount += 1;
             _meassgeCreator.MessageWriter(new byte[] { 0x00 });
 
             //Cycle through every byte of update message

@@ -15,9 +15,9 @@ namespace ReturnHome.PacketProcessing
             _sessionManager = sessionManager;
         }
 
-        public async Task AcceptPacket(ChannelReader<UdpPacketStruct> ChannelReader)
+        public void AcceptPacket(ChannelReader<UdpPacketStruct> ChannelReader)
         {
-            while (await ChannelReader.WaitToReadAsync())
+            while (true)
                 while (ChannelReader.TryRead(out UdpPacketStruct item))
                     ProcPacket(item);
         }

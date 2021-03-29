@@ -251,7 +251,7 @@ namespace ReturnHome.PacketProcessing
                 if (MySession.Channel40Ack)
                 {
                     packetCreator.PacketWriter(new byte[] {0x40});
-                    packetCreator.PacketWriter(BitConverter.GetBytes(MySession.Channel40Message));
+                    packetCreator.PacketWriter(BitConverter.GetBytes(MySession.Channel40Base.Messagenumber));
                     packetCreator.PacketWriter(new byte[] { 0xF8 });
                     MySession.Channel40Ack = false;
                     return;
@@ -264,10 +264,9 @@ namespace ReturnHome.PacketProcessing
         public void AddBundleType(Session MySession)
         {
             byte segBody = 0;
-            if (MySession.RdpMessage)
-            {
-                segBody |= 0x20;
-            }
+
+            //Always has this
+            segBody |= 0x20;
 
             if (MySession.RdpReport)
             {

@@ -564,6 +564,7 @@ namespace ReturnHome.SQL
                     charCreation.YCoord = rdr.GetFloat(10);
                     charCreation.ZCoord = rdr.GetFloat(11);
                     charCreation.Facing = rdr.GetFloat(12);
+                    charCreation.World = rdr.GetInt32(13);
                     charCreation.DefaultStrength = rdr.GetInt32(14);
                     charCreation.DefaultStamina = rdr.GetInt32(15);
                     charCreation.DefaultAgility = rdr.GetInt32(16);
@@ -590,6 +591,8 @@ namespace ReturnHome.SQL
 
                 //Open second connection using query string params
 
+
+                Console.WriteLine($"Character using world {charCreation.World}");
                 //Set connection property from connection string and open connection
                 using MySqlConnection SecondCon = new MySqlConnection(connectionString);
                 SecondCon.Open();
@@ -620,6 +623,7 @@ namespace ReturnHome.SQL
                 SecondCmd.Parameters.AddWithValue("BankTunar", charCreation.BankTunar);
                 SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.UnusedTP);
                 SecondCmd.Parameters.AddWithValue("TotalTP", 350);
+                SecondCmd.Parameters.AddWithValue("World", charCreation.World);
                 SecondCmd.Parameters.AddWithValue("X", charCreation.XCoord);
                 SecondCmd.Parameters.AddWithValue("Y", charCreation.YCoord);
                 SecondCmd.Parameters.AddWithValue("Z", charCreation.ZCoord);

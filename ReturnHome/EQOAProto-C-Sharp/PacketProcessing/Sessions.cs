@@ -43,9 +43,8 @@ namespace ReturnHome.PacketProcessing
         public ushort ServerRecvMessageNumber = 1;
 
         public bool Channel40Ack = false;
-        public ushort Channel40Message = 0;
         public MessageStruct Channel40Base;
-        public List<MessageStruct> Channel40BaseList = new List<MessageStruct> { };
+        public ushort ActorUpdatMessageCount = 1; 
 
         public long elapsedTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 

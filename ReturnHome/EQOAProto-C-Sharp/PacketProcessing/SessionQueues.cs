@@ -68,40 +68,6 @@ namespace ReturnHome.PacketProcessing
 
         public void GatherMessages(PacketCreator packetCreator)
         {
-            //Check Resend queue first... this could be much better
-            if(ResendMessageQueue.TryDequeue(out MessageStruct resendMessage))
-            {
-                //If no ack in 2 seconds resend
-                if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - resendMessage.Time) > 2000)
-                {
-                    //Resend messages
-                    packetCreator.PacketWriter(resendMessage.Message);
-                    resendMessage.Time = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                }
-            }
-
-            //Process reliable messages
-            while (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp))
-            {
-                if ((packetCreator.ReadBytes + temp.Message.Length) < 1500)
-                {
-                    if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
-                    {
-                        //Place message into outgoing message
-                        packetCreator.PacketWriter(reliableMessage.Message);
-
-                        //Reset Timestamp
-                        reliableMessage.Time = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-                        //Place into resend queue
-                        ResendMessageQueue.Enqueue(reliableMessage);
-
-                        //continue processing
-                        continue;
-                    }
-                }
-                break;
-            }
 
             //process unreliable messages
             while (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
@@ -119,18 +85,53 @@ namespace ReturnHome.PacketProcessing
                 }
                 break;
             }
+
+            //Check Resend queue first... this could be much better
+            if (ResendMessageQueue.TryDequeue(out MessageStruct resendMessage))
+            {
+                //If no ack in 2 seconds resend
+                if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - resendMessage.Time) > 2000)
+                {
+                    //Resend messages
+                    packetCreator.PacketWriter(resendMessage.Message);
+                    resendMessage.updateTime();
+                }
+            }
+
+            //Process reliable messages
+            while (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp))
+            {
+                if ((packetCreator.ReadBytes + temp.Message.Length) < 1500)
+                {
+                    if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                    {
+                        //Place message into outgoing message
+                        packetCreator.PacketWriter(reliableMessage.Message);
+
+                        //Reset Timestamp
+                        reliableMessage.updateTime();
+
+                        //Place into resend queue
+                        ResendMessageQueue.Enqueue(reliableMessage);
+
+                        //continue processing
+                        continue;
+                    }
+                }
+                break;
+            }
         }
 
         public void RemoveReliables(int LastAckMessageNumber)
         {
             while (ResendMessageQueue.TryPeek(out MessageStruct temp))
             {
-                if (temp.Messagenumber < LastAckMessageNumber)
+                if (temp.Messagenumber <= LastAckMessageNumber)
                 {
                     // If first message to be resent is less then last ack'd #, drop it
                     if(ResendMessageQueue.TryDequeue(out MessageStruct resendMessage))
                     {
-
+                        continue;
                     }
                 }
                 //Means that the last ack message is less then our resend queue message
