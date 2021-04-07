@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Channels;
+using System.Threading.Tasks;
+using System.Timers;
 using ReturnHome.Actor;
 using ReturnHome.Opcodes;
 using ReturnHome.SQL;
@@ -16,13 +19,21 @@ namespace ReturnHome.PacketProcessing
         private readonly SessionManager _sessionManager;
         private readonly ProcessOpcode _processOpcode;
         public readonly SessionQueueMessages queueMessages = new();
-        private readonly ProcessUnreliable _processUnreliable;
+        private readonly ProcessUnreliable _processUnreliable = new();
+        private readonly SelectServer _selectServer = new();
 
         public RdpCommIn(SessionManager sessionManager)
         {
+            //ServerSelect stuff
+            _selectServer.ReadConfig();
+            Timer t = new Timer(5000);
+            t.AutoReset = true;
+            t.Elapsed += new ElapsedEventHandler((_, _) => _selectServer.GenerateServerSelect());
+            t.Start();
+
+            //The rest
             _sessionManager = sessionManager;
             _processOpcode = new(queueMessages, sessionManager);
-            _processUnreliable = new();
         }
         public void ProcessBundle(Session MySession, ReadOnlyMemory<byte> ClientPacket, int offset)
         {
@@ -147,12 +158,32 @@ namespace ReturnHome.PacketProcessing
             ///Trigger Server Select with this?
             else if ((MySession.ClientEndpoint == (MySession.InstanceID & 0x0000FFFF)) && MySession.ServerMessageNumber == 2 && MySession.SessionAck)
             {
-                SelectServer.GenerateServerSelect(queueMessages, MySession);
+                ListenForServerList(MySession);
             }
 
             else
             {
                 Logger.Err($"Client received server message {LastRecvMessageNumber}, expected {MySession.ServerMessageNumber}");
+            }
+        }
+
+        private async Task ListenForServerList(Session MySession)
+        {
+            MySession.serverSelect = true;
+            ChannelReader<byte[]> serverList = _selectServer.getChannel(MySession);
+
+            if (MySession.serverSelect)
+            {
+                //Wait for data in channel
+                while (await serverList.WaitToReadAsync())
+                {
+                    //Grab the data
+                    while (serverList.TryRead(out byte[] item))
+                    {
+                        queueMessages.messageCreator.MessageWriter(item);
+                        queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortUnreliableMessage);
+                    }
+                }
             }
         }
 

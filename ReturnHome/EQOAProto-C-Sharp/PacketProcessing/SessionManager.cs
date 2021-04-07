@@ -67,6 +67,8 @@ namespace ReturnHome.PacketProcessing
                         if ((value & 0x10000) != 0) // reset connection?
                         {
                             SessionHash.TryRemove(ClientSession);
+                            ClientSession.serverSelect = false;
+                            ClientSession.Dispose();
                             return;
                         }
 
@@ -86,6 +88,8 @@ namespace ReturnHome.PacketProcessing
                         if ((value & 0x10000) != 0) // reset connection?
                         {
                             SessionHash.TryRemove(ClientSession);
+                            ClientSession.serverSelect = false;
+                            ClientSession.Dispose();
                             return;
                         }
 
@@ -114,6 +118,8 @@ namespace ReturnHome.PacketProcessing
                     if ((value & 0x10000) != 0) // reset connection?
                     {
                         SessionHash.TryRemove(ClientSession);
+                        ClientSession.serverSelect = false;
+                        ClientSession.Dispose();
                         return;
                     }
 

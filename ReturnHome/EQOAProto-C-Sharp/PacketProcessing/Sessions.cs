@@ -4,6 +4,7 @@ using System;
 using ReturnHome.Utilities;
 using ReturnHome.Actor;
 using System.IO.Pipelines;
+using System.Threading.Tasks;
 
 namespace ReturnHome.PacketProcessing
 {
@@ -53,6 +54,8 @@ namespace ReturnHome.PacketProcessing
 
         ///BundleType Transition
         public bool BundleTypeTransition = false;
+
+        public bool serverSelect;
 
         public bool RdpReport = false;
         public bool RdpMessage = false;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 
@@ -15,9 +14,9 @@ namespace ReturnHome.PacketProcessing
             _sessionManager = sessionManager;
         }
 
-        public void AcceptPacket(ChannelReader<UdpPacketStruct> ChannelReader)
+        public async void AcceptPacket(ChannelReader<UdpPacketStruct> ChannelReader)
         {
-            while (true)
+            while (await ChannelReader.WaitToReadAsync())
                 while (ChannelReader.TryRead(out UdpPacketStruct item))
                     ProcPacket(item);
         }

@@ -7,24 +7,38 @@ using System.Linq;
 using ReturnHome.PacketProcessing;
 using ReturnHome.Opcodes;
 using ReturnHome.Utilities;
+using System.Threading.Channels;
 
 namespace ServerSelect
 {
     class SelectServer
     {
-        private static Encoding unicode = Encoding.Unicode;
-        private static List<byte> ServerList = new List<byte>();
+        private Encoding unicode = Encoding.Unicode;
+        private byte[] ServerList;
+        private ConcurrentHashSet<serverListChannel> _serverListSubscribers = new();
 
-        public static void GenerateServerSelect(SessionQueueMessages sessionQueueMessages,Session MySession)
+        public SelectServer()
         {
-            ///Grab the server List
-            sessionQueueMessages.messageCreator.MessageWriter(ServerList.ToArray());
 
-            Logger.Info("Collecting Server select list for client");
-            sessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortUnreliableMessage);
         }
 
-        public static void ReadConfig()
+        public void GenerateServerSelect()
+        {
+            foreach (var b in _serverListSubscribers)
+            {
+                //if false, close the channel
+                if (!b.session.serverSelect)
+                {
+                    b.channel.Complete();
+                    _serverListSubscribers.Remove(b);
+                    continue;
+                }
+
+                b.channel.WriteAsync(ServerList);
+            }
+        }
+
+        public void ReadConfig()
         {
             try
             {
@@ -44,7 +58,7 @@ namespace ServerSelect
 
                 else
                 {
-                    
+
                     try
                     {
                         Logger.Info($"Acquiring Server Config, total of {result} config's");
@@ -52,10 +66,28 @@ namespace ServerSelect
                         ///Convert our result to an int
                         int ServerCount = int.Parse(result);
 
-                        ServerList.AddRange(BitConverter.GetBytes((ushort)GameOpcode.GameServers));
+                        //Standard server listing has 14 bytes to represent data not including length of servername and 3 bytes for server count and opcode
+                        int size = 14 * ServerCount + 3;
 
+                        //Get length of server names
+                        for (int i = 0; i < ServerCount; i++)
+                        {
+                            //Length * 2 because unicode
+                            size += appSettings[$"Server{i}"].Length * 2;
+                        }
+
+                        ServerList = new byte[size];
+                        Span<byte> temp = ServerList;
+
+                        int offset = 0;
+
+                        BitConverter.GetBytes((ushort)GameOpcode.GameServers).CopyTo(temp.Slice(offset, 2));
+
+                        offset += 2;
                         ///Add Server count to our preformed packet
-                        ServerList.AddRange(Utility_Funcs.Technique(ServerCount));
+                        byte[] bytetemp = Utility_Funcs.Technique(ServerCount);
+                        bytetemp.CopyTo(temp.Slice(offset, bytetemp.Length));
+                        offset += bytetemp.Length;
 
                         ///Cycle through servers in Config List
                         for (int i = 0; i < ServerCount; i++)
@@ -63,32 +95,48 @@ namespace ServerSelect
 
                             ///Gets Server Name and Name Length
                             string ServerName = appSettings[$"Server{i}"];
-                            int ServerNameLength = ServerName.Length;
-                            ///Add Server name length
-                            ServerList.AddRange(BitConverter.GetBytes(ServerNameLength));
-                            ///Add Server Name in unicode
-                            ServerList.AddRange(unicode.GetBytes(ServerName));
+                            BitConverter.GetBytes(ServerName.Length).CopyTo(temp.Slice(offset, 4));
+                            offset += 4;
 
-                            byte ServerRecommended = (byte)(Convert.ToUInt32(appSettings[$"ServerRecommended{i}"]));
+                            unicode.GetBytes(ServerName).CopyTo(temp.Slice(offset, ServerName.Length * 2));
+                            offset += ServerName.Length * 2;
+
                             ///Add Server Recommendation
-                            ServerList.Add(ServerRecommended);
+                            temp[offset] = (byte)(Convert.ToUInt32(appSettings[$"ServerRecommended{i}"]));
+                            offset += 1;
 
-                            ushort ServerEndPointID = Convert.ToUInt16(appSettings[$"ServerEndPointID{i}"]);
                             ///Add Server End Point
-                            ServerList.AddRange(BitConverter.GetBytes(ServerEndPointID));
+                            BitConverter.GetBytes(Convert.ToUInt16(appSettings[$"ServerEndPointID{i}"])).CopyTo(temp.Slice(offset, 2));
+                            offset += 2;
 
-                            ushort ServerPort = Convert.ToUInt16(appSettings[$"ServerPort{i}"]);
                             ///Add Server Port
-                            ServerList.AddRange(BitConverter.GetBytes(ServerPort));
+                            BitConverter.GetBytes(Convert.ToUInt16(appSettings[$"ServerPort{i}"])).CopyTo(temp.Slice(offset, 2));
+                            offset += 2;
 
-                            IPAddress ServerIP = IPAddress.Parse(appSettings[$"ServerIP{i}"]);
-                            ///Add Server IP and reverse bytes
-                            ServerList.AddRange((ServerIP.GetAddressBytes()).Reverse());
+                            ///Add Server IP 
+                            IPAddress tempIP = IPAddress.Parse(appSettings[$"ServerIP{i}"]);
+                            byte[] tempbyte = tempIP.GetAddressBytes();
 
-                            byte ServerLanguage = (byte)(Convert.ToUInt32(appSettings[$"ServerLanguage{i}"]));
-                            ServerList.Add(ServerLanguage);
+                            //Swap bytes for endianess here on the fly
+                            byte a = tempbyte[0];
+                            byte b = tempbyte[1];
+                            tempbyte[0] = tempbyte[3];
+                            tempbyte[1] = tempbyte[2];
+                            tempbyte[2] = b;
+                            tempbyte[3] = a;
+
+                            tempbyte.CopyTo(temp.Slice(offset, 4));
+                            offset += 4;
+
+                            temp[offset] = (byte)(Convert.ToUInt32(appSettings[$"ServerLanguage{i}"]));
+                            offset += 1;
 
                             Logger.Info($"Acquired Server #{i + 1}");
+                        }
+
+                        foreach (byte b in ServerList)
+                        {
+                            Console.WriteLine(b);
                         }
 
                         Logger.Info("Done...");
@@ -105,6 +153,25 @@ namespace ServerSelect
             {
                 Logger.Err("Error reading app settings");
             }
+        }
+
+        public ChannelReader<byte[]> getChannel(Session session)
+        {
+            var channel = Channel.CreateUnbounded<byte[]>();
+            _serverListSubscribers.Add(new serverListChannel(channel.Writer, session));
+            return channel.Reader;
+        }
+    }
+
+    public readonly struct serverListChannel
+    {
+        public readonly ChannelWriter<byte[]> channel;
+        public readonly Session session;
+
+        public serverListChannel(ChannelWriter<byte[]> c, Session s)
+        {
+            channel = c;
+            session = s;
         }
     }
 }
