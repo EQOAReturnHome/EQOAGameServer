@@ -3,6 +3,8 @@ using System.Net;
 using System.Threading.Tasks;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
+using System.Threading.Channels;
+using ReturnHome.Actor;
 
 namespace ReturnHome.PacketProcessing
 {
@@ -14,15 +16,15 @@ namespace ReturnHome.PacketProcessing
         ///This is our sessionList
         public ConcurrentHashSet<Session> SessionHash = new ConcurrentHashSet<Session>();
 
-        private readonly RdpCommIn _rdpComm;
+        public readonly RdpCommIn rdpComm;
 
-        public SessionManager()
+        public SessionManager(ChannelWriter<Character> chanWriter)
         {
-            _rdpComm = new(this);
+            rdpComm = new(this, chanWriter);
         }
 
         ///When a new session is identified, we add this into our endpoint/session list
-        public void ProcessSession(ReadOnlyMemory<byte> ClientPacket, int offset, ushort ClientEndPoint, IPEndPoint ClientIPEndPoint,  uint val)
+        public void ProcessSession(ReadOnlyMemory<byte> ClientPacket, int offset, ushort ClientEndPoint, IPEndPoint ClientIPEndPoint, uint val)
         ///public static void ProcessSession(List<byte> myPacket, bool NewSession)
         {
             //Make sure this is null'd before continuing
@@ -44,11 +46,14 @@ namespace ReturnHome.PacketProcessing
                     ClientSession = new Session(ClientIPEndPoint, InstanceID);
 
                     //Try adding session to hashset
-                    if(SessionHash.TryAdd(ClientSession))
+                    if (SessionHash.TryAdd(ClientSession))
                     {
                         ClientSession.ClientEndpoint = ClientEndPoint;
+
+                        Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
+
                         //Success, keep processing data
-                        _rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
+                        rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
                         return;
                     }
                     //If it fails to add, return?
@@ -58,7 +63,7 @@ namespace ReturnHome.PacketProcessing
 
                 //If true, should be a 3 byte SessionID to read/verify
                 //Means client is "remote endpoint"
-                if((value & 0x0800) != 0)
+                if ((value & 0x0800) != 0)
                 {
                     //Utilize actual SessionID to help narrow down for correct results
                     SessionID = Utility_Funcs.Unpack(ClientPacket.Span, ref offset);
@@ -66,13 +71,16 @@ namespace ReturnHome.PacketProcessing
                     {
                         if ((value & 0x10000) != 0) // reset connection?
                         {
+                            Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Removing session");
+
                             SessionHash.TryRemove(ClientSession);
                             ClientSession.serverSelect = false;
                             ClientSession.Dispose();
                             return;
                         }
+                        Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing session");
 
-                        _rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
+                        rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
                         return;
                     }
 
@@ -87,13 +95,16 @@ namespace ReturnHome.PacketProcessing
                     {
                         if ((value & 0x10000) != 0) // reset connection?
                         {
+                            Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Removing session");
+
                             SessionHash.TryRemove(ClientSession);
                             ClientSession.serverSelect = false;
                             ClientSession.Dispose();
                             return;
                         }
+                        Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing session");
 
-                        _rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
+                        rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
                         return;
                     }
 
@@ -117,20 +128,23 @@ namespace ReturnHome.PacketProcessing
                 {
                     if ((value & 0x10000) != 0) // reset connection?
                     {
+                        Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Removing session");
+
                         SessionHash.TryRemove(ClientSession);
                         ClientSession.serverSelect = false;
                         ClientSession.Dispose();
                         return;
                     }
+                    Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing session");
 
-                    _rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
+                    rdpComm.ProcessBundle(ClientSession, ClientPacket, offset);
                 }
             }
         }
 
         public bool FindSession(IPEndPoint ClientIPEndPoint, uint InstanceID, out Session actualSession)
         {
-            foreach(Session ClientSession in SessionHash)
+            foreach (Session ClientSession in SessionHash)
             {
                 if (ClientSession.MyIPEndPoint.Equals(ClientIPEndPoint) && ClientSession.InstanceID == InstanceID)
                 {
@@ -202,22 +216,22 @@ namespace ReturnHome.PacketProcessing
 
             if (SessionHash.TryAdd(thisSession))
             {
-                ProcessOpcode.ProcessMemoryDump(_rdpComm.queueMessages, thisSession);
+                ProcessOpcode.ProcessMemoryDump(thisSession.queueMessages, thisSession, this);
             }
         }
 
         ///Used when starting a master session with client.
         public void GenerateClientContact(Session MySession)
         {
-            _rdpComm.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera1));
-            _rdpComm.queueMessages.messageCreator.MessageWriter(new byte[] { 0x03, 0x00, 0x00, 0x00 });
+            MySession.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera1));
+            MySession.queueMessages.messageCreator.MessageWriter(new byte[] { 0x03, 0x00, 0x00, 0x00 });
             ///Handles packing message into outgoing packet
-            _rdpComm.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            MySession.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
 
-            _rdpComm.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera2));
-            _rdpComm.queueMessages.messageCreator.MessageWriter(new byte[] { 0x1B, 0x00, 0x00, 0x00 });
+            MySession.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera2));
+            MySession.queueMessages.messageCreator.MessageWriter(new byte[] { 0x1B, 0x00, 0x00, 0x00 });
             ///Handles packing message into outgoing packet
-            _rdpComm.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            MySession.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
 
         public async Task CheckClientTimeOut()
@@ -231,7 +245,7 @@ namespace ReturnHome.PacketProcessing
                     {
                         //Send a disconnect from server to client, then remove the session
                         //For now just remove the session
-                        if(SessionHash.TryRemove(MySession))
+                        if (SessionHash.TryRemove(MySession))
                         {
                             Console.WriteLine("Removed a Session");
                         }

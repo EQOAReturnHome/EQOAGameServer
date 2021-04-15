@@ -10,11 +10,13 @@ namespace ReturnHome.PacketProcessing
         private int serverTick = 1000 / 10;
         private readonly RdpCommOut _rdpCommOut;
         private readonly SessionManager _sessionManager;
+        private readonly WorldServer _worldServer;
 
-        public GameTick(UDPListener udpListener, SessionManager sessionManager)
+        public GameTick(UDPListener udpListener, SessionManager sessionManager, WorldServer worldServer)
         {
             _sessionManager = sessionManager;
             _rdpCommOut = new(udpListener, _sessionManager);
+            _worldServer = worldServer;
         }
 
         public async Task GameLoop()
@@ -24,7 +26,7 @@ namespace ReturnHome.PacketProcessing
             while (true)
             {
                 gameTimer.Restart();
-                
+                _worldServer.CreateObjectUpdates();
                 ///Loop over Sessions and send updates if available
                 _rdpCommOut.PrepPacket();
 

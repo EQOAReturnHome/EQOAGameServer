@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
 using System.Text;
-using System.Linq;
 using ReturnHome.PacketProcessing;
 using ReturnHome.Opcodes;
 using ReturnHome.Utilities;
@@ -132,11 +130,6 @@ namespace ServerSelect
                             offset += 1;
 
                             Logger.Info($"Acquired Server #{i + 1}");
-                        }
-
-                        foreach (byte b in ServerList)
-                        {
-                            Console.WriteLine(b);
                         }
 
                         Logger.Info("Done...");

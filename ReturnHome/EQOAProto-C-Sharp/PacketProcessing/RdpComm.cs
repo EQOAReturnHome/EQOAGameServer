@@ -18,11 +18,11 @@ namespace ReturnHome.PacketProcessing
     {
         private readonly SessionManager _sessionManager;
         private readonly ProcessOpcode _processOpcode;
-        public readonly SessionQueueMessages queueMessages = new();
         private readonly ProcessUnreliable _processUnreliable = new();
         private readonly SelectServer _selectServer = new();
+        public readonly ChannelWriter<Character> characterChanWriter;
 
-        public RdpCommIn(SessionManager sessionManager)
+        public RdpCommIn(SessionManager sessionManager, ChannelWriter<Character> chanWriter)
         {
             //ServerSelect stuff
             _selectServer.ReadConfig();
@@ -33,7 +33,9 @@ namespace ReturnHome.PacketProcessing
 
             //The rest
             _sessionManager = sessionManager;
-            _processOpcode = new(queueMessages, sessionManager);
+            characterChanWriter = chanWriter;
+
+            _processOpcode = new(_sessionManager);
         }
         public void ProcessBundle(Session MySession, ReadOnlyMemory<byte> ClientPacket, int offset)
         {
@@ -48,18 +50,18 @@ namespace ReturnHome.PacketProcessing
                     ProcessSessionAck(MySession, ClientPacket, ref offset);
                     ProcessRdpReport(MySession, ClientPacket, ref offset);
                     ProcessMessageBundle(MySession, ClientPacket, offset);
-                    Logger.Info("Processing Session Ack, Rdp Report and Message Bundle");
+                    Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing Session Ack, Rdp Report and Message Bundle");
                     break;
 
                 case BundleOpcode.NewProcessReport:
                     ProcessRdpReport(MySession, ClientPacket, ref offset);
                     ProcessMessageBundle(MySession, ClientPacket, offset);
-                    Logger.Info("Processing Rdp Report and messages");
+                    Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing Rdp Report and messages");
                     break;
 
                 case BundleOpcode.ProcessReport:
                     ProcessRdpReport(MySession, ClientPacket, ref offset);
-                    Logger.Info("Processing Rdp Report");
+                    Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing Rdp Report");
                     break;
 
                 case BundleOpcode.NewProcessMessages:
@@ -70,17 +72,17 @@ namespace ReturnHome.PacketProcessing
                     //2 bytes for Bundle #, is it relevant to track?
                     ProcessMessageBundle(MySession, ClientPacket, offset);
 
-                    Logger.Info("Processing Message Bundle");
+                    Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing Message Bundle");
                     break;
 
                 case BundleOpcode.ProcessMessageAndReport:
                     ProcessRdpReport(MySession, ClientPacket, ref offset);
                     ProcessMessageBundle(MySession, ClientPacket, offset);
-                    Logger.Info("Processing unreliable Rdp Report and messages");
+                    Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing unreliable Rdp Report and messages");
                     break;
 
                 default:
-                    Logger.Err("Unable to identify Bundle Type");
+                    Logger.Err($"{MySession.ClientEndpoint.ToString("X")}: Unable to identify Bundle Type");
                     break;
             }
         }
@@ -108,17 +110,21 @@ namespace ReturnHome.PacketProcessing
 
                     //Client ping request, process accordingly
                     case MessageOpcodeTypes.PingMessage:
-                        _processOpcode.ProcessPingRequest(queueMessages, MySession, ClientPacket, ref offset);
+                        Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing Ping Request");
+                        _processOpcode.ProcessPingRequest(MySession.queueMessages, MySession, ClientPacket, ref offset);
                         break;
 
                     default:
+
+                        Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Processing Object Update");
+
                         //This will process our unreliable message, or unreliable ack's
                         _processUnreliable.ProcessUnreliables(MySession, MessageTypeOpcode, ClientPacket, ref offset);
                         break;
-                }  
+                }
             }
             MySession.RdpReport = true;
-            Logger.Info("Done processing messages in packet");
+            Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Done processing messages in packet");
             ///Should we just initiate responses to clients through here for now?
             ///Ultimately we want to have a seperate thread with a server tick, 
             ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's
@@ -140,13 +146,13 @@ namespace ReturnHome.PacketProcessing
             ///Triggers Character select
             if ((MySession.ClientEndpoint != MySession.InstanceID) && MySession.ServerMessageNumber == 3)
             {
-                Logger.Info("Generating Character Select");
+                Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Generating Character Select");
                 List<Character> MyCharacterList = SQLOperations.AccountCharacters(MySession);
 
                 //Assign to our session
                 MySession.CharacterData = MyCharacterList;
 
-                ProcessOpcode.CreateCharacterList(queueMessages, _sessionManager, MyCharacterList, MySession);
+                ProcessOpcode.CreateCharacterList(MySession.queueMessages, _sessionManager, MyCharacterList, MySession);
             }
 
             ///Triggers creating master session
@@ -163,7 +169,7 @@ namespace ReturnHome.PacketProcessing
 
             else
             {
-                Logger.Err($"Client received server message {LastRecvMessageNumber}, expected {MySession.ServerMessageNumber}");
+                Logger.Err($"{MySession.ClientEndpoint.ToString("X")}: Client received server message {LastRecvMessageNumber}, expected {MySession.ServerMessageNumber}");
             }
         }
 
@@ -180,8 +186,8 @@ namespace ReturnHome.PacketProcessing
                     //Grab the data
                     while (serverList.TryRead(out byte[] item))
                     {
-                        queueMessages.messageCreator.MessageWriter(item);
-                        queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortUnreliableMessage);
+                        MySession.queueMessages.messageCreator.MessageWriter(item);
+                        MySession.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortUnreliableMessage);
                     }
                 }
             }
@@ -193,13 +199,12 @@ namespace ReturnHome.PacketProcessing
             if (SessionAck == MySession.InstanceID)
             {
                 MySession.Instance = true;
-                Logger.Info("Beginning Character Select creation");
+                Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Beginning Character Select creation");
             }
 
             else
             {
-                Console.WriteLine("Error");
-                Logger.Err("Error occured with Session Ack Check...");
+                Logger.Err($"{MySession.ClientEndpoint.ToString("X")}: Error occured with Session Ack Check...");
             }
         }
 
@@ -213,8 +218,6 @@ namespace ReturnHome.PacketProcessing
 
     public class RdpCommOut
     {
-
-        public PacketCreator packetCreator = new();
         private readonly HandleOutPacket _handleOutPacket;
         private readonly SessionManager _sessionManager;
 
@@ -227,10 +230,18 @@ namespace ReturnHome.PacketProcessing
         {
             foreach (Session MySession in _sessionManager.SessionHash)
             {
-                MySession.UnreliablePing();
+                if (MySession.inGame)
+                {
+                    MySession.UnreliablePing();
+                    if (MySession.coordToggle)
+                    {
+                        MySession.CoordinateUpdate();
+                    }
+                }
+
                 if (MySession.sessionQueue.CheckQueue() || MySession.RdpReport)
                 {
-                     MySession.ResetPing();
+                    MySession.ResetPing();
                     ///Add Session Information
                     AddSession(MySession);
 
@@ -251,7 +262,7 @@ namespace ReturnHome.PacketProcessing
                     AddRDPReport(MySession);
                     MySession.Reset();
 
-                    MySession.sessionQueue.GatherMessages(packetCreator);
+                    MySession.sessionQueue.GatherMessages(MySession.packetCreator);
 
                     ///Bundle needs to be incremented after every sent packet, seems like a good spot?
                     MySession.IncrementServerBundleNumber();
@@ -260,7 +271,7 @@ namespace ReturnHome.PacketProcessing
                     byte[] SessionHeader = AddSessionHeader(MySession);
 
                     ///Done? Send to CommManagerOut
-                    _handleOutPacket.AddEndPoints(packetCreator, MySession, SessionHeader);
+                    _handleOutPacket.AddEndPoints(MySession.packetCreator, MySession, SessionHeader);
                 }
             }
         }
@@ -268,22 +279,22 @@ namespace ReturnHome.PacketProcessing
         ///Identifies if full RDPReport is needed or just the current bundle #
         public void AddRDPReport(Session MySession)
         {
-            packetCreator.PacketWriter(BitConverter.GetBytes(MySession.ServerBundleNumber));
+            MySession.packetCreator.PacketWriter(BitConverter.GetBytes(MySession.ServerBundleNumber));
             ///If RDP Report == True, Current bundle #, Last Bundle received # and Last message received #
             if (MySession.RdpReport)
             {
                 Logger.Info("Full RDP Report");
 
-                packetCreator.PacketWriter(BitConverter.GetBytes(MySession.clientBundleNumber));
-                packetCreator.PacketWriter(BitConverter.GetBytes(MySession.clientMessageNumber));
+                MySession.packetCreator.PacketWriter(BitConverter.GetBytes(MySession.clientBundleNumber));
+                MySession.packetCreator.PacketWriter(BitConverter.GetBytes(MySession.clientMessageNumber));
                 /// Add them to packet in "reverse order" stated above
                 /// 
                 //If ingame, include 4029 ack's
                 if (MySession.Channel40Ack)
                 {
-                    packetCreator.PacketWriter(new byte[] {0x40});
-                    packetCreator.PacketWriter(BitConverter.GetBytes(MySession.Channel40Base.Messagenumber));
-                    packetCreator.PacketWriter(new byte[] { 0xF8 });
+                    MySession.packetCreator.PacketWriter(new byte[] { 0x40 });
+                    MySession.packetCreator.PacketWriter(BitConverter.GetBytes(MySession.Channel40MessageNumber));
+                    MySession.packetCreator.PacketWriter(new byte[] { 0xF8 });
                     MySession.Channel40Ack = false;
                     return;
                 }
@@ -314,96 +325,33 @@ namespace ReturnHome.PacketProcessing
                 segBody |= 0x40;
             }
 
-            packetCreator.PacketWriter(new byte[] { segBody });
-            ///Should this be a big switch statement?
-            ///Using if else for now
-            ///
-            /*
-            if (MySession.BundleTypeTransition)
-            {
-                if (MySession.RdpMessage && MySession.RdpReport)
-                {
-                    Logger.Info("Adding Bundle Type 0x13");
-                    packetCreator.PacketWriter(new byte[] { 0x13});
-                }
-
-                ///Message only packet, no RDP Report
-                else if (MySession.RdpMessage && !MySession.RdpReport && !MySession.Channel40Ack)
-                {
-                    Logger.Info("Adding Bundle Type 0x00");
-                    packetCreator.PacketWriter(new byte[] { 0x00 });
-                }
-
-                ///RDP Report only
-                else if (MySession.RdpReport)
-                {
-                    Logger.Info("Adding Bundle Type 0x03");
-                    packetCreator.PacketWriter(new byte[] { 0x03 });
-                }
-            }
-
-            else 
-            {
-                ///If Message and RDP report
-                if (!MySession.SessionAck && MySession.RdpMessage && MySession.RdpReport)
-                {
-                    Logger.Info("Adding Bundle Type 0x63");
-                    packetCreator.PacketWriter(new byte[] { 0x63 });
-                }
-
-                ///Message only packet, no RDP Report
-                else if (MySession.SessionAck && MySession.RdpMessage && !MySession.RdpReport)
-                {
-                    Logger.Info("Adding Bundle Type 0x20");
-                    packetCreator.PacketWriter(new byte[] { 0x20 });
-                }
-                else if(MySession.SessionAck  && MySession.Channel40Ack (()
-                {
-                    packetCreator.PacketWriter(BitConverter.GetBytes((byte)0x40));
-                    packetCreator.PacketWriter(BitConverter.GetBytes(MySession.Channel40Message));
-                    packetCreator.PacketWriter(BitConverter.GetBytes((byte)0xF8));
-
-                    Logger.Info("Adding Bundle Type 0x33");
-                    packetCreator.PacketWriter(new byte[] { 0x33 });
-
-                    MySession.Channel40Ack = false;
-                }
-
-                ///RDP Report only
-                else if (MySession.SessionAck && MySession.RdpReport)
-                {
-                    Logger.Info("Adding Bundle Type 0x23");
-                    packetCreator.PacketWriter(new byte[] { 0x23 });
-                }
-            }
-            */
-
+            MySession.packetCreator.PacketWriter(new byte[] { segBody });
         }
 
         ///Add a session ack to send to client
         public void AddSession(Session MySession)
         {
-            Logger.Info("Adding Session Data");
+            Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Adding Session Data");
             if (!MySession.RemoteMaster)
             {
                 ///Add first portion of session
-                packetCreator.PacketWriter(BitConverter.GetBytes(MySession.InstanceID));
+                MySession.packetCreator.PacketWriter(BitConverter.GetBytes(MySession.InstanceID));
             }
 
             else
             {
                 ///Add first portion of session
-                packetCreator.PacketWriter(BitConverter.GetBytes(MySession.InstanceID));
+                MySession.packetCreator.PacketWriter(BitConverter.GetBytes(MySession.InstanceID));
 
                 ///Ack session, first add 2nd portion of Session
-                packetCreator.PacketWriter(Utility_Funcs.Pack(MySession.SessionID));
+                MySession.packetCreator.PacketWriter(Utility_Funcs.Pack(MySession.SessionID));
             }
         }
 
         public byte[] AddSessionHeader(Session MySession)
         {
             uint value = 0;
-            Logger.Info("Adding Session Header");
+            Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Adding Session Header");
 
             if (!MySession.Instance) //When server initiates instance with the client, it will use this
             {
@@ -426,7 +374,7 @@ namespace ReturnHome.PacketProcessing
                 value |= 0x01000;
             }
 
-            if(MySession.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
+            if (MySession.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
             {
                 value |= 0x02000;
             }
@@ -434,13 +382,13 @@ namespace ReturnHome.PacketProcessing
             if (!MySession.RemoteMaster)
             {
                 //Add bundle length in
-                value |= (uint)(packetCreator.ReadBytes - 4);
+                value |= (uint)(MySession.packetCreator.ReadBytes - 4);
             }
 
             else
             {
                 //Add bundle length in
-                value |= (uint)(packetCreator.ReadBytes - 7);
+                value |= (uint)(MySession.packetCreator.ReadBytes - 7);
             }
 
             return Utility_Funcs.Pack(value);

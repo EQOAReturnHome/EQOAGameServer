@@ -34,7 +34,6 @@
 
     static public class AccountStatus
     {
-
         public const short INACTIVE = 0x00;
         public const short NORMAL = 0x01;
         public const short REQUESTKEY = 0x02;
@@ -56,7 +55,6 @@
 
     static public class LoginResults
     {
-
         public const byte NO_USER = 0x00;
         public const byte BAD_PASS = 0x01;
         public const byte NAME_TAKEN = 0x02;

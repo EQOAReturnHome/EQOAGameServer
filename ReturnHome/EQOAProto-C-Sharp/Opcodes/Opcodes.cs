@@ -11,7 +11,7 @@
         public const ushort NewConnection = 0xFFFE;
         public const ushort LongUnreliableMessage = 0xFFFC;
         public const byte ShortUnreliableMessage = 0xFC;
-        public const ushort LongReliableMessage = 0xFFFB; 
+        public const ushort LongReliableMessage = 0xFFFB;
         public const byte ShortReliableMessage = 0xFB;
         public const ushort MultiLongReliableMessage = 0xFFFA;
         public const byte MultiShortReliableMessage = 0xFA;
@@ -27,23 +27,24 @@
 
     public enum GameOpcode : ushort
     {
-         DiscVersion = 0x00, //0
-         Authenticate2 = 0x01, ///1
-         CharacterSelect = 0x2C, ///44
-         Camera1 = 0x07D1, ///2001
-         Camera2 = 0x07F5, ///2037
-         Authenticate = 0x0904, ///2308
-         GameServers = 0x07B3, ///1971
-         DelCharacter = 0x2D, ///45
-         CreateCharacter = 0x2B, ///43
-         NameTaken = 0x2F, ///47
-         SELECTED_CHAR = 0x2A, // 42
-         MemoryDump = 0x0D, //13
-         Time = 0x13, //19
-         IgnoreList = 0x1005, //4101
-         ActorSpeed = 0xF8, //248
-         ClientMessage = 0x0A7A, //2682
-         DisconnectClient = 0x09B0 //2480
+        DiscVersion = 0x00, //0
+        Authenticate2 = 0x01, ///1
+        CharacterSelect = 0x2C, ///44
+        Camera1 = 0x07D1, ///2001
+        Camera2 = 0x07F5, ///2037
+        Authenticate = 0x0904, ///2308
+        GameServers = 0x07B3, ///1971
+        DelCharacter = 0x2D, ///45
+        CreateCharacter = 0x2B, ///43
+        NameTaken = 0x2F, ///47
+        SELECTED_CHAR = 0x2A, // 42
+        MemoryDump = 0x0D, //13
+        Time = 0x13, //19
+        IgnoreList = 0x1005, //4101
+        ActorSpeed = 0xF8, //248
+        ClientMessage = 0x0A7A, //2682
+        DisconnectClient = 0x09B0, //2480
+        ClientSayChat = 0x000B //11
     }
 
     public static class GameVersions

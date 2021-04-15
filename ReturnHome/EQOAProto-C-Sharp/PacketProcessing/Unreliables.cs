@@ -3,6 +3,7 @@ using System;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Actor;
+using System.Runtime.InteropServices;
 
 namespace ReturnHome.PacketProcessing
 {
@@ -43,8 +44,18 @@ namespace ReturnHome.PacketProcessing
             if (XorByte != 0)
             {
                 //If this fails... try resending ack? make sure client got it
-                if (MySession.Channel40Base.Messagenumber != (XorMessage - XorByte))
+                if (MySession.Channel40MessageNumber != (XorMessage - XorByte))
                 {
+                    //0x29 is max 0x4029 size
+                    for (int i = 0; i < 0x29; i++)
+                    {
+                        if (ClientPacket.Span[i + offset] == 0)
+                        {
+                            offset += i;
+                            break;
+                        }
+                    }
+
                     return;
                 }
             }
@@ -55,6 +66,12 @@ namespace ReturnHome.PacketProcessing
             //First 0x4029 from client
             if (XorByte == 0)
             {
+                //Firsat 4029 means we are ingame
+                MySession.inGame = true;
+
+                //Copy base message to session base
+                MyPacket.CopyTo(MySession.Channel40Base);
+
                 MySession.MyCharacter.World = MyPacket.Span[0];
                 bytesRead += 1;
 
@@ -79,24 +96,48 @@ namespace ReturnHome.PacketProcessing
                 bytesRead += 2;
 
                 MySession.MyCharacter.Target = Get4ByteInt(MyPacket.Slice(bytesRead, 4));
-                bytesRead += 4;
 
-                //MySession.BundleTypeTransition = true;
-                //Add xor base message to our list to track
-                MySession.Channel40Base = new MessageStruct(XorMessage, MyPacket);
+                MySession.Channel40MessageNumber = XorMessage;
 
                 //Should we generate a C9 here?
                 MessageStruct UpdateMessage = new(_compression.CompressUnreliable(ObjectUpdate.GatherObjectUpdate(MySession.MyCharacter, MySession.SessionID), MySession));
 
                 MySession.sessionQueue.Add(UpdateMessage);
             }
-            /*
-            //Following client updates MySession.Channel40Base.ThisMessage
-            //Lots of xor'ing...
-            */
 
-            //Purely a stop gap to run around... eventually need to expand on this to update the character object
-            MySession.Channel40Base = new MessageStruct(XorMessage, MyPacket);
+            else
+            {
+                //Xor update message against base
+                Xor_data(MySession.Channel40Base, MyPacket, 0x29);
+
+                MySession.MyCharacter.World = MySession.Channel40Base.Span[0];
+                bytesRead += 1;
+
+                //This should match what we have stored for the character? Let's verify this?
+                MySession.MyCharacter.XCoord = ConvertXZ(Get3ByteInt(MySession.Channel40Base.Slice(bytesRead, 3)));
+                bytesRead += 3;
+
+                MySession.MyCharacter.YCoord = ConvertY(Get3ByteInt(MySession.Channel40Base.Slice(bytesRead, 3)));
+                bytesRead += 3;
+
+                MySession.MyCharacter.ZCoord = ConvertXZ(Get3ByteInt(MySession.Channel40Base.Slice(bytesRead, 3)));
+                bytesRead += 3;
+
+                //Skip 12 bytes...
+                bytesRead += 12;
+                MySession.MyCharacter.Facing = ConvertFacing(MySession.Channel40Base.Span[bytesRead]);
+                bytesRead += 1;
+
+                //Skip 12 bytes...
+                bytesRead += 12;
+                MySession.MyCharacter.Animation = (GetShort(MySession.Channel40Base.Slice(bytesRead, 2)));
+                bytesRead += 2;
+
+                MySession.MyCharacter.Target = Get4ByteInt(MySession.Channel40Base.Slice(bytesRead, 4));
+
+                MySession.Channel40MessageNumber = XorMessage;
+            }
+
             MySession.Channel40Ack = true;
         }
 
@@ -110,7 +151,7 @@ namespace ReturnHome.PacketProcessing
         { return ((sbyte)Value * 0.0245433693f); }
 
         private static int Get3ByteInt(ReadOnlyMemory<byte> MyInt)
-        { return (MyInt.Span[0] << 16 | MyInt.Span[1] << 8 | MyInt.Span[2]);  }
+        { return (MyInt.Span[0] << 16 | MyInt.Span[1] << 8 | MyInt.Span[2]); }
 
         private static int Get3ByteIntXOR(byte byte1, byte byte2, byte byte3)
         { return (byte1 << 16 | byte2 << 8 | byte3); }
@@ -130,10 +171,35 @@ namespace ReturnHome.PacketProcessing
         private static List<byte> GetArrayXOR(List<byte> BaseMessage, List<byte> ClientMessage)
         {
             List<byte> NewList = new List<byte> { };
-            for(int i = 0; i < 0x29; i++)
+            for (int i = 0; i < 0x29; i++)
             { NewList.Add((byte)(BaseMessage[i] ^ ClientMessage[i])); }
 
             return NewList;
+        }
+
+        public static unsafe void Xor_data(Memory<byte> dst, ReadOnlyMemory<byte> src, int len)
+        {
+            fixed (byte* srctempBuf = &MemoryMarshal.GetReference(src.Span))
+            fixed (byte* dsttempBuf = &MemoryMarshal.GetReference(dst.Span))
+            {
+                byte* ptr;
+                byte* srcBuf = srctempBuf;
+                byte* dstBuf = dsttempBuf;
+                int i;
+
+                i = 0;
+                if (0 < len)
+                {
+                    do
+                    {
+                        ptr = srcBuf + i;
+                        i = i + 1;
+                        *dstBuf = (byte)(*dstBuf ^ *ptr);
+                        dstBuf = dstBuf + 1;
+                    } while (i < len);
+                }
+                return;
+            }
         }
     }
 }

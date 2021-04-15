@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System;
 using ReturnHome.PacketProcessing;
+using ReturnHome.Actor;
 
 namespace ReturnHome
 {
@@ -15,16 +16,17 @@ namespace ReturnHome
         {
             ///Shared Channel between udpServer and commManager
             var channel = Channel.CreateUnbounded<UdpPacketStruct>();
+            var Charchannel = Channel.CreateUnbounded<Character>();
 
             //Consider rmeoving this and building it into outbound packet sender? Could be a simple bool/counter check
-            SessionManager sessionManager = new();
+            SessionManager sessionManager = new(Charchannel.Writer);
             Task.Run(sessionManager.CheckClientTimeOut);
 
             HandleIncPacket handle = new(sessionManager);
             Task.Run(() => handle.AcceptPacket(channel.Reader));
             UDPListener udpListener = new();
-
-            GameTick gameTick = new(udpListener, sessionManager);
+            WorldServer worldServer = new(Charchannel.Reader);
+            GameTick gameTick = new(udpListener, sessionManager, worldServer);
             Task.Run(gameTick.GameLoop);
 
             // Start UDP Server Last

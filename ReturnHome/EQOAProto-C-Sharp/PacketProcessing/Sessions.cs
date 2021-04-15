@@ -4,7 +4,8 @@ using System;
 using ReturnHome.Utilities;
 using ReturnHome.Actor;
 using System.IO.Pipelines;
-using System.Threading.Tasks;
+using ReturnHome.Opcodes;
+using System.Text;
 
 namespace ReturnHome.PacketProcessing
 {
@@ -16,8 +17,10 @@ namespace ReturnHome.PacketProcessing
         private Memory<byte> sessionMemory;
         private PipeWriter pipeWriter;
         private PipeReader pipeReader;
+        public readonly SessionQueueMessages queueMessages = new();
         private int bytesRead;
-        public byte ping = 0;
+        private byte ping = 0;
+        public PacketCreator packetCreator = new();
 
         ///SessionList Objects, probably need bundle information here too?
         public bool RemoteMaster;
@@ -44,8 +47,9 @@ namespace ReturnHome.PacketProcessing
         public ushort ServerRecvMessageNumber = 1;
 
         public bool Channel40Ack = false;
-        public MessageStruct Channel40Base;
-        public ushort ActorUpdatMessageCount = 1; 
+        public Memory<byte> Channel40Base = new byte[41];
+        public ushort Channel40MessageNumber;
+        public ushort ActorUpdatMessageCount = 1;
 
         public long elapsedTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
@@ -60,7 +64,9 @@ namespace ReturnHome.PacketProcessing
         public bool RdpReport = false;
         public bool RdpMessage = false;
         public bool SessionAck = false;
-
+        public bool inGame = false;
+        public bool coordToggle = false;
+        public bool unkOpcode = true;
         ///Once we receive account ID, this should never change...
         public int AccountID;
 
@@ -77,16 +83,17 @@ namespace ReturnHome.PacketProcessing
             MyIPEndPoint = myIPEndPoint;
             InstanceID = instanceID;
             sessionQueue = new(this);
-            //StartTimer(2000);
         }
 
         ///Allows us to update last known Client Bundle Number
         public ushort clientBundleNumber
         {
             get { return ClientBundleNumber; }
-            set { ClientBundleNumber = value;
+            set
+            {
+                ClientBundleNumber = value;
                 //if (ClientBundleNumber == 17)
-                    //BundleTypeTransition = true;
+                //BundleTypeTransition = true;
             }
         }
 
@@ -103,6 +110,18 @@ namespace ReturnHome.PacketProcessing
             return;
         }
 
+        public void CoordinateUpdate()
+        {
+            string theMessage = $"Coordinates: X-{MyCharacter.XCoord} Y-{MyCharacter.YCoord} Z-{MyCharacter.ZCoord}";
+            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
+            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(theMessage.Length));
+            queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(theMessage));
+
+            //Send Message
+            queueMessages.PackMessage(this, MessageOpcodeTypes.ShortReliableMessage);
+            coordToggle = false;
+        }
+
         public void ResetPing()
         {
             ping = 0;
@@ -112,24 +131,14 @@ namespace ReturnHome.PacketProcessing
         public ushort clientMessageNumber
         {
             get { return ClientMessageNumber; }
-            set
-            {
-                ClientMessageNumber = value;
-                //if (ClientMessageNumber == 17)
-                   // BundleTypeTransition = true;
-            }
+            set { ClientMessageNumber = value; }
         }
 
         ///Allows us to update last known Server Bundle Number
         public ushort serverBundleNumber
         {
             get { return ServerBundleNumber; }
-            set
-            {
-                ServerBundleNumber = value;
-                //if (ServerBundleNumber == 17)
-                    //BundleTypeTransition = true;
-            }
+            set { ServerBundleNumber = value; }
         }
 
         public void IncrementServerMessageNumber()
@@ -222,7 +231,7 @@ namespace ReturnHome.PacketProcessing
 
         private void Dispose(bool FreeManagedObjects)
         {
-            
+
             CharacterData = null;
             MyCharacter = null;
 

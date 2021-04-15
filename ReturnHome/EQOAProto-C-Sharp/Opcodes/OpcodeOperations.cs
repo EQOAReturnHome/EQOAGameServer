@@ -12,23 +12,22 @@ namespace ReturnHome.Opcodes
 {
     public class ProcessOpcode
     {
-        public static readonly Dictionary<GameOpcode, Action<SessionQueueMessages, SessionManager, Session, ReadOnlyMemory<byte>>> OpcodeDictionary = new ()
+        public static readonly Dictionary<GameOpcode, Action<SessionQueueMessages, SessionManager, Session, ReadOnlyMemory<byte>>> OpcodeDictionary = new()
         {
             { GameOpcode.DiscVersion, ProcessGameDisc },
             { GameOpcode.Authenticate, ProcessAuthenticate },
             { GameOpcode.Authenticate2, ProcessAuthenticate },
             { GameOpcode.SELECTED_CHAR, ProcessCharacterChanges },
             { GameOpcode.DelCharacter, ProcessDelChar },
-            { GameOpcode.CreateCharacter, ProcessCreateChar }
+            { GameOpcode.CreateCharacter, ProcessCreateChar },
+            { GameOpcode.ClientSayChat, ProcessChat }
         };
 
         //Make new class for packing Messages into Session queue
-        private readonly SessionQueueMessages _queueMessages;
         private readonly SessionManager _sessionManager;
 
-        public ProcessOpcode(SessionQueueMessages queueMessages, SessionManager sessionManager)
+        public ProcessOpcode(SessionManager sessionManager)
         {
-            _queueMessages = queueMessages;
             _sessionManager = sessionManager;
         }
 
@@ -46,6 +45,7 @@ namespace ReturnHome.Opcodes
             //If client message order was not expected, increment offset and drop it
             if (!(MySession.clientMessageNumber + 1 == MessageNumber))
             {
+                Logger.Info($"{MySession.ClientEndpoint.ToString("X")} - Message #{MessageNumber} was not expected, expected #{MySession.ClientMessageNumber}");
                 offset += (MessageLength - 2);
                 return;
             }
@@ -59,26 +59,84 @@ namespace ReturnHome.Opcodes
             Logger.Info($"Message Length: {MessageLength}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
             try
             {
-                OpcodeDictionary[(GameOpcode)Opcode].Invoke(_queueMessages, _sessionManager, MySession, ClientPacket.Slice(offset, MessageLength - 2));
+                OpcodeDictionary[(GameOpcode)Opcode].Invoke(MySession.queueMessages, _sessionManager, MySession, ClientPacket.Slice(offset, MessageLength - 2));
             }
 
             catch
             {
-                ClientOpcodeUnknown(_queueMessages, _sessionManager, MySession, Opcode);
+                ClientOpcodeUnknown(MySession.queueMessages, _sessionManager, MySession, Opcode);
             }
             offset += MessageLength - 2;
         }
 
+        public static void ProcessChat(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        {
+            int offset = 0;
+
+            int messageLength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
+            string message = Encoding.Unicode.GetString(ClientPacket.Span.Slice(offset, messageLength * 2));
+
+            if (message == "!c")
+            {
+                MySession.coordToggle ^= true;
+            }
+            if (message == "!o")
+            {
+                MySession.unkOpcode ^= true;
+                if (MySession.unkOpcode)
+                {
+                    message = "Unknown opcode display is now on.";
+                }
+
+                else
+                {
+                    message = "Unknown opcode display is now off.";
+                }
+
+                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
+                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(message.Length));
+                queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(message));
+
+                //Send Message
+                queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            }
+
+            if (message.Substring(0, 2) == "!s")
+            {
+                float speed;
+                try
+                {
+                    speed = float.Parse(message.Substring(3, messageLength - 3));
+                }
+
+                catch
+                {
+                    message = "Not a valid value for speed";
+                    queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
+                    queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(message.Length));
+                    queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(message));
+
+                    //Send Message
+                    queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+                    return;
+                }
+
+                ActorSpeed(queueMessages, MySession, speed);
+            }
+        }
 
         public static void ClientOpcodeUnknown(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ushort opcode)
         {
-            string theMessage = $"Unknown Opcode: {opcode.ToString("X")}";
-            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
-            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(theMessage.Length));
-            queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(theMessage));
+            if (MySession.unkOpcode)
+            {
+                string theMessage = $"Unknown Opcode: {opcode.ToString("X")}";
+                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
+                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(theMessage.Length));
+                queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(theMessage));
 
-            //Send Message
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+                //Send Message
+                queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            }
         }
 
         public static void ProcessCharacterChanges(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
@@ -101,7 +159,7 @@ namespace ReturnHome.Opcodes
             sessionManager.CreateMemoryDumpSession(MySession);
         }
 
-        public static async void ProcessMemoryDump(SessionQueueMessages queueMessages, Session MySession)
+        public static async void ProcessMemoryDump(SessionQueueMessages queueMessages, Session MySession, SessionManager sessionManager)
         {
             MySession.StartPipe(20000);
 
@@ -156,7 +214,7 @@ namespace ReturnHome.Opcodes
             }
 
             //Get Bank Item count
-            MySession.WriteMessage(new byte[] { (byte)(MySession.MyCharacter.BankItems.Count * 2)});
+            MySession.WriteMessage(new byte[] { (byte)(MySession.MyCharacter.BankItems.Count * 2) });
             MySession.WriteMessage(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count));
             for (int i = 0; i < MySession.MyCharacter.BankItems.Count; i++)
             {
@@ -187,6 +245,8 @@ namespace ReturnHome.Opcodes
                 MySession.WriteMessage(MySession.MyCharacter.MySpells[i].PullSpell());
             }
 
+            //Not entirely known what this is at this time
+            //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
             MySession.WriteMessage(new byte[] {0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
                                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
                                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
@@ -220,6 +280,8 @@ namespace ReturnHome.Opcodes
             await Task.Delay(1000);
             ///Handles packing message into outgoing packet
             queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+
+            sessionManager.rdpComm.characterChanWriter.TryWrite(MySession.MyCharacter);
 
             IgnoreList(queueMessages, MySession);
             ActorSpeed(queueMessages, MySession);
@@ -393,9 +455,12 @@ namespace ReturnHome.Opcodes
             //Verify the ping only has 1 byte of data
             if (BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset) == 1)
             {
+                Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Ping Packet only has 1 byte");
                 //Verify the message is in order
                 if (BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset) == MySession.clientMessageNumber + 1)
                 {
+                    Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Ping Packet was in order");
+
                     ///Increment for every message read, in order.
                     MySession.IncrementClientMessageNumber();
 
@@ -404,9 +469,12 @@ namespace ReturnHome.Opcodes
                         queueMessages.messageCreator.MessageWriter(new byte[] { 0x14 });
                         ///Do stuff here?
                         ///Handles packing message into outgoing packet
-                        _queueMessages.PackMessage(MySession, MessageOpcodeTypes.UnknownMessage);
+                        queueMessages.PackMessage(MySession, MessageOpcodeTypes.PingMessage);
                     }
                 }
+
+                offset += 1;
+                return;
             }
 
             offset += 1;
@@ -658,6 +726,14 @@ namespace ReturnHome.Opcodes
         {
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed));
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(25.0f));
+            //For now send a standard speed
+            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
+        public static void ActorSpeed(SessionQueueMessages queueMessages, Session MySession, float speed)
+        {
+            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed));
+            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(speed));
             //For now send a standard speed
             queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -13,11 +11,8 @@ namespace AuthServer.Server
 
     public class AsynchronousSocketListener
     {
-        private Stream _stream;
-        private Pipe _readPipe, _writePipe;
-
-        public PipeReader Input => _readPipe.Reader;
-        public PipeWriter Output => _writePipe.Writer;
+        private readonly int _buffSize = 300;
+        private byte[] _buffer = new byte[300];
         private readonly EQOAClientTracker _eqoaClientTracker;
         private readonly Socket _listener = new(SocketType.Stream, ProtocolType.Tcp);
 
@@ -35,56 +30,38 @@ namespace AuthServer.Server
             while (true)
             {
                 Socket socket = await _listener.AcceptAsync();
-                _ = ProcessAsync(socket);
+                Task.Run(() => ProcessAsync(socket));
             }
         }
 
         private async Task ProcessAsync(Socket socket)
         {
-            _readPipe = new();
-            _writePipe = new();
-
-            // Create a PipeReader over the network stream
-            _stream = new NetworkStream(socket);
 
             //Create Client session
-            EQOAClient theClient = new((IPEndPoint)socket.RemoteEndPoint, _stream, socket, Input, Output);
-            Task.Run(theClient.CheckClientRequest);
-            Task.Run(ProcessSend);
-
+            EQOAClient theClient = new((IPEndPoint)socket.RemoteEndPoint, socket);
             //Add Session to Tracking
             _eqoaClientTracker.AddEQOAClient(theClient);
 
             while (true)
             {
                 // note we'll usually get *much* more than we ask for
-                Memory<byte> buffer = _readPipe.Writer.GetMemory(1);
-                int bytes = await _stream.ReadAsync(buffer);
-                _readPipe.Writer.Advance(bytes);
+                SocketReceiveFromResult result = await socket.ReceiveFromAsync(
+                        new ArraySegment<byte>(_buffer, 0, _buffSize), SocketFlags.None, new IPEndPoint(IPAddress.Any, 0));
+                byte[] buffer = result.ReceivedBytes < _buffSize ? _buffer.AsSpan(0, result.ReceivedBytes).ToArray() : _buffer;
+                theClient.CheckClientRequest(buffer);
+                Console.WriteLine($"Processing data for {theClient.ClientIPEndPoint}");
 
-                if (bytes == 0)
-                    break;
-
-                var flush = await _readPipe.Writer.FlushAsync();
-
-                if (flush.IsCompleted || flush.IsCanceled)
+                if (result.ReceivedBytes == 0)
                     break;
             }
-
-            // Mark the PipeReader as complete.
-            await Input.CompleteAsync();
+            _eqoaClientTracker.RemoveEQOAClient(theClient);
 
             Console.WriteLine($"[{socket.RemoteEndPoint}]: disconnected");
         }
 
-        private async Task ProcessSend()
+        public static void ProcessSend(EQOAClient client)
         {
-            while(true)
-            {
-                ReadResult read = await _writePipe.Reader.ReadAsync();
-                await _stream.WriteAsync(read.Buffer.First);
-                _writePipe.Reader.AdvanceTo(read.Buffer.End);
-            }
+            client.Handler.Send(client.ResponsePacket.Span);
         }
     }
 }

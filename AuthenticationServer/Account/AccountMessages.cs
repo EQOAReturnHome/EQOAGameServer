@@ -5,32 +5,32 @@ using System.Text;
 
 namespace AuthServer.Account
 {
-	public class BaseBuildMessage
-	{
-		public void PreparePacket(EQOAClient Client)
-		{
+    public class BaseBuildMessage
+    {
+        public void PreparePacket(EQOAClient Client)
+        {
 
-		}
+        }
 
-		public void SendMessage(EQOAClient ThisClient)
+        public void SendMessage(EQOAClient ThisClient)
         {
             //Add Packet Length to beginning of List
             BitConverter.GetBytes(ByteSwaps.SwapBytes((uint)ThisClient.resOffset)).CopyTo(ThisClient.ResponsePacket[0..4]);
 
-            ThisClient.SendMessage();
+            AsynchronousSocketListener.ProcessSend(ThisClient);
 
             ThisClient.ClearMessages();
 
-		}
-	}
+        }
+    }
 
-	public class GoodLogin : BaseBuildMessage
-	{
+    public class GoodLogin : BaseBuildMessage
+    {
         public GoodLogin(EQOAClient ThisClient)
         {
-            ThisClient.GetBuffer(168);
+            ThisClient.ResponsePacket = new byte[168];
 
-            BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.LOGIN_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset+4)]); //LoginResponse
+            BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.LOGIN_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //LoginResponse
             ThisClient.resOffset += 4;
 
             new byte[72].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 72)]);
@@ -60,42 +60,42 @@ namespace AuthServer.Account
             BitConverter.GetBytes(ByteSwaps.SwapBytes(ThisClient.Gamefeatures)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //AccountID 4 bytes
             ThisClient.resOffset += 4;
 
-			SendMessage(ThisClient);
+            SendMessage(ThisClient);
         }
-	}
+    }
 
-	public class BadAttempt : BaseBuildMessage
-	{
-		public BadAttempt(EQOAClient ThisClient)
-		{
+    public class BadAttempt : BaseBuildMessage
+    {
+        public BadAttempt(EQOAClient ThisClient)
+        {
             string Response;
             switch (ThisClient.MessageType)
             {
-				case AccountMessageTypes.LOGIN_RESPONSE:
-					Response = "Username or Password was incorrect.";
-					break;
+                case AccountMessageTypes.LOGIN_RESPONSE:
+                    Response = "Username or Password was incorrect.";
+                    break;
 
-				case AccountMessageTypes.SUBMIT_ACCT_CREATE:
-					Response = "An error occured or username is taken. Please try again and if unsuccessful, try another username. Thank you.";
-					break;
+                case AccountMessageTypes.SUBMIT_ACCT_CREATE:
+                    Response = "An error occured or username is taken. Please try again and if unsuccessful, try another username. Thank you.";
+                    break;
 
-				case AccountMessageTypes.CHANGE_PASSWORD:
-					Response = "An error occured. Please try again. If this persists try a new password.";
-					break;
+                case AccountMessageTypes.CHANGE_PASSWORD:
+                    Response = "An error occured. Please try again. If this persists try a new password.";
+                    break;
 
-				case AccountMessageTypes.DISABLED_FEATURE:
-					Response = "This option is disabled in order to bring you content faster. If you feel this is an error, please contact the developer team for further assistance.";
-					break;
+                case AccountMessageTypes.DISABLED_FEATURE:
+                    Response = "This option is disabled in order to bring you content faster. If you feel this is an error, please contact the developer team for further assistance.";
+                    break;
 
-				default:
-					Response = "You've managed to do something wrong! Please let the developer team know you received this message.";
-					break;
+                default:
+                    Response = "You've managed to do something wrong! Please let the developer team know you received this message.";
+                    break;
 
             }
-            ThisClient.GetBuffer(276);
+            ThisClient.ResponsePacket = new byte[276];
 
             //Response Code
-            BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.ACCT_CREATE_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset+4)]); //LoginResponse
+            BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.ACCT_CREATE_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //LoginResponse
             ThisClient.resOffset += 4;
 
             //Skip next 12 bytes
@@ -111,14 +111,14 @@ namespace AuthServer.Account
 
             //Process Last bit of packet and send
             SendMessage(ThisClient);
-		}
-	}
+        }
+    }
 
-	public class GoodChangePassword : BaseBuildMessage
-	{
-		public GoodChangePassword(EQOAClient ThisClient)
+    public class GoodChangePassword : BaseBuildMessage
+    {
+        public GoodChangePassword(EQOAClient ThisClient)
         {
-            ThisClient.GetBuffer(272);
+            ThisClient.ResponsePacket = new byte[272];
 
             BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.CHANGE_PASSWORD_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //Good Password Response
             ThisClient.resOffset += 4;
@@ -133,14 +133,14 @@ namespace AuthServer.Account
             ThisClient.resOffset += 256;
 
             SendMessage(ThisClient);
-		}
-	}
+        }
+    }
 
-	public class GoodCreateAccount : BaseBuildMessage
-	{
-		public GoodCreateAccount(EQOAClient ThisClient)
+    public class GoodCreateAccount : BaseBuildMessage
+    {
+        public GoodCreateAccount(EQOAClient ThisClient)
         {
-            ThisClient.GetBuffer(276);
+            ThisClient.ResponsePacket = new byte[276];
 
             BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.ACCT_CREATE_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //Good Password Response
             ThisClient.resOffset += 4;
@@ -159,6 +159,6 @@ namespace AuthServer.Account
             ThisClient.resOffset += 256;
 
             SendMessage(ThisClient);
-		}
-	}
+        }
+    }
 }

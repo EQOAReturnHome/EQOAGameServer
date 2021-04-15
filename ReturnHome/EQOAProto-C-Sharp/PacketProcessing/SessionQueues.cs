@@ -4,7 +4,6 @@ using ReturnHome.Opcodes;
 using ReturnHome.Utilities;
 using System;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace ReturnHome.PacketProcessing
 {
@@ -23,7 +22,7 @@ namespace ReturnHome.PacketProcessing
         public void Add(MessageStruct thisMessage)
         {
             //If it is a reliable message type
-            if(thisMessage.Message.Span[0] == MessageOpcodeTypes.ShortReliableMessage || thisMessage.Message.Span[0] == MessageOpcodeTypes.PingMessage || thisMessage.Message.Span[0] == MessageOpcodeTypes.MultiShortReliableMessage)
+            if (thisMessage.Message.Span[0] == MessageOpcodeTypes.ShortReliableMessage || thisMessage.Message.Span[0] == MessageOpcodeTypes.PingMessage || thisMessage.Message.Span[0] == MessageOpcodeTypes.MultiShortReliableMessage)
             {
                 OutGoingReliableMessageQueue.Enqueue(thisMessage);
             }
@@ -94,7 +93,7 @@ namespace ReturnHome.PacketProcessing
                 if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - resendMessage.Time) > 2000)
                 {
                     //Loop over Queue
-                    foreach(MessageStruct thisResend in ResendMessageQueue)
+                    foreach (MessageStruct thisResend in ResendMessageQueue)
                     {
                         //Resend messages
                         packetCreator.PacketWriter(thisResend.Message);
@@ -130,22 +129,17 @@ namespace ReturnHome.PacketProcessing
 
         public void RemoveReliables(ushort LastAckMessageNumber)
         {
-            Console.WriteLine($"Checking up to message #{LastAckMessageNumber}");
             while (ResendMessageQueue.TryPeek(out MessageStruct temp))
             {
-                Console.WriteLine($"Got Message {temp.Messagenumber}");
                 if (temp.Messagenumber <= LastAckMessageNumber)
                 {
-                    Console.WriteLine($"Message is less than {LastAckMessageNumber}");
                     // If first message to be resent is less then last ack'd #, drop it
-                    if(ResendMessageQueue.TryDequeue(out MessageStruct resendMessage))
+                    if (ResendMessageQueue.TryDequeue(out MessageStruct resendMessage))
                     {
-                        Console.WriteLine($"Ack on message #{resendMessage.Messagenumber}");
                         continue;
                     }
                 }
 
-                Console.WriteLine($"Message was {temp.Messagenumber} and LastAck was {LastAckMessageNumber}");
                 //Means that the last ack message is less then our resend queue message
                 break;
             }
