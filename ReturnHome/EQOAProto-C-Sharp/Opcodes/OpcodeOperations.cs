@@ -20,7 +20,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.SELECTED_CHAR, ProcessCharacterChanges },
             { GameOpcode.DelCharacter, ProcessDelChar },
             { GameOpcode.CreateCharacter, ProcessCreateChar },
-            { GameOpcode.ClientSayChat, ProcessChat }
+            { GameOpcode.ClientSayChat, ProcessChat },
+            { GameOpcode.RandomName, GenerateRandomName },
         };
 
         //Make new class for packing Messages into Session queue
@@ -67,6 +68,35 @@ namespace ReturnHome.Opcodes
                 ClientOpcodeUnknown(MySession.queueMessages, _sessionManager, MySession, Opcode);
             }
             offset += MessageLength - 2;
+        }
+
+        public static void GenerateRandomName(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        {
+            int offset = 0;
+
+            ///Get Race Byte
+            byte Race = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
+
+            Console.WriteLine($"Race: {Race}");
+
+            ///Make sure Message number is expected, needs to be in order.
+            byte sex = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
+
+            Console.WriteLine($"Sex: {sex}");
+
+            string Name = RandomName.GenerateName();
+            //Maybe a check here to verify name isn't taken in database before sending to client?
+
+            Console.WriteLine($"Name: {Name}");
+
+            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort) GameOpcode.RandomName));
+            Console.WriteLine(0);
+            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(Name.Length));
+            Console.WriteLine(1);
+            queueMessages.messageCreator.MessageWriter(Encoding.Default.GetBytes(Name));
+            Console.WriteLine(2);
+            //Send Message
+            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
 
         public static void ProcessChat(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)

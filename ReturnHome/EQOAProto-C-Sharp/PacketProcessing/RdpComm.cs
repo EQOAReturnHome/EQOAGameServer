@@ -82,7 +82,7 @@ namespace ReturnHome.PacketProcessing
                     break;
 
                 default:
-                    Logger.Err($"{MySession.ClientEndpoint.ToString("X")}: Unable to identify Bundle Type");
+                    Logger.Err($"{MySession.ClientEndpoint.ToString("X")}: Unable to identify Bundle Type: {ClientPacket.Span[offset-1].ToString("X")}");
                     break;
             }
         }
@@ -123,6 +123,7 @@ namespace ReturnHome.PacketProcessing
                         break;
                 }
             }
+
             MySession.RdpReport = true;
             Logger.Info($"{MySession.ClientEndpoint.ToString("X")}: Done processing messages in packet");
             ///Should we just initiate responses to clients through here for now?

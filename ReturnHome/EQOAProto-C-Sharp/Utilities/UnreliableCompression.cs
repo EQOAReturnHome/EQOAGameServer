@@ -179,7 +179,6 @@ namespace ReturnHome.Utilities
                     }
                 }
             }
-
             return messageBuf;
         }
     }

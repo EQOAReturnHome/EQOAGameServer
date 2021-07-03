@@ -40,6 +40,7 @@
         SELECTED_CHAR = 0x2A, // 42
         MemoryDump = 0x0D, //13
         Time = 0x13, //19
+        RandomName = 0x12, //18
         IgnoreList = 0x1005, //4101
         ActorSpeed = 0xF8, //248
         ClientMessage = 0x0A7A, //2682
