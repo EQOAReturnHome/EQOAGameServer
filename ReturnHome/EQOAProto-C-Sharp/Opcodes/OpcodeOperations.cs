@@ -74,15 +74,13 @@ namespace ReturnHome.Opcodes
         {
             int offset = 0;
 
+            //This could be useful later if real names are created per race/sex
             ///Get Race Byte
             byte Race = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
-
-            Console.WriteLine($"Race: {Race}");
 
             ///Make sure Message number is expected, needs to be in order.
             byte sex = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
 
-            Console.WriteLine($"Sex: {sex}");
 
             string Name = RandomName.GenerateName();
             //Maybe a check here to verify name isn't taken in database before sending to client?
@@ -90,11 +88,8 @@ namespace ReturnHome.Opcodes
             Console.WriteLine($"Name: {Name}");
 
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort) GameOpcode.RandomName));
-            Console.WriteLine(0);
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(Name.Length));
-            Console.WriteLine(1);
             queueMessages.messageCreator.MessageWriter(Encoding.Default.GetBytes(Name));
-            Console.WriteLine(2);
             //Send Message
             queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
