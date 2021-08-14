@@ -1,8 +1,7 @@
-﻿using System.Threading.Channels;
-using System.Threading.Tasks;
-using System;
-using ReturnHome.PacketProcessing;
-using ReturnHome.Actor;
+﻿using System;
+using System.Timers;
+using ReturnHome.Server.Managers;
+using ReturnHome.Server.Network.Managers;
 
 namespace ReturnHome
 {
@@ -14,24 +13,19 @@ namespace ReturnHome
     {
         public static void Main(string[] args)
         {
-            ///Shared Channel between udpServer and commManager
-            var channel = Channel.CreateUnbounded<UdpPacketStruct>();
-            var Charchannel = Channel.CreateUnbounded<Character>();
-
-            //Consider rmeoving this and building it into outbound packet sender? Could be a simple bool/counter check
-            SessionManager sessionManager = new(Charchannel.Writer);
-            Task.Run(sessionManager.CheckClientTimeOut);
-
-            HandleIncPacket handle = new(sessionManager);
-            Task.Run(() => handle.AcceptPacket(channel.Reader));
-            UDPListener udpListener = new();
-            WorldServer worldServer = new(Charchannel.Reader);
-            GameTick gameTick = new(udpListener, sessionManager, worldServer);
-            Task.Run(gameTick.GameLoop);
-
-            // Start UDP Server Last
-            //Start UDPServer async
-            udpListener.StartServer(channel.Writer);
+			//Load config for ServerListManager and start it
+			ServerListManager.ReadConfig(); 
+			Timer t = new(5000);
+            t.AutoReset = true;
+            t.Elapsed += new ElapsedEventHandler((_, _) => ServerListManager.DistributeServerList());
+            t.Start();
+			
+			//Load GameManager
+			
+			
+            // Start SocketManager
+			SocketManager.Initialize();
+			
             string stuff = Console.ReadLine();
         }
     }

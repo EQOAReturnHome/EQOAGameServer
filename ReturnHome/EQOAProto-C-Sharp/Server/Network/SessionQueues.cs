@@ -5,20 +5,21 @@ using ReturnHome.Utilities;
 using System;
 using System.Collections.Concurrent;
 
-namespace ReturnHome.PacketProcessing
+namespace ReturnHome.Server.Network
 {
-    public class EQOASessionQueue
+    public class SessionQueue
     {
         private ConcurrentQueue<MessageStruct> OutGoingReliableMessageQueue = new();
         private ConcurrentQueue<MessageStruct> OutGoingUnreliableMessageQueue = new();
-        private ConcurrentQueue<MessageStruct> ResendMessageQueue = new();
-        private Session _session;
+        private ConcurrentDictionary<ushort, MessageStruct> ResendMessageQueue = new();
+		
+		private Session _session;
 
-        public EQOASessionQueue(Session MySession)
-        {
-            _session = MySession;
-        }
-
+		public SessionQueue(Session session)
+		{
+			_session = session;
+		}
+		
         public void Add(MessageStruct thisMessage)
         {
             //If it is a reliable message type
@@ -66,26 +67,10 @@ namespace ReturnHome.PacketProcessing
             return false;
         }
 
-        public void GatherMessages(PacketCreator packetCreator)
+        public bool GatherMessages(out ReadOnlyMemory<byte> message)
         {
-
-            //process unreliable messages
-            while (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
-            {
-                if ((packetCreator.ReadBytes + temp.Message.Length) < 1500)
-                {
-                    if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
-                    {
-                        //Place message into outgoing message
-                        packetCreator.PacketWriter(reliableMessage.Message);
-
-                        //continue processing
-                        continue;
-                    }
-                }
-                break;
-            }
-
+			/*
+			//Rework this
             //Check Resend queue first... this could be much better
             if (ResendMessageQueue.TryPeek(out MessageStruct resendMessage))
             {
@@ -98,20 +83,35 @@ namespace ReturnHome.PacketProcessing
                         //Resend messages
                         packetCreator.PacketWriter(thisResend.Message);
                         thisResend.updateTime();
+                    }
+                }
+            }*/
+			
+            //process unreliable messages
+            if (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
+            {
+                if ((_session.rdpCommOut.totalLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
+                {
+                    if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                    {
+                        //Place message into outgoing message
+                        message = reliableMessage.Message;
 
+                        //continue processing
+                        return true;
                     }
                 }
             }
 
             //Process reliable messages
-            while (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp))
+            if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp))
             {
-                if ((packetCreator.ReadBytes + temp.Message.Length) < 1500)
+                if ((_session.rdpCommOut.totalLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
                 {
                     if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
                     {
                         //Place message into outgoing message
-                        packetCreator.PacketWriter(reliableMessage.Message);
+                        message = reliableMessage.Message;
 
                         //Reset Timestamp
                         reliableMessage.updateTime();
@@ -120,28 +120,22 @@ namespace ReturnHome.PacketProcessing
                         ResendMessageQueue.Enqueue(reliableMessage);
 
                         //continue processing
-                        continue;
+                        return true;
                     }
                 }
-                break;
             }
+			
+			return false;
         }
 
-        public void RemoveReliables(ushort LastAckMessageNumber)
+        public void RemoveReliables(SessionConnectionData connectionData)
         {
-            while (ResendMessageQueue.TryPeek(out MessageStruct temp))
-            {
-                if (temp.Messagenumber <= LastAckMessageNumber)
-                {
-                    // If first message to be resent is less then last ack'd #, drop it
-                    if (ResendMessageQueue.TryDequeue(out MessageStruct resendMessage))
-                    {
-                        continue;
-                    }
-                }
+            var removalList = cachedMessages.Keys.Where(x => x <= connectionData.lastReceivedMessageSequence);
 
-                //Means that the last ack message is less then our resend queue message
-                break;
+            foreach (var key in removalList)
+            {
+                cachedMessages.TryRemove(key, out MessageStruct serverMessage);
+                Logger.Info($"Removed message {}", key);
             }
         }
     }

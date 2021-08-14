@@ -65,11 +65,13 @@ namespace ReturnHome.PacketProcessing
     {
         public readonly ushort Type;
         public readonly ushort Length;
+        public readonly ushort Number;
 
-        public MessageHeaderUnreliableLong(ushort type, ushort length)
+        public MessageHeaderUnreliableLong(ushort type, ushort length, ushort number)
         {
             Type = type;
             Length = length;
+            Number = number;
         }
 
         public byte[] getBytes()
@@ -90,11 +92,13 @@ namespace ReturnHome.PacketProcessing
     {
         public readonly byte Type;
         public readonly byte Length;
+        public readonly ushort Number;
 
-        public MessageHeaderUnreliableShort(byte type, byte length)
+        public MessageHeaderUnreliableShort(byte type, byte length, ushort number)
         {
             Type = type;
             Length = length;
+            Number = number;
         }
 
         public byte[] getBytes()

@@ -1,42 +1,56 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Configuration;
 using System.Net;
 using System.Text;
-using ReturnHome.PacketProcessing;
+
 using ReturnHome.Opcodes;
+using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
-using System.Threading.Channels;
 
-namespace ServerSelect
+namespace ReturnHome.Server.Managers
 {
-    class SelectServer
+    public static class ServerListManager
     {
-        private Encoding unicode = Encoding.Unicode;
-        private byte[] ServerList;
-        private ConcurrentHashSet<serverListChannel> _serverListSubscribers = new();
 
-        public SelectServer()
+        private static Encoding unicode = Encoding.Unicode;
+        private static ConcurrentDictionary<IPEndPoint, Session> sessionDict = new();
+        private static byte[] _serverList;
+        public static void AddSession(Session session)
         {
-
+            if (sessionDict.TryAdd(session.MyIPEndPoint, session))
+                return;
+            
+            Console.WriteLine("Error occured and session was not added to ServerList Queue");
         }
 
-        public void GenerateServerSelect()
+        public static void DistributeServerList()
         {
-            foreach (var b in _serverListSubscribers)
-            {
-                //if false, close the channel
-                if (!b.session.serverSelect)
-                {
-                    b.channel.Complete();
-                    _serverListSubscribers.Remove(b);
-                    continue;
-                }
+            //Check to see if there is any point to even send a server list
 
-                b.channel.WriteAsync(ServerList);
+            if (sessionDict.IsEmpty)
+                return;
+
+            //Means there is client's on the server list menu, let's send the list
+            foreach (var result in sessionDict)
+            {
+                result.Value.rdpCommIn.sessionQueueMessages(result.Value, _serverList, 0xFC);
             }
         }
 
-        public void ReadConfig()
+        public static void RemoveSession(Session session)
+        {
+            if (sessionDict.TryRemove(session.MyIPEndPoint, out _))
+            {
+                Console.WriteLine("Session removed from ServerList");
+                return;
+            }
+
+            Console.WriteLine("Session not removed");
+            return;
+        }
+
+        public static void ReadConfig()
         {
             try
             {
@@ -74,8 +88,8 @@ namespace ServerSelect
                             size += appSettings[$"Server{i}"].Length * 2;
                         }
 
-                        ServerList = new byte[size];
-                        Span<byte> temp = ServerList;
+                        _serverList = new byte[size];
+                        Span<byte> temp = _serverList;
 
                         int offset = 0;
 
@@ -146,25 +160,6 @@ namespace ServerSelect
             {
                 Logger.Err("Error reading app settings");
             }
-        }
-
-        public ChannelReader<byte[]> getChannel(Session session)
-        {
-            var channel = Channel.CreateUnbounded<byte[]>();
-            _serverListSubscribers.Add(new serverListChannel(channel.Writer, session));
-            return channel.Reader;
-        }
-    }
-
-    public readonly struct serverListChannel
-    {
-        public readonly ChannelWriter<byte[]> channel;
-        public readonly Session session;
-
-        public serverListChannel(ChannelWriter<byte[]> c, Session s)
-        {
-            channel = c;
-            session = s;
         }
     }
 }
