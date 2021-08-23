@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ReturnHome.PacketProcessing;
+using System.Buffers.Binary;
+
 using ReturnHome.Utilities;
-using ReturnHome.Actor;
 using ReturnHome.SQL;
 using ReturnHome.AccountAction;
 using System.Threading.Tasks;
+using ReturnHome.Server.Network;
+using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.Network.Managers;
 
 namespace ReturnHome.Opcodes
 {
-    public class ProcessOpcode
+    public static class ProcessOpcode
     {
-        public static readonly Dictionary<GameOpcode, Action<SessionQueueMessages, SessionManager, Session, ReadOnlyMemory<byte>>> OpcodeDictionary = new()
+        public static readonly Dictionary<GameOpcode, Action<Session, PacketMessage>> OpcodeDictionary = new()
         {
             { GameOpcode.DiscVersion, ProcessGameDisc },
             { GameOpcode.Authenticate, ProcessAuthenticate },
@@ -24,82 +27,51 @@ namespace ReturnHome.Opcodes
             { GameOpcode.RandomName, GenerateRandomName },
         };
 
-        //Make new class for packing Messages into Session queue
-        private readonly SessionManager _sessionManager;
-
-        public ProcessOpcode(SessionManager sessionManager)
+        public static void ProcessOpcodes(Session MySession, PacketMessage message)
         {
-            _sessionManager = sessionManager;
-        }
 
-        public void ProcessOpcodes(Session MySession, ushort MessageTypeOpcode, ReadOnlyMemory<byte> ClientPacket, ref int offset)
-        {
-            ushort MessageLength;
-            ushort MessageNumber;
-            ushort Opcode;
-
-            MessageLength = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset) == 0xFF ? BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset) : ClientPacket.Span[offset - 1];
-
-            ///Make sure Message number is expected, needs to be in order.
-            MessageNumber = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
-
-            //If client message order was not expected, increment offset and drop it
-            if (!(MySession.clientMessageNumber + 1 == MessageNumber))
-            {
-                Logger.Info($"{MySession.ClientEndpoint.ToString("X")} - Message #{MessageNumber} was not expected, expected #{MySession.ClientMessageNumber}");
-                offset += (MessageLength - 2);
-                return;
-            }
-
-            ///Increment for every message read, in order.
-            MySession.IncrementClientMessageNumber();
-
-            //grab our opcode
-            Opcode = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
-
-            Logger.Info($"Message Length: {MessageLength}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
+            //Logger.Info($"Message Length: {ClientPacket.Length}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
             try
             {
-                OpcodeDictionary[(GameOpcode)Opcode].Invoke(MySession.queueMessages, _sessionManager, MySession, ClientPacket.Slice(offset, MessageLength - 2));
+                OpcodeDictionary[(GameOpcode)message.Header.Opcode].Invoke(MySession, message);
             }
 
             catch
             {
-                ClientOpcodeUnknown(MySession.queueMessages, _sessionManager, MySession, Opcode);
+                ClientOpcodeUnknown(MySession, message.Header.Opcode);
             }
-            offset += MessageLength - 2;
         }
 
-        public static void GenerateRandomName(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void GenerateRandomName(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
 
             //This could be useful later if real names are created per race/sex
             ///Get Race Byte
-            byte Race = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
+            byte Race = ClientPacket.Data.Span[0];
 
             ///Make sure Message number is expected, needs to be in order.
-            byte sex = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
+            byte sex = ClientPacket.Data.Span[1];
 
 
             string Name = RandomName.GenerateName();
             //Maybe a check here to verify name isn't taken in database before sending to client?
 
-            Console.WriteLine($"Name: {Name}");
+            Memory<byte> Message = new Memory<byte>(new byte[2 + 4 + (Name.Length * 2)]);
 
-            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort) GameOpcode.RandomName));
-            queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(Name.Length));
-            queueMessages.messageCreator.MessageWriter(Encoding.Default.GetBytes(Name));
+            Message.Write((ushort) GameOpcode.RandomName, ref offset);
+            Message.Write(Name.Length, ref offset);
+            Message.Write(Encoding.Default.GetBytes(Name), ref offset);
             //Send Message
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, Message, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ProcessChat(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void ProcessChat(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
 
-            int messageLength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
-            string message = Encoding.Unicode.GetString(ClientPacket.Span.Slice(offset, messageLength * 2));
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[0..]);
+            string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[4..(4 + messageLength * 2)]);
 
             if (message == "!c")
             {
@@ -118,12 +90,14 @@ namespace ReturnHome.Opcodes
                     message = "Unknown opcode display is now off.";
                 }
 
-                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
-                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(message.Length));
-                queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(message));
+                Memory<byte> Message = new Memory<byte>(new byte[2 + 4 + (message.Length * 2)]);
+
+                Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
+                Message.Write(message.Length, ref offset);
+                Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
 
                 //Send Message
-                queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+                SessionQueueMessages.PackMessage(MySession, Message, MessageOpcodeTypes.ShortReliableMessage);
             }
 
             if (message.Substring(0, 2) == "!s")
@@ -137,34 +111,41 @@ namespace ReturnHome.Opcodes
                 catch
                 {
                     message = "Not a valid value for speed";
-                    queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
-                    queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(message.Length));
-                    queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(message));
+
+                    Memory<byte> Message = new Memory<byte>(new byte[2 + 4 + (message.Length * 2)]);
+
+                    Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
+                    Message.Write(message.Length, ref offset);
+                    Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
 
                     //Send Message
-                    queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+                    SessionQueueMessages.PackMessage(MySession, Message, MessageOpcodeTypes.ShortReliableMessage);
                     return;
                 }
 
-                ActorSpeed(queueMessages, MySession, speed);
+                ActorSpeed(MySession, speed);
             }
         }
 
-        public static void ClientOpcodeUnknown(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ushort opcode)
+        public static void ClientOpcodeUnknown(Session MySession, ushort opcode)
         {
             if (MySession.unkOpcode)
             {
+                int offset = 0;
                 string theMessage = $"Unknown Opcode: {opcode.ToString("X")}";
-                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ClientMessage));
-                queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(theMessage.Length));
-                queueMessages.messageCreator.MessageWriter(Encoding.Unicode.GetBytes(theMessage));
+
+                Memory<byte> Message = new Memory<byte>(new byte[2 + 4 + (theMessage.Length * 2)]);
+
+                Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
+                Message.Write(theMessage.Length, ref offset);
+                Message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
 
                 //Send Message
-                queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+                SessionQueueMessages.PackMessage(MySession, Message, MessageOpcodeTypes.ShortReliableMessage);
             }
         }
 
-        public static void ProcessCharacterChanges(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
 
@@ -181,10 +162,10 @@ namespace ReturnHome.Opcodes
             //Got character, update changes
             thisChar.UpdateFeatures(MySession, HairColor, HairLength, HairStyle, FaceOption);
 
-            sessionManager.CreateMemoryDumpSession(MySession);
+            SessionManager.CreateMemoryDumpSession(MySession);
         }
 
-        public static async void ProcessMemoryDump(SessionQueueMessages queueMessages, Session MySession, SessionManager sessionManager)
+        public static async void ProcessMemoryDump(Session MySession)
         {
             MySession.StartPipe(20000);
 
@@ -287,7 +268,7 @@ namespace ReturnHome.Opcodes
             //Get our timestamp opcode in queue
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Time));
             queueMessages.messageCreator.MessageWriter(DNP3Creation.CreateDNP3TimeStamp());
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
 
             //Get our Memory allocAtions
             ReadOnlyMemory<byte> enterGame = MySession.ReadMessage();
@@ -296,7 +277,7 @@ namespace ReturnHome.Opcodes
             {
                 queueMessages.messageCreator.MessageWriter(enterGame[bytesRead..(bytesRead + 4096)]);
                 ///Handles packing message into outgoing packet
-                queueMessages.PackMessage(MySession, MessageOpcodeTypes.MultiShortReliableMessage);
+                SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.MultiShortReliableMessage);
                 bytesRead += 4096;
             }
 
@@ -304,7 +285,7 @@ namespace ReturnHome.Opcodes
 
             await Task.Delay(1000);
             ///Handles packing message into outgoing packet
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
 
             sessionManager.rdpComm.characterChanWriter.TryWrite(MySession.MyCharacter);
 
@@ -312,7 +293,7 @@ namespace ReturnHome.Opcodes
             ActorSpeed(queueMessages, MySession);
         }
 
-        public static void ProcessDelChar(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void ProcessDelChar(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
 
@@ -324,7 +305,7 @@ namespace ReturnHome.Opcodes
         }
 
         //Method to create new character when new character opcode is received
-        public static void ProcessCreateChar(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void ProcessCreateChar(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
 
@@ -341,7 +322,7 @@ namespace ReturnHome.Opcodes
                 queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.NameTaken));
                 //Log character name taken and send out RDP message to pop up that name is taken.
                 //Console.WriteLine("Character Name Already Taken");
-                queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+                SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
             }
 
             //If name not found continue to actually create character
@@ -380,7 +361,7 @@ namespace ReturnHome.Opcodes
         }
 
         ///Game Disc Version
-        public static void ProcessGameDisc(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void ProcessGameDisc(Session MySession, PacketMessage ClientPacket)
         {
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.DiscVersion));
 
@@ -411,11 +392,11 @@ namespace ReturnHome.Opcodes
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((uint)GameVersion));
 
             ///Handles packing message into outgoing packet
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
 
         ///Authentication check
-        public static void ProcessAuthenticate(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, ReadOnlyMemory<byte> ClientPacket)
+        public static void ProcessAuthenticate(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
             Logger.Info("Processing Authentication");
@@ -475,7 +456,7 @@ namespace ReturnHome.Opcodes
             }
         }
 
-        public void ProcessPingRequest(SessionQueueMessages queueMessages, Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
+        public void ProcessPingRequest(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             //Verify the ping only has 1 byte of data
             if (BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset) == 1)
@@ -494,7 +475,7 @@ namespace ReturnHome.Opcodes
                         queueMessages.messageCreator.MessageWriter(new byte[] { 0x14 });
                         ///Do stuff here?
                         ///Handles packing message into outgoing packet
-                        queueMessages.PackMessage(MySession, MessageOpcodeTypes.PingMessage);
+                        SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.PingMessage);
                     }
                 }
 
@@ -505,7 +486,7 @@ namespace ReturnHome.Opcodes
             offset += 1;
         }
 
-        public static void CreateCharacterList(SessionQueueMessages queueMessages, SessionManager sessionManager, List<Character> MyCharacterList, Session MySession)
+        public static void CreateCharacterList(List<Character> MyCharacterList, Session MySession)
         {
             //Holds list of characters pulled from the DB for the AccountID
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.CharacterSelect));
@@ -736,31 +717,31 @@ namespace ReturnHome.Opcodes
 
             ///Character list is complete
             ///Handles packing message into outgoing packet
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void IgnoreList(SessionQueueMessages queueMessages, Session MySession)
+        public static void IgnoreList(Session MySession)
         {
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.IgnoreList));
             queueMessages.messageCreator.MessageWriter(new byte[] { 0 });
             //For now send no ignored people
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ActorSpeed(SessionQueueMessages queueMessages, Session MySession)
+        public static void ActorSpeed(Session MySession)
         {
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed));
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(25.0f));
             //For now send a standard speed
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ActorSpeed(SessionQueueMessages queueMessages, Session MySession, float speed)
+        public static void ActorSpeed(Session MySession, float speed)
         {
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed));
             queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes(speed));
             //For now send a standard speed
-            queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
         }
     }
 }

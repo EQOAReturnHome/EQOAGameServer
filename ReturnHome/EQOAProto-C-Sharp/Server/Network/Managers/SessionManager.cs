@@ -5,6 +5,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using System.Threading.Channels;
 using ReturnHome.Actor;
+using System.Linq;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -69,7 +70,7 @@ namespace ReturnHome.Server.Network.Managers
 
                 else
                 {
-                    Logger.Info("Unsolicited Packet from {0} with Id {1}", ClientIPEndPoint, packet.Header.ClientEndPoint);
+                    Logger.Info($"Unsolicited Packet from {ClientIPEndPoint} with Id { packet.Header.ClientEndPoint}");
                 }
             }
         }
@@ -81,7 +82,7 @@ namespace ReturnHome.Server.Network.Managers
         {
             foreach (Session ClientSession in SessionHash)
             {
-                if (ClientSession.EndPoint.Equals(ClientIPEndPoint) && ClientSession.InstanceID == InstanceID)
+                if (ClientSession.MyIPEndPoint.Equals(ClientIPEndPoint) && ClientSession.InstanceID == InstanceID)
                 {
                     actualSession = ClientSession;
                     return true;
@@ -93,7 +94,7 @@ namespace ReturnHome.Server.Network.Managers
             return false;
         }
 		
-        public uint ObtainIDUp()
+        public static uint ObtainIDUp()
         {
             ///Eventually would need some checks to make sure it isn't taken in bigger scale
             uint NewID = InstanceIDUpStarter;
@@ -104,13 +105,10 @@ namespace ReturnHome.Server.Network.Managers
             return NewID;
         }
 
-        public void CreateMasterSession(Session MySession)
+        public static void CreateMasterSession(Session MySession)
         {
-            Session NewMasterSession = new Session(MySession.MyIPEndPoint, DNP3Creation.DNP3Session());
-            NewMasterSession.SessionID = ObtainIDUp();
+            Session NewMasterSession = new Session(MySession.listener, MySession.MyIPEndPoint, ObtainIDUp(), DNP3Creation.DNP3Session(), MySession.ClientEndpoint, MySession.rdpCommIn.serverID, true);
             NewMasterSession.AccountID = MySession.AccountID;
-            NewMasterSession.ClientEndpoint = MySession.ClientEndpoint;
-            NewMasterSession.RemoteMaster = true;
             NewMasterSession.SessionAck = true;
 
             if (SessionHash.TryAdd(NewMasterSession))
@@ -121,27 +119,25 @@ namespace ReturnHome.Server.Network.Managers
 
         }
 
-        public void CreateMemoryDumpSession(Session MySession)
+        public static void CreateMemoryDumpSession(Session MySession)
         {
             //Start new session 
-            Session thisSession = new Session(MySession.MyIPEndPoint, DNP3Creation.DNP3Session());
-            thisSession.ClientEndpoint = MySession.ClientEndpoint;
-            thisSession.RemoteMaster = MySession.RemoteMaster;
-            thisSession.AccountID = MySession.AccountID;
-            thisSession.SessionID = MySession.SessionID + 1;
-            thisSession.MyCharacter = MySession.MyCharacter;
-            thisSession.RemoteMaster = true;
-            thisSession.SessionAck = true;
+            Session NewMasterSession = new Session(MySession.listener, MySession.MyIPEndPoint, MySession.SessionID++, DNP3Creation.DNP3Session(), MySession.ClientEndpoint, MySession.rdpCommIn.serverID, true);
+            NewMasterSession.ClientEndpoint = MySession.ClientEndpoint;
+            NewMasterSession.AccountID = MySession.AccountID;
+            NewMasterSession.MyCharacter = MySession.MyCharacter;
+            NewMasterSession.SessionAck = true;
 
-            if (SessionHash.TryAdd(thisSession))
+            if (SessionHash.TryAdd(NewMasterSession))
             {
-                ProcessOpcode.ProcessMemoryDump(thisSession.queueMessages, thisSession, this);
+                ProcessOpcode.ProcessMemoryDump(NewMasterSession.queueMessages, thisSession, this);
             }
         }
 
         ///Used when starting a master session with client.
-        public void GenerateClientContact(Session MySession)
+        public static void GenerateClientContact(Session MySession)
         {
+            /*
             MySession.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera1));
             MySession.queueMessages.messageCreator.MessageWriter(new byte[] { 0x03, 0x00, 0x00, 0x00 });
             ///Handles packing message into outgoing packet
@@ -151,9 +147,10 @@ namespace ReturnHome.Server.Network.Managers
             MySession.queueMessages.messageCreator.MessageWriter(new byte[] { 0x1B, 0x00, 0x00, 0x00 });
             ///Handles packing message into outgoing packet
             MySession.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            */
         }
 
-        public async Task CheckClientTimeOut()
+        public static async Task CheckClientTimeOut()
         {
             //Approximately every 30 seconds, check if a session is in a timedout state and disconnect it
             do
@@ -183,29 +180,20 @@ namespace ReturnHome.Server.Network.Managers
         {
             int sessionCount = 0;
 
-            sessionLock.EnterUpgradeableReadLock();
-            try
+            // The session tick outbound processes pending actions and handles outgoing messages
+            Parallel.ForEach(SessionHash, s => s?.TickOutbound());
+
+            // Removes sessions in the NetworkTimeout state, including sessions that have reached a timeout limit.
+            foreach (var session in SessionHash.Where(k => !Equals(null, k)))
             {
-                // The session tick outbound processes pending actions and handles outgoing messages
-                Parallel.ForEach(SessionHash, s => s?.TickOutbound());
-
-                // Removes sessions in the NetworkTimeout state, including sessions that have reached a timeout limit.
-                foreach (var session in SessionHash.Where(k => !Equals(null, k)))
+                if (session.PendingTermination)
                 {
-                    if (session.PendingTermination != null && session.PendingTermination.TerminationStatus == SessionTerminationPhase.SessionWorkCompleted)
-                    {
-                        session.DropSession();
-                        session.PendingTermination.TerminationStatus = SessionTerminationPhase.WorldManagerWorkCompleted;
-                    }
-
-                    sessionCount++;
+                    session.DropSession();
                 }
+
+                sessionCount++;
             }
 			
-            finally
-            {
-                sessionLock.ExitUpgradeableReadLock();
-            }
             return sessionCount;
         }
 		

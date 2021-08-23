@@ -4,7 +4,7 @@ using System.Text;
 using ReturnHome.PacketProcessing;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Actor
+namespace ReturnHome.Server.Entity.Actor
 {
     public static class ObjectUpdate
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Actor
+namespace ReturnHome.Server.Entity.Actor
 {
     public class Item
     {

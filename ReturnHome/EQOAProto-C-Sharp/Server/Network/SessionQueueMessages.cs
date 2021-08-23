@@ -1,13 +1,15 @@
 ﻿using System;
+
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
+using ReturnHome.PacketProcessing;
 
 namespace ReturnHome.Server.Network
 {
-    public class SessionQueueMessages
+    public static class SessionQueueMessages
     {
         ///Message processing for outbound section
-        public void PackMessage(Session session, ReadOnlyMemory<byte> ClientMessage, byte MessageOpcodeType)
+        public static void PackMessage(Session session, ReadOnlyMemory<byte> ClientMessage, byte MessageOpcodeType)
         {
             //This is only needed so often
             int readBytes = 0;
@@ -17,20 +19,21 @@ namespace ReturnHome.Server.Network
             {
                 while ((ClientMessage.Length - readBytes) >= 1024)
                 {
-                    MessageHeaderReliableLong thisMessageHeader = new(MessageOpcodeTypes.MultiLongReliableMessage, 1024, session.rdpCommIn.connectionData.lastSentMessageSequence++);
+                    MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeTypes.MultiShortReliableMessage), 1024, session.rdpCommIn.connectionData.lastSentMessageSequence++);
 
-                    ReadOnlyMemory<byte> WholeClientMessage = new byte[thisMessageHeader.Length + 6];
-                    thisMessageHeader.getBytes().CopyTo(WholeClientMessage[0..6]);
-                    ClientMessage[readBytes..(readBytes + 1024)].CopyTo(WholeClientMessage[6..WholeClientMessage.Length]);
-                    readBytes += 1024;
-                    AddMessage(session, thisMessageHeader.Number, WholeClientMessage);
+                    Memory<byte> thisMessage = new byte[thisMessageHeader.Length + 6];
+                    thisMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
+
+                    //1018 + 6 = 1024
+                    thisMessage.Write(ClientMessage[readBytes..(readBytes + 1018)], ref readBytes);
+                    AddMessage(session, thisMessageHeader.Number, thisMessage);
                 }
 
                 //Slice remaining bytes left to put into a message which is < 1500
                 ClientMessage = ClientMessage.Slice(readBytes, (ClientMessage.Length - readBytes));
             }
 
-			ReadOnlyMemory<byte> WholeClientMessage;
+			Memory<byte> WholeClientMessage;
 			ushort MessageSequence;
 			
             ///Pack Message here into session.SessionMessages
@@ -38,54 +41,54 @@ namespace ReturnHome.Server.Network
             if (ClientMessage.Length > 255)
             {
 				//0xFC types (unreliable system messages)
-				if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage))
+				if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
 				{
-					MessageHeaderUnreliableLong thisMessageHeader = new(((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, 0);
+					MessageHeaderUnreliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, 0);
 					WholeClientMessage = new byte[thisMessageHeader.Length + 4];
-					thisMessageHeader.getBytes().CopyTo(WholeClientMessage[0..4]);
-					ClientMessage.CopyTo(WholeClientMessage[4..WholeClientMessage.Length]);
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
+					WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
 					MessageSequence = thisMessageHeader.Number;
 				}
 				
 				//Reliable system messages
 				else
 				{
-					MessageHeaderReliableLong thisMessageHeader = new((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
-					WholeClientMessage = new byte[thisMessageHeader.Length + 6];
-					thisMessageHeader.getBytes().CopyTo(WholeClientMessage[0..6]);
-					ClientMessage.CopyTo(WholeClientMessage[6..WholeClientMessage.Length]);
-					MessageSequence = thisMessageHeader.Number;
-				}
+					MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
+                    WholeClientMessage = new byte[thisMessageHeader.Length + 6];
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
+                    WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
+                    MessageSequence = thisMessageHeader.Number;
+                }
             }
 
             ///Message is < 255
             else
             {
 				//0xFC types (unreliable system messages)
-				if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage))
+				if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
 				{
-					MessageHeaderUnreliableShort thisMessageHeader = new(MessageOpcodeType, (ushort)ClientMessage.Length, 0);
-					WholeClientMessage = new byte[thisMessageHeader.Length + 2];
-					thisMessageHeader.getBytes().CopyTo(WholeClientMessage[0..2]);
-					ClientMessage.CopyTo(WholeClientMessage[2..WholeClientMessage.Length]);
-					MessageSequence = thisMessageHeader.Number;
-				}
+					MessageHeaderUnreliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, 0);
+                    WholeClientMessage = new byte[thisMessageHeader.Length + 2];
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
+                    WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
+                    MessageSequence = thisMessageHeader.Number;
+                }
 				
 				//Reliable system messages
 				else
 				{
-					MessageHeaderReliableShort thisMessageHeader = new(MessageOpcodeType, (ushort)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
-					WholeClientMessage = new byte[thisMessageHeader.Length + 4];
-					thisMessageHeader.getBytes().CopyTo(WholeClientMessage[0..4]);
-					ClientMessage.CopyTo(WholeClientMessage[4..WholeClientMessage.Length]);
-					MessageSequence = thisMessageHeader.Number;
-				}
+					MessageHeaderReliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
+                    WholeClientMessage = new byte[thisMessageHeader.Length + 4];
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
+                    WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
+                    MessageSequence = thisMessageHeader.Number;
+                }
             }
 			
 			AddMessage(session, MessageSequence, WholeClientMessage);
         }
 
-        private void AddMessage(Session session, ushort MessageSequence, ReadOnlyMemory<byte> MyMessage)
+        private static void AddMessage(Session session, ushort MessageSequence, ReadOnlyMemory<byte> MyMessage)
         {
             session.sessionQueue.Add(new MessageStruct(MessageSequence, MyMessage));
         }

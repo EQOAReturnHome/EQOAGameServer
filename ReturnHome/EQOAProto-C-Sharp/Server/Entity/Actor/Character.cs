@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using ReturnHome.PacketProcessing;
 using ReturnHome.Playercharacter.Actor;
+using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Actor
+namespace ReturnHome.Server.Entity.Actor
 {
     public class Character
     {
@@ -19,7 +19,7 @@ namespace ReturnHome.Actor
         public int ModelID;
         public int TClass;
         public int Race;
-        public String HumType;
+        public string HumType;
         public int Level;
         public int HairColor;
         public int HairLength;

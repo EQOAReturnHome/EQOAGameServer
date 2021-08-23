@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Concurrent;
 
 namespace ReturnHome.Server.Network
 {
     public abstract class Packet
     {
         public PacketHeader Header { get; } = new PacketHeader();
-        public Dictionary<ushort, PacketMessage> Messages { get; } = new Dictionary<ushort, PacketMessage>();
+        public ConcurrentDictionary<ushort, PacketMessage> Messages { get; } = new ConcurrentDictionary<ushort, PacketMessage>();
     }
 }

@@ -4,26 +4,24 @@ using System.Collections.Generic;
 using System.Data;
 using System.Configuration;
 using System.Linq;
-using ReturnHome.Actor;
-using ReturnHome.PacketProcessing;
+
 using ReturnHome.Playercharacter.Actor;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
+using ReturnHome.Server.Network;
+using ReturnHome.Server.Entity.Actor;
 
 namespace ReturnHome.SQL
 {
     //Class to handle all SQL Operations
     class SQLOperations
     {
-
-        //Holds list of characters for whole class
-        private static List<Character> characterData = new List<Character>();
-
         //Class to pull characters from DB via serverid
-        public static List<Character> AccountCharacters(Session MySession)
+        public List<Character> AccountCharacters(Session MySession)
         {
-            //Clears characterData previously queried
-            characterData.Clear();
+            //Holds list of characters for whole class
+            List<Character> characterData = new List<Character>();
+
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
             //Set connection property from connection string and open connection
@@ -304,7 +302,7 @@ namespace ReturnHome.SQL
             return characterData;
         }
 
-        public static void GetPlayerSpells(Session MySession)
+        public void GetPlayerSpells(Session MySession)
         {
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
@@ -372,7 +370,7 @@ namespace ReturnHome.SQL
             rdr.Close();
         }
 
-        public static void GetPlayerHotkeys(Session MySession)
+        public void GetPlayerHotkeys(Session MySession)
         {
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
@@ -419,7 +417,7 @@ namespace ReturnHome.SQL
             rdr.Close();
         }
 
-        public static void GetPlayerWeaponHotbar(Session MySession)
+        public void GetPlayerWeaponHotbar(Session MySession)
         {
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
@@ -461,7 +459,7 @@ namespace ReturnHome.SQL
         }
 
         //Method to delete character from player's account
-        public static void DeleteCharacter(SessionQueueMessages queueMessages, SessionManager sessionManager, int serverid, Session MySession)
+        public void DeleteCharacter(int serverid, Session MySession)
         {
             //Opens new Sql connection using connection parameters
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
@@ -484,7 +482,7 @@ namespace ReturnHome.SQL
             List<Character> MyCharacterList = AccountCharacters(MySession);
 
             //Send Fresh Character Listing
-            ProcessOpcode.CreateCharacterList(queueMessages, sessionManager, MyCharacterList, MySession);
+            ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
         }
 
         //Method to check if characters name exist in the DB
@@ -519,7 +517,7 @@ namespace ReturnHome.SQL
         }
 
         //Method to create new character for player's account
-        public static void CreateCharacter(SessionQueueMessages queueMessages, SessionManager sessionManager, Session MySession, Character charCreation)
+        public void CreateCharacter(Session MySession, Character charCreation)
         {
 
             //Instantiate new list of Characters to return new character listing
@@ -677,10 +675,10 @@ namespace ReturnHome.SQL
             //Log which character serverid was created
             //Console.WriteLine($"Created Character with Name: {charCreation.CharName}");
 
-            List<Character> MyCharacterList = SQLOperations.AccountCharacters(MySession);
+            List<Character> MyCharacterList = AccountCharacters(MySession);
 
             //Send Fresh Character Listing
-            ProcessOpcode.CreateCharacterList(queueMessages, sessionManager, MyCharacterList, MySession);
+            ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
         }
     }
 }

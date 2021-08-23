@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -176,46 +177,46 @@ namespace ReturnHome.Utilities
 		}
 		
 		public static void Write(this ref Memory<byte> memory, short data, ref int offset)
-		{
-			byte[] temp = BitConverter.GetBytes(data);
-			temp.CopyTo(memory[offset..(offset+temp.Length)]);
-			offset += temp.Length;
+        {
+            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            offset += 2;
 		}
 		
 		public static void Write(this ref Memory<byte> memory, ushort data, ref int offset)
-		{
-			byte[] temp = BitConverter.GetBytes(data);
-			temp.CopyTo(memory[offset..(offset+temp.Length)]);
-			offset += temp.Length;
-		}
+        {
+            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            offset += 2;
+        }
 		
 		public static void Write(this ref Memory<byte> memory, int data, ref int offset)
-		{
-			byte[] temp = BitConverter.GetBytes(data);
-			temp.CopyTo(memory[offset..(offset+temp.Length)]);
-			offset += temp.Length;
-		}
+        {
+            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            offset += 4;
+        }
 		
 		public static void Write(this ref Memory<byte> memory, uint data, ref int offset)
-		{
-			byte[] temp = BitConverter.GetBytes(data);
-			temp.CopyTo(memory[offset..(offset+temp.Length)]);
-			offset += temp.Length;
-		}
+        {
+            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            offset += 4;
+        }
 		
 		public static void Write(this ref Memory<byte> memory, long data, ref int offset)
-		{
-			byte[] temp = BitConverter.GetBytes(data);
-			temp.CopyTo(memory[offset..(offset+temp.Length)]);
-			offset += temp.Length;
-		}
+        {
+            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            offset += 8;
+        }
 		
 		public static void Write(this ref Memory<byte> memory, ulong data, ref int offset)
 		{
-			byte[] temp = BitConverter.GetBytes(data);
-			temp.CopyTo(memory[offset..(offset+temp.Length)]);
-			offset += temp.Length;
-		}
+            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            offset += 8;
+        }
+
+        public static void Write(this ref Memory<byte> memory, ReadOnlyMemory<byte> memory2, ref int offset)
+        {
+            memory2.CopyTo(memory[offset..(offset + memory2.Length)]);
+            offset += memory2.Length;
+        }
 		
         #endregion
 
@@ -314,7 +315,7 @@ namespace ReturnHome.Utilities
 		///<summary>
         ///Takes an offset and needed size, returning a ReadOnlySpan<byte> of said size from said offset
         ///</summary>
-        public static void GetSpan(this ref Memory<byte> memory, byte[] data, ref int offset)
+        public static void Write(this ref Memory<byte> memory, byte[] data, ref int offset)
         {
 			data.CopyTo(memory[offset..(offset+data.Length)]);
 			offset += data.Length;

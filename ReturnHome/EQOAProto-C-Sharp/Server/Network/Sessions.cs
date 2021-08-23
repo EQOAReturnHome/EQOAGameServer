@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System;
+using System.Text;
+
 using ReturnHome.Utilities;
 using ReturnHome.Actor;
-using System.IO.Pipelines;
 using ReturnHome.Opcodes;
-using System.Text;
+using ReturnHome.Server.Network.Managers;
 
 namespace ReturnHome.Server.Network
 {
@@ -14,9 +14,10 @@ namespace ReturnHome.Server.Network
     {
         //Message List
 		//New data to Session...
-		public readonly RDPCommIn rdpCommIn { get; private set; } 
-		public readonly RDPCommOut rdpCommOut { get; private set; }
-        public readonly SessionQueue sessionQueue { get; private set; } 
+		public RdpCommIn rdpCommIn { get; private set; } 
+		public RdpCommOut rdpCommOut { get; private set; }
+        public SessionQueue sessionQueue { get; private set; }
+        public ServerListener listener { get; private set; }
 		
 		
         private byte _pingCount = 0;
@@ -26,6 +27,7 @@ namespace ReturnHome.Server.Network
 		
 		//Helps to identify master of session
 		public bool didServerInitiate { get; private set; }
+        public bool PendingTermination { get; private set; } = false;
 		
 		///Client IPEndPoint
         public IPEndPoint MyIPEndPoint { get; private set; }
@@ -62,7 +64,7 @@ namespace ReturnHome.Server.Network
         public int AccountID;
 
         //Character 
-        public Character MyCharacter { get; private set; }
+        public Character MyCharacter { get; set; }
 
         /// <summary>
         /// Create a Simple Client Session
@@ -102,7 +104,7 @@ namespace ReturnHome.Server.Network
             //if (!CheckState(packet))
                 //return;
 
-            RdpCommIn.ProcessPacket(packet);
+            rdpCommIn.ProcessPacket(packet);
         }
 
         public void UnreliablePing()
@@ -113,23 +115,24 @@ namespace ReturnHome.Server.Network
                 _pingCount = 0;
             }
         }
-		
-		//This should get built into somewhere else, eventually
+
+        //This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
             string theMessage = $"Coordinates: X-{MyCharacter.XCoord} Y-{MyCharacter.YCoord} Z-{MyCharacter.ZCoord}";
-			
-			//opcode length + string length definition
-			int length = 2 + 4 + (theMessage.Length * 2);
-			
-			ReadOnlyMemory<byte> message = new ReadOnlyMemory<byte>(length);
-			
-            BitConverter.GetBytes((ushort)GameOpcode.ClientMessage).CopyTo(message[0..2]);
-            BitConverter.GetBytes(theMessage.Length).CopyTo(message[2..6]);
-            Encoding.Unicode.GetBytes(theMessage).CopyTo(message[6..message.Length]);
+
+            //opcode length + string length definition
+            int length = 2 + 4 + (theMessage.Length * 2);
+            int offset = 0;
+
+            Memory<byte> message = new Memory<byte>(new byte[length]);
+
+            message.Write((ushort)GameOpcode.ClientMessage, ref offset);
+            message.Write(theMessage.Length, ref offset);
+            message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
 			
             //Send Message
-			rdpCommIn.sessionQueueMessages.PackMessage(this, message, MessageOpcodeTypes.ShortReliableMessage);
+			SessionQueueMessages.PackMessage(this, message, MessageOpcodeTypes.ShortReliableMessage);
             coordToggle = false;
         }
 
@@ -164,20 +167,28 @@ namespace ReturnHome.Server.Network
         {
 			//Add some state stuff? To identify some stuff
             // Checks if the session has stopped responding.
-            if (DateTime.UtcNow.Ticks >= Network.TimeoutTick)
+            if (DateTime.UtcNow.Ticks >= rdpCommIn.TimeoutTick)
             {
 				//After 2 minutes... disconnect session
 				if (inGame)
 				{
 					UnreliablePing();
-                    if (MySession.coordToggle)
+                    if (coordToggle)
                     {
-                        MySession.CoordinateUpdate();
+                        CoordinateUpdate();
                     }
 				}
             }
 
             rdpCommOut.PrepPackets();
-        }	
+        }
+
+        public void DropSession()
+        {
+            if (!PendingTermination) return;
+            //Eventually this would kick the player out of the world and save data/free resources
+
+            SessionManager.SessionHash.TryRemove(this);
+        }
     }
 }

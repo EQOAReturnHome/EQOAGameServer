@@ -7,9 +7,10 @@ namespace ReturnHome.Server.Network
     public class PacketMessageHeader
     {
         public int HeaderSize { get; set; }
-		
-		public byte MessageType { get; set; }
+
+        public byte MessageType { get; set; }
         public ushort MessageNumber { get; set; }
+        public ushort Opcode { get; private set; }
         public ushort Size { get; set; }
 		public int Count { get; set; }
         public int Index { get; set; }
@@ -51,6 +52,8 @@ namespace ReturnHome.Server.Network
 				
 				//Eventually check for unreliable messages "Character updates" from client
 			}
+
+            Opcode = buffer.GetLEUShort(ref offset);
         }
     }
 }
