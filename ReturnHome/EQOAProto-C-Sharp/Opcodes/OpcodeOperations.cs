@@ -148,23 +148,25 @@ namespace ReturnHome.Opcodes
         public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
-
+            ReadOnlyMemory<byte> temp = ClientPacket.Data;
             //Retrieve CharacterID from client
-            int ServerID = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
-            int FaceOption = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
-            int HairStyle = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
-            int HairLength = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
-            int HairColor = BinaryPrimitiveWrapper.GetLEInt(ClientPacket, ref offset);
+            int ServerID = temp.GetLEInt(ref offset);
+            int FaceOption = temp.GetLEInt( ref offset);
+            int HairStyle = temp.GetLEInt( ref offset);
+            int HairLength = temp.GetLEInt( ref offset);
+            int HairColor = temp.GetLEInt( ref offset);
 
             //Update these on our character
-            Character thisChar = MySession.CharacterData.Find(i => Equals(i.ServerID, ServerID));
+            //Perform SQL query to update this later
+            //Character thisChar = MySession.CharacterData.Find(i => Equals(i.ServerID, ServerID));
 
             //Got character, update changes
-            thisChar.UpdateFeatures(MySession, HairColor, HairLength, HairStyle, FaceOption);
+            //thisChar.UpdateFeatures(MySession, HairColor, HairLength, HairStyle, FaceOption);
 
             SessionManager.CreateMemoryDumpSession(MySession);
         }
 
+        /*
         public static async void ProcessMemoryDump(Session MySession)
         {
             MySession.StartPipe(20000);
@@ -292,6 +294,7 @@ namespace ReturnHome.Opcodes
             IgnoreList(queueMessages, MySession);
             ActorSpeed(queueMessages, MySession);
         }
+        */
 
         public static void ProcessDelChar(Session MySession, PacketMessage ClientPacket)
         {

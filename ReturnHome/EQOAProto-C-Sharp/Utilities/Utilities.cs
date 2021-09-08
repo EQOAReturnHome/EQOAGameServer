@@ -15,80 +15,8 @@ namespace ReturnHome.Utilities
             return (ulong)(unixTime.TotalSeconds);
         }
 
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(byte val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(sbyte val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(short val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(ushort val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(int val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(uint val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
         ///Performs the actual Technique for us
-        private static long RealTechnique(long value)
+        private static byte[] RealTechnique(int value)
         {
             //Bool to indicate if negative
             bool isNegative = false;

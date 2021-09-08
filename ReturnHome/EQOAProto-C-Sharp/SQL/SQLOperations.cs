@@ -14,19 +14,13 @@ using ReturnHome.Server.Entity.Actor;
 namespace ReturnHome.SQL
 {
     //Class to handle all SQL Operations
-    class SQLOperations
+    class SQLOperations : SQLBase
     {
         //Class to pull characters from DB via serverid
         public List<Character> AccountCharacters(Session MySession)
         {
             //Holds list of characters for whole class
             List<Character> characterData = new List<Character>();
-
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
-
-            //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
-            con.Open();
 
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
@@ -304,12 +298,6 @@ namespace ReturnHome.SQL
 
         public void GetPlayerSpells(Session MySession)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
-
-            //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
-            con.Open();
-
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
@@ -372,12 +360,6 @@ namespace ReturnHome.SQL
 
         public void GetPlayerHotkeys(Session MySession)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
-
-            //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
-            con.Open();
-
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
@@ -415,16 +397,11 @@ namespace ReturnHome.SQL
                 MySession.MyCharacter.MyHotkeys.Add(thisHotkey);
             }
             rdr.Close();
+            con.Close();
         }
 
         public void GetPlayerWeaponHotbar(Session MySession)
         {
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
-
-            //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
-            con.Open();
-
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
@@ -456,17 +433,12 @@ namespace ReturnHome.SQL
             {
                 MySession.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
             }
+            con.Close();
         }
 
         //Method to delete character from player's account
         public void DeleteCharacter(int serverid, Session MySession)
         {
-            //Opens new Sql connection using connection parameters
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
-
-            //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
-            con.Open();
             //Creates var to store a MySQlcommand with the query and connection parameters.
             using var cmd = new MySqlCommand("DeleteCharacter", con);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -481,23 +453,21 @@ namespace ReturnHome.SQL
             //Create a new list of characters after deletion
             List<Character> MyCharacterList = AccountCharacters(MySession);
 
+            con.Close();
+
             //Send Fresh Character Listing
             ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
         }
 
         //Method to check if characters name exist in the DB
-        public static string CheckName(string CharName)
+        public string CheckName(string CharName)
         {
             //Create local var to hold character name from DB
             String TestCharName = "";
             //Set and open SQL con
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
-            //Set connection property from connection string and open connection
-            using MySqlConnection CheckNameCon = new MySqlConnection(connectionString);
-            CheckNameCon.Open();
             //SQL query to check if a name exists in the DB or not
-            using var CheckNameCmd = new MySqlCommand("CheckName", CheckNameCon);
+            using var CheckNameCmd = new MySqlCommand("CheckName", con);
             CheckNameCmd.CommandType = CommandType.StoredProcedure;
             //Assigns variable to in line @Sql variable
             CheckNameCmd.Parameters.AddWithValue("@CharacterName", CharName);
@@ -510,7 +480,7 @@ namespace ReturnHome.SQL
                 TestCharName = CheckNameRdr.GetString(0);
             }
             //Close the DB connection
-            CheckNameCon.Close();
+            con.Close();
 
             //Return the matched name if it existed in the DB.
             return TestCharName;
