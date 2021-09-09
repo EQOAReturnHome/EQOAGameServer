@@ -299,9 +299,9 @@ namespace ReturnHome.Opcodes
         public static void ProcessDelChar(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
-
+            ReadOnlyMemory<byte> temp = ClientPacket.Data;
             //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
-            int clientServID = Utility_Funcs.Untechnique(ClientPacket.Span, ref offset);
+            int clientServID = temp.Get7BitDoubleEncodedInt( ref offset);
 
             //Call SQL delete method to actually process the delete.
             SQLOperations.DeleteCharacter(queueMessages, sessionManager, clientServID, MySession);
