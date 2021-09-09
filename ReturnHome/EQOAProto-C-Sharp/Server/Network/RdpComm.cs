@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
@@ -186,7 +187,10 @@ namespace ReturnHome.Server.Network
             if (_session.sessionQueue.CheckQueue() || _session.RdpReport)
             {
                 _session.ResetPing();
-					
+
+                List<ReadOnlyMemory<byte>> messageList;
+
+                (totalLength, messageList) = _session.sessionQueue.GatherMessages();
 				//Calculate expected expected outgoing packet length
 				// 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
 				GetHeaderLength();
@@ -219,13 +223,21 @@ namespace ReturnHome.Server.Network
                 AddRDPReport();
                 _session.Reset();
 				
-				AddMessages();
+				AddMessages(messageList);
 				
 				//Add session header data
 				AddSessionHeader();
 
-                ///Done? Send to CommManagerOut
-                //_handleOutPacket.AddEndPoints(MySession.packetCreator, MySession, SessionHeader);
+                //Adjust offset to last 4 bytes
+                _offset = packet.Length - 4;
+                //Add CRC
+                packet.Write(CRC.calculateCRC(packet.Span[0..(packet.Length - 4)]), ref _offset);
+
+                SocketAsyncEventArgs args = new();
+                args.RemoteEndPoint = _session.MyIPEndPoint;
+                args.SetBuffer(packet);
+                //Send Packet
+                _session.listener.socket.SendToAsync(args);
             }
         }
 		
@@ -279,14 +291,11 @@ namespace ReturnHome.Server.Network
             return totalLength;
 		}
 
-		private void AddMessages()
+		private void AddMessages(List<ReadOnlyMemory<byte>> messageList)
 		{
-            while (true)
+            foreach( ReadOnlyMemory<byte> message in messageList)
             {
-                if (_session.sessionQueue.GatherMessages(out ReadOnlyMemory<byte> message))
-                {
-                    return;
-                }
+                packet.Write(message, ref _offset);
             }
 		}
 
