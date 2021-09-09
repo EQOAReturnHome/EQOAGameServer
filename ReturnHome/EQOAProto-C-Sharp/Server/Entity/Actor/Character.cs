@@ -263,7 +263,7 @@ namespace ReturnHome.Server.Entity.Actor
 
             //Need to add a Database push here also
         }
-
+        /*
         public byte[] PullCharacter()
         {
             //Clear List
@@ -298,7 +298,7 @@ namespace ReturnHome.Server.Entity.Actor
 
             return ourMessage.ToArray(); ;
         }
-
+        */
         public void DistributeUpdates()
         {
 

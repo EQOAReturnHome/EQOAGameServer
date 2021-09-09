@@ -3,9 +3,9 @@ using System;
 using System.Text;
 
 using ReturnHome.Utilities;
-using ReturnHome.Actor;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Network.Managers;
+using ReturnHome.Server.Entity.Actor;
 
 namespace ReturnHome.Server.Network
 {

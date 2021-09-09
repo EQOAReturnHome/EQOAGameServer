@@ -11,10 +11,10 @@ using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Entity.Actor;
 
-namespace ReturnHome.SQL
+namespace ReturnHome.Database.SQL
 {
     //Class to handle all SQL Operations
-    class SQLOperations : SQLBase
+    class CharacterSQL : SQLBase
     {
         //Class to pull characters from DB via serverid
         public List<Character> AccountCharacters(Session MySession)

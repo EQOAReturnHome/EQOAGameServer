@@ -3,11 +3,8 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ReturnHome.Utilities
 {
@@ -99,6 +96,23 @@ namespace ReturnHome.Utilities
             finally
             {
                 offset += 4;
+            }
+        }
+
+
+        ///<summary>
+        ///Takes an offset and string from the span, incrementing offset by string length
+        ///</summary>
+        public static string GetString(this ref ReadOnlyMemory<byte> memory, ref int offset, int stringLength)
+        {
+            try
+            {
+                return Encoding.Default.GetString(memory.Span.Slice(offset, stringLength));
+            }
+
+            finally
+            {
+                offset += stringLength;
             }
         }
         #endregion

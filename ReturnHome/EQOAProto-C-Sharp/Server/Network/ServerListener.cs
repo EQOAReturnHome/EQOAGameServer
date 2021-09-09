@@ -51,7 +51,7 @@ namespace ReturnHome.Server.Network
 				//Should we try to catch anything else?
                 catch (SocketException socketException)
                 {
-                    Console.WriteLine($"Error with client connection: {result.RemoteEndPoint}");
+                    Console.WriteLine($"Error with client connection: ");
                 }
             }
         }

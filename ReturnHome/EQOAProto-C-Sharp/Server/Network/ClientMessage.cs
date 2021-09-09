@@ -9,14 +9,14 @@ namespace ReturnHome.Server.Network
         public ReadOnlyMemory<byte> Payload;
 
         public ushort Opcode { get; }
-		
-		public int offset { get; set; }
+
+        public int offset = 0;
 
         public ClientMessage(ReadOnlyMemory<byte> payload)
         {
             Payload = payload;
 			offset = 0;
-            (Opcode, offset) = BinaryPrimitiveWrapper.GetLEUShort(Payload, offset);
+            Opcode = payload.GetLEUShort(ref offset);
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace ReturnHome.SQL
+namespace ReturnHome.Database.SQL
 {
     class SQLBase
     {

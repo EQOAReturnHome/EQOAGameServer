@@ -46,7 +46,7 @@ namespace ReturnHome.Playercharacter.Actor
 
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
-            ourMessage.AddRange(Utility_Funcs.Technique(HotKeyFuncs.OutHoingHotkeyDict[Direction]));
+            //ourMessage.AddRange(Utility_Funcs.Technique(HotKeyFuncs.OutHoingHotkeyDict[Direction])); **********READD THIS
 
             //North HK
             ourMessage.Add(0);

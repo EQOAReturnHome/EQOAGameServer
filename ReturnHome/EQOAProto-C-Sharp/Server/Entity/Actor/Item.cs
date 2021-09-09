@@ -153,6 +153,7 @@ namespace ReturnHome.Server.Entity.Actor
             AR = ar;
         }
 
+        /*
         public byte[] PullItem()
         {
             ourMessage.Clear();
@@ -334,5 +335,6 @@ namespace ReturnHome.Server.Entity.Actor
             //Add Stats to our List
             ourMessage.AddRange(ourStats);
         }
+        */
     }
 }

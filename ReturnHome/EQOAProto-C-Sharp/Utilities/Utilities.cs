@@ -15,96 +15,28 @@ namespace ReturnHome.Utilities
             return (ulong)(unixTime.TotalSeconds);
         }
 
-        ///Performs the actual Technique for us
-        private static byte[] RealTechnique(int value)
+        public static byte VariableLengthIntegerLength(int val)
         {
-            //Bool to indicate if negative
-            bool isNegative = false;
+            uint value = (uint)val;
 
-            //Check for being negative, if true set bool to true
-            if (value < 0)
-            {
-                isNegative = true;
-                value = Math.Abs(value);
-            }
+            if (value >= 0 && value <= 127)
+                return 1;
 
-            //First value * 2
-            value *= 2;
+            else if (value >= 128 && value <= 16383)
+                return 2;
 
-            //Create a list to store our bytes
-            List<byte> TechniqueVal = new List<byte> { };
+            else if (value >= 16384 && value <= 2097151)
+                return 3;
 
-            //Loop over value and break it down
-            while (value != 0)
-            {
-                if (value > 0x80)
-                {
-                    TechniqueVal.Add((byte)((value & 0x7F) | 0x80));
-                    value >>= 7;
-                }
+            else if (value >= 2097152 && value <= 268435455)
+                return 4;
 
-                else
-                {
-                    TechniqueVal.Add((byte)value);
-                    value >>= 7;
-                }
-            }
+            else if (value >= 268435456 && value <= 4294967295)
+                return 5;
 
-            //Get # of bytes in List
-            int length = TechniqueVal.Count;
-
-            //long to store new value
-            long NewValue = 0;
-            //Console.WriteLine(TechniqueVal[length - 1]);
-            for (int i = 1; i < length + 1; i++)
-            {
-                NewValue = (NewValue << 8) | TechniqueVal[length - i];
-                //Console.WriteLine(Convert.ToString(NewValue, 2));
-            }
-
-            //If original value was negative, add 1 to new value
-            if (isNegative) { NewValue -= 1; }
-
-            return NewValue;
-        }
-
-        public static int Untechnique(ReadOnlySpan<byte> MyPacket, ref int offset)
-        {
-            bool isNegative = false;
-
-            //Check if value is negative, is so add 1 to first byte and check bool
-            if ((MyPacket[offset] & 1) == 1) isNegative = true; 
-
-            //Work some magic
-            uint val = 0;
-
-            //Loop over our packet
-            for (int i = 0; i < MyPacket.Length; i++)
-            {
-                //Grab the current byte and shift i * 7
-                val |= (uint)((MyPacket[offset] & 0x7f) << (i * 7));
-
-                //Keep processing if true
-                if (!((MyPacket[offset] & 0x80) == 0))
-                {
-                    offset += 1;
-                    continue;
-                }
-
-                offset += 1;
-                break;
-            }
-
-            //If value is supposed to be negative, add 1
-            if (isNegative) val += 1;
-
-            //Divide the unsigned value by 2 and cast to an integer
-            int newVal = (int)(val / 2);
-
-            //If its supposed to be negative, make it so
-            if (isNegative) { newVal *= -1; }
-
-            return newVal;
+            else
+                //Throw an error and return 0?
+                return 0;
         }
 
         //This method unpacks VLI data

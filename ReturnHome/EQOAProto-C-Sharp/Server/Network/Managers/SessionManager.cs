@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
-using System.Threading.Channels;
-using ReturnHome.Actor;
 using System.Linq;
+
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -130,7 +128,8 @@ namespace ReturnHome.Server.Network.Managers
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
-                ProcessOpcode.ProcessMemoryDump(NewMasterSession.queueMessages, thisSession, this);
+                Console.WriteLine("Ready For Memory Dump");
+                //ProcessOpcode.ProcessMemoryDump(NewMasterSession.queueMessages, thisSession, this);
             }
         }
 

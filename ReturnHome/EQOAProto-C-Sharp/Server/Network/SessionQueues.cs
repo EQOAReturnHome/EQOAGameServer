@@ -4,6 +4,7 @@ using ReturnHome.Opcodes;
 using ReturnHome.Utilities;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace ReturnHome.Server.Network
 {
@@ -46,9 +47,9 @@ namespace ReturnHome.Server.Network
             //If resend queue is not empty, check resend timer.
             else if (!ResendMessageQueue.IsEmpty)
             {
-                if (ResendMessageQueue.TryPeek(out MessageStruct resendMessage))
+                foreach(var item in ResendMessageQueue)
                 {
-                    if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - resendMessage.Time) > 2000)
+                    if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - item.Value.Time) > 2000)
                     {
                         _session.RdpMessage = true;
                         return true;
@@ -104,9 +105,9 @@ namespace ReturnHome.Server.Network
             }
 
             //Process reliable messages
-            if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp))
+            if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp2))
             {
-                if ((_session.rdpCommOut.totalLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
+                if ((_session.rdpCommOut.totalLength + temp2.Message.Length) < _session.rdpCommOut.maxSize)
                 {
                     if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
                     {
@@ -117,25 +118,26 @@ namespace ReturnHome.Server.Network
                         reliableMessage.updateTime();
 
                         //Place into resend queue
-                        ResendMessageQueue.Enqueue(reliableMessage);
+                        ResendMessageQueue.TryAdd(reliableMessage.Messagenumber, reliableMessage);
 
                         //continue processing
                         return true;
                     }
                 }
             }
-			
+
+            message = default;
 			return false;
         }
 
         public void RemoveReliables(SessionConnectionData connectionData)
         {
-            var removalList = cachedMessages.Keys.Where(x => x <= connectionData.lastReceivedMessageSequence);
+            var removalList = ResendMessageQueue.Keys.Where(x => x <= connectionData.lastReceivedMessageSequence);
 
             foreach (var key in removalList)
             {
-                cachedMessages.TryRemove(key, out MessageStruct serverMessage);
-                Logger.Info($"Removed message {}", key);
+                ResendMessageQueue.TryRemove(key, out MessageStruct serverMessage);
+                Logger.Info($"Removed message {key}");
             }
         }
     }

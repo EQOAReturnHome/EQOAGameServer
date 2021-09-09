@@ -30,6 +30,7 @@ namespace ReturnHome.Playercharacter.Actor
             SecondaryHandID = thisSecondaryHandID;
         }
 
+        /*
         public byte[] PullWeaponHotbar()
         {
             //Ensure this is empty
@@ -42,5 +43,6 @@ namespace ReturnHome.Playercharacter.Actor
 
             return ourMessage.ToArray();
         }
+        */
     }
 }

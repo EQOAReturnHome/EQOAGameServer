@@ -115,9 +115,10 @@ namespace ReturnHome.Server.Network
 
             //Logging an old ack that was received here... should something else happen?
             else
+            {
                 Logger.Info($"Received an old ack, Expected: {connectionData.lastReceivedMessageSequence} Received: {packet.Header.ClientMessageAck}");
-				return;
-			
+                return;
+            }
             //Check reliable resend queue
             _sessionQueue.RemoveReliables(connectionData);
 

@@ -65,7 +65,7 @@ namespace ReturnHome.Server.Network
                         if (!message.Unpack(buffer, ref offset))
                             return false;
 
-                        Messages.Add(message.Header.MessageNumber, message);
+                        Messages.TryAdd(message.Header.MessageNumber, message);
                     }
 
                     catch (Exception)

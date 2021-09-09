@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using ReturnHome.PacketProcessing;
+
+using ReturnHome.Server.Network;
 
 namespace ReturnHome.Utilities
 {
+    
     class Compression
     {
-        //For uncompress
-        private int readBytes = 0;
-        private int myBytes = 0;
-        private int padding = 0;
-        private int realBytes = 0;
         private MessageCreator _meassgeCreator;
 
         public Compression()

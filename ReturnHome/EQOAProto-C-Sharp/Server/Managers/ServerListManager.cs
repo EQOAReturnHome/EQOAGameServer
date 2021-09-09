@@ -34,7 +34,7 @@ namespace ReturnHome.Server.Managers
             //Means there is client's on the server list menu, let's send the list
             foreach (var result in sessionDict)
             {
-                result.Value.rdpCommIn.sessionQueueMessages(result.Value, _serverList, 0xFC);
+                SessionQueueMessages.PackMessage(result.Value, _serverList, 0xFC);
             }
         }
 
@@ -97,7 +97,8 @@ namespace ReturnHome.Server.Managers
 
                         offset += 2;
                         ///Add Server count to our preformed packet
-                        byte[] bytetemp = Utility_Funcs.Technique(ServerCount);
+                        ///KEep this simple since value can't get very high
+                        byte[] bytetemp = new byte[] { (byte)(ServerCount * 2) };
                         bytetemp.CopyTo(temp.Slice(offset, bytetemp.Length));
                         offset += bytetemp.Length;
 

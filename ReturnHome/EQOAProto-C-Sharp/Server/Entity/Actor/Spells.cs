@@ -57,6 +57,7 @@ namespace ReturnHome.Server.Entity.Actor
             SpellDesc = thisSpellDesc;
         }
 
+        /*
         public byte[] PullSpell()
         {
             //Make sure this is empty before pulling new data
@@ -89,5 +90,6 @@ namespace ReturnHome.Server.Entity.Actor
 
             return ourMessage.ToArray();
         }
+        */
     }
 }

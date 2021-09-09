@@ -27,7 +27,8 @@ namespace ReturnHome.Server.Network.Managers
 				//Could make an elaborate config setup
 				throw new Exception("Forced failure for now");
             }
-            catch (Exception ex)
+
+            catch
             {
                 hosts.Clear();
                 hosts.Add(IPAddress.Any);

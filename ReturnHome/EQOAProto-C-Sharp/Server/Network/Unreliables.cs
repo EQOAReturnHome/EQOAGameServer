@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Runtime.InteropServices;
+
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
-using ReturnHome.Actor;
-using System.Runtime.InteropServices;
+using ReturnHome.Server.Network;
+using ReturnHome.Server.Entity.Actor;
 
 namespace ReturnHome.PacketProcessing
 {
@@ -31,13 +33,13 @@ namespace ReturnHome.PacketProcessing
         private void ProcessUnreliableClientUpdate(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
         {
             //Get Unreliable length
-            UnreliableLength = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
+            UnreliableLength = ClientPacket.GetByte(ref offset);
 
             //Get Message # we are acknowledging
-            XorMessage = BinaryPrimitiveWrapper.GetLEUShort(ClientPacket, ref offset);
+            XorMessage = ClientPacket.GetLEUShort(ref offset);
 
             //Get xor byte /Technically not needed...? Tells us what message to xor with but that should be the last message we xor'd... right?
-            XorByte = BinaryPrimitiveWrapper.GetLEByte(ClientPacket, ref offset);
+            XorByte = ClientPacket.GetByte(ref offset);
 
             //This means that this is a deprecated packet that may of got lost on the way, base xor is behind current basexor
             //Let's not bother to even process it
