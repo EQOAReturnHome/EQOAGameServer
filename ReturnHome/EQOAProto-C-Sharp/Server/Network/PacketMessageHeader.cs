@@ -23,7 +23,7 @@ namespace ReturnHome.Server.Network
 			if (temp == 0xFF)
 			{
 				MessageType   = buffer.GetByte(ref offset);
-                Size          = buffer.GetLEUShort(ref offset);
+                Size          = (ushort)(buffer.GetLEUShort(ref offset) - 2);
 				MessageNumber = buffer.GetLEUShort(ref offset);
 
                 //Message is split across 2+ packets
@@ -42,8 +42,9 @@ namespace ReturnHome.Server.Network
                     //Check if split
                     if (MessageType == 0xFA)
 						Split = true;
-			
-					Size = buffer.GetByte(ref offset);
+
+                    //Subtract 2 because we will read the opcode off
+					Size = (ushort)(buffer.GetByte(ref offset) - 2);
 
                     //FC type is of an unreliable nature and does not have a message#
                     if (!(MessageType == 0xFC))

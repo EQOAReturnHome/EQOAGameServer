@@ -19,17 +19,15 @@ namespace ReturnHome.Server.Network
 		private readonly ConcurrentDictionary<ushort, ReadOnlyMemory<byte>> _outOfOrderMessages = new();
 		
 		private readonly Session _session;
-		private readonly ServerListener _listener;
 		private readonly SessionQueue _sessionQueue;
 		
 		public ushort clientID { get; private set; }
         public ushort serverID { get; private set; }
 		public long TimeoutTick { get; set; }
 		
-        public RdpCommIn(Session session, ServerListener listener, ushort ClientID, ushort ServerID)
+        public RdpCommIn(Session session, ushort ClientID, ushort ServerID)
         {
 			_session = session;
-			_listener = listener;
             _sessionQueue = new(_session);
 			clientID = ClientID;
 			serverID = ServerID;
@@ -72,20 +70,24 @@ namespace ReturnHome.Server.Network
 				{
 					if (packet.Messages.TryRemove((ushort)(connectionData.lastReceivedMessageSequence + 1), out PacketMessage message))
 					{
-						Logger.Info($"Working with message {message.Header.MessageNumber}");
+                        connectionData.lastReceivedMessageSequence++;
+                        Logger.Info($"Working with message {message.Header.MessageNumber}");
                         ProcessOpcode.ProcessOpcodes(_session, message);
 						_session.RdpReport = true;
 					}
-					
-					//Add remaining messages to out of order since
-					else
-					{
-						foreach(var i in packet.Messages)
-							_outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
-						
-						//Should be done working with messages now
-						break;
-					}
+
+                    if (packet.Messages.Count == 0)
+                        break;
+
+                    //Add remaining messages to out of order since
+                    else
+                    {
+                        foreach (var i in packet.Messages)
+                            _outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
+
+                        //Should be done working with messages now
+                        break;
+                    }
 				}
 			}
 			
@@ -168,18 +170,20 @@ namespace ReturnHome.Server.Network
     public class RdpCommOut
     {
         private readonly Session _session;
-		private int _offset;
+        private readonly ServerListener _listener;
+        private int _offset;
 		public int totalLength;
 		private int _headerLength;
 		public int maxSize = 1024;
 		private Memory<byte> packet;
 
-        public RdpCommOut(Session session)
+        public RdpCommOut(Session session, ServerListener listener)
         {
             _session = session;
 			_offset = 0;
 			totalLength = 0;
 			_headerLength = 0;
+            _listener = listener;
         }
 		
         public void PrepPackets()
@@ -230,14 +234,16 @@ namespace ReturnHome.Server.Network
 
                 //Adjust offset to last 4 bytes
                 _offset = packet.Length - 4;
+
                 //Add CRC
                 packet.Write(CRC.calculateCRC(packet.Span[0..(packet.Length - 4)]), ref _offset);
 
                 SocketAsyncEventArgs args = new();
                 args.RemoteEndPoint = _session.MyIPEndPoint;
                 args.SetBuffer(packet);
+
                 //Send Packet
-                _session.listener.socket.SendToAsync(args);
+                _listener.socket.SendToAsync(args);
             }
         }
 		
@@ -378,7 +384,7 @@ namespace ReturnHome.Server.Network
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Adding Session Header");
 			
 			packet.Write(_session.ClientEndpoint, ref _offset);
-			packet.Write(_session.listener.serverEndPoint, ref _offset);
+			packet.Write(_listener.serverEndPoint, ref _offset);
 			
             if (!_session.Instance) //When server initiates instance with the client, it will use this
             {

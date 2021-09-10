@@ -57,7 +57,8 @@ namespace ReturnHome.Server.Network
             //If message type is present, break out messages
             if (Header.ProcessMessage)
             {
-                while (offset != buffer.Length)
+                //Subtract 4 from buffer length to account for removing CRC
+                while (offset != buffer.Length - 4)
                 {
                     try
                     {

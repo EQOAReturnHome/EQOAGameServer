@@ -25,7 +25,7 @@ namespace ReturnHome.Server.Network
                     thisMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
 
                     //1018 + 6 = 1024
-                    thisMessage.Write(ClientMessage[readBytes..(readBytes + 1018)], ref readBytes);
+                    thisMessage.Write(ClientMessage[readBytes..(readBytes + 1024)], ref readBytes);
                     AddMessage(session, thisMessageHeader.Number, thisMessage);
                 }
 
@@ -46,8 +46,8 @@ namespace ReturnHome.Server.Network
 					MessageHeaderUnreliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, 0);
 					WholeClientMessage = new byte[thisMessageHeader.Length + 4];
                     WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-					WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
-					MessageSequence = thisMessageHeader.Number;
+                    WholeClientMessage.Write(ClientMessage, ref readBytes);
+                    MessageSequence = thisMessageHeader.Number;
 				}
 				
 				//Reliable system messages
@@ -56,7 +56,7 @@ namespace ReturnHome.Server.Network
 					MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
                     WholeClientMessage = new byte[thisMessageHeader.Length + 6];
                     WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
+                    WholeClientMessage.Write(ClientMessage, ref readBytes);
                     MessageSequence = thisMessageHeader.Number;
                 }
             }
@@ -70,7 +70,7 @@ namespace ReturnHome.Server.Network
 					MessageHeaderUnreliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, 0);
                     WholeClientMessage = new byte[thisMessageHeader.Length + 2];
                     WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
+                    WholeClientMessage.Write(ClientMessage, ref readBytes);
                     MessageSequence = thisMessageHeader.Number;
                 }
 				
@@ -80,7 +80,7 @@ namespace ReturnHome.Server.Network
 					MessageHeaderReliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
                     WholeClientMessage = new byte[thisMessageHeader.Length + 4];
                     WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    WholeClientMessage.Write(WholeClientMessage[readBytes..(readBytes + WholeClientMessage.Length)], ref readBytes);
+                    WholeClientMessage.Write(ClientMessage, ref readBytes);
                     MessageSequence = thisMessageHeader.Number;
                 }
             }

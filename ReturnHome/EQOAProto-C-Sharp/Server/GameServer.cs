@@ -3,7 +3,7 @@ using System.Timers;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 
-namespace ReturnHome
+namespace ReturnHome.Server
 {
     /*
     Keep this in main.cs
@@ -19,9 +19,9 @@ namespace ReturnHome
             t.AutoReset = true;
             t.Elapsed += new ElapsedEventHandler((_, _) => ServerListManager.DistributeServerList());
             t.Start();
-			
-			//Load GameManager
-			
+
+            //Load GameManager
+            WorldServer.Initialize();
 			
             // Start SocketManager
 			SocketManager.Initialize();

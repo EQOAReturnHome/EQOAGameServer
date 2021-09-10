@@ -76,8 +76,8 @@ namespace ReturnHome.Server.Network
             SessionID = sessionID;
             MyIPEndPoint = myIPEndPoint;
             InstanceID = instanceID;
-            rdpCommIn = new(this, listener, clientID, serverID);
-			rdpCommOut = new(this);
+            rdpCommIn = new(this, clientID, serverID);
+			rdpCommOut = new(this, listener);
 			sessionQueue = new(this);
 			
 			//Scrap this specific code?

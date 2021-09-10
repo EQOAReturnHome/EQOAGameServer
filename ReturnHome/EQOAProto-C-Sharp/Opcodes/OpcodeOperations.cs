@@ -397,8 +397,9 @@ namespace ReturnHome.Opcodes
                     break;
             }
             offset = 0;
-            Memory<byte> Message = new byte[2];
+            Memory<byte> Message = new byte[6];
             ///Need to send this back to client
+            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.DiscVersion), ref offset);
             Message.Write(BitConverter.GetBytes((uint)GameVersion), ref offset);
 
             ///Handles packing message into outgoing packet
