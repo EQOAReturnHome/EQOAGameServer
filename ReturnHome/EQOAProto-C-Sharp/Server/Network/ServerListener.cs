@@ -19,7 +19,12 @@ namespace ReturnHome.Server.Network
         private byte[] _buffer = new byte[300];
         public Socket socket;
         
-		
+        public ServerListener(IPAddress IP, ushort Port, ushort EndPoint)
+        {
+            serverEndPoint = EndPoint;
+            serverName = "Default";
+        }
+
 		public ServerListener(IPAddress IP, ushort Port, ushort EndPoint, string ServerName)
 		{
 			serverEndPoint = EndPoint;

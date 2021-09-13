@@ -70,7 +70,7 @@ namespace ReturnHome.Server.Network
         /// Create a Simple Client Session
         /// </summary>
         /// <param name="MyIPEndPoint"></param>
-        public Session(ServerListener listener, IPEndPoint myIPEndPoint, uint sessionID, uint instanceID, ushort clientID, ushort serverID, bool DidServerInitiate)
+        public Session(ServerListener listener, IPEndPoint myIPEndPoint, uint instanceID, uint sessionID, ushort clientID, ushort serverID, bool DidServerInitiate)
         {
             didServerInitiate = DidServerInitiate;
             SessionID = sessionID;

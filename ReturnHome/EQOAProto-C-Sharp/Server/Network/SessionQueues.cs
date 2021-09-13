@@ -48,14 +48,16 @@ namespace ReturnHome.Server.Network
             //If resend queue is not empty, check resend timer.
             else if (!ResendMessageQueue.IsEmpty)
             {
+                /*
                 foreach(var item in ResendMessageQueue)
                 {
-                    if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - item.Value.Time) > 2000)
+                    long stuff = DateTimeOffset.Now.ToUnixTimeMilliseconds() - item.Value.Time;
+                    if (stuff > 2000)
                     {
                         _session.RdpMessage = true;
                         return true;
                     }
-                }
+                }*/
                 return false;
             }
 
@@ -152,14 +154,29 @@ namespace ReturnHome.Server.Network
             return length;
         }
 
-        public void RemoveReliables(SessionConnectionData connectionData)
+        //This method will check against 2 connection variables, if the hardack is less then the soft ack
+        //It will cycle over the dictionary and try to remove the resend messages, and increment the counter of the hard ack in the process.
+        public void RemoveReliables()
         {
-            var removalList = ResendMessageQueue.Keys.Where(x => x <= connectionData.lastReceivedMessageSequence);
-
-            foreach (var key in removalList)
+            while(_session.rdpCommIn.connectionData.clientLastReceivedMessage > _session.rdpCommIn.connectionData.clientLastReceivedMessageFinal)
             {
-                ResendMessageQueue.TryRemove(key, out MessageStruct serverMessage);
-                Logger.Info($"Removed message {key}");
+                if(_session.sessionQueue.ResendMessageQueue.TryRemove(_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal++, out MessageStruct message))
+                {
+                    //Successfully removed message, should these get placed into a backup dictionary?
+                    //Not 100% on proof yet, but pretty sure client can backstep and request a message #
+                    continue;
+                }
+
+                else
+                {
+                    //Back step message ack
+                    _session.rdpCommIn.connectionData.clientLastReceivedMessageFinal--;
+
+                    //Log this, would mean the message wasn't in our resend queue
+                    Logger.Err($"Message #{_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal}");
+
+                    //Should session get dropped at this point? Something went wrong here.
+                }
             }
         }
     }

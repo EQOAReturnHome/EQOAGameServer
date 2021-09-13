@@ -26,7 +26,7 @@ namespace ReturnHome.Server.Network.Managers
             //Remove session
             if (packet.Header.CancelSession)
             {
-                findSession(ClientIPEndPoint, packet.Header.InstanceID, out ClientSession);
+                findSession(ClientIPEndPoint, packet.Header.SessionID, out ClientSession);
                 if (SessionHash.TryRemove(ClientSession))
                     Logger.Info("Session Successfully removed from Session List");
                 return;
@@ -36,7 +36,7 @@ namespace ReturnHome.Server.Network.Managers
             if(packet.Header.NewInstance)
 			{
                 // Create New Session
-                ClientSession = new Session(listener, ClientIPEndPoint, packet.Header.SessionID, packet.Header.InstanceID, packet.Header.ClientEndPoint, listener.serverEndPoint, false);
+                ClientSession = new Session(listener, ClientIPEndPoint, packet.Header.InstanceID, packet.Header.SessionID, packet.Header.ClientEndPoint, listener.serverEndPoint, false);
 
                 //Try adding session to hashset
                 if (SessionHash.TryAdd(ClientSession))

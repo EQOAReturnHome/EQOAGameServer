@@ -76,9 +76,6 @@ namespace ReturnHome.Server.Network
 						_session.RdpReport = true;
 					}
 
-                    if (packet.Messages.Count == 0)
-                        break;
-
                     //Add remaining messages to out of order since
                     else
                     {
@@ -88,7 +85,10 @@ namespace ReturnHome.Server.Network
                         //Should be done working with messages now
                         break;
                     }
-				}
+
+                    if (packet.Messages.Count == 0)
+                        break;
+                }
 			}
 			
 			/*else if ()
@@ -113,8 +113,8 @@ namespace ReturnHome.Server.Network
         {
             //Update our connection data object
             //Let's make sure the ack > current saved ack
-            if (connectionData.lastReceivedMessageSequence < packet.Header.ClientMessageAck)
-                connectionData.lastReceivedMessageSequence = packet.Header.ClientMessageAck;
+            if (connectionData.clientLastReceivedMessage < packet.Header.ClientMessageAck)
+                connectionData.clientLastReceivedMessage = packet.Header.ClientMessageAck;
 
             //Logging an old ack that was received here... should something else happen?
             else
@@ -123,7 +123,7 @@ namespace ReturnHome.Server.Network
                 return;
             }
             //Check reliable resend queue
-            _sessionQueue.RemoveReliables(connectionData);
+            _sessionQueue.RemoveReliables();
 
             ///Triggers Character select
             if ((connectionData.lastReceivedMessageSequence == 0x00) && _session.didServerInitiate)
@@ -201,7 +201,7 @@ namespace ReturnHome.Server.Network
 				packet = new Memory<byte>(new byte[totalLength]);
 				
 				//Jump offset past endpoints and bundle header information
-				if (!_session.Instance)// || _session.CancelConnection)
+				if (_session.Instance)// || _session.CancelConnection)
 					_offset += 7;
 			
 				else
@@ -233,6 +233,7 @@ namespace ReturnHome.Server.Network
 				AddSessionHeader();
 
                 //Adjust offset to last 4 bytes
+
                 _offset = packet.Length - 4;
 
                 //Add CRC
@@ -243,7 +244,7 @@ namespace ReturnHome.Server.Network
                 args.SetBuffer(packet);
 
                 //Send Packet
-                _listener.socket.SendToAsync(args);
+                //_listener.socket.SendToAsync(args);
             }
         }
 		
@@ -253,8 +254,8 @@ namespace ReturnHome.Server.Network
 			totalLength += 4;
 			_headerLength += 4;
 			
-			
-			if (!_session.Instance)// || _session.CancelConnection)
+			//If new instance
+			if (_session.Instance)// || _session.CancelConnection)
 			{
 				_headerLength += 3;
 				totalLength += 3;
@@ -382,9 +383,9 @@ namespace ReturnHome.Server.Network
 			_offset = 0;
             uint value = 0;
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Adding Session Header");
-			
-			packet.Write(_session.ClientEndpoint, ref _offset);
-			packet.Write(_listener.serverEndPoint, ref _offset);
+
+            packet.Write(_listener.serverEndPoint, ref _offset);
+            packet.Write(_session.rdpCommIn.clientID, ref _offset);
 			
             if (!_session.Instance) //When server initiates instance with the client, it will use this
             {

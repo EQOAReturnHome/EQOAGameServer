@@ -18,8 +18,8 @@ namespace ReturnHome.Server.Network
 		public bool ProcessMessage { get; private set; } = false;
         public bool CancelSession { get; private set; } = false;
         public ushort BundleSize { get; set; }
-        public uint SessionID { get; set; }
         public uint InstanceID { get; set; }
+        public uint SessionID { get; set; }
         public ushort ClientBundleNumber { get; set; }
         public ushort ClientBundleAck { get; set; }
         public ushort ClientMessageAck { get; set; } 
@@ -34,20 +34,20 @@ namespace ReturnHome.Server.Network
 
             //Verify packet has instance in header
             if (HasHeaderFlag(PacketHeaderFlags.HasInstance))
-                SessionID = buffer.GetLEUInt(ref offset);
+                InstanceID = buffer.GetLEUInt(ref offset);
 
             //if Client is "remote", means it is not "master" anymore and an additional pack value to read which ties into character instanceID
             if (HasHeaderFlag(PacketHeaderFlags.IsRemote))
-                InstanceID = (uint)buffer.Get7BitDoubleEncodedInt(ref offset);
+                SessionID = (uint)buffer.Get7BitDoubleEncodedInt(ref offset);
 
             else
-                InstanceID = 0;
+                SessionID = 0;
 
             if (HasHeaderFlag(PacketHeaderFlags.ResetConnection))
                 //SessionID is duplicated with resetconnection header, indicates to drop session
 				//What do we do if this... isn't the case?
 				//Chalk it up to invalid packet and drop?
-                if (SessionID == buffer.GetLEUInt(ref offset))
+                if (InstanceID == buffer.GetLEUInt(ref offset))
                 {
                     CancelSession = true;
                     return;
