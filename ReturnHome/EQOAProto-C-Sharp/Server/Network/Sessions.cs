@@ -125,14 +125,15 @@ namespace ReturnHome.Server.Network
             int length = 2 + 4 + (theMessage.Length * 2);
             int offset = 0;
 
-            Memory<byte> message = new Memory<byte>(new byte[length]);
+            Memory<byte> temp = new Memory<byte>(new byte[length]);
+            Span<byte> Message = temp.Span;
 
-            message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-            message.Write(theMessage.Length, ref offset);
-            message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
+            Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
+            Message.Write(theMessage.Length, ref offset);
+            Message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
 			
             //Send Message
-			SessionQueueMessages.PackMessage(this, message, MessageOpcodeTypes.ShortReliableMessage);
+			SessionQueueMessages.PackMessage(this, temp, MessageOpcodeTypes.ShortReliableMessage);
             coordToggle = false;
         }
 

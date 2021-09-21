@@ -17,15 +17,18 @@ namespace ReturnHome.Server.Network
         public bool RDPReport { get; private set; } = false;
 		public bool ProcessMessage { get; private set; } = false;
         public bool CancelSession { get; private set; } = false;
+        public bool SessionAck { get; private set; } = false;
         public ushort BundleSize { get; set; }
         public uint InstanceID { get; set; }
         public uint SessionID { get; set; }
+        public uint SessionAckID { get; private set; }
         public ushort ClientBundleNumber { get; set; }
         public ushort ClientBundleAck { get; set; }
         public ushort ClientMessageAck { get; set; } 
 
-        public void Unpack(ReadOnlyMemory<byte> buffer, ref int offset)
+        public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
         {
+            ReadOnlySpan<byte> buffer = temp.Span;
             ClientEndPoint = buffer.GetLEUShort(ref offset);
             TargetEndPoint = buffer.GetLEUShort(ref offset);
             HeaderData = buffer.Get7BitEncodedInt(ref offset);
@@ -62,7 +65,7 @@ namespace ReturnHome.Server.Network
             //Check if it is a transfer packet
             if (!(TargetEndPoint == 0xFFFF))
                 //Not Transfer packet, Validate CRC Checksum for packet
-                CRCChecksum = buffer.Slice((buffer.Length - 4), 4).Span.SequenceEqual(CRC.calculateCRC(buffer.Slice(0, buffer.Length - 4).Span));
+                CRCChecksum = buffer.Slice((buffer.Length - 4), 4).SequenceEqual(CRC.calculateCRC(buffer.Slice(0, buffer.Length - 4)));
 
             else
                 //Eventually do transfers here some how
@@ -71,18 +74,25 @@ namespace ReturnHome.Server.Network
             //Read Bundle Type, needs abit of a work around....
             bundleFlags = (PacketBundleFlags)buffer.GetByte(ref offset);
 
+            if (HasBundleFlag(PacketBundleFlags.ProcessAll))
+            {
+                SessionAckID = buffer.GetLEUInt(ref offset);
+
+                RDPReport = true;
+                ProcessMessage = true;
+                SessionAck = true;
+            }
+
             ClientBundleNumber = buffer.GetLEUShort(ref offset);
 
-
-            if (HasBundleFlag(PacketBundleFlags.NewProcessReport) || HasBundleFlag(PacketBundleFlags.ProcessMessageAndReport) ||
-                HasBundleFlag(PacketBundleFlags.ProcessReport) || HasBundleFlag(PacketBundleFlags.ProcessAll))
+            if (HasBundleFlag(PacketBundleFlags.NewProcessReport) || HasBundleFlag(PacketBundleFlags.ProcessReport))
             {
                 ClientBundleAck = buffer.GetLEUShort(ref offset);
                 ClientMessageAck = buffer.GetLEUShort(ref offset);
                 RDPReport = true;
             }
-			if (HasBundleFlag(PacketBundleFlags.NewProcessMessages) || HasBundleFlag(PacketBundleFlags.ProcessMessageAndReport) ||
-                HasBundleFlag(PacketBundleFlags.ProcessMessages) || HasBundleFlag(PacketBundleFlags.ProcessAll))
+
+			if (HasBundleFlag(PacketBundleFlags.NewProcessMessages) || HasBundleFlag(PacketBundleFlags.ProcessMessages))
 				ProcessMessage = true;
         }
 

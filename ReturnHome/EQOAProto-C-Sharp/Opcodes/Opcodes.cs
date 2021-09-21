@@ -71,7 +71,7 @@
         public const byte ProcessAll = 99; ///Client requesting new session
         public const byte ProcessReport = 35; ///Client requesting to close session
         public const byte ProcessMessages = 32; ///Client is continuing session
-        public const byte ProcessMessageAndReport = 13; ///Client is continuing session
+        public const byte ProcessMessageAndReport = 19; ///Client is continuing session
         public const byte NewProcessReport = 3; ///Client is continuing session
         public const byte NewProcessMessages = 0; ///Client is continuing session
     }

@@ -13,8 +13,14 @@ namespace ReturnHome.Database.SQL
             var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
 
             //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
+            con = new MySqlConnection(connectionString);
             con.Open();
+
+        }
+
+        public void CloseConnection()
+        {
+            con.Close();
         }
     }
 }

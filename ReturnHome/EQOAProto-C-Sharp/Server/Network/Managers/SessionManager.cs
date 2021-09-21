@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Linq;
 
 using ReturnHome.Utilities;
+using ReturnHome.Opcodes;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -26,7 +28,10 @@ namespace ReturnHome.Server.Network.Managers
             //Remove session
             if (packet.Header.CancelSession)
             {
-                findSession(ClientIPEndPoint, packet.Header.SessionID, out ClientSession);
+                //Add a method here to save session data and character etc, whatever is applicable.
+                //Attempt to remove from serverlisting for now
+                findSession(ClientIPEndPoint, packet.Header.InstanceID, out ClientSession);
+                ServerListManager.RemoveSession(ClientSession);
                 if (SessionHash.TryRemove(ClientSession))
                     Logger.Info("Session Successfully removed from Session List");
                 return;
@@ -42,7 +47,7 @@ namespace ReturnHome.Server.Network.Managers
                 if (SessionHash.TryAdd(ClientSession))
                 {
                     Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
-
+                    ClientSession.SessionAck = true;
                     //Success, keep processing data
                     ClientSession.ProcessPacket(packet);
                 }
@@ -51,7 +56,7 @@ namespace ReturnHome.Server.Network.Managers
             else
             {
 				//Find session, if it returns true, outputs session
-                if (findSession(ClientIPEndPoint, packet.Header.InstanceID, out ClientSession))
+                if (findSession(ClientIPEndPoint, out ClientSession))
                 {
 					//Checks if IP/Port matches expected session to incoming packet
 					//This might not be needed?
@@ -91,7 +96,24 @@ namespace ReturnHome.Server.Network.Managers
             actualSession = default;
             return false;
         }
-		
+
+        //Have two seperate FindSession functions to handle the times instanceID is not in header, may be a better way to do this.
+        public static bool findSession(IPEndPoint ClientIPEndPoint, out Session actualSession)
+        {
+            foreach (Session ClientSession in SessionHash)
+            {
+                if (ClientSession.MyIPEndPoint.Equals(ClientIPEndPoint))
+                {
+                    actualSession = ClientSession;
+                    return true;
+                }
+            }
+
+            //Need logging to indicate actual session was not found
+            actualSession = default;
+            return false;
+        }
+
         public static uint ObtainIDUp()
         {
             ///Eventually would need some checks to make sure it isn't taken in bigger scale
@@ -105,13 +127,13 @@ namespace ReturnHome.Server.Network.Managers
 
         public static void CreateMasterSession(Session MySession)
         {
-            Session NewMasterSession = new Session(MySession.listener, MySession.MyIPEndPoint, ObtainIDUp(), DNP3Creation.DNP3Session(), MySession.ClientEndpoint, MySession.rdpCommIn.serverID, true);
+            Session NewMasterSession = new Session(MySession.rdpCommOut._listener, MySession.MyIPEndPoint, DNP3Creation.DNP3Session(), ObtainIDUp(), MySession.rdpCommIn.clientID, MySession.rdpCommIn.serverID, true);
             NewMasterSession.AccountID = MySession.AccountID;
-            NewMasterSession.SessionAck = true;
+            NewMasterSession.Instance = true;
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
-                //Start memory dump here.
+                //Start client contact here
                 GenerateClientContact(NewMasterSession);
             }
 
@@ -136,17 +158,22 @@ namespace ReturnHome.Server.Network.Managers
         ///Used when starting a master session with client.
         public static void GenerateClientContact(Session MySession)
         {
-            /*
-            MySession.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera1));
-            MySession.queueMessages.messageCreator.MessageWriter(new byte[] { 0x03, 0x00, 0x00, 0x00 });
+            int offset = 0;
+            Memory<byte> temp1 = new byte[6];
+            Span<byte> Message = temp1.Span;
+            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.Camera1), ref offset);
+            Message.Write(new byte[] { 0x03, 0x00, 0x00, 0x00 }, ref offset);
             ///Handles packing message into outgoing packet
-            MySession.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, temp1, MessageOpcodeTypes.ShortReliableMessage);
 
-            MySession.queueMessages.messageCreator.MessageWriter(BitConverter.GetBytes((ushort)GameOpcode.Camera2));
-            MySession.queueMessages.messageCreator.MessageWriter(new byte[] { 0x1B, 0x00, 0x00, 0x00 });
+            offset = 0;
+            Memory<byte> temp2 = new byte[6];
+            Span<byte> Message2 = temp2.Span;
+            Message2.Write(BitConverter.GetBytes((ushort)GameOpcode.Camera2), ref offset);
+            Message2.Write(new byte[] { 0x1B, 0x00, 0x00, 0x00 }, ref offset);
             ///Handles packing message into outgoing packet
-            MySession.queueMessages.PackMessage(MySession, MessageOpcodeTypes.ShortReliableMessage);
-            */
+            SessionQueueMessages.PackMessage(MySession, temp2, MessageOpcodeTypes.ShortReliableMessage);
+
         }
 
         public static async Task CheckClientTimeOut()

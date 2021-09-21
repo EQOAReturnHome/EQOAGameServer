@@ -40,24 +40,13 @@ namespace ReturnHome.Server.Network
             SocketReceiveFromResult result;
             while (true)
             {
-                try
-                {
-                    result = await socket.ReceiveFromAsync(
-                        new ArraySegment<byte>(_buffer, 0, _buffSize), SocketFlags.None, new IPEndPoint(IPAddress.Any, 0));
-                    byte[] buffer = result.ReceivedBytes < _buffSize ? _buffer.AsSpan(0, result.ReceivedBytes).ToArray() : _buffer;
+                result = await socket.ReceiveFromAsync(
+                    new ArraySegment<byte>(_buffer, 0, _buffSize), SocketFlags.None, new IPEndPoint(IPAddress.Any, 0));
+                byte[] buffer = result.ReceivedBytes < _buffSize ? _buffer.AsSpan(0, result.ReceivedBytes).ToArray() : _buffer;
 
-					ClientPacket clientPacket = new();
-                    if(clientPacket.ProcessPacket(new ReadOnlyMemory<byte>(buffer)))
-						SessionManager.ProcessPacket(this, clientPacket, (IPEndPoint)result.RemoteEndPoint);
-					
-					//If it fails, just let GC clean it up eventually, or will eventually return to clean up an already processed packet
-                }
-				
-				//Should we try to catch anything else?
-                catch (SocketException socketException)
-                {
-                    Console.WriteLine($"Error with client connection: ");
-                }
+		    	ClientPacket clientPacket = new();
+                if(clientPacket.ProcessPacket(new ReadOnlyMemory<byte>(buffer)))
+				    SessionManager.ProcessPacket(this, clientPacket, (IPEndPoint)result.RemoteEndPoint);
             }
         }
     }

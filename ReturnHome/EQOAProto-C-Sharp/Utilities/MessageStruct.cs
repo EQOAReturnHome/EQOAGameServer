@@ -2,7 +2,7 @@
 
 namespace ReturnHome.Utilities
 {
-    public struct MessageStruct
+    public class MessageStruct
     {
         public readonly ReadOnlyMemory<byte> Message;
         public readonly ushort Messagenumber;

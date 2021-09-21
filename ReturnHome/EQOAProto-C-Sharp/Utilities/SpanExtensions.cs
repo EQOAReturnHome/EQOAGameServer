@@ -8,16 +8,16 @@ using System.Text;
 
 namespace ReturnHome.Utilities
 {
-    static class MemoryExtensions
+    static class SpanExtensions
     {
         ///<summary>
         ///Takes an offset and needed size, returning a ReadOnlySpan<byte> of said size from said offset
         ///</summary>
-        public static ReadOnlyMemory<byte> GetSpan(this ref ReadOnlyMemory<byte> memory, ref int offset, int size)
+        public static ReadOnlySpan<byte> GetSpan(this ref ReadOnlySpan<byte> span, ref int offset, int size)
         {
             try
             {
-                return memory.Slice(offset, size);
+                return span.Slice(offset, size);
             }
 
             finally
@@ -29,20 +29,20 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a byte from the span, incrementing offset by 1
         ///</summary>
-        public static byte GetByte(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static byte GetByte(this ref ReadOnlySpan<byte> span, ref int offset)
         {
-            return memory.Span[offset++];
+            return span[offset++];
         }
 
         #region Read Little Endian
         ///<summary>
         ///Takes an offset and returns a Little Endian ushort from the span, incrementing offset by 2
         ///</summary>
-        public static ushort GetLEUShort(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static ushort GetLEUShort(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadUInt16LittleEndian(memory.Span.Slice(offset, 2));
+                return BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(offset, 2));
             }
 
             finally
@@ -54,11 +54,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian short from the span, incrementing offset by 2
         ///</summary>
-        public static short GetLEShort(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static short GetLEShort(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadInt16LittleEndian(memory.Span.Slice(offset, 2));
+                return BinaryPrimitives.ReadInt16LittleEndian(span.Slice(offset, 2));
             }
 
             finally
@@ -70,11 +70,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian uint from the span, incrementing offset by 4
         ///</summary>
-        public static uint GetLEUInt(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static uint GetLEUInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadUInt32LittleEndian(memory.Span.Slice(offset, 4));
+                return BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(offset, 4));
             }
 
             finally
@@ -86,11 +86,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian int from the span, incrementing offset by 4
         ///</summary>
-        public static int GetLEInt(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static int GetLEInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadInt32LittleEndian(memory.Span.Slice(offset, 4));
+                return BinaryPrimitives.ReadInt32LittleEndian(span.Slice(offset, 4));
             }
 
             finally
@@ -103,11 +103,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and string from the span, incrementing offset by string length
         ///</summary>
-        public static string GetString(this ref ReadOnlyMemory<byte> memory, ref int offset, int stringLength)
+        public static string GetString(this ref ReadOnlySpan<byte> span, ref int offset, int stringLength)
         {
             try
             {
-                return Encoding.Default.GetString(memory.Span.Slice(offset, stringLength));
+                return Encoding.Default.GetString(span.Slice(offset, stringLength));
             }
 
             finally
@@ -121,11 +121,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian ushort from the span, incrementing offset by 2
         ///</summary>
-        public static ushort GetBEUShort(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static ushort GetBEUShort(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadUInt16BigEndian(memory.Span.Slice(offset, 2));
+                return BinaryPrimitives.ReadUInt16BigEndian(span.Slice(offset, 2));
             }
 
             finally
@@ -137,11 +137,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian short from the span, incrementing offset by 2
         ///</summary>
-        public static short GetBEShort(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static short GetBEShort(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadInt16BigEndian(memory.Span.Slice(offset, 2));
+                return BinaryPrimitives.ReadInt16BigEndian(span.Slice(offset, 2));
             }
 
             finally
@@ -153,11 +153,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian uint from the span, incrementing offset by 4
         ///</summary>
-        public static uint GetBEUInt(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static uint GetBEUInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadUInt32BigEndian(memory.Span.Slice(offset, 4));
+                return BinaryPrimitives.ReadUInt32BigEndian(span.Slice(offset, 4));
             }
 
             finally
@@ -169,11 +169,11 @@ namespace ReturnHome.Utilities
         ///<summary>
         ///Takes an offset and returns a Little Endian int from the span, incrementing offset by 4
         ///</summary>
-        public static int GetBEInt(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static int GetBEInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             try
             {
-                return BinaryPrimitives.ReadInt32BigEndian(memory.Span.Slice(offset, 4));
+                return BinaryPrimitives.ReadInt32BigEndian(span.Slice(offset, 4));
             }
 
             finally
@@ -185,51 +185,51 @@ namespace ReturnHome.Utilities
 
         #region Write Little Endian
 		
-		public static void Write(this ref Memory<byte> memory, byte data, ref int offset)
+		public static void Write(this ref Span<byte> span, byte data, ref int offset)
 		{
-			memory.Span[offset++] = data;
+			span[offset++] = data;
 		}
 		
-		public static void Write(this ref Memory<byte> memory, short data, ref int offset)
+		public static void Write(this ref Span<byte> span, short data, ref int offset)
         {
-            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            MemoryMarshal.Write(span[offset..], ref data);
             offset += 2;
 		}
 		
-		public static void Write(this ref Memory<byte> memory, ushort data, ref int offset)
+		public static void Write(this ref Span<byte> span, ushort data, ref int offset)
         {
-            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            MemoryMarshal.Write(span[offset..], ref data);
             offset += 2;
         }
 		
-		public static void Write(this ref Memory<byte> memory, int data, ref int offset)
+		public static void Write(this ref Span<byte> span, int data, ref int offset)
         {
-            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            MemoryMarshal.Write(span[offset..], ref data);
             offset += 4;
         }
 		
-		public static void Write(this ref Memory<byte> memory, uint data, ref int offset)
+		public static void Write(this ref Span<byte> span, uint data, ref int offset)
         {
-            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            MemoryMarshal.Write(span[offset..], ref data);
             offset += 4;
         }
 		
-		public static void Write(this ref Memory<byte> memory, long data, ref int offset)
+		public static void Write(this ref Span<byte> span, long data, ref int offset)
         {
-            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            MemoryMarshal.Write(span[offset..], ref data);
             offset += 8;
         }
 		
-		public static void Write(this ref Memory<byte> memory, ulong data, ref int offset)
+		public static void Write(this ref Span<byte> span, ulong data, ref int offset)
 		{
-            MemoryMarshal.Write(memory.Span[offset..], ref data);
+            MemoryMarshal.Write(span[offset..], ref data);
             offset += 8;
         }
 
-        public static void Write(this ref Memory<byte> memory, ReadOnlyMemory<byte> memory2, ref int offset)
+        public static void Write(this ref Span<byte> span, ReadOnlyMemory<byte> span2, ref int offset)
         {
-            memory2.CopyTo(memory[offset..(offset + memory2.Length)]);
-            offset += memory2.Length;
+            span2.Span.CopyTo(span[offset..(offset + span2.Length)]);
+            offset += span2.Length;
         }
 		
         #endregion
@@ -244,15 +244,15 @@ namespace ReturnHome.Utilities
         ///Takes an offset reads bytes till < 0x80. This allows values of unknown length to be read. Should not be bigger then an int
         ///See: "Variable Length Integers", Most significant Bit is an indicator if more bits to read, shifting remaining bits over
         ///</summary>
-        public static uint Get7BitEncodedInt(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static uint Get7BitEncodedInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             int r = -7, v = 0;
             do
             {
-                int that = (memory.Span[offset] & 0x7F) << (r += 7);
+                int that = (span[offset] & 0x7F) << (r += 7);
                 v |= that;
             }
-            while (memory.Span[offset++] > 0x80);
+            while (span[offset++] >= 0x80);
             return (uint)v;
         }
 
@@ -261,15 +261,15 @@ namespace ReturnHome.Utilities
         ///See: "Variable Length Integers", Most significant Bit is an indicator if more bits to read, shifting remaining bits over
         ///This method is double the value then encoded. If value is negative, requires special care
         ///</summary>
-        public static int Get7BitDoubleEncodedInt(this ref ReadOnlyMemory<byte> memory, ref int offset)
+        public static int Get7BitDoubleEncodedInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
             int r = -7, v = 0;
             do
             {
-                int that = (memory.Span[offset] & 0x7F) << (r += 7);
+                int that = (span[offset] & 0x7F) << (r += 7);
                 v |= that;
             }
-            while (memory.Span[offset++] > 0x80);
+            while (span[offset++] >= 0x80);
             return 0 == v % 2 ? v / 2 : ((v - 1) / 2) * -1;
         }
 		
@@ -277,7 +277,7 @@ namespace ReturnHome.Utilities
 		
 		#region Write7bit
 		
-		public static void Write7BitEncodedInt(this ref Memory<byte> memory, uint value, ref int offset)
+		public static void Write7BitEncodedInt(this ref Span<byte> span, uint value, ref int offset)
 		{
 			do
             {
@@ -285,53 +285,58 @@ namespace ReturnHome.Utilities
                 value >>= 7;
                 if (value > 0)
                 {
-                    memory.Span[offset++] = (byte)(lower7bits |= 128);
+                    span[offset++] = (byte)(lower7bits |= 128);
                 }
                 else
                 {
-                    memory.Span[offset++] = lower7bits;
+                    span[offset++] = lower7bits;
                 }
             } while (value > 0);
 		}
-		
-		public static void Write7BitDoubleEncodedInt(this ref Memory<byte> memory, int value, ref int offset)
-		{
-			bool isNegative = false;
-			
-			if (value < 0)
-			{
-				isNegative = true;
-				value = Math.Abs(value);
-			}
-			value *= 2;
-			
-			do
+
+        public static void Write7BitDoubleEncodedInt(this ref Span<byte> span, int val, ref int offset)
+        {
+            bool isNegative = false;
+
+            if (val < 0)
+            {
+                isNegative = true;
+                val = Math.Abs(val);
+            }
+
+            uint value = (uint)val;
+
+            value *= 2;
+
+            do
             {
                 byte lower7bits = (byte)(value & 0x7f);
                 value >>= 7;
                 if (value > 0)
                 {
-                    memory.Span[offset++] = (byte)(lower7bits |= 128);
+                    if (isNegative)
+                    {
+                        isNegative = false;
+                        lower7bits -= 1;
+                    }
+                    span[offset++] = (byte)(lower7bits |= 128);
+
                 }
                 else
-                {
-					if(isNegative)
-						lower7bits -= 1;
-					
-                    memory.Span[offset++] = lower7bits;
-                }
+                    span[offset++] = lower7bits;
+
             } while (value > 0);
-		}
-		#endregion
-    
-		#region Write block
-		
-		///<summary>
+        }
+        #endregion
+
+        #region Write block
+
+        ///<summary>
         ///Takes an offset and needed size, returning a ReadOnlySpan<byte> of said size from said offset
         ///</summary>
-        public static void Write(this ref Memory<byte> memory, byte[] data, ref int offset)
+        public static void Write(this ref Span<byte> span, byte[] data, ref int offset)
         {
-			data.CopyTo(memory[offset..(offset+data.Length)]);
+			data.CopyTo(span[offset..(offset+data.Length)]);
 			offset += data.Length;
         }
 		

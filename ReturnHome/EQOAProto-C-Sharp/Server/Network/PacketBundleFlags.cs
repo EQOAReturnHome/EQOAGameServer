@@ -7,7 +7,7 @@ namespace ReturnHome.Server.Network
     {
         NewProcessMessages      = 0x00,
 		NewProcessReport        = 0x03,
-		ProcessMessageAndReport = 0x0D,
+		ProcessMessageAndReport = 0x13,
 		ProcessMessages         = 0x20,
 		ProcessReport           = 0x23,
 		ProcessAll              = 0x63

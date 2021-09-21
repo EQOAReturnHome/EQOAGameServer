@@ -8,53 +8,38 @@ namespace ReturnHome.Server.Network
     {
         public int HeaderSize { get; set; }
 
-        public byte MessageType { get; set; }
+        public byte messageType { get; set; }
         public ushort MessageNumber { get; set; }
         public ushort Opcode { get; private set; }
         public ushort Size { get; set; }
 		public int Count { get; set; }
-        public int Index { get; set; }
-        public bool Split { get; set; }
+        public int Index { get; set; } // If client sends 0xFA types, may be needed to combine message splits
+        public bool Split { get; set; } // If client sends 0xFA types, may be needed to combine message splits
 
-        public void Unpack(ReadOnlyMemory<byte> buffer, ref int offset)
+        public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
         {
+            ReadOnlySpan<byte> buffer = temp.Span;
             //Read first byte, if it is FF, read an additional byte (Indicates >255byte message
-            byte temp= buffer.GetByte(ref offset);
-			if (temp == 0xFF)
-			{
-				MessageType   = buffer.GetByte(ref offset);
-                Size          = (ushort)(buffer.GetLEUShort(ref offset) - 2);
-				MessageNumber = buffer.GetLEUShort(ref offset);
+            messageType = buffer.GetByte(ref offset);
 
-                //Message is split across 2+ packets
-				//Does the client even utilize this? Don't think it does/will can maybe remove
-                if (MessageType == 0xFA)
-					Split = true;
-			}
-			
-			//Single byte message type, may be unreliable/reliable
-			else
-			{
-				if (temp == 0xFA || temp == 0xFB || temp == 0xF9 || temp == 0xFC)
-				{
-                    MessageType = temp;
+            byte bigCheck = buffer.GetByte(ref offset);
 
-                    //Check if split
-                    if (MessageType == 0xFA)
-						Split = true;
+            if (bigCheck == 0xFF)
+                Size = buffer.GetLEUShort(ref offset);
 
-                    //Subtract 2 because we will read the opcode off
-					Size = (ushort)(buffer.GetByte(ref offset) - 2);
+            else
+                Size = bigCheck;
 
-                    //FC type is of an unreliable nature and does not have a message#
-                    if (!(MessageType == 0xFC))
-						MessageNumber = buffer.GetLEUShort(ref offset);
-                }
-				
-				//Eventually check for unreliable messages "Character updates" from client
-			}
+            if((byte)MessageType.UnreliableMessage != messageType)
+                MessageNumber = buffer.GetLEUShort(ref offset);
+
+            if ((byte)MessageType.PingMessage == messageType)
+                return;
 
             Opcode = buffer.GetLEUShort(ref offset);
+
+            //Subtract 2 from size after reading opcode
+            Size -= 2;
         }
     }
 }

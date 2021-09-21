@@ -5,7 +5,6 @@ using ReturnHome.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ReturnHome.Server.Network
 {
@@ -46,23 +45,22 @@ namespace ReturnHome.Server.Network
             }
 
             //If resend queue is not empty, check resend timer.
-            else if (!ResendMessageQueue.IsEmpty)
+            if (!ResendMessageQueue.IsEmpty)
             {
-                /*
-                foreach(var item in ResendMessageQueue)
+                //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
+                foreach (var item in ResendMessageQueue)
                 {
                     long stuff = DateTimeOffset.Now.ToUnixTimeMilliseconds() - item.Value.Time;
+                    //If message needs to be resent, just add it back to the reliable queue
                     if (stuff > 2000)
                     {
-                        _session.RdpMessage = true;
-                        return true;
+                        OutGoingReliableMessageQueue.Enqueue(item.Value);
                     }
-                }*/
-                return false;
+                }
             }
 
             //If either of these have items in the queue, return true
-            else if (!OutGoingReliableMessageQueue.IsEmpty || !OutGoingUnreliableMessageQueue.IsEmpty)
+            if (!OutGoingReliableMessageQueue.IsEmpty || !OutGoingUnreliableMessageQueue.IsEmpty)
             {
                 _session.RdpMessage = true;
                 return true;
@@ -76,24 +74,7 @@ namespace ReturnHome.Server.Network
             List<ReadOnlyMemory<byte>> messageList = new();
             int messageLength = 0;
 
-            /*
-			//Rework this
-            //Check Resend queue first... this could be much better
-            if (ResendMessageQueue.TryPeek(out MessageStruct resendMessage))
-            {
-                //If no ack in 2 seconds resend
-                if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - resendMessage.Time) > 2000)
-                {
-                    //Loop over Queue
-                    foreach (MessageStruct thisResend in ResendMessageQueue)
-                    {
-                        //Resend messages
-                        packetCreator.PacketWriter(thisResend.Message);
-                        thisResend.updateTime();
-                    }
-                }
-            }*/
-
+            //Resend queue is not needed here since we loop it back into the reliable queue on the check
             while (messageLength < _session.rdpCommOut.maxSize)
             {
                 //process unreliable messages
@@ -106,6 +87,7 @@ namespace ReturnHome.Server.Network
                             //Place message into outgoing message
                             messageList.Add(reliableMessage.Message);
                             messageLength += reliableMessage.Message.Length;
+                            _session.RdpMessage = true;
                             continue;
                         }
                     }
@@ -124,14 +106,31 @@ namespace ReturnHome.Server.Network
                             //Place message into outgoing message
                             messageList.Add(reliableMessage.Message);
                             messageLength += reliableMessage.Message.Length;
-                            //Reset Timestamp
+
+                            //Reset Timestamp, this works well in our favour of reliables needing to be resent here
                             reliableMessage.updateTime();
 
                             //Place into resend queue
-                            ResendMessageQueue.TryAdd(reliableMessage.Messagenumber, reliableMessage);
+                            if (ResendMessageQueue.TryAdd(reliableMessage.Messagenumber, reliableMessage))
+                            {
+                                _session.RdpMessage = true;
 
-                            //continue processing
-                            continue;
+                                //continue processing
+                                continue;
+                            }
+                            else
+                            {
+                                //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
+                                if (ResendMessageQueue.TryUpdate(reliableMessage.Messagenumber, reliableMessage, reliableMessage))
+                                {
+                                    _session.RdpMessage = true;
+                                    continue;
+                                }
+
+                                else
+                                    Logger.Err($"Error occured adding or updating Message #{reliableMessage.Messagenumber} for session {_session.rdpCommIn.clientID.ToString("X")}");
+                                    //Log an error here?
+                            }
                         }
                     }
 
@@ -160,7 +159,7 @@ namespace ReturnHome.Server.Network
         {
             while(_session.rdpCommIn.connectionData.clientLastReceivedMessage > _session.rdpCommIn.connectionData.clientLastReceivedMessageFinal)
             {
-                if(_session.sessionQueue.ResendMessageQueue.TryRemove(_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal++, out MessageStruct message))
+                if(_session.sessionQueue.ResendMessageQueue.TryRemove(++_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal, out MessageStruct message))
                 {
                     //Successfully removed message, should these get placed into a backup dictionary?
                     //Not 100% on proof yet, but pretty sure client can backstep and request a message #
@@ -174,7 +173,7 @@ namespace ReturnHome.Server.Network
 
                     //Log this, would mean the message wasn't in our resend queue
                     Logger.Err($"Message #{_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal}");
-
+                    break;
                     //Should session get dropped at this point? Something went wrong here.
                 }
             }

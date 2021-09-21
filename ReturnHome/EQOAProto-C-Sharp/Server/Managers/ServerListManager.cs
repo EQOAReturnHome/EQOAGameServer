@@ -40,14 +40,14 @@ namespace ReturnHome.Server.Managers
 
         public static void RemoveSession(Session session)
         {
-            if (sessionDict.TryRemove(session.MyIPEndPoint, out _))
-            {
-                Console.WriteLine("Session removed from ServerList");
-                return;
+            if ( session != null)
+            { 
+                if (sessionDict.TryRemove(session.MyIPEndPoint, out _))
+                {
+                    Console.WriteLine("Session removed from ServerList");
+                    return;
+                }
             }
-
-            Console.WriteLine("Session not removed");
-            return;
         }
 
         public static void ReadConfig()

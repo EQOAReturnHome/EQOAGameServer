@@ -14,9 +14,9 @@ namespace ReturnHome.Server.Network
 
         public ClientMessage(ReadOnlyMemory<byte> payload)
         {
-            Payload = payload;
-			offset = 0;
-            Opcode = payload.GetLEUShort(ref offset);
+            //Payload = payload;
+			//offset = 0;
+            //Opcode = payload.Span.GetLEUShort(ref offset);
         }
     }
 }

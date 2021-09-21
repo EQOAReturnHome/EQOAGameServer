@@ -30,8 +30,9 @@ namespace ReturnHome.PacketProcessing
         }
 
         //Uncompress and process update
-        private void ProcessUnreliableClientUpdate(Session MySession, ReadOnlyMemory<byte> ClientPacket, ref int offset)
+        private void ProcessUnreliableClientUpdate(Session MySession, ReadOnlyMemory<byte> temp, ref int offset)
         {
+            ReadOnlySpan<byte> ClientPacket = temp.Span;
             //Get Unreliable length
             UnreliableLength = ClientPacket.GetByte(ref offset);
 
@@ -51,7 +52,7 @@ namespace ReturnHome.PacketProcessing
                     //0x29 is max 0x4029 size
                     for (int i = 0; i < 0x29; i++)
                     {
-                        if (ClientPacket.Span[i + offset] == 0)
+                        if (ClientPacket[i + offset] == 0)
                         {
                             offset += i;
                             break;
@@ -63,7 +64,7 @@ namespace ReturnHome.PacketProcessing
             }
 
             //Uncompress the packet
-            ReadOnlyMemory<byte> MyPacket = _compression.Run_length_decode(ClientPacket.Span, ref offset, UnreliableLength);
+            ReadOnlyMemory<byte> MyPacket = _compression.Run_length_decode(ClientPacket, ref offset, UnreliableLength);
             int bytesRead = 0;
             //First 0x4029 from client
             if (XorByte == 0)

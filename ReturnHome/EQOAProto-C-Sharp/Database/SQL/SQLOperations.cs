@@ -397,7 +397,6 @@ namespace ReturnHome.Database.SQL
                 MySession.MyCharacter.MyHotkeys.Add(thisHotkey);
             }
             rdr.Close();
-            con.Close();
         }
 
         public void GetPlayerWeaponHotbar(Session MySession)
@@ -433,7 +432,6 @@ namespace ReturnHome.Database.SQL
             {
                 MySession.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
             }
-            con.Close();
         }
 
         //Method to delete character from player's account
@@ -446,14 +444,14 @@ namespace ReturnHome.Database.SQL
 
             //Executes a reader on the previous var.
             using MySqlDataReader rdr = cmd.ExecuteReader();
-
+            rdr.Close();
             //Log which character serverid was deleted
             Logger.Info($"Deleted Character with ServerID: {serverid}");
 
             //Create a new list of characters after deletion
             List<Character> MyCharacterList = AccountCharacters(MySession);
 
-            con.Close();
+            //Don't close connection because we recreate character list and resend it, it handles closing connection
 
             //Send Fresh Character Listing
             ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
@@ -479,8 +477,6 @@ namespace ReturnHome.Database.SQL
             {
                 TestCharName = CheckNameRdr.GetString(0);
             }
-            //Close the DB connection
-            con.Close();
 
             //Return the matched name if it existed in the DB.
             return TestCharName;
@@ -489,10 +485,6 @@ namespace ReturnHome.Database.SQL
         //Method to create new character for player's account
         public void CreateCharacter(Session MySession, Character charCreation)
         {
-
-            //Instantiate new list of Characters to return new character listing
-
-
             //Local variables to get string values to store in the DB from dictionary keys received from client
             string humType = charCreation.HumTypeDict[charCreation.HumTypeNum];
             string classType = charCreation.CharClassDict[charCreation.StartingClass];
@@ -502,13 +494,6 @@ namespace ReturnHome.Database.SQL
             //Calculate total TP used among all stats for DB storage
             int UsedTP = charCreation.AddStrength + charCreation.AddStamina + charCreation.AddAgility + charCreation.AddDexterity + charCreation.AddWisdom + charCreation.AddIntelligence
                              + charCreation.AddCharisma;
-
-            //Create and Open new Sql connection using connection parameters
-            var connectionString = ConfigurationManager.ConnectionStrings["DevLocal"].ConnectionString;
-
-            //Set connection property from connection string and open connection
-            using MySqlConnection con = new MySqlConnection(connectionString);
-            con.Open();
 
             //Assign query string and connection to commands
             using var cmd = new MySqlCommand("GetCharModel", con);
@@ -544,7 +529,6 @@ namespace ReturnHome.Database.SQL
                 charCreation.ModelID = rdr.GetInt32(21);
             }
             rdr.Close();
-            con.Close();
 
             //Calculate Unused TP still available to character upon entering world.
             charCreation.UnusedTP = charCreation.UnusedTP - UsedTP;
@@ -558,16 +542,8 @@ namespace ReturnHome.Database.SQL
             charCreation.Intelligence = charCreation.DefaultIntelligence + charCreation.AddIntelligence;
             charCreation.Charisma = charCreation.DefaultCharisma + charCreation.AddCharisma;
 
-            //Open second connection using query string params
-
-
-            Console.WriteLine($"Character using world {charCreation.World}");
-            //Set connection property from connection string and open connection
-            using MySqlConnection SecondCon = new MySqlConnection(connectionString);
-            SecondCon.Open();
-
             //Create second command using second connection and char insert query string
-            using var SecondCmd = new MySqlCommand("CreateCharacter", SecondCon);
+            using var SecondCmd = new MySqlCommand("CreateCharacter", con);
             SecondCmd.CommandType = CommandType.StoredProcedure;
 
             //Add all character attributes for new character creation to parameterized values
@@ -637,14 +613,8 @@ namespace ReturnHome.Database.SQL
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
             SecondCmd.ExecuteNonQuery();
-            SecondCon.Close();
 
-            ///Close DB connection
-            SecondCon.Close();
-
-            //Log which character serverid was created
-            //Console.WriteLine($"Created Character with Name: {charCreation.CharName}");
-
+            //Don't close connection because we have character list generated next
             List<Character> MyCharacterList = AccountCharacters(MySession);
 
             //Send Fresh Character Listing
