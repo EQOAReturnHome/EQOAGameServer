@@ -153,8 +153,8 @@ namespace ReturnHome.Server.Entity.Actor
             AR = ar;
         }
 
-        /*
-        public byte[] PullItem()
+        
+        public byte[] DumpItem()
         {
             ourMessage.Clear();
 
@@ -335,6 +335,155 @@ namespace ReturnHome.Server.Entity.Actor
             //Add Stats to our List
             ourMessage.AddRange(ourStats);
         }
-        */
+
+        public int GetSize()
+        {
+            int size = 0;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(StackLeft);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(RemainingHP);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Charges);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(EquipLocation);
+            size += 5;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ItemID);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ItemCost);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk1);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ItemIcon);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk2);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Equipslot);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk3);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Trade);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Rent);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk4);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Attacktype);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Weapondamage);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk5);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Levelreq);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Maxstack);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Maxhp);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Duration);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Classuse);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Raceuse);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Procanim);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Lore);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk6);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Craft);
+            size += 8 + ItemName.Length + ItemDesc.Length;
+            size += GetStatSize();
+            return size;
+        }
+
+        private int GetStatSize()
+        {
+            int size = 1;
+            if (Str > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Str);
+            }
+
+            if (Sta > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Sta);
+            }
+
+            if (Agi > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Agi);
+            }
+
+            if (Dex > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Dex);
+            }
+
+            if (Wis > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Wis);
+            }
+
+            if (Int > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Int);
+            }
+
+            if (Cha > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(Cha);
+            }
+
+            if (HPMax > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(HPMax);
+            }
+
+            if (POWMax > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(POWMax);
+            }
+
+            if (PoT > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(PoT);
+            }
+
+            if (HoT > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(HoT);
+            }
+
+            if (AC > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(AC);
+            }
+
+            if (PR > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(PR);
+            }
+
+            if (DR > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(DR);
+            }
+
+            if (FR > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(FR);
+            }
+
+            if (CR > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(CR);
+            }
+
+            if (LR > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(LR);
+            }
+
+            if (AR > 0)
+            {
+                size++;
+                Utility_Funcs.DoubleVariableLengthIntegerLength(AR);
+            }
+
+            return size;
+        }
     }
 }

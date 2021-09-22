@@ -263,8 +263,62 @@ namespace ReturnHome.Server.Entity.Actor
 
             //Need to add a Database push here also
         }
-        /*
-        public byte[] PullCharacter()
+
+        public int calcDumpSize()
+        {
+            int size = 3;
+            size += 4 + Tunaria.Length;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ServerID);
+            size += 4 + CharName.Length;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(TClass);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Race);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Level);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(TotalXP);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Debt);
+            size += 1;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Tunar);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(BankTunar);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(UnusedTP);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(TotalAssignableTP);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(World);
+            size += 24;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(MyHotkeys.Count);
+            foreach (Hotkey hk in MyHotkeys)
+                size += hk.GetSize();
+
+            //2 unknown 4 byte sections and 4 bytes for quest count
+            size += 12;
+            foreach (Quest q in MyQuests)
+                size += q.GetSize();
+
+            size += 4 + Utility_Funcs.DoubleVariableLengthIntegerLength(InventoryItems.Count);
+            foreach (Item i in InventoryItems)
+                size += i.GetSize();
+
+            foreach (WeaponHotbar wb in WeaponHotbars)
+                size += wb.GetSize();
+
+            size += 4 + Utility_Funcs.DoubleVariableLengthIntegerLength(BankItems.Count);
+            foreach (Item i in BankItems)
+                size += i.GetSize();
+
+            size += 2;
+            foreach (Auction sa in MySellingAuctions)
+                size += sa.GetSize();
+
+            foreach (Auction ba in MyBuyingAuctions)
+                size += ba.GetSize();
+
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(MySpells.Count);
+            foreach (Spell s in MySpells)
+                size += s.GetSize();
+
+            size += 165;
+
+            return size;
+        }
+
+        public byte[] DumpCharacter()
         {
             //Clear List
             ourMessage.Clear();
@@ -298,7 +352,7 @@ namespace ReturnHome.Server.Entity.Actor
 
             return ourMessage.ToArray(); ;
         }
-        */
+        
         public void DistributeUpdates()
         {
 

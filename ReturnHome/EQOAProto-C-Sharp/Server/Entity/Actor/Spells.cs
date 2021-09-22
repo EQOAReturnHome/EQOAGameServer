@@ -57,8 +57,8 @@ namespace ReturnHome.Server.Entity.Actor
             SpellDesc = thisSpellDesc;
         }
 
-        /*
-        public byte[] PullSpell()
+        
+        public byte[] DumpSpell()
         {
             //Make sure this is empty before pulling new data
             ourMessage.Clear();
@@ -90,6 +90,30 @@ namespace ReturnHome.Server.Entity.Actor
 
             return ourMessage.ToArray();
         }
-        */
+
+        public int GetSize()
+        {
+            int size = 0;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(SpellID));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(AddedOrder));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(OnHotBar));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(WhereOnHotBar));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk1));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ShowHide));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(AbilityLevel));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk2));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk3));
+            size += 2;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(CastTime));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Power));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(IconColor));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Icon));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Scope));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Recast));
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(EqpRequirement));
+            size += 9 + SpellName.Length + SpellDesc.Length;
+
+            return size;
+        }
     }
 }

@@ -34,7 +34,6 @@ namespace ReturnHome.Server.Network
 		
 		//End
 		
-        private int bytesRead;
         public PacketCreator packetCreator = new();
 
         ///SessionList Objects, probably need bundle information here too?
@@ -79,22 +78,6 @@ namespace ReturnHome.Server.Network
             rdpCommIn = new(this, clientID, serverID);
 			rdpCommOut = new(this, listener);
 			sessionQueue = new(this);
-			
-			//Scrap this specific code?
-            //If server initiated, have 2 messages to send client/initiate session
-			/*
-            if(didServerInitiate)
-            {
-                GameMessage[] gameList = new GameMessage[2];
-
-                var camera1 = new Camera1();
-                gameList[0] = camera1;
-
-                var camera2 = new Camera2();
-                gameList[1] = camera2;
-
-                Network.EnqueueSend(gameList);
-            }*/
         }
 
         public void ProcessPacket(ClientPacket packet)
@@ -181,6 +164,13 @@ namespace ReturnHome.Server.Network
 				}
             }
 
+            if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - elapsedTime) > 60000)
+            {
+                //Send a disconnect from server to client, then remove the session
+                //For now just remove the session
+                PendingTermination = true;
+            }
+
             rdpCommOut.PrepPackets();
         }
 
@@ -188,7 +178,8 @@ namespace ReturnHome.Server.Network
         {
             if (!PendingTermination) return;
             //Eventually this would kick the player out of the world and save data/free resources
-
+            // Remove character from Character List
+            PlayerManager.RemovePlayer(MyCharacter);
             SessionManager.SessionHash.TryRemove(this);
         }
     }

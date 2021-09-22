@@ -4,18 +4,20 @@ namespace ReturnHome.Playercharacter.Actor
 {
     public class Quest
     {
-        private List<byte> ourMessage = new List<byte> { };
+        private string ourMessage = "";
         public Quest()
         {
 
         }
 
-        public byte[] PullQuest()
+        public byte[] DumpQuest()
         {
-            //Clear List
-            ourMessage.Clear();
+            return default;
+        }
 
-            return ourMessage.ToArray();
+        public int GetSize()
+        {
+            return 4 + ourMessage.Length * 2;
         }
     }
 }

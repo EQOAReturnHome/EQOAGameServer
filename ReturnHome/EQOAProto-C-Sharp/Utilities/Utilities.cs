@@ -15,6 +15,31 @@ namespace ReturnHome.Utilities
             return (ulong)(unixTime.TotalSeconds);
         }
 
+        public static byte DoubleVariableLengthIntegerLength(int val)
+        {
+            uint value = (uint)val;
+            value *= 2;
+
+            if (value >= 0 && value <= 127)
+                return 1;
+
+            else if (value >= 128 && value <= 16383)
+                return 2;
+
+            else if (value >= 16384 && value <= 2097151)
+                return 3;
+
+            else if (value >= 2097152 && value <= 268435455)
+                return 4;
+
+            else if (value >= 268435456 && value <= 4294967295)
+                return 5;
+
+            else
+                //Throw an error and return 0?
+                return 0;
+        }
+
         public static byte VariableLengthIntegerLength(int val)
         {
             uint value = (uint)val;

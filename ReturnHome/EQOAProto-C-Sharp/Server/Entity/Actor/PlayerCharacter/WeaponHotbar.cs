@@ -30,8 +30,8 @@ namespace ReturnHome.Playercharacter.Actor
             SecondaryHandID = thisSecondaryHandID;
         }
 
-        /*
-        public byte[] PullWeaponHotbar()
+        
+        public byte[] DumpWeaponHotbar()
         {
             //Ensure this is empty
             ourMessage.Clear();
@@ -43,6 +43,14 @@ namespace ReturnHome.Playercharacter.Actor
 
             return ourMessage.ToArray();
         }
-        */
+
+        public int GetSize()
+        {
+            int size = 4 + HotbarName.Length;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(PrimaryHandID);
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(SecondaryHandID);
+
+            return size;
+        }
     }
 }

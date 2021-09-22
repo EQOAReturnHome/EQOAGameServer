@@ -11,11 +11,18 @@ namespace ReturnHome.Playercharacter.Actor
 
         }
 
-        public byte[] PullAuction()
+        public byte[] DumpAuction()
         {
             ourMessage.Clear();
 
             return ourMessage.ToArray();
+        }
+
+        public int GetSize()
+        {
+            int size = 0;
+
+            return size;
         }
     }
 }

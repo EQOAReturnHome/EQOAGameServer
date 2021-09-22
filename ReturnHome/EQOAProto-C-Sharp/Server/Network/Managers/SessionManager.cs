@@ -175,28 +175,6 @@ namespace ReturnHome.Server.Network.Managers
             SessionQueueMessages.PackMessage(MySession, temp2, MessageOpcodeTypes.ShortReliableMessage);
 
         }
-
-        public static async Task CheckClientTimeOut()
-        {
-            //Approximately every 30 seconds, check if a session is in a timedout state and disconnect it
-            do
-            {
-                foreach (Session MySession in SessionHash)
-                {
-                    if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - MySession.elapsedTime) > 60000)
-                    {
-                        //Send a disconnect from server to client, then remove the session
-                        //For now just remove the session
-                        if (SessionHash.TryRemove(MySession))
-                        {
-                            Console.WriteLine("Removed a Session");
-                        }
-                    }
-                }
-                await Task.Delay(30000);
-            }
-            while (true);
-        }
 		
 		/// <summary>
         /// Dispatches all outgoing messages.<para />

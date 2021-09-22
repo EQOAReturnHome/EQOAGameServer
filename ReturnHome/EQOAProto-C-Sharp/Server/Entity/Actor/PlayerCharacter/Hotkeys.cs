@@ -46,7 +46,7 @@ namespace ReturnHome.Playercharacter.Actor
 
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
-            //ourMessage.AddRange(Utility_Funcs.Technique(HotKeyFuncs.OutHoingHotkeyDict[Direction])); **********READD THIS
+            ourMessage.AddRange(Utility_Funcs.Technique(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
 
             //North HK
             ourMessage.Add(0);
@@ -118,6 +118,44 @@ namespace ReturnHome.Playercharacter.Actor
             }
 
             return tempMessage;
+        }
+
+        public int GetSize()
+        {
+            int size = 4;
+            size += Utility_Funcs.DoubleVariableLengthIntegerLength(HotKeyFuncs.OutHoingHotkeyDict[Direction]);
+            size += calcHotKeySize(NMessage, NLabel);
+            size += calcHotKeySize(WMessage, WLabel);
+            size += calcHotKeySize(EMessage, ELabel);
+            size += calcHotKeySize(SMessage, SLabel);
+            return size;
+        }
+
+        private int calcHotKeySize(string message, string label)
+        {
+            int size = 0;
+
+            if (label == null)
+            {
+                size += 4;
+            }
+
+            else
+            {
+                size += 4 + label.Length * 2;
+            }
+
+            if (message == null)
+            {
+                size += 4;
+            }
+
+            else
+            {
+                size += 4 + message.Length * 2;
+            }
+
+            return size;
         }
     }
 }
