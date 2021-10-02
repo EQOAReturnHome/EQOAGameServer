@@ -7,16 +7,9 @@ namespace ReturnHome.Utilities
 {
     
     class Compression
-    {
-        private MessageCreator _meassgeCreator;
-
-        public Compression()
-        {
-            _meassgeCreator = new();
-        }
-
-        public ReadOnlyMemory<byte> CompressUnreliable(byte[] MyUnreliable, Session MySession)
-        {
+    {/*
+        public static ReadOnlyMemory<byte> CompressUnreliable(byte[] MyUnreliable, Session MySession)
+        {/*
             int length = MyUnreliable.Length;
 
             int thisReal = 0;
@@ -113,10 +106,10 @@ namespace ReturnHome.Utilities
 
             //Return ReadOnlyMemory Message
             return _meassgeCreator.MessageReader();
-        }
+        }*/
 
         //Pass in Unreliable message and expected unreliable length
-        public unsafe ReadOnlyMemory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, ref int offset, int length)
+        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, ref int offset, int length)
         {
 
             byte[] messageBuf = new byte[length];
@@ -136,8 +129,7 @@ namespace ReturnHome.Utilities
 
                 while (true)
                 {
-                    local_70 = buf[offset];
-                    offset += 1;
+                    local_70 = buf[offset++];
                     if (local_70 == 0) break;
                     len_00 = (uint)local_70 & 0x7f;
                     if ((local_70 & 0x80) == 0)
@@ -148,8 +140,7 @@ namespace ReturnHome.Utilities
 
                     else
                     {
-                        local_70 = buf[offset];
-                        offset += 1;
+                        local_70 = buf[offset++];
                         uVar2 = (uint)local_70;
                     }
 
@@ -168,9 +159,8 @@ namespace ReturnHome.Utilities
                     {
                         for (int i = 0; i < len_00; i++)
                         {
-                            messageBuf[counter] = buf[offset];
+                            messageBuf[counter] = buf[offset++];
                             counter += 1;
-                            offset += 1;
                         }
                     }
                 }

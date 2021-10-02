@@ -1,28 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace ReturnHome.Playercharacter.Actor
 {
     public class Auction
     {
-        private List<byte> ourMessage = new List<byte> { };
-
         public Auction()
         {
 
         }
 
-        public byte[] DumpAuction()
+        public void DumpAuction(MemoryStream memStream)
         {
-            ourMessage.Clear();
 
-            return ourMessage.ToArray();
-        }
-
-        public int GetSize()
-        {
-            int size = 0;
-
-            return size;
         }
     }
 }

@@ -80,7 +80,7 @@ namespace ReturnHome.Database.SQL
                     //world
                     rdr.GetInt32(19),
                     //x
-                    rdr.GetFloat(20),
+                    rdr.GetFloat(21),
                     //y
                     rdr.GetFloat(21),
                     //z
@@ -289,11 +289,300 @@ namespace ReturnHome.Database.SQL
                     thisChar.AuctionItems.Add(ThisItem);
                 }
             }
+
             SecondRdr.Close();
             //foreach (Character character in characterData.OrderBy(newCharacter => newCharacter.CharName)) Console.WriteLine(character);
 
             //return Character Data with characters and gear.
             return characterData;
+        }
+
+        public Character AcquireCharacter(Session MySession, int serverID)
+        {
+            //Holds list of characters for whole class
+            Character selectedCharacter = null;
+
+            //Queries DB for all characters and their necessary attributes  to generate character select
+            //Later should convert to a SQL stored procedure if possible.
+            //Currently pulls ALL charcters, will pull characters based on accountID.
+            using var cmd = new MySqlCommand("GetAccountCharacters", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("pAccountID", MySession.AccountID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            //string to hold local charcter Name
+            string charName;
+
+            //Read through results from query populating character data needed for character select
+            while (rdr.Read())
+            {
+                if (rdr.GetInt32(1) == serverID)
+                {
+                    Console.WriteLine("ServerID Match");
+
+                    //Instantiate new character object, not to be confused with a newly created character
+                    selectedCharacter = new Character
+                    (
+                        //charName
+                        rdr.GetString(0),
+                        //serverid
+                        rdr.GetInt32(1),
+                        //modelid
+                        rdr.GetInt32(2),
+                        //tclass
+                        rdr.GetInt32(3),
+                        //race
+                        rdr.GetInt32(4),
+                        //humType
+                        rdr.GetString(5),
+                        //level
+                        rdr.GetInt32(6),
+                        //haircolor
+                        rdr.GetInt32(7),
+                        //hairlength
+                        rdr.GetInt32(8),
+                        //hairstyle
+                        rdr.GetInt32(9),
+                        //faceoption
+                        rdr.GetInt32(10),
+                        //classIcon
+                        rdr.GetInt32(11),
+                        //totalXP
+                        rdr.GetInt32(12),
+                        //debt
+                        rdr.GetInt32(13),
+                        //breath
+                        rdr.GetInt32(14),
+                        //tunar
+                        rdr.GetInt32(15),
+                        //bankTunar
+                        rdr.GetInt32(16),
+                        //unusedTP
+                        rdr.GetInt32(17),
+                        //totalTP
+                        rdr.GetInt32(18),
+                        //world
+                        rdr.GetInt32(19),
+                        //x
+                        rdr.GetFloat(20),
+                        //y
+                        rdr.GetFloat(21),
+                        //z
+                        rdr.GetFloat(22),
+                        //facing
+                        rdr.GetFloat(23),
+                        //strength
+                        rdr.GetInt32(24),
+                        //stamina
+                        rdr.GetInt32(25),
+                        //agility
+                        rdr.GetInt32(26),
+                        //dexterity
+                        rdr.GetInt32(27),
+                        //wisdom
+                        rdr.GetInt32(28),
+                        //intel
+                        rdr.GetInt32(29),
+                        //charisma
+                        rdr.GetInt32(30),
+                        //currentHP
+                        rdr.GetInt32(31),
+                        //maxHP
+                        rdr.GetInt32(32),
+                        //currentPower
+                        rdr.GetInt32(33),
+                        //maxPower
+                        rdr.GetInt32(34),
+                        //healot
+                        rdr.GetInt32(35),
+                        //powerot
+                        rdr.GetInt32(36),
+                        //ac
+                        rdr.GetInt32(37),
+                        //poisonr
+                        rdr.GetInt32(38),
+                        //diseaser
+                        rdr.GetInt32(39),
+                        //firer
+                        rdr.GetInt32(40),
+                        //coldr
+                        rdr.GetInt32(41),
+                        //lightningr
+                        rdr.GetInt32(42),
+                        //arcaner
+                        rdr.GetInt32(43),
+                        //fishing
+                        rdr.GetInt32(44),
+                        //baseStr
+                        rdr.GetInt32(45),
+                        //baseSta
+                        rdr.GetInt32(46),
+                        //baseAgi
+                        rdr.GetInt32(47),
+                        //baseDex
+                        rdr.GetInt32(48),
+                        //baseWisdom
+                        rdr.GetInt32(49),
+                        //baseIntel
+                        rdr.GetInt32(50),
+                        //baseCha
+                        rdr.GetInt32(51),
+                        //currentHP2
+                        rdr.GetInt32(52),
+                        //baseHp
+                        rdr.GetInt32(53),
+                        //currentPower2
+                        rdr.GetInt32(54),
+                        //basePower
+                        rdr.GetInt32(55),
+                        //healot2
+                        rdr.GetInt32(56),
+                        //powerot2
+                        rdr.GetInt32(57),
+                        MySession);
+                    break;
+                }
+
+                else
+                {
+                    Console.WriteLine($"ServerID: {serverID.ToString("X")} RDR ServerID: {rdr.GetInt32(1).ToString("X")}");
+                }
+            }
+
+            //Close first reader
+            rdr.Close();
+
+            //Second SQL command and reader
+            using var SecondCmd = new MySqlCommand("GetCharacterGear", con);
+            SecondCmd.CommandType = CommandType.StoredProcedure;
+            SecondCmd.Parameters.AddWithValue("pAccountID", MySession.AccountID);
+            using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
+
+            //Use second reader to iterate through character gear and assign to character attributes
+            while (SecondRdr.Read())
+            {
+                //Hold character value so we have names to compare against 
+                if (SecondRdr.GetString(0) == selectedCharacter.CharName)
+                {
+                    Console.WriteLine("Getting character item's");
+                    Item ThisItem = new Item(
+                      //Stacksleft
+                      SecondRdr.GetInt32(1),
+                      //RemainingHP
+                      SecondRdr.GetInt32(2),
+                      //Charges
+                      SecondRdr.GetInt32(3),
+                      //Equipment Location
+                      SecondRdr.GetInt32(4),
+                      //Location (Bank, self, auction etc)
+                      SecondRdr.GetByte(5),
+                      //Location in inventory
+                      SecondRdr.GetInt32(6),
+                      //ItemID
+                      SecondRdr.GetInt32(7),
+                      //Item cost 
+                      SecondRdr.GetInt32(8),
+                      //ItemIcon
+                      SecondRdr.GetInt32(9),
+                      //Itempattern equipslot
+                      SecondRdr.GetInt32(10),
+                      //Attack Type 
+                      SecondRdr.GetInt32(11),
+                      //WeaponDamage
+                      SecondRdr.GetInt32(12),
+                      //MaxHP of item 
+                      SecondRdr.GetInt32(13),
+                      //Tradeable?
+                      SecondRdr.GetInt32(14),
+                      //Rentable
+                      SecondRdr.GetInt32(15),
+                      //Craft Item
+                      SecondRdr.GetInt32(16),
+                      //Lore item 
+                      SecondRdr.GetInt32(17),
+                      //Level requirement 
+                      SecondRdr.GetInt32(18),
+                      //Max stack of item 
+                      SecondRdr.GetInt32(19),
+                      //ItemName
+                      SecondRdr.GetString(20),
+                      //Item Description
+                      SecondRdr.GetString(21),
+                      //Duration
+                      SecondRdr.GetInt32(22),
+                      //useable classes
+                      SecondRdr.GetInt32(23),
+                      //useable races
+                      SecondRdr.GetInt32(24),
+                      //Proc Animation
+                      SecondRdr.GetInt32(25),
+                      //Strength
+                      SecondRdr.GetInt32(26),
+                      //Stamina
+                      SecondRdr.GetInt32(27),
+                      //Agility
+                      SecondRdr.GetInt32(28),
+                      //Dexterity
+                      SecondRdr.GetInt32(29),
+                      //Wisdom
+                      SecondRdr.GetInt32(30),
+                      //Intelligence
+                      SecondRdr.GetInt32(31),
+                      //Charisma
+                      SecondRdr.GetInt32(32),
+                      //HPMax
+                      SecondRdr.GetInt32(33),
+                      //POWMax
+                      SecondRdr.GetInt32(34),
+                      //Powerot
+                      SecondRdr.GetInt32(35),
+                      //Healot
+                      SecondRdr.GetInt32(36),
+                      //Ac
+                      SecondRdr.GetInt32(37),
+                      //PR 
+                      SecondRdr.GetInt32(38),
+                      //DR 
+                      SecondRdr.GetInt32(39),
+                      //FR 
+                      SecondRdr.GetInt32(40),
+                      //CR 
+                      SecondRdr.GetInt32(41),
+                      //LR 
+                      SecondRdr.GetInt32(42),
+                      //AR 
+                      SecondRdr.GetInt32(43),
+                      //Model
+                      SecondRdr.GetInt32(44),
+                      //Color
+                      SecondRdr.GetUInt32(45));
+
+                    //If this is 1, it needs to go to inventory
+                    if (ThisItem.Location == 1)
+                    {
+                        selectedCharacter.InventoryItems.Add(ThisItem);
+                    }
+
+                    //If this is 2, it needs to go to the Bank
+                    else if (ThisItem.Location == 2)
+                    {
+                        selectedCharacter.BankItems.Add(ThisItem);
+                    }
+
+                    //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
+                    else if (ThisItem.Location == 4)
+                    {
+                        selectedCharacter.AuctionItems.Add(ThisItem);
+                    }
+                }
+
+                else
+                    Console.WriteLine("Wrong Character");
+            }
+            SecondRdr.Close();
+
+            //return Character Data with characters and gear.
+            return selectedCharacter;
         }
 
         public void GetPlayerSpells(Session MySession)

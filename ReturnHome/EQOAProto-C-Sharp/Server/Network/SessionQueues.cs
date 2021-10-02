@@ -80,7 +80,7 @@ namespace ReturnHome.Server.Network
                 //process unreliable messages
                 if (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
                 {
-                    if ((_session.rdpCommOut.totalLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
+                    if ((messageLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
                     {
                         if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
                         {
@@ -99,7 +99,7 @@ namespace ReturnHome.Server.Network
                 //Process reliable messages
                 if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp2))
                 {
-                    if ((_session.rdpCommOut.totalLength + temp2.Message.Length) < _session.rdpCommOut.maxSize)
+                    if ((messageLength + temp2.Message.Length) < _session.rdpCommOut.maxSize)
                     {
                         if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
                         {

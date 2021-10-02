@@ -13,7 +13,10 @@ namespace ReturnHome.Server.Network
         {
             //This is only needed so often
             int readBytes = 0;
-			
+            int offset = 0;
+
+            Memory<byte> temp;
+            ushort MessageSequence;
             //Check if message will span multiple packets
             if (ClientMessage.Length > 1024)
             {
@@ -21,21 +24,20 @@ namespace ReturnHome.Server.Network
                 {
                     MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeTypes.MultiShortReliableMessage), 1024, session.rdpCommIn.connectionData.lastSentMessageSequence++);
 
-                    Memory<byte> temp2 = new byte[thisMessageHeader.Length + 6];
-                    Span<byte> thisMessage = temp2.Span;
-                    thisMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
+                    temp = new byte[thisMessageHeader.Length + 6];
+                    Span<byte> thisMessage = temp.Span;
+                    thisMessage.Write(thisMessageHeader.getBytes(), ref offset);
 
                     //1018 + 6 = 1024
-                    thisMessage.Write(ClientMessage[readBytes..(readBytes + 1024)], ref readBytes);
-                    AddMessage(session, thisMessageHeader.Number, temp2);
+                    thisMessage.Write(ClientMessage[readBytes..(readBytes + 1024)], ref offset);
+                    readBytes += 1024;
+                    AddMessage(session, thisMessageHeader.Number, temp);
+                    offset = 0;
                 }
 
                 //Slice remaining bytes left to put into a message which is < 1500
                 ClientMessage = ClientMessage.Slice(readBytes, (ClientMessage.Length - readBytes));
             }
-
-			Memory<byte> temp;
-			ushort MessageSequence;
 			
             ///Pack Message here into session.SessionMessages
             ///Check message length first
@@ -47,9 +49,9 @@ namespace ReturnHome.Server.Network
 					MessageHeaderUnreliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, 0);
                     temp = new byte[thisMessageHeader.Length + 4];
                     Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    readBytes -= 2;
-                    WholeClientMessage.Write(ClientMessage, ref readBytes);
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
+                    offset -= 2;
+                    WholeClientMessage.Write(ClientMessage, ref offset);
                     MessageSequence = thisMessageHeader.Number;
 				}
 				
@@ -59,8 +61,8 @@ namespace ReturnHome.Server.Network
 					MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
                     temp = new byte[thisMessageHeader.Length + 6];
                     Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    WholeClientMessage.Write(ClientMessage, ref readBytes);
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
+                    WholeClientMessage.Write(ClientMessage, ref offset);
                     MessageSequence = thisMessageHeader.Number;
                 }
             }
@@ -74,9 +76,9 @@ namespace ReturnHome.Server.Network
 					MessageHeaderUnreliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, 0);
                     temp = new byte[thisMessageHeader.Length + 2];
                     Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    readBytes -= 2;
-                    WholeClientMessage.Write(ClientMessage, ref readBytes);
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
+                    offset -= 2;
+                    WholeClientMessage.Write(ClientMessage, ref offset);
                     MessageSequence = thisMessageHeader.Number;
                 }
 				
@@ -86,8 +88,8 @@ namespace ReturnHome.Server.Network
 					MessageHeaderReliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
                     temp = new byte[thisMessageHeader.Length + 4];
                     Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref readBytes);
-                    WholeClientMessage.Write(ClientMessage, ref readBytes);
+                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
+                    WholeClientMessage.Write(ClientMessage, ref offset);
                     MessageSequence = thisMessageHeader.Number;
                 }
             }

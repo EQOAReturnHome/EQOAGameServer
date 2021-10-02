@@ -37,13 +37,13 @@ namespace ReturnHome.Server.Network
 			// New network auth session timeouts will always be high.
             //For now hardcode 30 seconds, once we enter world it needs to be like... 2 seconds to ping clients, maybe 60 seconds to disconnect
             //Maybe this would get set by the session location. Pre-memory dump = 30 seconds, memory dump > is 2 seconds
-            TimeoutTick = DateTime.UtcNow.AddSeconds(30000).Ticks;
+            TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
         }
 		
         public void ProcessPacket(ClientPacket packet)
         {
             //At this point we have received contact from client, reset it's timer
-            TimeoutTick = DateTime.UtcNow.AddSeconds(30000).Ticks;
+            TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
 			
 			//Let's make sure this isn't a delayed packet etc.
 			if(packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)
@@ -74,7 +74,7 @@ namespace ReturnHome.Server.Network
                         connectionData.lastReceivedMessageSequence++;
                         Logger.Info($"Working with message {message.Header.MessageNumber}");
 
-                        switch ((byte)message.Header.messageType)
+                        switch (message.Header.messageType)
                         {
                             case (byte)MessageType.PingMessage:
                                 ProcessOpcode.ProcessPingRequest(_session, message);
@@ -92,6 +92,7 @@ namespace ReturnHome.Server.Network
 
                             default:
                                 Logger.Info("Processing Object update messages");
+                                ProcessUnreliable.ProcessUnreliables(_session, message);
                                 //Do stuff to process 0x40 type messages from client
                                 break;
                         }
@@ -123,7 +124,13 @@ namespace ReturnHome.Server.Network
 				foreach(var i in packet.Messages)
 					_outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
 			}
-            
+
+            //Check client update message
+            if (packet.clientUpdate != null)
+            {
+                Logger.Info("Processing Object update messages");
+                ProcessUnreliable.ProcessUnreliables(_session, packet.clientUpdate);
+            }
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Done processing messages in packet");
             ///Should we just initiate responses to clients through here for now?
             ///Ultimately we want to have a seperate thread with a server tick, 
@@ -191,7 +198,7 @@ namespace ReturnHome.Server.Network
         private int _value = 0;
 		public int totalLength;
 		private int _headerLength;
-		public int maxSize = 1024;
+		public int maxSize = 1200;
 		private Memory<byte> temp;
 
         public RdpCommOut(Session session, ServerListener listener)

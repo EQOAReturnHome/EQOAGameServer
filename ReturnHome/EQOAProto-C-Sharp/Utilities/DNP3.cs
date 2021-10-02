@@ -15,14 +15,14 @@ namespace ReturnHome.Utilities
             ulong Date1 = DateTime.Now.GetUnixEpoch() + (ulong)val;
 
             ///return time * 1000 for milliseconds
-            return (ulong)(Date1 * 1000);
+            return Date1 * 1000;
         }
 
         public static byte[] CreateDNP3TimeStamp()
         {
             List<byte> newList = new List<byte> { };
             newList.AddRange(BitConverter.GetBytes(CreateDNP3(0)));
-            newList.AddRange(BitConverter.GetBytes(CreateDNP3(1350000)));
+            newList.AddRange(BitConverter.GetBytes(CreateDNP3(0) + 1350000));
 
             return newList.ToArray();
         }

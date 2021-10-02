@@ -31,6 +31,17 @@ namespace ReturnHome.Server.Network
             ReadOnlySpan<byte> buffer = temp.Span;
             ClientEndPoint = buffer.GetLEUShort(ref offset);
             TargetEndPoint = buffer.GetLEUShort(ref offset);
+
+            //Check if it is a transfer packet
+            if (!(TargetEndPoint == 0xFFFF))
+                //Not Transfer packet, Validate CRC Checksum for packet
+                //Should probably do something if it fails here, so we don't waste cycles processing a broken packet
+                CRCChecksum = buffer.Slice((buffer.Length - 4), 4).SequenceEqual(CRC.calculateCRC(buffer.Slice(0, buffer.Length - 4)));
+
+            else
+                //Eventually do transfers here some how
+                return;
+
             HeaderData = buffer.Get7BitEncodedInt(ref offset);
             BundleSize = (ushort)(HeaderData & 0x7FF);
             headerFlags = (PacketHeaderFlags)(HeaderData - BundleSize);
@@ -39,37 +50,28 @@ namespace ReturnHome.Server.Network
             if (HasHeaderFlag(PacketHeaderFlags.HasInstance))
                 InstanceID = buffer.GetLEUInt(ref offset);
 
+            if (HasHeaderFlag(PacketHeaderFlags.ResetConnection))
+                //SessionID is duplicated with resetconnection header, indicates to drop session
+                //What do we do if this... isn't the case?
+                //Chalk it up to invalid packet and drop?
+                if (InstanceID == buffer.GetLEUInt(ref offset))
+                {
+                    CancelSession = true;
+                    return;
+                }
+
             //if Client is "remote", means it is not "master" anymore and an additional pack value to read which ties into character instanceID
             if (HasHeaderFlag(PacketHeaderFlags.IsRemote))
                 SessionID = (uint)buffer.Get7BitDoubleEncodedInt(ref offset);
 
             else
                 SessionID = 0;
-
-            if (HasHeaderFlag(PacketHeaderFlags.ResetConnection))
-                //SessionID is duplicated with resetconnection header, indicates to drop session
-				//What do we do if this... isn't the case?
-				//Chalk it up to invalid packet and drop?
-                if (InstanceID == buffer.GetLEUInt(ref offset))
-                {
-                    CancelSession = true;
-                    return;
-                }
 				
 				
 			if (HasHeaderFlag(PacketHeaderFlags.NewInstance))
                 NewInstance = true;
 
             //Else?????
-
-            //Check if it is a transfer packet
-            if (!(TargetEndPoint == 0xFFFF))
-                //Not Transfer packet, Validate CRC Checksum for packet
-                CRCChecksum = buffer.Slice((buffer.Length - 4), 4).SequenceEqual(CRC.calculateCRC(buffer.Slice(0, buffer.Length - 4)));
-
-            else
-                //Eventually do transfers here some how
-                return;
 
             //Read Bundle Type, needs abit of a work around....
             bundleFlags = (PacketBundleFlags)buffer.GetByte(ref offset);

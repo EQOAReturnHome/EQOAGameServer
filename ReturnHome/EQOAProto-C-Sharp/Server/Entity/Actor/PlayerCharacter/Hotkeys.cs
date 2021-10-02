@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using ReturnHome.Utilities;
 
@@ -39,59 +40,51 @@ namespace ReturnHome.Playercharacter.Actor
             SMessage = thisSMessage;
         }
 
-        public byte[] PullHotkey()
+        public void PullHotkey(MemoryStream memStream)
         {
-            //Make sure this is clear before gathering and sending
-            ourMessage.Clear();
-
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
-            ourMessage.AddRange(Utility_Funcs.Technique(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
+            memStream.Write(Utility_Funcs.DoublePack(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
 
             //North HK
-            ourMessage.Add(0);
-            ourMessage.AddRange(ConvertHotKey(NMessage, NLabel));
+            memStream.WriteByte(0);
+            ConvertHotKey(memStream, NMessage, NLabel);
 
             //West HK
-            ourMessage.Add(2);
-            ourMessage.AddRange(ConvertHotKey(WMessage, WLabel));
+            memStream.WriteByte(2);
+            ConvertHotKey(memStream, WMessage, WLabel);
 
             //East HK
-            ourMessage.Add(4);
-            ourMessage.AddRange(ConvertHotKey(EMessage, ELabel));
+            memStream.WriteByte(4);
+            ConvertHotKey(memStream, EMessage, ELabel);
 
             //South HK
-            ourMessage.Add(6);
-            ourMessage.AddRange(ConvertHotKey(SMessage, SLabel));
-
-            return ourMessage.ToArray();
+            memStream.WriteByte(6);
+            ConvertHotKey(memStream, SMessage, SLabel);
         }
 
-        private List<byte> ConvertHotKey(string message, string label)
+        private void ConvertHotKey(MemoryStream memStream, string message, string label)
         {
-            //Clear out TempMessage Holder
-            tempMessage.Clear();
-
             //If message
             if(label != null)
             {
                 //Add string length, 4 bytes then string as utf-16-le
-                tempMessage.AddRange(BitConverter.GetBytes(label.Length));
-                tempMessage.AddRange(Encoding.Unicode.GetBytes(label));
+                memStream.Write(BitConverter.GetBytes(label.Length));
+                memStream.Write(Encoding.Unicode.GetBytes(label));
 
                 //If label
                 if (message != null)
                 {
                     //Add string length, 4 bytes then string as utf-16-le
-                    tempMessage.AddRange(BitConverter.GetBytes(message.Length));
-                    tempMessage.AddRange(Encoding.Unicode.GetBytes(message));
+                    memStream.Write(BitConverter.GetBytes(message.Length));
+                    memStream.Write(Encoding.Unicode.GetBytes(message));
                 }
 
                 //no label
                 else
                 {
                     //Length of 0, 4 bytes
-                    tempMessage.AddRange(BitConverter.GetBytes(0));
+                    memStream.Write(BitConverter.GetBytes(0));
                 }
             }
 
@@ -99,63 +92,23 @@ namespace ReturnHome.Playercharacter.Actor
             else
             {
                 //Length of 0, 4 bytes
-                tempMessage.AddRange(BitConverter.GetBytes(0));
+                memStream.Write(BitConverter.GetBytes(0));
 
                 //If label
                 if (message != null)
                 {
                     //Add string length, 4 bytes then string as utf-16-le
-                    tempMessage.AddRange(BitConverter.GetBytes(message.Length));
-                    tempMessage.AddRange(Encoding.Unicode.GetBytes(message));
+                    memStream.Write(BitConverter.GetBytes(message.Length));
+                    memStream.Write(Encoding.Unicode.GetBytes(message));
                 }
 
                 //no label
                 else
                 {
                     //Length of 0, 4 bytes
-                    tempMessage.AddRange(BitConverter.GetBytes(0));
+                    memStream.Write(BitConverter.GetBytes(0));
                 }
             }
-
-            return tempMessage;
-        }
-
-        public int GetSize()
-        {
-            int size = 4;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(HotKeyFuncs.OutHoingHotkeyDict[Direction]);
-            size += calcHotKeySize(NMessage, NLabel);
-            size += calcHotKeySize(WMessage, WLabel);
-            size += calcHotKeySize(EMessage, ELabel);
-            size += calcHotKeySize(SMessage, SLabel);
-            return size;
-        }
-
-        private int calcHotKeySize(string message, string label)
-        {
-            int size = 0;
-
-            if (label == null)
-            {
-                size += 4;
-            }
-
-            else
-            {
-                size += 4 + label.Length * 2;
-            }
-
-            if (message == null)
-            {
-                size += 4;
-            }
-
-            else
-            {
-                size += 4 + message.Length * 2;
-            }
-
-            return size;
         }
     }
 }

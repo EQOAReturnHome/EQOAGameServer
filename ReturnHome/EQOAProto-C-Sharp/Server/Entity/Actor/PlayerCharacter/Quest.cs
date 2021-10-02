@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 
 namespace ReturnHome.Playercharacter.Actor
 {
@@ -10,14 +11,9 @@ namespace ReturnHome.Playercharacter.Actor
 
         }
 
-        public byte[] DumpQuest()
+        public void DumpQuest(MemoryStream memStream)
         {
-            return default;
-        }
 
-        public int GetSize()
-        {
-            return 4 + ourMessage.Length * 2;
         }
     }
 }

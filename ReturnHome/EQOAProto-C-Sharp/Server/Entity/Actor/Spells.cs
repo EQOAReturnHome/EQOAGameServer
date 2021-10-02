@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using ReturnHome.Utilities;
 
@@ -26,8 +27,6 @@ namespace ReturnHome.Server.Entity.Actor
         public int EqpRequirement { get; private set; }
         public string SpellName { get; private set; }
         public string SpellDesc { get; private set; }
-
-        private List<byte> ourMessage = new List<byte> { };
 
         public Spell()
         { }
@@ -58,62 +57,33 @@ namespace ReturnHome.Server.Entity.Actor
         }
 
         
-        public byte[] DumpSpell()
+        public void DumpSpell(MemoryStream memStream)
         {
-            //Make sure this is empty before pulling new data
-            ourMessage.Clear();
-
             //Start gathering the data
-            ourMessage.AddRange(Utility_Funcs.Technique(SpellID));
-            ourMessage.AddRange(Utility_Funcs.Technique(AddedOrder));
-            ourMessage.AddRange(Utility_Funcs.Technique(OnHotBar));
-            ourMessage.AddRange(Utility_Funcs.Technique(WhereOnHotBar));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk1));
-            ourMessage.AddRange(Utility_Funcs.Technique(ShowHide));
-            ourMessage.AddRange(Utility_Funcs.Technique(AbilityLevel));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk2));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk3));
-            byte[] MyRange = BitConverter.GetBytes(SpellRange);
-            ourMessage.AddRange(MyRange[2..4]);
-            ourMessage.AddRange(Utility_Funcs.Technique(CastTime));
-            ourMessage.AddRange(Utility_Funcs.Technique(Power));
-            ourMessage.AddRange(Utility_Funcs.Technique(IconColor));
-            ourMessage.AddRange(Utility_Funcs.Technique(Icon));
-            ourMessage.AddRange(Utility_Funcs.Technique(Scope));
-            ourMessage.AddRange(Utility_Funcs.Technique(Recast));
-            ourMessage.AddRange(Utility_Funcs.Technique(EqpRequirement));
-            ourMessage.AddRange(BitConverter.GetBytes(SpellName.Length));
-            ourMessage.AddRange(Encoding.Unicode.GetBytes(SpellName));
-            ourMessage.AddRange(BitConverter.GetBytes(SpellDesc.Length));
-            ourMessage.AddRange(Encoding.Unicode.GetBytes(SpellDesc));
-            ourMessage.Add(0);
+            memStream.Write(Utility_Funcs.DoublePack(SpellID));
+            memStream.Write(Utility_Funcs.DoublePack(AddedOrder));
+            memStream.Write(Utility_Funcs.DoublePack(OnHotBar));
+            memStream.Write(Utility_Funcs.DoublePack(WhereOnHotBar));
+            memStream.Write(Utility_Funcs.DoublePack(Unk1));
+            memStream.Write(Utility_Funcs.DoublePack(ShowHide));
+            memStream.Write(Utility_Funcs.DoublePack(AbilityLevel));
+            memStream.Write(Utility_Funcs.DoublePack(Unk2));
+            memStream.Write(Utility_Funcs.DoublePack(Unk3));
 
-            return ourMessage.ToArray();
-        }
-
-        public int GetSize()
-        {
-            int size = 0;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(SpellID));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(AddedOrder));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(OnHotBar));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(WhereOnHotBar));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk1));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ShowHide));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(AbilityLevel));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk2));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk3));
-            size += 2;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(CastTime));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Power));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(IconColor));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Icon));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Scope));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Recast));
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(EqpRequirement));
-            size += 9 + SpellName.Length + SpellDesc.Length;
-
-            return size;
+            //Only take the last 2 bytes, technically a half float but not much support yet in c# that I have seen
+            memStream.Write(BitConverter.GetBytes(SpellRange)[2..4]);
+            memStream.Write(Utility_Funcs.DoublePack(CastTime));
+            memStream.Write(Utility_Funcs.DoublePack(Power));
+            memStream.Write(Utility_Funcs.DoublePack(IconColor));
+            memStream.Write(Utility_Funcs.DoublePack(Icon));
+            memStream.Write(Utility_Funcs.DoublePack(Scope));
+            memStream.Write(Utility_Funcs.DoublePack(Recast));
+            memStream.Write(Utility_Funcs.DoublePack(EqpRequirement));
+            memStream.Write(BitConverter.GetBytes(SpellName.Length));
+            memStream.Write(Encoding.Unicode.GetBytes(SpellName));
+            memStream.Write(BitConverter.GetBytes(SpellDesc.Length));
+            memStream.Write(Encoding.Unicode.GetBytes(SpellDesc));
+            memStream.WriteByte(0);
         }
     }
 }

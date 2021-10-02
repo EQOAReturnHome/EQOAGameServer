@@ -2,12 +2,13 @@ namespace ReturnHome.Server.Network
 {
     public class SessionConnectionData
     {
-		public ushort lastReceivedMessageSequence { get; set; }
-		public ushort lastReceivedPacketSequence { get; set; }
+        public ushort lastReceivedMessageSequence { get; set; }
+        public ushort lastReceivedPacketSequence { get; set; }
         public ushort lastSentMessageSequence { get; set; }
         public ushort lastSentPacketSequence { get; set; }
         public ushort clientLastReceivedMessage { get; set; }
         public ushort clientLastReceivedMessageFinal { get; set; }
+        public ClientUpdate client {get; set;}
 
 
         public SessionConnectionData()
@@ -24,6 +25,9 @@ namespace ReturnHome.Server.Network
 
 			lastSentMessageSequence = 1;
 			lastSentPacketSequence = 1;
+
+            //Create the object to track incoming client updates
+            client = new();
         }
     }
 }

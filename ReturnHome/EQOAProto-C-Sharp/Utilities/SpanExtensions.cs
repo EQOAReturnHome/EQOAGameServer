@@ -67,6 +67,11 @@ namespace ReturnHome.Utilities
             }
         }
 
+        public static uint GetLEUInt24(this ref ReadOnlySpan<byte> span, ref int offset)
+        {
+            return (uint)(span[offset++] | span[offset++] << 8 | span[offset++] << 16);
+        }
+
         ///<summary>
         ///Takes an offset and returns a Little Endian uint from the span, incrementing offset by 4
         ///</summary>

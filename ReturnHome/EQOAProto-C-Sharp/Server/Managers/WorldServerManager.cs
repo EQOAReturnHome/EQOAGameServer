@@ -11,7 +11,7 @@ namespace ReturnHome.Server.Managers
     {
 
         private static Stopwatch gameTimer;
-        private static int serverTick = 1000 / 10;
+        private static int serverTick = 1000 / 5;
 
         static WorldServer()
         {

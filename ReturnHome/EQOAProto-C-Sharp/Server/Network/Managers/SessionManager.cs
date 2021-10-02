@@ -6,6 +6,7 @@ using System.Linq;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Managers;
+using ReturnHome.Server.Entity.Actor;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -139,19 +140,18 @@ namespace ReturnHome.Server.Network.Managers
 
         }
 
-        public static void CreateMemoryDumpSession(Session MySession)
+        public static void CreateMemoryDumpSession(Session MySession, Character MyCharacter)
         {
             //Start new session 
-            Session NewMasterSession = new Session(MySession.listener, MySession.MyIPEndPoint, MySession.SessionID++, DNP3Creation.DNP3Session(), MySession.ClientEndpoint, MySession.rdpCommIn.serverID, true);
-            NewMasterSession.ClientEndpoint = MySession.ClientEndpoint;
+            Session NewMasterSession = new Session(MySession.rdpCommOut._listener, MySession.MyIPEndPoint, DNP3Creation.DNP3Session(), MySession.SessionID + 1, MySession.rdpCommIn.clientID, MySession.rdpCommIn.serverID, true);
+            NewMasterSession.Instance = true;
             NewMasterSession.AccountID = MySession.AccountID;
-            NewMasterSession.MyCharacter = MySession.MyCharacter;
-            NewMasterSession.SessionAck = true;
+            NewMasterSession.MyCharacter = MyCharacter;
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
                 Console.WriteLine("Ready For Memory Dump");
-                //ProcessOpcode.ProcessMemoryDump(NewMasterSession.queueMessages, thisSession, this);
+                ProcessOpcode.ProcessMemoryDump(NewMasterSession);
             }
         }
 
@@ -192,6 +192,7 @@ namespace ReturnHome.Server.Network.Managers
             {
                 if (session.PendingTermination)
                 {
+                    Console.WriteLine("Dropping Session on server end");
                     session.DropSession();
                 }
 

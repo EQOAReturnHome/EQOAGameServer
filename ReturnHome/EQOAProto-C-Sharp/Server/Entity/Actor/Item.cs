@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using ReturnHome.Utilities;
 
@@ -154,336 +155,187 @@ namespace ReturnHome.Server.Entity.Actor
         }
 
         
-        public byte[] DumpItem()
+        public void DumpItem(MemoryStream memStream)
         {
-            ourMessage.Clear();
-
             //Start adding attributes to list for this item
-            ourMessage.AddRange(Utility_Funcs.Technique(StackLeft));
-            ourMessage.AddRange(Utility_Funcs.Technique(RemainingHP));
-            ourMessage.AddRange(Utility_Funcs.Technique(Charges));
-            ourMessage.AddRange(Utility_Funcs.Technique(EquipLocation));
-            ourMessage.Add(Location);
-            ourMessage.AddRange(BitConverter.GetBytes(InventoryNumber));
-            ourMessage.AddRange(Utility_Funcs.Technique(ItemID));
-            ourMessage.AddRange(Utility_Funcs.Technique(ItemCost));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk1));
-            ourMessage.AddRange(Utility_Funcs.Technique(ItemIcon));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk2));
-            ourMessage.AddRange(Utility_Funcs.Technique(Equipslot));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk3));
-            ourMessage.AddRange(Utility_Funcs.Technique(Trade));
-            ourMessage.AddRange(Utility_Funcs.Technique(Rent));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk4));
-            ourMessage.AddRange(Utility_Funcs.Technique(Attacktype));
-            ourMessage.AddRange(Utility_Funcs.Technique(Weapondamage));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk5));
-            ourMessage.AddRange(Utility_Funcs.Technique(Levelreq));
-            ourMessage.AddRange(Utility_Funcs.Technique(Maxstack));
-            ourMessage.AddRange(Utility_Funcs.Technique(Maxhp));
-            ourMessage.AddRange(Utility_Funcs.Technique(Duration));
-            ourMessage.AddRange(Utility_Funcs.Technique(Classuse));
-            ourMessage.AddRange(Utility_Funcs.Technique(Raceuse));
-            ourMessage.AddRange(Utility_Funcs.Technique(Procanim));
-            ourMessage.AddRange(Utility_Funcs.Technique(Lore));
-            ourMessage.AddRange(Utility_Funcs.Technique(Unk6));
-            ourMessage.AddRange(Utility_Funcs.Technique(Craft));
-            ourMessage.AddRange(BitConverter.GetBytes(ItemName.Length));
-            ourMessage.AddRange(Encoding.Unicode.GetBytes(ItemName));
-            ourMessage.AddRange(BitConverter.GetBytes(ItemDesc.Length));
-            ourMessage.AddRange(Encoding.Unicode.GetBytes(ItemDesc));
-            PullStats();
-
-            return ourMessage.ToArray();
+            memStream.Write(Utility_Funcs.DoublePack(StackLeft));
+            memStream.Write(Utility_Funcs.DoublePack(RemainingHP));
+            memStream.Write(Utility_Funcs.DoublePack(Charges));
+            memStream.Write(Utility_Funcs.DoublePack(EquipLocation));
+            memStream.WriteByte(Location);
+            memStream.Write(BitConverter.GetBytes(InventoryNumber));
+            memStream.Write(Utility_Funcs.DoublePack(ItemID));
+            memStream.Write(Utility_Funcs.DoublePack(ItemCost));
+            memStream.Write(Utility_Funcs.DoublePack(Unk1));
+            memStream.Write(Utility_Funcs.DoublePack(ItemIcon));
+            memStream.Write(Utility_Funcs.DoublePack(Unk2));
+            memStream.Write(Utility_Funcs.DoublePack(Equipslot));
+            memStream.Write(Utility_Funcs.DoublePack(Unk3));
+            memStream.Write(Utility_Funcs.DoublePack(Trade));
+            memStream.Write(Utility_Funcs.DoublePack(Rent));
+            memStream.Write(Utility_Funcs.DoublePack(Unk4));
+            memStream.Write(Utility_Funcs.DoublePack(Attacktype));
+            memStream.Write(Utility_Funcs.DoublePack(Weapondamage));
+            memStream.Write(Utility_Funcs.DoublePack(Unk5));
+            memStream.Write(Utility_Funcs.DoublePack(Levelreq));
+            memStream.Write(Utility_Funcs.DoublePack(Maxstack));
+            memStream.Write(Utility_Funcs.DoublePack(Maxhp));
+            memStream.Write(Utility_Funcs.DoublePack(Duration));
+            memStream.Write(Utility_Funcs.DoublePack(Classuse));
+            memStream.Write(Utility_Funcs.DoublePack(Raceuse));
+            memStream.Write(Utility_Funcs.DoublePack(Procanim));
+            memStream.Write(Utility_Funcs.DoublePack(Lore));
+            memStream.Write(Utility_Funcs.DoublePack(Unk6));
+            memStream.Write(Utility_Funcs.DoublePack(Craft));
+            memStream.Write(BitConverter.GetBytes(ItemName.Length));
+            memStream.Write(Encoding.Unicode.GetBytes(ItemName));
+            memStream.Write(BitConverter.GetBytes(ItemDesc.Length));
+            memStream.Write(Encoding.Unicode.GetBytes(ItemDesc));
+            PullStats(memStream);
         }
 
-        private void PullStats()
+        private void PullStats(MemoryStream memStream)
         {
-            
+
             //Gather stats if any exist
-            //Increment counter if if statement true, then add identifier int for stat and then technique and add stat value
+            //Increment counter if if statement true, then add identifier int for stat and then DoublePack and add stat value
+            long position = memStream.Position;
+            //Place 0 place holder here
+            memStream.WriteByte(0);
 
             if (Str > 0)
             {
                 Counter++;
-                ourStats.Add(0);
-                ourStats.AddRange(Utility_Funcs.Technique(Str));
+                memStream.WriteByte(0);
+                memStream.Write(Utility_Funcs.DoublePack(Str));
             }
 
             if (Sta > 0)
             {
                 Counter++;
-                ourStats.Add(2);
-                ourStats.AddRange(Utility_Funcs.Technique(Sta));
+                memStream.WriteByte(2);
+                memStream.Write(Utility_Funcs.DoublePack(Sta));
             }
 
             if (Agi > 0)
             {
                 Counter++;
-                ourStats.Add(4);
-                ourStats.AddRange(Utility_Funcs.Technique(Agi));
+                memStream.WriteByte(4);
+                memStream.Write(Utility_Funcs.DoublePack(Agi));
             }
 
             if (Dex > 0)
             {
                 Counter++;
-                ourStats.Add(6);
-                ourStats.AddRange(Utility_Funcs.Technique(Dex));
+                memStream.WriteByte(6);
+                memStream.Write(Utility_Funcs.DoublePack(Dex));
             }
 
             if (Wis > 0)
             {
                 Counter++;
-                ourStats.Add(8);
-                ourStats.AddRange(Utility_Funcs.Technique(Wis));
+                memStream.WriteByte(8);
+                memStream.Write(Utility_Funcs.DoublePack(Wis));
             }
 
             if (Int > 0)
             {
                 Counter++;
-                ourStats.Add(10);
-                ourStats.AddRange(Utility_Funcs.Technique(Int));
+                memStream.WriteByte(10);
+                memStream.Write(Utility_Funcs.DoublePack(Int));
             }
 
             if (Cha > 0)
             {
                 Counter++;
-                ourStats.Add(12);
-                ourStats.AddRange(Utility_Funcs.Technique(Cha));
+                memStream.WriteByte(12);
+                memStream.Write(Utility_Funcs.DoublePack(Cha));
             }
 
             if (HPMax > 0)
             {
                 Counter++;
-                ourStats.Add(16);
-                ourStats.AddRange(Utility_Funcs.Technique(HPMax));
+                memStream.WriteByte(16);
+                memStream.Write(Utility_Funcs.DoublePack(HPMax));
             }
 
             if (POWMax > 0)
             {
                 Counter++;
-                ourStats.Add(20);
-                ourStats.AddRange(Utility_Funcs.Technique(POWMax));
+                memStream.WriteByte(20);
+                memStream.Write(Utility_Funcs.DoublePack(POWMax));
             }
 
             if (PoT > 0)
             {
                 Counter++;
-                ourStats.Add(24);
-                ourStats.AddRange(Utility_Funcs.Technique(PoT));
+                memStream.WriteByte(24);
+                memStream.Write(Utility_Funcs.DoublePack(PoT));
             }
 
             if (HoT > 0)
             {
                 Counter++;
-                ourStats.Add(26);
-                ourStats.AddRange(Utility_Funcs.Technique(HoT));
+                memStream.WriteByte(26);
+                memStream.Write(Utility_Funcs.DoublePack(HoT));
             }
 
             if (AC > 0)
             {
                 Counter++;
-                ourStats.Add(28);
-                ourStats.AddRange(Utility_Funcs.Technique(AC));
+                memStream.WriteByte(28);
+                memStream.Write(Utility_Funcs.DoublePack(AC));
             }
 
             if (PR > 0)
             {
                 Counter++;
-                ourStats.Add(44);
-                ourStats.AddRange(Utility_Funcs.Technique(PR));
+                memStream.WriteByte(44);
+                memStream.Write(Utility_Funcs.DoublePack(PR));
             }
 
             if (DR > 0)
             {
                 Counter++;
-                ourStats.Add(46);
-                ourStats.AddRange(Utility_Funcs.Technique(DR));
+                memStream.WriteByte(46);
+                memStream.Write(Utility_Funcs.DoublePack(DR));
             }
 
             if (FR > 0)
             {
                 Counter++;
-                ourStats.Add(48);
-                ourStats.AddRange(Utility_Funcs.Technique(FR));
+                memStream.WriteByte(48);
+                memStream.Write(Utility_Funcs.DoublePack(FR));
             }
 
             if (CR > 0)
             {
                 Counter++;
-                ourStats.Add(50);
-                ourStats.AddRange(Utility_Funcs.Technique(CR));
+                memStream.WriteByte(50);
+                memStream.Write(Utility_Funcs.DoublePack(CR));
             }
 
             if (LR > 0)
             {
                 Counter++;
-                ourStats.Add(52);
-                ourStats.AddRange(Utility_Funcs.Technique(LR));
+                memStream.WriteByte(52);
+                memStream.Write(Utility_Funcs.DoublePack(LR));
             }
 
             if (AR > 0)
             {
                 Counter++;
-                ourStats.Add(54);
-                ourStats.AddRange(Utility_Funcs.Technique(AR));
+                memStream.WriteByte(54);
+                memStream.Write(Utility_Funcs.DoublePack(AR));
             }
 
-            //Prepend the stat count
-            ourStats.InsertRange(0, Utility_Funcs.Technique(Counter));
+            if (Counter == 0)
+                return;
+            long position2 = memStream.Position;
+            memStream.Position = position;
+            memStream.Write(Utility_Funcs.DoublePack(Counter));
 
-            //Add Stats to our List
-            ourMessage.AddRange(ourStats);
-        }
-
-        public int GetSize()
-        {
-            int size = 0;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(StackLeft);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(RemainingHP);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Charges);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(EquipLocation);
-            size += 5;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ItemID);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ItemCost);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk1);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ItemIcon);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk2);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Equipslot);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk3);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Trade);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Rent);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk4);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Attacktype);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Weapondamage);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk5);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Levelreq);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Maxstack);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Maxhp);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Duration);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Classuse);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Raceuse);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Procanim);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Lore);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Unk6);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Craft);
-            size += 8 + ItemName.Length + ItemDesc.Length;
-            size += GetStatSize();
-            return size;
-        }
-
-        private int GetStatSize()
-        {
-            int size = 1;
-            if (Str > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Str);
-            }
-
-            if (Sta > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Sta);
-            }
-
-            if (Agi > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Agi);
-            }
-
-            if (Dex > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Dex);
-            }
-
-            if (Wis > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Wis);
-            }
-
-            if (Int > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Int);
-            }
-
-            if (Cha > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(Cha);
-            }
-
-            if (HPMax > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(HPMax);
-            }
-
-            if (POWMax > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(POWMax);
-            }
-
-            if (PoT > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(PoT);
-            }
-
-            if (HoT > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(HoT);
-            }
-
-            if (AC > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(AC);
-            }
-
-            if (PR > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(PR);
-            }
-
-            if (DR > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(DR);
-            }
-
-            if (FR > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(FR);
-            }
-
-            if (CR > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(CR);
-            }
-
-            if (LR > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(LR);
-            }
-
-            if (AR > 0)
-            {
-                size++;
-                Utility_Funcs.DoubleVariableLengthIntegerLength(AR);
-            }
-
-            return size;
+            memStream.Position = position2;
         }
     }
 }

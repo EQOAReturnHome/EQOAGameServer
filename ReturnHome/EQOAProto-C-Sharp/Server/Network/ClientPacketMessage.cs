@@ -1,4 +1,5 @@
 using System;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network
 {
@@ -7,10 +8,20 @@ namespace ReturnHome.Server.Network
         public bool Unpack(ReadOnlyMemory<byte> buffer, ref int offset)
         {
             Header.Unpack(buffer, ref offset);
-			
-            Data = buffer.Slice(offset, Header.Size);
-			offset += Header.Size;
-            return true;
+
+            //Check if message type is client update
+            if (Header.messageType == (byte)MessageType.ClientUpdate)
+            {
+                Data = Compression.Run_length_decode(buffer.Span, ref offset, Header.Size);
+                return true;
+            }
+
+            else
+            {
+                Data = buffer.Slice(offset, Header.Size);
+                offset += Header.Size;
+                return true;
+            }
         }
     }
 }

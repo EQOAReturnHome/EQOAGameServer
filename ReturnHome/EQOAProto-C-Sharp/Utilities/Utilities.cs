@@ -40,7 +40,7 @@ namespace ReturnHome.Utilities
                 return 0;
         }
 
-        public static byte VariableLengthIntegerLength(int val)
+        public static byte VariableLengthIntegerLength(uint val)
         {
             uint value = (uint)val;
 
@@ -89,34 +89,60 @@ namespace ReturnHome.Utilities
             return val;
         }
 
+        //Packing
         static public byte[] Pack(uint value)
         {
-            //Work some magic. Basic VLI
-            List<byte> myList = new List<byte> { };
+            byte[] temp = new byte[VariableLengthIntegerLength(value)];
+            byte b;
+            byte counter = 0;
 
-            int myVal = 0;
-            int shift = 0;
+            b = (byte)(value & 0xFF);
             do
             {
-                byte lower7bits = (byte)(value & 0x7f);
-                value >>= 7;
-                if (value > 0)
-                {
-                    myVal |= (lower7bits |= 128) << shift;
-                    shift += 8;
-                }
-                else
-                {
-                    myVal |= lower7bits << shift;
-                }
-            } while (value > 0);
+                value = value >> 7;
+                b = (byte)(b & 0x7f);
+                if (value != 0)
+                    b = (byte)(b | 0x80);
 
-            myList.AddRange(BitConverter.GetBytes(myVal));
-            int i = myList.Count - 1;
-            int j = 0;
-            while (myList[i] == 0) { j++; --i; }
-            myList.RemoveRange(i + 1, j);
-            return myList.ToArray();
+                temp[counter++] = (byte)b;
+                b = (byte)(value & 0xff);
+            } while (value != 0);
+            return temp;
+        }
+
+        static public byte[] DoublePack(int val)
+        {
+            uint uVar1;
+            uVar1 = (uint)val;
+            uVar1 = val < 0 ? ((~uVar1) << 1) + 1 : uVar1 <<= 1;
+
+            return Pack(uVar1);
+        }
+
+        //Unpacking
+        static public int DoubleUnpack(byte[] buffer)
+        {
+            uint val = Unpack(buffer);
+            return (int)((val & 1) != 0 ? ~((val - 1) >> 1) : val >> 1);
+        }
+
+        static public uint Unpack(byte[] buffer)
+        {
+            byte local_60;
+            uint uVar2 = 0;
+            byte uVar1 = 0;
+            byte counter = 0;
+
+            while (uVar1 < 0x40)
+            {
+                local_60 = buffer[counter++];
+                uVar2 = (uint)(uVar2 | (local_60 & 0x7f) << uVar1);
+                if ((local_60 & 0x80) == 0)
+                    break;
+                uVar1 += 7;
+            }
+
+            return uVar2;
         }
 
         public static string GetMemoryString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)

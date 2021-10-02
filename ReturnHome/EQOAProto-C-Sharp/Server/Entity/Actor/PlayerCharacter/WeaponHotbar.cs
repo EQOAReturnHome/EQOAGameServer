@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using ReturnHome.Utilities;
 
@@ -11,8 +12,6 @@ namespace ReturnHome.Playercharacter.Actor
         public string HotbarName { get; private set; }
         public int PrimaryHandID { get; private set; }
         public int SecondaryHandID { get; private set; }
-
-        private List<byte> ourMessage = new List<byte> { };
 
         //Default constructor
         //Even if not hotbar data, these must be -1 (Techniqued is 1)
@@ -29,28 +28,13 @@ namespace ReturnHome.Playercharacter.Actor
             PrimaryHandID = thisPrimaryHandID;
             SecondaryHandID = thisSecondaryHandID;
         }
-
         
-        public byte[] DumpWeaponHotbar()
+        public void DumpWeaponHotbar(MemoryStream memStream)
         {
-            //Ensure this is empty
-            ourMessage.Clear();
-
-            ourMessage.AddRange(Utility_Funcs.Technique(PrimaryHandID));
-            ourMessage.AddRange(Utility_Funcs.Technique(SecondaryHandID));
-            ourMessage.AddRange(BitConverter.GetBytes(HotbarName.Length));
-            ourMessage.AddRange(Encoding.Unicode.GetBytes(HotbarName));
-
-            return ourMessage.ToArray();
-        }
-
-        public int GetSize()
-        {
-            int size = 4 + HotbarName.Length;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(PrimaryHandID);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(SecondaryHandID);
-
-            return size;
+            memStream.Write(Utility_Funcs.DoublePack(PrimaryHandID));
+            memStream.Write(Utility_Funcs.DoublePack(SecondaryHandID));
+            memStream.Write(BitConverter.GetBytes(HotbarName.Length));
+            memStream.Write(Encoding.Unicode.GetBytes(HotbarName));
         }
     }
 }

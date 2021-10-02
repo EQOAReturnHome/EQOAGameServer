@@ -4,6 +4,7 @@ using System.Text;
 
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.Entity.Actor;
 
@@ -42,8 +43,6 @@ namespace ReturnHome.Server.Network
         public Memory<byte> Channel40Base = new byte[41];
         public ushort Channel40MessageNumber;
         public ushort ActorUpdatMessageCount = 1;
-
-        public long elapsedTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         public bool hasInstance = true;
         public bool Instance = false;
@@ -164,7 +163,7 @@ namespace ReturnHome.Server.Network
 				}
             }
 
-            if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - elapsedTime) > 60000)
+            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > rdpCommIn.TimeoutTick)
             {
                 //Send a disconnect from server to client, then remove the session
                 //For now just remove the session

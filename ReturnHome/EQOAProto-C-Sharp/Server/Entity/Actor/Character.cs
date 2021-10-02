@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using ReturnHome.Playercharacter.Actor;
 using ReturnHome.Server.Network;
@@ -114,8 +115,6 @@ namespace ReturnHome.Server.Entity.Actor
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
-
-        private List<byte> ourMessage = new List<byte> { };
 
         public Session characterSession;
 
@@ -264,93 +263,34 @@ namespace ReturnHome.Server.Entity.Actor
             //Need to add a Database push here also
         }
 
-        public int calcDumpSize()
+        public void DumpCharacter(MemoryStream memStream)
         {
-            int size = 3;
-            size += 4 + Tunaria.Length;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(ServerID);
-            size += 4 + CharName.Length;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(TClass);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Race);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Level);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(TotalXP);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Debt);
-            size += 1;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(Tunar);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(BankTunar);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(UnusedTP);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(TotalAssignableTP);
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(World);
-            size += 24;
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(MyHotkeys.Count);
-            foreach (Hotkey hk in MyHotkeys)
-                size += hk.GetSize();
-
-            //2 unknown 4 byte sections and 4 bytes for quest count
-            size += 12;
-            foreach (Quest q in MyQuests)
-                size += q.GetSize();
-
-            size += 4 + Utility_Funcs.DoubleVariableLengthIntegerLength(InventoryItems.Count);
-            foreach (Item i in InventoryItems)
-                size += i.GetSize();
-
-            foreach (WeaponHotbar wb in WeaponHotbars)
-                size += wb.GetSize();
-
-            size += 4 + Utility_Funcs.DoubleVariableLengthIntegerLength(BankItems.Count);
-            foreach (Item i in BankItems)
-                size += i.GetSize();
-
-            size += 2;
-            foreach (Auction sa in MySellingAuctions)
-                size += sa.GetSize();
-
-            foreach (Auction ba in MyBuyingAuctions)
-                size += ba.GetSize();
-
-            size += Utility_Funcs.DoubleVariableLengthIntegerLength(MySpells.Count);
-            foreach (Spell s in MySpells)
-                size += s.GetSize();
-
-            size += 165;
-
-            return size;
-        }
-
-        public byte[] DumpCharacter()
-        {
-            //Clear List
-            ourMessage.Clear();
-
             //Start pulling data together
-            ourMessage.Add(0);
-            ourMessage.AddRange(BitConverter.GetBytes(Tunaria.Length));
-            ourMessage.AddRange(Encoding.UTF8.GetBytes(Tunaria));
-            ourMessage.AddRange(Utility_Funcs.Technique(ServerID));
-            ourMessage.AddRange(BitConverter.GetBytes(CharName.Length));
-            ourMessage.AddRange(Encoding.UTF8.GetBytes(CharName));
-            ourMessage.AddRange(Utility_Funcs.Technique(TClass));
-            ourMessage.AddRange(Utility_Funcs.Technique(Race));
-            ourMessage.AddRange(Utility_Funcs.Technique(Level));
-            ourMessage.AddRange(Utility_Funcs.Technique(TotalXP));
-            ourMessage.AddRange(Utility_Funcs.Technique(Debt));
-            ourMessage.Add((byte)Breath);
-            ourMessage.AddRange(Utility_Funcs.Technique(Tunar));
-            ourMessage.AddRange(Utility_Funcs.Technique(BankTunar));
-            ourMessage.AddRange(Utility_Funcs.Technique(UnusedTP));
-            ourMessage.AddRange(Utility_Funcs.Technique(TotalAssignableTP));
-            ourMessage.AddRange(Utility_Funcs.Technique(World));
-            ourMessage.AddRange(BitConverter.GetBytes(XCoord));
-            ourMessage.AddRange(BitConverter.GetBytes(YCoord));
-            ourMessage.AddRange(BitConverter.GetBytes(ZCoord));
-            ourMessage.AddRange(BitConverter.GetBytes(Facing));
+            memStream.WriteByte(0);
+            memStream.Write(BitConverter.GetBytes(Tunaria.Length));
+            memStream.Write(Encoding.UTF8.GetBytes(Tunaria));
+            memStream.Write(Utility_Funcs.DoublePack(ServerID));
+            memStream.Write(BitConverter.GetBytes(CharName.Length));
+            memStream.Write(Encoding.UTF8.GetBytes(CharName));
+            memStream.Write(Utility_Funcs.DoublePack(TClass));
+            memStream.Write(Utility_Funcs.DoublePack(Race));
+            memStream.Write(Utility_Funcs.DoublePack(Level));
+            memStream.Write(Utility_Funcs.DoublePack(TotalXP));
+            memStream.Write(Utility_Funcs.DoublePack(Debt));
+            memStream.WriteByte((byte)Breath);
+            memStream.Write(Utility_Funcs.DoublePack(Tunar));
+            memStream.Write(Utility_Funcs.DoublePack(BankTunar));
+            memStream.Write(Utility_Funcs.DoublePack(UnusedTP));
+            memStream.Write(Utility_Funcs.DoublePack(TotalAssignableTP));
+            memStream.Write(Utility_Funcs.DoublePack(World));
+            memStream.Write(BitConverter.GetBytes(XCoord));
+            memStream.Write(BitConverter.GetBytes(YCoord));
+            memStream.Write(BitConverter.GetBytes(ZCoord));
+            memStream.Write(BitConverter.GetBytes(Facing));
             //Two unknown values must be packed on the end, can be updated later to
             //include database values when we figure out what it does.
-            ourMessage.AddRange(BitConverter.GetBytes(0.0f));
-            ourMessage.AddRange(BitConverter.GetBytes(0.0f));
-
-            return ourMessage.ToArray(); ;
+            memStream.Write(BitConverter.GetBytes(0.0f));
+            memStream.Write(BitConverter.GetBytes(0.0f));
         }
         
         public void DistributeUpdates()

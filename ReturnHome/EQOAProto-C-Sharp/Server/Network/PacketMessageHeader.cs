@@ -12,9 +12,10 @@ namespace ReturnHome.Server.Network
         public ushort MessageNumber { get; set; }
         public ushort Opcode { get; private set; }
         public ushort Size { get; set; }
-		public int Count { get; set; }
+        public int Count { get; set; }
         public int Index { get; set; } // If client sends 0xFA types, may be needed to combine message splits
         public bool Split { get; set; } // If client sends 0xFA types, may be needed to combine message splits
+        public byte XorByte { get; set; }
 
         public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
         {
@@ -36,10 +37,17 @@ namespace ReturnHome.Server.Network
             if ((byte)MessageType.PingMessage == messageType)
                 return;
 
-            Opcode = buffer.GetLEUShort(ref offset);
+            //unreliables and Reliables have opcodes. No  other opcode type/channel does
+            if ((byte)MessageType.UnreliableMessage == messageType || (byte)MessageType.ReliableMessage == messageType)
+            {
+                Opcode = buffer.GetLEUShort(ref offset);
+                //Subtract 2 from size after reading opcode
+                Size -= 2;
+            }
 
-            //Subtract 2 from size after reading opcode
-            Size -= 2;
+            if (messageType == (byte)MessageType.ClientUpdate)
+                XorByte = buffer.GetByte(ref offset);
+
         }
     }
 }

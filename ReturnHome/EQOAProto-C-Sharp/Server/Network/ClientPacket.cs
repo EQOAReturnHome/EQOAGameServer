@@ -65,8 +65,10 @@ namespace ReturnHome.Server.Network
                         var message = new ClientPacketMessage();
                         if (!message.Unpack(buffer, ref offset))
                             return false;
-
-                        Messages.TryAdd(message.Header.MessageNumber, message);
+                        if (message.Header.messageType == (byte)MessageType.ClientUpdate)
+                            clientUpdate = message;
+                        else
+                            Messages.TryAdd(message.Header.MessageNumber, message);
                     }
 
                     catch (Exception)
