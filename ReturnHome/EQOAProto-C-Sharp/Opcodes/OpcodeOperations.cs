@@ -224,6 +224,9 @@ namespace ReturnHome.Opcodes
                   i.DumpItem(memStream);
               }
 
+              //While we are here, lets "equip" our equipped gear
+              MySession.MyCharacter.EquipGear();
+
               foreach( WeaponHotbar wb in MySession.MyCharacter.WeaponHotbars)
               {
                   wb.DumpWeaponHotbar(memStream);
@@ -560,115 +563,8 @@ namespace ReturnHome.Opcodes
                 ///Add Face option
                 Message.Write7BitDoubleEncodedInt(character.FaceOption, ref offset);
 
-                ///Start processing MyItem
-                foreach (Item MyItem in character.InventoryItems)
-                {
-                    ///Use a switch to sift through MyItem and add them properly
-                    switch (MyItem.EquipLocation)
-                    {
-                        ///Helm
-                        case 1:
-                            character.Helm = (byte)MyItem.Model;
-                            character.HelmColor = MyItem.Color;
-                            break;
-
-                        ///Robe
-                        case 2:
-                            character.Robe = (byte)MyItem.Model;
-                            character.RobeColor = MyItem.Color;
-                            break;
-
-                        ///Gloves
-                        case 19:
-                            character.Gloves = (byte)MyItem.Model;
-                            character.GlovesColor = MyItem.Color;
-                            break;
-
-                        ///Chest
-                        case 5:
-                            character.Chest = (byte)MyItem.Model;
-                            character.ChestColor = MyItem.Color;
-                            break;
-
-                        ///Bracers
-                        case 8:
-                            character.Bracer = (byte)MyItem.Model;
-                            character.BracerColor = MyItem.Color;
-                            break;
-
-                        ///Legs
-                        case 10:
-                            character.Legs = (byte)MyItem.Model;
-                            character.LegsColor = MyItem.Color;
-                            break;
-
-                        ///Feet
-                        case 11:
-                            character.Boots = (byte)MyItem.Model;
-                            character.BootsColor = MyItem.Color;
-                            break;
-
-                        ///Primary
-                        case 12:
-                            character.Primary = MyItem.Model;
-                            break;
-
-                        ///Secondary
-                        case 14:
-
-                            ///If we have a secondary equipped already, puts next secondary into primary slot
-                            if (character.Secondary > 0)
-                            {
-                                character.Primary = MyItem.Model;
-                            }
-
-                            ///If no secondary, add to secondary slot
-                            else
-                            {
-                                character.Secondary = MyItem.Model;
-                            }
-                            break;
-
-                        ///2 Hand
-                        case 15:
-                            character.Primary = MyItem.Model;
-                            break;
-
-                        ///Shield
-                        case 13:
-                            character.Shield = MyItem.Model;
-                            break;
-
-                        ///Bow
-                        case 16:
-                            character.Primary = MyItem.Model;
-                            break;
-
-                        ///Thrown
-                        case 17:
-                            character.Primary = MyItem.Model;
-                            break;
-
-                        ///Held
-                        case 18:
-                            ///If we have a secondary equipped already, puts next secondary into primary slot
-                            if (character.Secondary > 0)
-                            {
-                                character.Primary = MyItem.Model;
-                            }
-
-                            ///If no secondary, add to secondary slot
-                            else
-                            {
-                                character.Secondary = MyItem.Model;
-                            }
-                            break;
-
-                        default:
-                            Logger.Err("Equipment not in list, this may need to be changed");
-                            break;
-                    }
-                }
+                //Equip Gear
+                character.EquipGear();
 
                 ///Add Robe
                 Message.Write(BitConverter.GetBytes(character.Robe), ref offset);

@@ -265,6 +265,119 @@ namespace ReturnHome.Server.Entity.Actor
             memStream.Write(BitConverter.GetBytes(0.0f));
             memStream.Write(BitConverter.GetBytes(0.0f));
         }
+
+        public void EquipGear()
+        {
+            ///Start processing MyItem
+            foreach (Item MyItem in InventoryItems)
+            {
+                ///Use a switch to sift through MyItem and add them properly
+                switch (MyItem.EquipLocation)
+                {
+                    ///Helm
+                    case 1:
+                        Helm = (byte)MyItem.Model;
+                        HelmColor = MyItem.Color;
+                        break;
+
+                    ///Robe
+                    case 2:
+                        Robe = (byte)MyItem.Model;
+                        RobeColor = MyItem.Color;
+                        break;
+
+                    ///Gloves
+                    case 19:
+                        Gloves = (byte)MyItem.Model;
+                        GlovesColor = MyItem.Color;
+                        break;
+
+                    ///Chest
+                    case 5:
+                        Chest = (byte)MyItem.Model;
+                        ChestColor = MyItem.Color;
+                        break;
+
+                    ///Bracers
+                    case 8:
+                        Bracer = (byte)MyItem.Model;
+                        BracerColor = MyItem.Color;
+                        break;
+
+                    ///Legs
+                    case 10:
+                        Legs = (byte)MyItem.Model;
+                        LegsColor = MyItem.Color;
+                        break;
+
+                    ///Feet
+                    case 11:
+                        Boots = (byte)MyItem.Model;
+                        BootsColor = MyItem.Color;
+                        break;
+
+                    ///Primary
+                    case 12:
+                        Primary = MyItem.Model;
+                        break;
+
+                    ///Secondary
+                    case 14:
+
+                        ///If we have a secondary equipped already, puts next secondary into primary slot
+                        if (Secondary > 0)
+                        {
+                            Primary = MyItem.Model;
+                        }
+
+                        ///If no secondary, add to secondary slot
+                        else
+                        {
+                            Secondary = MyItem.Model;
+                        }
+                        break;
+
+                    ///2 Hand
+                    case 15:
+                        Primary = MyItem.Model;
+                        break;
+
+                    ///Shield
+                    case 13:
+                        Shield = MyItem.Model;
+                        break;
+
+                    ///Bow
+                    case 16:
+                        Primary = MyItem.Model;
+                        break;
+
+                    ///Thrown
+                    case 17:
+                        Primary = MyItem.Model;
+                        break;
+
+                    ///Held
+                    case 18:
+                        ///If we have a secondary equipped already, puts next secondary into primary slot
+                        if (Secondary > 0)
+                        {
+                            Primary = MyItem.Model;
+                        }
+
+                        ///If no secondary, add to secondary slot
+                        else
+                        {
+                            Secondary = MyItem.Model;
+                        }
+                        break;
+
+                    default:
+                        Logger.Err("Equipment not in list, this may need to be changed");
+                        break;
+                }
+            }
+        }
         
         public void DistributeUpdates()
         {

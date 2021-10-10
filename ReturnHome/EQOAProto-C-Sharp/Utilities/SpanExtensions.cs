@@ -69,7 +69,7 @@ namespace ReturnHome.Utilities
 
         public static uint GetLEUInt24(this ref ReadOnlySpan<byte> span, ref int offset)
         {
-            return (uint)(span[offset++] | span[offset++] << 8 | span[offset++] << 16);
+            return (uint)(span[offset++] << 16 | span[offset++] << 8 | span[offset++]);
         }
 
         ///<summary>

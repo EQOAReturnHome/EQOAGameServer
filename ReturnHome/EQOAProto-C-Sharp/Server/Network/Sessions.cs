@@ -160,6 +160,10 @@ namespace ReturnHome.Server.Network
             if (DateTime.UtcNow.Ticks >= rdpCommIn.TimeoutTick)
             {
                 UnreliablePing();
+                if (inGame)
+                    rdpCommIn.TimeoutTick = DateTime.UtcNow.AddSeconds(2).Ticks;
+                else
+                    rdpCommIn.TimeoutTick = DateTime.UtcNow.AddSeconds(45).Ticks;
             }
 
             if (characterInWorld)

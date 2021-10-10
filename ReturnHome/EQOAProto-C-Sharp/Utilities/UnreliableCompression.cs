@@ -61,14 +61,14 @@ namespace ReturnHome.Utilities
                         {
                             tempSpan[offset++] = (byte)(thisReal | 0x80);
                             tempSpan[offset++] = (byte)thisCompress;
-                            tempSpan.Write(MyUnreliable[(i - thisReal + 1)..i], ref offset);
+                            tempSpan.Write(MyUnreliable[(i - thisReal)..i], ref offset);
                         }
 
                         //Single byte compression
                         else
                         {
                             tempSpan[offset++] = (byte)((thisReal * 0x10) + thisCompress);
-                            tempSpan.Write(MyUnreliable[(i - thisReal + 1)..i], ref offset);
+                            tempSpan.Write(MyUnreliable[(i - thisReal)..i], ref offset);
                         }
                     }
                 }
@@ -88,14 +88,14 @@ namespace ReturnHome.Utilities
                         {
                             tempSpan[offset++] = (byte)(thisReal | 0x80);
                             tempSpan[offset++] = (byte)thisCompress;
-                            tempSpan.Write(MyUnreliable[(i - thisReal + 1)..(i+1)], ref offset);
+                            tempSpan.Write(MyUnreliable[(i - thisReal)..(i+1)], ref offset);
                         }
 
                         //Single byte compression
                         else
                         {
                             tempSpan[offset++] = (byte)((thisReal * 0x10) + thisCompress);
-                            tempSpan.Write(MyUnreliable[(i - thisReal + 1)..(i+1)], ref offset);
+                            tempSpan.Write(MyUnreliable[(i - thisReal)..(i+1)], ref offset);
                         }
                     }
                 }

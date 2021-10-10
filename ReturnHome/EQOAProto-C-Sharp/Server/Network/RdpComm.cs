@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
+
 using ReturnHome.Database.SQL;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Entity.Actor;
@@ -39,17 +40,17 @@ namespace ReturnHome.Server.Network
             //For now hardcode 30 seconds, once we enter world it needs to be like... 2 seconds to ping clients, maybe 60 seconds to disconnect
             //Maybe this would get set by the session location. Pre-memory dump = 30 seconds, memory dump > is 2 seconds
             if (_session.inGame)
-                TimeoutTick = DateTime.UtcNow.AddSeconds(2000).Ticks;
+                TimeoutTick = DateTime.UtcNow.AddSeconds(2).Ticks;
             else
-                TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
+                TimeoutTick = DateTime.UtcNow.AddSeconds(45).Ticks;
         }
 		
         public void ProcessPacket(ClientPacket packet)
         {
             if (_session.inGame)
-                TimeoutTick = DateTime.UtcNow.AddSeconds(2000).Ticks;
+                TimeoutTick = DateTime.UtcNow.AddSeconds(2).Ticks;
             else
-                TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
+                TimeoutTick = DateTime.UtcNow.AddSeconds(45).Ticks;
 
             //Let's make sure this isn't a delayed packet etc.
             if (packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)

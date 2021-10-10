@@ -72,7 +72,10 @@ namespace ReturnHome.Server.Network
         public void UpdateBaseXor(ushort msgCounter)
         {
             //Get the message client ack'd
-            CurrentXORResults.TryGetValue(msgCounter, out Memory<byte> tempMemory);
+            Memory<byte> tempMemory = CurrentXORResults.GetValueOrDefault(msgCounter);
+
+            if (tempMemory.Length == 0)
+                return;
 
             //xor base against this message
             CoordinateConversions.Xor_data(baseXOR, tempMemory, 0xC9);

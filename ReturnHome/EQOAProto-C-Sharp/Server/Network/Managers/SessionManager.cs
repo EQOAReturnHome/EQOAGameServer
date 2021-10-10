@@ -147,6 +147,7 @@ namespace ReturnHome.Server.Network.Managers
             NewMasterSession.Instance = true;
             NewMasterSession.AccountID = MySession.AccountID;
             NewMasterSession.MyCharacter = MyCharacter;
+            NewMasterSession.MyCharacter.characterSession = NewMasterSession;
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
