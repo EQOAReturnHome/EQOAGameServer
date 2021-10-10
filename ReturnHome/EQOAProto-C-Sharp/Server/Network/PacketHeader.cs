@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ReturnHome.Utilities;
@@ -24,7 +25,8 @@ namespace ReturnHome.Server.Network
         public uint SessionAckID { get; private set; }
         public ushort ClientBundleNumber { get; set; }
         public ushort ClientBundleAck { get; set; }
-        public ushort ClientMessageAck { get; set; } 
+        public ushort ClientMessageAck { get; set; }
+        public Dictionary<byte, ushort> ChannelAcks;
 
         public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
         {
@@ -92,6 +94,29 @@ namespace ReturnHome.Server.Network
                 ClientBundleAck = buffer.GetLEUShort(ref offset);
                 ClientMessageAck = buffer.GetLEUShort(ref offset);
                 RDPReport = true;
+            }
+
+            if (temp.Length > (offset + 4))
+            {
+                byte chk = buffer.GetByte(ref offset);
+                if (chk >= 0x00 & chk <= 0x17)
+                {
+                    ChannelAcks = new();
+                    ushort msgNum = buffer.GetLEUShort(ref offset);
+
+                    while (true)
+                    {
+                        ChannelAcks.Add(chk, msgNum);
+                        chk = buffer.GetByte(ref offset);
+                        if (chk == 0xF8)
+                            break;
+
+                        msgNum = buffer.GetLEUShort(ref offset);
+                    }
+                }
+
+                else
+                    offset -= 1;
             }
 
 			if (HasBundleFlag(PacketBundleFlags.NewProcessMessages) || HasBundleFlag(PacketBundleFlags.ProcessMessages))

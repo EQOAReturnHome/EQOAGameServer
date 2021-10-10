@@ -184,6 +184,9 @@ namespace ReturnHome.Server.Network.Managers
         {
             int sessionCount = 0;
 
+            //Should push client object update directly to character if needed
+            Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
+
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());
 

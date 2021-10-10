@@ -16,15 +16,15 @@ namespace ReturnHome.Utilities
 
         public static unsafe void Xor_data(Memory<byte> dst, ReadOnlyMemory<byte> src, int len)
         {
+
             fixed (byte* srctempBuf = &MemoryMarshal.GetReference(src.Span))
             fixed (byte* dsttempBuf = &MemoryMarshal.GetReference(dst.Span))
             {
                 byte* ptr;
                 byte* srcBuf = srctempBuf;
                 byte* dstBuf = dsttempBuf;
-                int i;
+                int i = 0;
 
-                i = 0;
                 if (0 < len)
                 {
                     do
@@ -32,6 +32,34 @@ namespace ReturnHome.Utilities
                         ptr = srcBuf + i;
                         i = i + 1;
                         *dstBuf = (byte)(*dstBuf ^ *ptr);
+                        dstBuf = dstBuf + 1;
+                    } while (i < len);
+                }
+                return;
+            }
+        }
+
+        public static unsafe void Xor_data(Memory<byte> returnMem, Memory<byte> dst, ReadOnlyMemory<byte> src, int len)
+        {
+
+            fixed (byte* srctempBuf = &MemoryMarshal.GetReference(src.Span))
+            fixed (byte* dsttempBuf = &MemoryMarshal.GetReference(dst.Span))
+            fixed (byte* rtntempBuf = &MemoryMarshal.GetReference(returnMem.Span))
+            {
+                byte* ptr;
+                byte* rtnBuf = rtntempBuf;
+                byte* srcBuf = srctempBuf;
+                byte* dstBuf = dsttempBuf;
+                int i = 0;
+
+                if (0 < len)
+                {
+                    do
+                    {
+                        ptr = srcBuf + i;
+                        i = i + 1;
+                        *rtnBuf = (byte)(*dstBuf ^ *ptr);
+                        rtnBuf = rtnBuf + 1;
                         dstBuf = dstBuf + 1;
                     } while (i < len);
                 }

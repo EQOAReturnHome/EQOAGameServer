@@ -1,3 +1,5 @@
+using System;
+
 namespace ReturnHome.Server.Network
 {
     public class SessionConnectionData
@@ -8,10 +10,14 @@ namespace ReturnHome.Server.Network
         public ushort lastSentPacketSequence { get; set; }
         public ushort clientLastReceivedMessage { get; set; }
         public ushort clientLastReceivedMessageFinal { get; set; }
-        public ClientUpdate client {get; set;}
+        public ClientObjectUpdate client {get; set;}
+
+        //Create an array of all 24 object updates
+        //Need a way to ensure no more then 24 objects can be allocated, array may be best?
+        public Memory<ServerObjectUpdate> serverObjects;
 
 
-        public SessionConnectionData()
+        public SessionConnectionData(Session _session)
         {
             lastReceivedMessageSequence = 0;
             lastReceivedPacketSequence = 0;
@@ -28,6 +34,12 @@ namespace ReturnHome.Server.Network
 
             //Create the object to track incoming client updates
             client = new();
+
+            serverObjects = new Memory<ServerObjectUpdate>(new ServerObjectUpdate[0x17]);
+            Span<ServerObjectUpdate> tempSpan = serverObjects.Span;
+
+            for (int i = 0; i < tempSpan.Length; i++)
+                tempSpan[i] = new(_session, (byte)i);
         }
     }
 }

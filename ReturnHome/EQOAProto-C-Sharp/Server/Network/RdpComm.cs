@@ -16,7 +16,7 @@ namespace ReturnHome.Server.Network
     /// </summary>
     public class RdpCommIn
     {
-		public readonly SessionConnectionData connectionData = new();
+		public readonly SessionConnectionData connectionData;
 		
 		private readonly ConcurrentDictionary<ushort, ReadOnlyMemory<byte>> _outOfOrderMessages = new();
 		
@@ -33,20 +33,26 @@ namespace ReturnHome.Server.Network
             _sessionQueue = new(_session);
 			clientID = ClientID;
 			serverID = ServerID;
-			
-			// New network auth session timeouts will always be high.
+            connectionData = new(_session);
+
+            // New network auth session timeouts will always be high.
             //For now hardcode 30 seconds, once we enter world it needs to be like... 2 seconds to ping clients, maybe 60 seconds to disconnect
             //Maybe this would get set by the session location. Pre-memory dump = 30 seconds, memory dump > is 2 seconds
-            TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
+            if (_session.inGame)
+                TimeoutTick = DateTime.UtcNow.AddSeconds(2000).Ticks;
+            else
+                TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
         }
 		
         public void ProcessPacket(ClientPacket packet)
         {
-            //At this point we have received contact from client, reset it's timer
-            TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
-			
-			//Let's make sure this isn't a delayed packet etc.
-			if(packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)
+            if (_session.inGame)
+                TimeoutTick = DateTime.UtcNow.AddSeconds(2000).Ticks;
+            else
+                TimeoutTick = DateTime.UtcNow.AddSeconds(45000).Ticks;
+
+            //Let's make sure this isn't a delayed packet etc.
+            if (packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)
 				return;
 			
 			connectionData.lastReceivedPacketSequence = packet.Header.ClientBundleNumber;
@@ -112,18 +118,19 @@ namespace ReturnHome.Server.Network
                         break;
                 }
 			}
-			
-			/*else if ()
-			{
-				
-			}*/
-			
-			//Add all of these messages to out of order list
+						//Add all of these messages to out of order list
 			else
 			{
 				foreach(var i in packet.Messages)
 					_outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
 			}
+
+			if(packet.Header.ChannelAcks != null)
+            {
+                Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;
+                foreach (KeyValuePair<byte, ushort> ack in packet.Header.ChannelAcks)
+                    temp[ack.Key].UpdateBaseXor(ack.Value);
+            }
 
             //Check client update message
             if (packet.clientUpdate != null)
@@ -212,10 +219,8 @@ namespace ReturnHome.Server.Network
 		
         public void PrepPackets()
         {
-            if (_session.sessionQueue.CheckQueue() || _session.RdpReport)
+            if (_session.sessionQueue.CheckQueue() || _session.RdpReport || _session.clientUpdateAck)
             {
-                _session.ResetPing();
-
                 List<ReadOnlyMemory<byte>> messageList;
 
                 (totalLength, messageList) = _session.sessionQueue.GatherMessages();
@@ -259,7 +264,6 @@ namespace ReturnHome.Server.Network
 				AddSessionHeader(packet);
 
                 //Adjust offset to last 4 bytes
-
                 _offset = packet.Length - 4;
 
                 //Add CRC
@@ -292,6 +296,7 @@ namespace ReturnHome.Server.Network
 
             if (_session.didServerInitiate) // Purely a guess.... Something is 0x4000 in this and seems to correspond the initator of the session
             {
+                //This needs to be more dynamic, technically the sessionID length can vary when packed but 3 is super common
                 totalLength += 3;
                 _headerLength += 3;
                 _value |= 0x04000;
@@ -323,7 +328,7 @@ namespace ReturnHome.Server.Network
 			if (_session.RdpReport)
 				totalLength += 4;
 			
-			if (_session.Channel40Ack)
+			if (_session.clientUpdateAck)
 				totalLength += 4;
 			
 			//Add 4 more for CRC upfront
@@ -353,16 +358,16 @@ namespace ReturnHome.Server.Network
                 packet.Write(_session.rdpCommIn.connectionData.lastReceivedPacketSequence, ref _offset);
                 packet.Write(_session.rdpCommIn.connectionData.lastReceivedMessageSequence, ref _offset);
                 /// Add them to packet in "reverse order" stated above
-                /// 
-                //If ingame, include 4029 ack's
-                if (_session.Channel40Ack)
-                {
-                    packet.Write(0x40, ref _offset);
-                    packet.Write(_session.Channel40MessageNumber, ref _offset);
-                    packet.Write(0xF8, ref _offset);
-                    _session.Channel40Ack = false;
-                    return;
-                }
+            }
+
+            //If ingame, include 4029 ack's
+            if (_session.clientUpdateAck)
+            {
+                packet.Write((byte)0x40, ref _offset);
+                packet.Write(_session.rdpCommIn.connectionData.client.BaseXorMessage, ref _offset);
+                packet.Write((byte)0xF8, ref _offset);
+                _session.clientUpdateAck = false;
+                return;
             }
         }
 
@@ -380,7 +385,7 @@ namespace ReturnHome.Server.Network
                 segBody |= 0x03;
             }
 
-            if (_session.Channel40Ack)
+            if (_session.clientUpdateAck)
             {
                 segBody |= 0x10;
             }

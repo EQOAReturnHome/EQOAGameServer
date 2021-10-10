@@ -21,7 +21,7 @@ namespace ReturnHome.Server.Network
         public ServerListener listener { get; private set; }
 		
 		
-        private byte _pingCount = 0;
+        private short _pingCount = 0;
         public uint InstanceID;
         public uint SessionID;
 		public ushort ClientEndpoint;
@@ -38,10 +38,6 @@ namespace ReturnHome.Server.Network
         public PacketCreator packetCreator = new();
 
         ///SessionList Objects, probably need bundle information here too?
-
-        public bool Channel40Ack = false;
-        public Memory<byte> Channel40Base = new byte[41];
-        public ushort Channel40MessageNumber;
         public ushort ActorUpdatMessageCount = 1;
 
         public bool hasInstance = true;
@@ -52,11 +48,13 @@ namespace ReturnHome.Server.Network
 
         public bool serverSelect;
 
+        public bool characterInWorld = false;
         public bool RdpReport = false;
         public bool RdpMessage = false;
         public bool SessionAck = false;
+        public bool clientUpdateAck = false;
         public bool inGame = false;
-        public bool coordToggle = false;
+        public bool objectUpdate = false;
         public bool unkOpcode = true;
         ///Once we receive account ID, this should never change...
         public int AccountID;
@@ -91,11 +89,8 @@ namespace ReturnHome.Server.Network
 
         public void UnreliablePing()
         {
-            if (_pingCount++ == 20)
-            {
-                sessionQueue.Add(new MessageStruct(new ReadOnlyMemory<byte>(new byte[] { 0xFC, 0x02, 0xD0, 0x07 })));
-                _pingCount = 0;
-            }
+            sessionQueue.Add(new MessageStruct(new ReadOnlyMemory<byte>(new byte[] { 0xFC, 0x02, 0xD0, 0x07 })));
+            _pingCount++;
         }
 
         //This should get built into somewhere else, eventually
@@ -111,12 +106,11 @@ namespace ReturnHome.Server.Network
             Span<byte> Message = temp.Span;
 
             Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-            Message.Write(theMessage.Length, ref offset);
+            Message.Write((byte)theMessage.Length, ref offset);
             Message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
 			
             //Send Message
 			SessionQueueMessages.PackMessage(this, temp, MessageOpcodeTypes.ShortReliableMessage);
-            coordToggle = false;
         }
 
         public void ResetPing()
@@ -142,33 +136,42 @@ namespace ReturnHome.Server.Network
                 return hash;
             }
         }
-		
-		/// <summary>
+
+        public void UpdateClientObject()
+        {
+            //If changes for client object update need to go out...
+            if (objectUpdate)
+            {
+                //Cycle over objects to update for client, currently only updating client
+                MyCharacter.characterUpdate = ObjectUpdate.SerializeClientUpdate(MyCharacter);
+                objectUpdate = false;
+            }
+
+            //if no update needed, stay same as before
+        }
+
+        /// <summary>
         /// This will send outgoing packets as well as the final logoff message.
         /// </summary>
         public void TickOutbound()
         {
-			//Add some state stuff? To identify some stuff
+            //Add some state stuff? To identify some stuff
             // Checks if the session has stopped responding.
             if (DateTime.UtcNow.Ticks >= rdpCommIn.TimeoutTick)
             {
-				//After 2 minutes... disconnect session
-				if (inGame)
-				{
-					UnreliablePing();
-                    if (coordToggle)
-                    {
-                        CoordinateUpdate();
-                    }
-				}
+                UnreliablePing();
             }
 
-            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > rdpCommIn.TimeoutTick)
+            if (characterInWorld)
             {
+                //Check for updates on current objects
+                foreach (ServerObjectUpdate i in rdpCommIn.connectionData.serverObjects.Span)
+                    i.GenerateUpdate();
+            }
+
+            PendingTermination = inGame ? _pingCount >= 300 ? true : false : _pingCount >= 300 ? true : false;
                 //Send a disconnect from server to client, then remove the session
                 //For now just remove the session
-                PendingTermination = true;
-            }
 
             rdpCommOut.PrepPackets();
         }

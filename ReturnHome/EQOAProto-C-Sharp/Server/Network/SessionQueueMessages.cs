@@ -9,97 +9,145 @@ namespace ReturnHome.Server.Network
     public static class SessionQueueMessages
     {
         ///Message processing for outbound section
-        public static void PackMessage(Session session, ReadOnlyMemory<byte> ClientMessage, byte MessageOpcodeType)
+        public static void PackMessage(Session session, Memory<byte> ClientMessage, byte MessageOpcodeType)
         {
-            //This is only needed so often
+            switch (MessageOpcodeType)
+            {
+                case 0xF9:
+                case 0xFB:
+                    CreateFBMessage(session, ClientMessage, MessageOpcodeType);
+                    break;
+
+                case 0xFC:
+                    CreateFCMessage(session, ClientMessage, MessageOpcodeType);
+                    break;
+
+                default:
+                    Logger.Info($"Creating message for channel: {MessageOpcodeType}");
+                    CreateChannelMessage(session, ClientMessage, MessageOpcodeType);
+                    break;
+            }
+        }
+
+        private static void AddMessage(Session session, ushort MessageSequence, ReadOnlyMemory<byte> MyMessage)
+        {
+            session.sessionQueue.Add(new MessageStruct(MessageSequence, MyMessage));
+        }
+
+        //Create FB Types including creating FA types
+        private static void CreateFBMessage(Session session, ReadOnlyMemory<byte> ClientMessage, byte MessageOpcodeType)
+        {
             int readBytes = 0;
             int offset = 0;
 
             Memory<byte> temp;
-            ushort MessageSequence;
+
             //Check if message will span multiple packets
             if (ClientMessage.Length > 1024)
             {
                 while ((ClientMessage.Length - readBytes) >= 1024)
                 {
-                    MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeTypes.MultiShortReliableMessage), 1024, session.rdpCommIn.connectionData.lastSentMessageSequence++);
-
-                    temp = new byte[thisMessageHeader.Length + 6];
+                    temp = new Memory<byte>(new byte[1024 + 6]);
                     Span<byte> thisMessage = temp.Span;
-                    thisMessage.Write(thisMessageHeader.getBytes(), ref offset);
 
-                    //1018 + 6 = 1024
+                    thisMessage.Write((ushort)(0xFF << 8 | MessageOpcodeTypes.MultiShortReliableMessage), ref offset);
+                    thisMessage.Write((ushort)1024, ref offset);
+                    thisMessage.Write(session.rdpCommIn.connectionData.lastSentMessageSequence, ref offset);
                     thisMessage.Write(ClientMessage[readBytes..(readBytes + 1024)], ref offset);
                     readBytes += 1024;
-                    AddMessage(session, thisMessageHeader.Number, temp);
+                    AddMessage(session, session.rdpCommIn.connectionData.lastSentMessageSequence++, temp);
                     offset = 0;
                 }
 
                 //Slice remaining bytes left to put into a message which is < 1500
                 ClientMessage = ClientMessage.Slice(readBytes, (ClientMessage.Length - readBytes));
             }
-			
-            ///Pack Message here into session.SessionMessages
-            ///Check message length first
+
+            temp = new Memory<byte>(new byte[(ClientMessage.Length > 255) ? 6 + ClientMessage.Length : 4 + ClientMessage.Length]);
+            Span<byte> WholeClientMessage = temp.Span;
+
             if (ClientMessage.Length > 255)
             {
-				//0xFC types (unreliable system messages)
-				if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
-				{
-					MessageHeaderUnreliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, 0);
-                    temp = new byte[thisMessageHeader.Length + 4];
-                    Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
-                    offset -= 2;
-                    WholeClientMessage.Write(ClientMessage, ref offset);
-                    MessageSequence = thisMessageHeader.Number;
-				}
-				
-				//Reliable system messages
-				else
-				{
-					MessageHeaderReliableLong thisMessageHeader = new((ushort)((0xFF << 8) | MessageOpcodeType), (ushort)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
-                    temp = new byte[thisMessageHeader.Length + 6];
-                    Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
-                    WholeClientMessage.Write(ClientMessage, ref offset);
-                    MessageSequence = thisMessageHeader.Number;
-                }
+                WholeClientMessage.Write((ushort)(0xFF << 8 | MessageOpcodeType), ref offset);
+                WholeClientMessage.Write((ushort)ClientMessage.Length, ref offset);
+                WholeClientMessage.Write(session.rdpCommIn.connectionData.lastSentMessageSequence, ref offset);
+                WholeClientMessage.Write(ClientMessage, ref offset);
             }
 
-            ///Message is < 255
             else
             {
-				//0xFC types (unreliable system messages)
-				if (MessageOpcodeType == MessageOpcodeTypes.ShortUnreliableMessage)
-				{
-					MessageHeaderUnreliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, 0);
-                    temp = new byte[thisMessageHeader.Length + 2];
-                    Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
-                    offset -= 2;
-                    WholeClientMessage.Write(ClientMessage, ref offset);
-                    MessageSequence = thisMessageHeader.Number;
-                }
-				
-				//Reliable system messages
-				else
-				{
-					MessageHeaderReliableShort thisMessageHeader = new(MessageOpcodeType, (byte)ClientMessage.Length, session.rdpCommIn.connectionData.lastSentMessageSequence++);
-                    temp = new byte[thisMessageHeader.Length + 4];
-                    Span<byte> WholeClientMessage = temp.Span;
-                    WholeClientMessage.Write(thisMessageHeader.getBytes(), ref offset);
-                    WholeClientMessage.Write(ClientMessage, ref offset);
-                    MessageSequence = thisMessageHeader.Number;
-                }
+                WholeClientMessage.Write(MessageOpcodeType, ref offset);
+                WholeClientMessage.Write((byte)ClientMessage.Length, ref offset);
+                WholeClientMessage.Write(session.rdpCommIn.connectionData.lastSentMessageSequence, ref offset);
+                WholeClientMessage.Write(ClientMessage, ref offset);
             }
-			
-			AddMessage(session, MessageSequence, temp);
+
+            AddMessage(session, session.rdpCommIn.connectionData.lastSentMessageSequence++, temp);
         }
 
-        private static void AddMessage(Session session, ushort MessageSequence, ReadOnlyMemory<byte> MyMessage)
+        //Create FC Types 
+        private static void CreateFCMessage(Session session, ReadOnlyMemory<byte> ClientMessage, byte MessageOpcodeType)
         {
-            session.sessionQueue.Add(new MessageStruct(MessageSequence, MyMessage));
+            int offset = 0;
+
+            Memory<byte> temp = new Memory<byte>(new byte[(ClientMessage.Length > 255) ? 4 + ClientMessage.Length : 2 + ClientMessage.Length]);
+            Span<byte> WholeClientMessage = temp.Span;
+
+            if (ClientMessage.Length > 255)
+            {
+                WholeClientMessage.Write((ushort)(0xFF << 8 | MessageOpcodeType), ref offset);
+                WholeClientMessage.Write((ushort)ClientMessage.Length, ref offset);
+                WholeClientMessage.Write(ClientMessage, ref offset);
+            }
+
+            else
+            {
+                WholeClientMessage.Write(MessageOpcodeType, ref offset);
+                WholeClientMessage.Write((byte)ClientMessage.Length, ref offset);
+                WholeClientMessage.Write(ClientMessage, ref offset);
+            }
+
+            AddMessage(session, 0, temp);
+        }
+
+        //Create FC Types 
+        private static void CreateChannelMessage(Session session, Memory<byte> ClientMessage, byte MessageOpcodeType)
+        {
+            int offset = 0;
+            //Do some magic to find which counter to apply, eventually add group, and both stat and buff messages to this
+            ushort messageCounter = (MessageOpcodeType >= 0x00 & MessageOpcodeType <= 0x17) ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter++ : 0;
+            byte xorByte = MessageOpcodeType == 0xC9 ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter == 0 ? 0 : (byte)(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter - session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter) : 0;
+
+            Memory<byte> temp = new Memory<byte>(new byte[(ClientMessage.Length > 255) ? 7 + ClientMessage.Length : 5 + ClientMessage.Length]);
+            Span<byte> WholeClientMessage = temp.Span;
+
+            if (ClientMessage.Length > 255)
+            {
+                WholeClientMessage.Write((ushort)(0xFF << 8 | MessageOpcodeType), ref offset);
+                WholeClientMessage.Write((ushort)ClientMessage.Length, ref offset);
+
+                //Need some way to distinguish which channel message coutner to use here?
+                WholeClientMessage.Write(messageCounter, ref offset);
+                WholeClientMessage.Write(xorByte, ref offset);
+                WholeClientMessage.Write(Compression.CompressUnreliable(ClientMessage), ref offset);
+
+            }
+
+            else
+            {
+                WholeClientMessage.Write(MessageOpcodeType, ref offset);
+                WholeClientMessage.Write((byte)ClientMessage.Length, ref offset);
+
+                //Need some way to distinguish which channel message coutner to use here?
+                WholeClientMessage.Write(messageCounter, ref offset);
+                WholeClientMessage.Write(xorByte, ref offset);
+                WholeClientMessage.Write(Compression.CompressUnreliable(ClientMessage), ref offset);
+                WholeClientMessage.Write((byte)0, ref offset);
+
+            }
+
+            //Slice out the actual message and send it off, can probably be reworked later to compress it comwhere else but still reliably read message size?
+            AddMessage(session, 0, temp.Slice(0, offset));
         }
     }
 }

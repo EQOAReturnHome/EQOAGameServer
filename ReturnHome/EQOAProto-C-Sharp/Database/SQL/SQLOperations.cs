@@ -775,10 +775,10 @@ namespace ReturnHome.Database.SQL
         public void CreateCharacter(Session MySession, Character charCreation)
         {
             //Local variables to get string values to store in the DB from dictionary keys received from client
-            string humType = charCreation.HumTypeDict[charCreation.HumTypeNum];
-            string classType = charCreation.CharClassDict[charCreation.StartingClass];
-            string raceType = charCreation.CharRaceDict[charCreation.Race];
-            string sexType = charCreation.CharSexDict[charCreation.Gender];
+            string humType = CharacterUtilities.HumTypeDict[charCreation.HumTypeNum];
+            string classType = CharacterUtilities.CharClassDict[charCreation.StartingClass];
+            string raceType = CharacterUtilities.CharRaceDict[charCreation.Race];
+            string sexType = CharacterUtilities.CharSexDict[charCreation.Gender];
 
             //Calculate total TP used among all stats for DB storage
             int UsedTP = charCreation.AddStrength + charCreation.AddStamina + charCreation.AddAgility + charCreation.AddDexterity + charCreation.AddWisdom + charCreation.AddIntelligence

@@ -4,11 +4,6 @@ using System.Text;
 using System.Buffers.Binary;
 using System.IO;
 
-using System.Net;
-using System.Net.Sockets;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-
 using ReturnHome.Utilities;
 using ReturnHome.Database.SQL;
 using ReturnHome.AccountAction;
@@ -82,7 +77,7 @@ namespace ReturnHome.Opcodes
 
             if (message == "!c")
             {
-                MySession.coordToggle ^= true;
+                MySession.CoordinateUpdate();
             }
             if (message == "!o")
             {
@@ -294,7 +289,13 @@ namespace ReturnHome.Opcodes
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
 
             SessionQueueMessages.PackMessage(MySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
-            
+
+            //At this point, character should be loading in game, so we would want to get them added to the Player List and receiving any updates
+            MySession.inGame = true;
+
+            //Put player into channel 0?
+            MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);
+
             //Add player to world player list queue
             IgnoreList(MySession);
             ActorSpeed(MySession);
@@ -773,7 +774,7 @@ namespace ReturnHome.Opcodes
         public static void ActorSpeed(Session MySession, float speed)
         {
             int offset = 0;
-            Memory<byte> temp = new byte[3];
+            Memory<byte> temp = new byte[6];
             Span<byte> Message = temp.Span;
 
             Message.Write(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed), ref offset);

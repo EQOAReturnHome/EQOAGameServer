@@ -6,7 +6,7 @@ using System;
 
 namespace ReturnHome.Server.Network
 {
-    public class ClientUpdate
+    public class ClientObjectUpdate
     {
         public ushort BaseXorMessage { get; set; } = 0;
         private Memory<byte> BaseClientUpdate { get; set; }

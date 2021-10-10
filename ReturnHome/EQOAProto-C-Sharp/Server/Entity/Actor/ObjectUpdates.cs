@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Text;
-using ReturnHome.PacketProcessing;
+
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Entity.Actor
@@ -9,144 +8,141 @@ namespace ReturnHome.Server.Entity.Actor
     public static class ObjectUpdate
     {
         //This will be our class for storing our C9 object updates that will go out to clients
-        public static byte[] GatherObjectUpdate(Character myCharacter, uint objectID)
+        public static Memory<byte> SerializeClientUpdate(Character character)
         {
-            using (MemoryStream stream = new MemoryStream())
-            using (BinaryWriter writer = new BinaryWriter(stream))
-            {
-                ThreeByteInt Xcoord = (int)(myCharacter.XCoord * 128.0f);
-                ThreeByteInt Ycoord = (int)(myCharacter.YCoord * 128.0f);
-                ThreeByteInt Zcoord = (int)(myCharacter.ZCoord * 128.0f);
+            int offset = 0;
+            Memory<byte> characterSerialize = new Memory<byte>(new byte[0xC9]);
+            Span<byte> temp = characterSerialize.Span;
 
-                //Active or not
-                writer.Write((byte)1);
-                writer.Write(objectID);
-                //not sure
-                writer.Write((byte)0x82);
-                //XCoord
-                writer.Write(Xcoord.byte2);
-                writer.Write(Xcoord.byte1);
-                writer.Write(Xcoord.byte0);
-                //YCoord
-                writer.Write(Ycoord.byte2);
-                writer.Write(Ycoord.byte1);
-                writer.Write(Ycoord.byte0);
-                //ZCoord
-                writer.Write(Zcoord.byte2);
-                writer.Write(Zcoord.byte1);
-                writer.Write(Zcoord.byte0);
-                writer.Write((byte)(myCharacter.Facing / 0.024543693));
-                writer.Write(myCharacter.FirstPerson);
-                writer.Write((byte)myCharacter.World);
-                //Kill time
-                writer.Write((long)0);
-                //Hp Flag?
-                writer.Write((byte)1);
-                writer.Write((byte)0xFF); //Formula to calculate this byte I believe (((float)myCharacter.MaxHP / myCharacter.CurrentHP) * 255));
-                writer.Write(myCharacter.ModelID);
-                //Upgraded model ID?
-                writer.Write(0);
-                writer.Write(myCharacter.ModelSize);
-                //XOffset
-                writer.Write((short)0);
-                //ZOffset
-                writer.Write((short)0);
-                //unk
-                writer.Write((byte)0);
-                //East/West
-                writer.Write((byte)0);
-                //Direction
-                writer.Write((byte)0);
-                //North/South
-                writer.Write((byte)0);
-                writer.Write(myCharacter.Turning);
-                //Down/Up? Camera stuff?
-                writer.Write((byte)0);
-                writer.Write(myCharacter.YCoord);
-                writer.Write(myCharacter.Facing);
-                writer.Write((byte)0); //Has to do with "animations", may need to explore this more  myCharacter.Animation);
-                writer.Write(myCharacter.Target);
-                //Another unk
-                writer.Write((short)0x0105);
-                //Additional unk
-                writer.Write((short)0);
-                writer.Write(myCharacter.Primary);
-                writer.Write(myCharacter.Secondary);
-                writer.Write(myCharacter.Shield);
-                //upgraded weapon graphics? Primary/Secondary/Shield
-                writer.Write(0);
-                writer.Write(0);
-                writer.Write(0);
-                //unk again
-                writer.Write((short)0);
-                writer.Write(myCharacter.Chest);
-                writer.Write(myCharacter.Bracer);
-                writer.Write(myCharacter.Gloves);
-                writer.Write(myCharacter.Legs);
-                writer.Write(myCharacter.Boots);
-                writer.Write(myCharacter.Helm);
-                //vanilla stuff related to above, believe it's colors?
-                writer.Write((ushort)0xFFFF);
-                writer.Write((ushort)0xFFFF);
-                writer.Write((ushort)0xFFFF);
-                writer.Write((ushort)0xFFFF);
-                writer.Write((ushort)0xFFFF);
-                writer.Write((ushort)0xFFFF);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.ChestColor));
-                writer.Write((byte)0);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.BracerColor));
-                writer.Write((byte)0);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.GlovesColor));
-                writer.Write((byte)0);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.LegsColor));
-                writer.Write((byte)0);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.BootsColor));
-                writer.Write((byte)0);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.HelmColor));
-                writer.Write((byte)0);
-                writer.Write(ByteSwaps.SwapBytes(myCharacter.RobeColor));
-                writer.Write((byte)myCharacter.HairColor);
-                writer.Write((byte)myCharacter.HairLength);
-                writer.Write((byte)myCharacter.HairStyle);
-                writer.Write((byte)myCharacter.FaceOption);
-                writer.Write((byte)myCharacter.Robe);
-                //unk
-                writer.Write(5);
-                //unk
-                writer.Write((byte)0);
-                writer.Write(Encoding.UTF8.GetBytes(myCharacter.CharName));
-                for (int i = 0;  i < (24 - myCharacter.CharName.Length); i++)
-                {
-                    writer.Write((byte)0);
-                }
-                writer.Write((byte)myCharacter.Level);
-                //movement
-                writer.Write((byte)1);
-                //conflag
-                writer.Write((byte)2);
-                //nameplate
-                writer.Write((byte)0);
-                writer.Write((byte)myCharacter.Race);
-                writer.Write((byte)myCharacter.TClass);
-                //npctype?
-                writer.Write((short)0);
-                writer.Write(0xFFFFFFFF);
-                //unk
-                writer.Write((byte)0);
-                //unk
-                writer.Write((byte)0x1F);
-                //If target has invis/poison?
-                writer.Write((byte)0);
-                //unk
-                writer.Write((byte)0);
-                //unk
-                writer.Write((byte)1);
-                //unk
-                writer.Write((byte)0);
-                writer.Write(Encoding.UTF8.GetBytes("tsrq"));
+            //Seems to indicate if channel is changing
+            temp.Write((byte)1, ref offset);
 
-                return stream.ToArray();
-            }
+            //Ties this update channel and client together, based on the SessionID
+            temp.Write(character.characterSession.SessionID, ref offset);
+
+            //Unsure what this really does
+            temp.Write((byte)0x82, ref offset);
+
+            //Writes 3byte x coordinate
+            temp.Write3Bytes((uint)(character.XCoord * 128.0f), ref offset);
+
+            //Writes 3byte y coordinate
+            temp.Write3Bytes((uint)(character.YCoord * 128.0f), ref offset);
+
+            //Writes 3byte z coordinate
+            temp.Write3Bytes((uint)(character.ZCoord * 128.0f), ref offset);
+
+            //Facing
+            temp.Write((byte)(character.Facing / 0.024543693), ref offset);
+            temp.Write(character.FirstPerson, ref offset);
+            temp.Write((byte)character.World, ref offset);
+            //Kill time
+            temp.Write((long)0, ref offset);
+            //Hp Flag?
+            temp.Write((byte)1, ref offset);
+            temp.Write((byte)0xFF, ref offset); //Formula to calculate this byte I believe (((float)character.MaxHP / character.CurrentHP) * 255), ref offset);
+            temp.Write(character.ModelID, ref offset);
+            //Upgraded model ID?
+            temp.Write(0, ref offset);
+            temp.Write(character.ModelSize, ref offset);
+            //XOffset
+            temp.Write((short)0, ref offset);
+            //ZOffset
+            temp.Write((short)0, ref offset);
+            //unk
+            temp.Write((byte)0, ref offset);
+            //East/West
+            temp.Write((byte)0, ref offset);
+            //Direction
+            temp.Write((byte)0, ref offset);
+            //North/South
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.Turning, ref offset);
+            //Down/Up? Camera stuff?
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.YCoord, ref offset);
+            temp.Write(character.Facing, ref offset);
+            temp.Write((byte)0, ref offset); //Has to do with "animations", may need to explore this more  character.Animation, ref offset);
+            temp.Write(character.Target, ref offset);
+            //Another unk
+            temp.Write((short)0x0105, ref offset);
+            //Additional unk
+            temp.Write((short)0, ref offset);
+            temp.Write(character.Primary, ref offset);
+            temp.Write(character.Secondary, ref offset);
+            temp.Write(character.Shield, ref offset);
+            //upgraded weapon graphics? Primary/Secondary/Shield
+            temp.Write(0, ref offset);
+            temp.Write(0, ref offset);
+            temp.Write(0, ref offset);
+            //unk again
+            temp.Write((short)0, ref offset);
+            temp.Write(character.Chest, ref offset);
+            temp.Write(character.Bracer, ref offset);
+            temp.Write(character.Gloves, ref offset);
+            temp.Write(character.Legs, ref offset);
+            temp.Write(character.Boots, ref offset);
+            temp.Write(character.Helm, ref offset);
+            //vanilla stuff related to above, believe it's colors?
+            temp.Write((ushort)0xFFFF, ref offset);
+            temp.Write((ushort)0xFFFF, ref offset);
+            temp.Write((ushort)0xFFFF, ref offset);
+            temp.Write((ushort)0xFFFF, ref offset);
+            temp.Write((ushort)0xFFFF, ref offset);
+            temp.Write((ushort)0xFFFF, ref offset);
+            temp.Write(character.ChestColor, ref offset);
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.BracerColor, ref offset);
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.GlovesColor, ref offset);
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.LegsColor, ref offset);
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.BootsColor, ref offset);
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.HelmColor, ref offset);
+            temp.Write((byte)0, ref offset);
+            temp.Write(character.RobeColor, ref offset);
+            temp.Write((byte)character.HairColor, ref offset);
+            temp.Write((byte)character.HairLength, ref offset);
+            temp.Write((byte)character.HairStyle, ref offset);
+            temp.Write((byte)character.FaceOption, ref offset);
+            temp.Write((byte)character.Robe, ref offset);
+            //unk
+            temp.Write(5, ref offset);
+            //unk
+            temp.Write((byte)0, ref offset);
+            temp.Write(Encoding.UTF8.GetBytes(character.CharName), ref offset);
+            temp.Write(new byte[24 - character.CharName.Length], ref offset);
+
+            temp.Write((byte)character.Level, ref offset);
+            //movement
+            temp.Write((byte)1, ref offset);
+            //conflag
+            temp.Write((byte)2, ref offset);
+            //nameplate
+            temp.Write((byte)0, ref offset);
+            temp.Write((byte)character.Race, ref offset);
+            temp.Write((byte)character.TClass, ref offset);
+            //npctype?
+            temp.Write((short)0, ref offset);
+            temp.Write(0xFFFFFFFF, ref offset);
+            //unk
+            temp.Write((byte)0, ref offset);
+            //unk
+            temp.Write((byte)0x1F, ref offset);
+            //If target has invis/poison?
+            temp.Write((byte)0, ref offset);
+            //unk
+            temp.Write((byte)0, ref offset);
+            //unk
+            temp.Write((byte)1, ref offset);
+            //unk
+            temp.Write((byte)0, ref offset);
+            temp.Write(Encoding.UTF8.GetBytes("tsrq"), ref offset);
+
+            Console.WriteLine(offset);
+            return characterSerialize;
         }
     }
 }

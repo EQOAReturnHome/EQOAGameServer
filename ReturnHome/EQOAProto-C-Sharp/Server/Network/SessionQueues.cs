@@ -23,8 +23,10 @@ namespace ReturnHome.Server.Network
 		
         public void Add(MessageStruct thisMessage)
         {
+            byte messageType = thisMessage.Message.Span[0];
+
             //If it is a reliable message type
-            if (thisMessage.Message.Span[0] == MessageOpcodeTypes.ShortReliableMessage || thisMessage.Message.Span[0] == MessageOpcodeTypes.PingMessage || thisMessage.Message.Span[0] == MessageOpcodeTypes.MultiShortReliableMessage)
+            if (messageType == MessageOpcodeTypes.ShortReliableMessage || messageType == MessageOpcodeTypes.PingMessage || messageType == MessageOpcodeTypes.MultiShortReliableMessage)
             {
                 OutGoingReliableMessageQueue.Enqueue(thisMessage);
             }
@@ -77,25 +79,6 @@ namespace ReturnHome.Server.Network
             //Resend queue is not needed here since we loop it back into the reliable queue on the check
             while (messageLength < _session.rdpCommOut.maxSize)
             {
-                //process unreliable messages
-                if (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
-                {
-                    if ((messageLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
-                    {
-                        if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
-                        {
-                            //Place message into outgoing message
-                            messageList.Add(reliableMessage.Message);
-                            messageLength += reliableMessage.Message.Length;
-                            _session.RdpMessage = true;
-                            continue;
-                        }
-                    }
-
-                    else
-                        return (messageLength, messageList);
-                }
-
                 //Process reliable messages
                 if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp2))
                 {
@@ -131,6 +114,25 @@ namespace ReturnHome.Server.Network
                                     Logger.Err($"Error occured adding or updating Message #{reliableMessage.Messagenumber} for session {_session.rdpCommIn.clientID.ToString("X")}");
                                     //Log an error here?
                             }
+                        }
+                    }
+
+                    else
+                        return (messageLength, messageList);
+                }
+
+                //process unreliable messages
+                if (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
+                {
+                    if ((messageLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
+                    {
+                        if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                        {
+                            //Place message into outgoing message
+                            messageList.Add(reliableMessage.Message);
+                            messageLength += reliableMessage.Message.Length;
+                            _session.RdpMessage = true;
+                            continue;
                         }
                     }
 

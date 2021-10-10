@@ -189,44 +189,57 @@ namespace ReturnHome.Utilities
         #endregion
 
         #region Write Little Endian
-		
-		public static void Write(this ref Span<byte> span, byte data, ref int offset)
-		{
-			span[offset++] = data;
-		}
-		
-		public static void Write(this ref Span<byte> span, short data, ref int offset)
+
+        public static void Write(this ref Span<byte> span, byte data, ref int offset)
         {
-            MemoryMarshal.Write(span[offset..], ref data);
-            offset += 2;
-		}
-		
-		public static void Write(this ref Span<byte> span, ushort data, ref int offset)
+            span[offset++] = data;
+        }
+
+        public static void Write(this ref Span<byte> span, short data, ref int offset)
         {
             MemoryMarshal.Write(span[offset..], ref data);
             offset += 2;
         }
-		
-		public static void Write(this ref Span<byte> span, int data, ref int offset)
+
+        public static void Write(this ref Span<byte> span, ushort data, ref int offset)
+        {
+            MemoryMarshal.Write(span[offset..], ref data);
+            offset += 2;
+        }
+
+        public static void Write(this ref Span<byte> span, int data, ref int offset)
         {
             MemoryMarshal.Write(span[offset..], ref data);
             offset += 4;
         }
-		
-		public static void Write(this ref Span<byte> span, uint data, ref int offset)
+
+        public static void Write(this ref Span<byte> span, uint data, ref int offset)
         {
             MemoryMarshal.Write(span[offset..], ref data);
             offset += 4;
         }
-		
-		public static void Write(this ref Span<byte> span, long data, ref int offset)
+
+        public static void Write3Bytes(this ref Span<byte> span, uint data, ref int offset)
+        {
+            span[offset++] = (byte)((data & 0xFF0000) >> 16);
+            span[offset++] = (byte)((data & 0xFF00) >> 8);
+            span[offset++] = (byte)((data & 0xFF));
+        }
+
+        public static void Write(this ref Span<byte> span, float data, ref int offset)
+        {
+            MemoryMarshal.Write(span[offset..], ref data);
+            offset += 4;
+        }
+
+        public static void Write(this ref Span<byte> span, long data, ref int offset)
         {
             MemoryMarshal.Write(span[offset..], ref data);
             offset += 8;
         }
-		
-		public static void Write(this ref Span<byte> span, ulong data, ref int offset)
-		{
+
+        public static void Write(this ref Span<byte> span, ulong data, ref int offset)
+        {
             MemoryMarshal.Write(span[offset..], ref data);
             offset += 8;
         }
@@ -236,15 +249,33 @@ namespace ReturnHome.Utilities
             span2.Span.CopyTo(span[offset..(offset + span2.Length)]);
             offset += span2.Length;
         }
-		
+
+        public static void Write(this ref Span<byte> span, Memory<byte> span2, ref int offset)
+        {
+            span2.Span.CopyTo(span[offset..(offset + span2.Length)]);
+            offset += span2.Length;
+        }
+
+        public static void Write(this ref Span<byte> span, ReadOnlySpan<byte> span2, ref int offset)
+        {
+            span2.CopyTo(span[offset..(offset + span2.Length)]);
+            offset += span2.Length;
+        }
+
+        public static void Write(this ref Span<byte> span, Span<byte> span2, ref int offset)
+        {
+            span2.CopyTo(span[offset..(offset + span2.Length)]);
+            offset += span2.Length;
+        }
+
         #endregion
 
         #region Write Big Endian
 
         #endregion
 
-		#region Read 7bit
-		
+        #region Read 7bit
+
         ///<summary>
         ///Takes an offset reads bytes till < 0x80. This allows values of unknown length to be read. Should not be bigger then an int
         ///See: "Variable Length Integers", Most significant Bit is an indicator if more bits to read, shifting remaining bits over
@@ -277,14 +308,14 @@ namespace ReturnHome.Utilities
             while (span[offset++] >= 0x80);
             return 0 == v % 2 ? v / 2 : ((v - 1) / 2) * -1;
         }
-		
-		#endregion
-		
-		#region Write7bit
-		
-		public static void Write7BitEncodedInt(this ref Span<byte> span, uint value, ref int offset)
-		{
-			do
+
+        #endregion
+
+        #region Write7bit
+
+        public static void Write7BitEncodedInt(this ref Span<byte> span, uint value, ref int offset)
+        {
+            do
             {
                 byte lower7bits = (byte)(value & 0x7f);
                 value >>= 7;
@@ -297,7 +328,7 @@ namespace ReturnHome.Utilities
                     span[offset++] = lower7bits;
                 }
             } while (value > 0);
-		}
+        }
 
         public static void Write7BitDoubleEncodedInt(this ref Span<byte> span, int val, ref int offset)
         {
@@ -341,10 +372,10 @@ namespace ReturnHome.Utilities
         ///</summary>
         public static void Write(this ref Span<byte> span, byte[] data, ref int offset)
         {
-			data.CopyTo(span[offset..(offset+data.Length)]);
-			offset += data.Length;
+            data.CopyTo(span[offset..(offset + data.Length)]);
+            offset += data.Length;
         }
-		
-		#endregion
-	}
+
+        #endregion
+    }
 }

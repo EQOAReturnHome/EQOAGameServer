@@ -22,6 +22,7 @@ namespace ReturnHome.Server.Network
         //Uncompress and process update
         private static void ProcessUnreliableClientUpdate(Session Mysession, PacketMessage message)
         {
+            Mysession.characterInWorld = true;
             int offset = 0;
             ReadOnlySpan<byte> ClientPacket = message.Data.Span;
 
@@ -49,6 +50,9 @@ namespace ReturnHome.Server.Network
                 //First 4029 means we are ingame
                 Mysession.inGame = true;
 
+                //Set new base message#, this will allow us to weed out messages trying to xor old base
+                Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
+
                 //Copy base message
                 Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);
 
@@ -72,6 +76,7 @@ namespace ReturnHome.Server.Network
                 Mysession.MyCharacter.Animation = ClientPacket.GetLEShort(ref offset);
 
                 Mysession.MyCharacter.Target = ClientPacket.GetLEInt(ref offset);
+                Mysession.objectUpdate = true;
             }
 
             else
@@ -88,11 +93,11 @@ namespace ReturnHome.Server.Network
                 Mysession.MyCharacter.World = temp2[offset++];
 
                 //This should match what we have stored for the character? Let's verify this?
-                Mysession.MyCharacter.XCoord = CoordinateConversions.ConvertXZToFloat(ClientPacket.GetLEUInt24(ref offset));
+                Mysession.MyCharacter.XCoord = CoordinateConversions.ConvertXZToFloat(temp2.GetLEUInt24(ref offset));
 
-                Mysession.MyCharacter.YCoord = CoordinateConversions.ConvertYToFloat(ClientPacket.GetLEUInt24(ref offset));
+                Mysession.MyCharacter.YCoord = CoordinateConversions.ConvertYToFloat(temp2.GetLEUInt24(ref offset));
 
-                Mysession.MyCharacter.ZCoord = CoordinateConversions.ConvertXZToFloat(ClientPacket.GetLEUInt24(ref offset));
+                Mysession.MyCharacter.ZCoord = CoordinateConversions.ConvertXZToFloat(temp2.GetLEUInt24(ref offset));
 
                 //Skip 12 bytes...
                 offset += 12;
@@ -100,12 +105,13 @@ namespace ReturnHome.Server.Network
 
                 //Skip 12 bytes...
                 offset += 12;
-                Mysession.MyCharacter.Animation = ClientPacket.GetLEShort(ref offset);
+                Mysession.MyCharacter.Animation = temp2.GetLEShort(ref offset);
 
-                Mysession.MyCharacter.Target = ClientPacket.GetLEInt(ref offset);
+                Mysession.MyCharacter.Target = temp2.GetLEInt(ref offset);
+                Mysession.objectUpdate = true;
             }
 
-            //MySession.Channel40Ack = true;
+            Mysession.clientUpdateAck = true;
         }
     }
 }
