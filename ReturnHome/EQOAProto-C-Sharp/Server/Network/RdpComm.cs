@@ -51,7 +51,7 @@ namespace ReturnHome.Server.Network
                 TimeoutTick = DateTime.UtcNow.AddSeconds(2).Ticks;
             else
                 TimeoutTick = DateTime.UtcNow.AddSeconds(45).Ticks;
-
+            _session.ResetPing();
             //Let's make sure this isn't a delayed packet etc.
             if (packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)
 				return;

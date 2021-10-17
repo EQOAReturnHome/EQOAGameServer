@@ -24,7 +24,7 @@ namespace ReturnHome.Opcodes
             { GameOpcode.SELECTED_CHAR, ProcessCharacterChanges },
             { GameOpcode.DelCharacter, ProcessDelChar },
             { GameOpcode.CreateCharacter, ProcessCreateChar },
-            { GameOpcode.ClientSayChat, ProcessChat },
+            { GameOpcode.ClientSayChat, ChatMessage.ProcessClientChat },
             { GameOpcode.RandomName, GenerateRandomName },
         };
 
@@ -68,84 +68,14 @@ namespace ReturnHome.Opcodes
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ProcessChat(Session MySession, PacketMessage ClientPacket)
-        {
-            int offset = 0;
-
-            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[0..]);
-            string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[4..(4 + messageLength * 2)]);
-
-            if (message == "!c")
-            {
-                MySession.CoordinateUpdate();
-            }
-            if (message == "!o")
-            {
-                MySession.unkOpcode ^= true;
-                if (MySession.unkOpcode)
-                {
-                    message = "Unknown opcode display is now on.";
-                }
-
-                else
-                {
-                    message = "Unknown opcode display is now off.";
-                }
-
-                Memory<byte> temp = new Memory<byte>(new byte[2 + 4 + (message.Length * 2)]);
-                Span<byte> Message = temp.Span;
-                Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-                Message.Write(message.Length, ref offset);
-                Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
-
-                //Send Message
-                SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-            }
-
-            if (message.Substring(0, 2) == "!s")
-            {
-                float speed;
-                try
-                {
-                    speed = float.Parse(message.Substring(3, messageLength - 3));
-                }
-
-                catch
-                {
-                    message = "Not a valid value for speed";
-
-                    Memory<byte> temp = new Memory<byte>(new byte[2 + 4 + (message.Length * 2)]);
-                    Span<byte> Message = temp.Span;
-
-                    Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-                    Message.Write(message.Length, ref offset);
-                    Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
-
-                    //Send Message
-                    SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-                    return;
-                }
-
-                ActorSpeed(MySession, speed);
-            }
-        }
-
         public static void ClientOpcodeUnknown(Session MySession, ushort opcode)
         {
             if (MySession.unkOpcode)
             {
                 int offset = 0;
-                string theMessage = $"Unknown Opcode: {opcode.ToString("X")}";
+                string message = $"Unknown Opcode: {opcode.ToString("X")}";
 
-                Memory<byte> temp = new Memory<byte>(new byte[2 + 4 + (theMessage.Length * 2)]);
-                Span<byte> Message = temp.Span;
-
-                Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-                Message.Write(theMessage.Length, ref offset);
-                Message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
-
-                //Send Message
-                SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                ChatMessage.GenerateClientSpecificChat(MySession, message);
             }
         }
 
@@ -294,7 +224,7 @@ namespace ReturnHome.Opcodes
             SessionQueueMessages.PackMessage(MySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
 
             //At this point, character should be loading in game, so we would want to get them added to the Player List and receiving any updates
-            MySession.inGame = true;
+            //MySession.inGame = true;
 
             //Put player into channel 0?
             MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);

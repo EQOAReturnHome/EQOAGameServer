@@ -6,6 +6,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Entity.Actor;
 using System.Runtime.CompilerServices;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.Network
 {
@@ -46,9 +47,6 @@ namespace ReturnHome.Server.Network
             //First 0x4029 from client
             if (message.Header.XorByte == 0)
             {
-                //Would likely need some checks here eventually? Shouldn't blindly trust client
-                //First 4029 means we are ingame
-                Mysession.inGame = true;
 
                 //Set new base message#, this will allow us to weed out messages trying to xor old base
                 Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
@@ -77,6 +75,21 @@ namespace ReturnHome.Server.Network
 
                 Mysession.MyCharacter.Target = ClientPacket.GetLEInt(ref offset);
                 Mysession.objectUpdate = true;
+
+                //Would likely need some checks here eventually? Shouldn't blindly trust client
+                //First 4029 means we are ingame
+                if (!Mysession.inGame)
+                {
+                    PlayerManager.AddPlayer(Mysession.MyCharacter);
+                    MapManager.AddPlayerToTree(Mysession.MyCharacter);
+                    Mysession.inGame = true;
+                }
+
+                else
+                {
+                    Mysession.MyCharacter.UpdatePosition();
+                    MapManager.UpdatePosition(Mysession.MyCharacter);
+                }
             }
 
             else
@@ -109,6 +122,9 @@ namespace ReturnHome.Server.Network
 
                 Mysession.MyCharacter.Target = temp2.GetLEInt(ref offset);
                 Mysession.objectUpdate = true;
+
+                Mysession.MyCharacter.UpdatePosition();
+                MapManager.UpdatePosition(Mysession.MyCharacter);
             }
 
             Mysession.clientUpdateAck = true;

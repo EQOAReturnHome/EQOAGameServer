@@ -58,7 +58,7 @@ namespace ReturnHome.Server.Network
             if (Header.ProcessMessage)
             {
                 //Subtract 4 from buffer length to account for removing CRC
-                while (offset != buffer.Length - 4)
+                while (offset < (buffer.Length - 4))
                 {
                     try
                     {

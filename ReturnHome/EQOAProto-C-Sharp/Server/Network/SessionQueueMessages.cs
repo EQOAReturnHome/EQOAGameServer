@@ -115,8 +115,7 @@ namespace ReturnHome.Server.Network
         {
             int offset = 0;
             //Do some magic to find which counter to apply, eventually add group, and both stat and buff messages to this
-            ushort messageCounter = (MessageOpcodeType >= 0x00 & MessageOpcodeType <= 0x17) ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter++ : 0;
-            byte xorByte = MessageOpcodeType == 0xC9 ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter == 0 ? 0 : (byte)(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter - session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter) : 0;
+            byte xorByte = (MessageOpcodeType >= 0x00 & MessageOpcodeType <= 0x17) ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter == 0 ? 0 : (byte)(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter - session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter) : 0;
 
             Memory<byte> temp = new Memory<byte>(new byte[(ClientMessage.Length > 255) ? 7 + ClientMessage.Length : 5 + ClientMessage.Length]);
             Span<byte> WholeClientMessage = temp.Span;
@@ -127,9 +126,9 @@ namespace ReturnHome.Server.Network
                 WholeClientMessage.Write((ushort)ClientMessage.Length, ref offset);
 
                 //Need some way to distinguish which channel message coutner to use here?
-                WholeClientMessage.Write(messageCounter, ref offset);
+                WholeClientMessage.Write(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter++, ref offset);
                 WholeClientMessage.Write(xorByte, ref offset);
-                WholeClientMessage.Write(Compression.CompressUnreliable(ClientMessage), ref offset);
+                WholeClientMessage.Write(Compression.runLengthEncode(ClientMessage), ref offset);
 
             }
 
@@ -139,9 +138,9 @@ namespace ReturnHome.Server.Network
                 WholeClientMessage.Write((byte)ClientMessage.Length, ref offset);
 
                 //Need some way to distinguish which channel message coutner to use here?
-                WholeClientMessage.Write(messageCounter, ref offset);
+                WholeClientMessage.Write(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter++, ref offset);
                 WholeClientMessage.Write(xorByte, ref offset);
-                WholeClientMessage.Write(Compression.CompressUnreliable(ClientMessage), ref offset);
+                WholeClientMessage.Write(Compression.runLengthEncode(ClientMessage), ref offset);
                 WholeClientMessage.Write((byte)0, ref offset);
 
             }

@@ -90,19 +90,19 @@ namespace ReturnHome.Server.Entity.Actor
             temp.Write((ushort)0xFFFF, ref offset);
             temp.Write((ushort)0xFFFF, ref offset);
             temp.Write((ushort)0xFFFF, ref offset);
-            temp.Write(character.ChestColor, ref offset);
+            temp.WriteBE(character.ChestColor, ref offset);
             temp.Write((byte)0, ref offset);
-            temp.Write(character.BracerColor, ref offset);
+            temp.WriteBE(character.BracerColor, ref offset);
             temp.Write((byte)0, ref offset);
-            temp.Write(character.GlovesColor, ref offset);
+            temp.WriteBE(character.GlovesColor, ref offset);
             temp.Write((byte)0, ref offset);
-            temp.Write(character.LegsColor, ref offset);
+            temp.WriteBE(character.LegsColor, ref offset);
             temp.Write((byte)0, ref offset);
-            temp.Write(character.BootsColor, ref offset);
+            temp.WriteBE(character.BootsColor, ref offset);
             temp.Write((byte)0, ref offset);
-            temp.Write(character.HelmColor, ref offset);
+            temp.WriteBE(character.HelmColor, ref offset);
             temp.Write((byte)0, ref offset);
-            temp.Write(character.RobeColor, ref offset);
+            temp.WriteBE(character.RobeColor, ref offset);
             temp.Write((byte)character.HairColor, ref offset);
             temp.Write((byte)character.HairLength, ref offset);
             temp.Write((byte)character.HairStyle, ref offset);
@@ -141,7 +141,6 @@ namespace ReturnHome.Server.Entity.Actor
             temp.Write((byte)0, ref offset);
             temp.Write(Encoding.UTF8.GetBytes("tsrq"), ref offset);
 
-            Console.WriteLine(offset);
             return characterSerialize;
         }
     }

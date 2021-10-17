@@ -96,21 +96,9 @@ namespace ReturnHome.Server.Network
         //This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
-            string theMessage = $"Coordinates: X-{MyCharacter.XCoord} Y-{MyCharacter.YCoord} Z-{MyCharacter.ZCoord}";
+            string message = $"Coordinates: X-{MyCharacter.XCoord} Y-{MyCharacter.YCoord} Z-{MyCharacter.ZCoord}";
 
-            //opcode length + string length definition
-            int length = 2 + 4 + (theMessage.Length * 2);
-            int offset = 0;
-
-            Memory<byte> temp = new Memory<byte>(new byte[length]);
-            Span<byte> Message = temp.Span;
-
-            Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-            Message.Write((byte)theMessage.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(theMessage), ref offset);
-			
-            //Send Message
-			SessionQueueMessages.PackMessage(this, temp, MessageOpcodeTypes.ShortReliableMessage);
+            ChatMessage.GenerateClientSpecificChat(this, message);
         }
 
         public void ResetPing()
@@ -173,7 +161,7 @@ namespace ReturnHome.Server.Network
                     i.GenerateUpdate();
             }
 
-            PendingTermination = inGame ? _pingCount >= 300 ? true : false : _pingCount >= 300 ? true : false;
+            PendingTermination = inGame ? _pingCount >= 300 ? true : false : _pingCount >= 4 ? true : false;
                 //Send a disconnect from server to client, then remove the session
                 //For now just remove the session
 

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using ReturnHome.Server.Entity.Actor;
 
 namespace ReturnHome.Server.Network
 {
@@ -40,6 +42,40 @@ namespace ReturnHome.Server.Network
 
             for (int i = 0; i < tempSpan.Length; i++)
                 tempSpan[i] = new(_session, (byte)i);
+        }
+
+        public void AddChannelObjects(List<Character> charList)
+        {
+            //Check if list is greater then ~24 characters
+
+            //If list is greater, remove farther characters
+
+            //Cross reference list against current channels, ensauring they all match or that characters are swapped around in the channel's array
+            Span<ServerObjectUpdate> temp = serverObjects.Span;
+            foreach(Character chara in charList)
+            {
+                bool ChannelExists = false;
+                for(int i = 0; i < temp.Length; i++)
+                {
+                    if (chara.CharName == temp[i].characterName)
+                    {
+                        ChannelExists ^= true;
+                        break;
+                    }
+                }
+
+                //If channel does not exist, find next available... or bump a character off. Just add to next available, for simplicity
+                if (!ChannelExists)
+                {
+                    for (int i = 0; i < temp.Length; i++)
+                    {
+                        if (temp[i].characterName == null)
+                        {
+                            temp[i].updateCharacter(chara);
+                        }
+                    }
+                }
+            }
         }
     }
 }

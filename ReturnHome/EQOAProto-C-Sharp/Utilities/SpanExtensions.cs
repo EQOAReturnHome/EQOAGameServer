@@ -207,6 +207,7 @@ namespace ReturnHome.Utilities
             offset += 2;
         }
 
+
         public static void Write(this ref Span<byte> span, int data, ref int offset)
         {
             MemoryMarshal.Write(span[offset..], ref data);
@@ -271,6 +272,58 @@ namespace ReturnHome.Utilities
         #endregion
 
         #region Write Big Endian
+
+        public static void WriteBE(this ref Span<byte> span, ushort data, ref int offset)
+        {
+            try
+            {
+                BinaryPrimitives.WriteUInt16BigEndian(span.Slice(offset, 2), data);
+            }
+
+            finally
+            {
+                offset += 2;
+            }
+        }
+
+        public static void WriteBE(this ref Span<byte> span, short data, ref int offset)
+        {
+            try
+            {
+                BinaryPrimitives.WriteInt16BigEndian(span.Slice(offset, 2), data);
+            }
+
+            finally
+            {
+                offset += 2;
+            }
+        }
+
+        public static void WriteBE(this ref Span<byte> span, int data, ref int offset)
+        {
+            try
+            {
+                BinaryPrimitives.WriteInt32BigEndian(span.Slice(offset, 4), data);
+            }
+
+            finally
+            {
+                offset += 4;
+            }
+        }
+
+        public static void WriteBE(this ref Span<byte> span, uint data, ref int offset)
+        {
+            try
+            {
+                BinaryPrimitives.WriteUInt32BigEndian(span.Slice(offset, 4), data);
+            }
+
+            finally
+            {
+                offset += 4;
+            }
+        }
 
         #endregion
 

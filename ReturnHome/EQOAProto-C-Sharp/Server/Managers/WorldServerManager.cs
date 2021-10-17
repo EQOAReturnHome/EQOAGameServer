@@ -29,27 +29,6 @@ namespace ReturnHome.Server.Managers
             thread.Start();
         }
 
-        /*
-        private async Task AddCharacters()
-        {
-            //Listen for new incoming connecting characters
-            while (await _chanReader.WaitToReadAsync())
-                while (_chanReader.TryRead(out Character item))
-                {
-                    _playerList.Add(item);
-                    Console.WriteLine($"{item.CharName} added to Player List");
-                }
-        }
-
-        public void CreateObjectUpdates()
-        {
-            foreach (Character i in _playerList)
-            {
-                i.DistributeUpdates();
-            }
-        }
-        */
-
         public async static void UpdateWorld()
         {
             gameTimer = new Stopwatch();

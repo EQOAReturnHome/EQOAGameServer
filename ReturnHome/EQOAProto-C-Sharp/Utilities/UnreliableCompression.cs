@@ -6,7 +6,7 @@ namespace ReturnHome.Utilities
     
     class Compression
     {
-        public static Memory<byte> CompressUnreliable(ReadOnlyMemory<byte> temp)
+        public static Memory<byte> runLengthEncode(ReadOnlyMemory<byte> temp)
         {
             ReadOnlySpan<byte> MyUnreliable = temp.Span;
             int length = MyUnreliable.Length;
@@ -28,21 +28,9 @@ namespace ReturnHome.Utilities
                     //Check if prior bytes were not null
                     if (thisReal > 0)
                     {
-                        //Need to add compression bytes
-                        //If either of these are true, need 2 byte compression
-                        if (thisReal > 7 || thisCompress > 15)
-                        {
-                            tempSpan[offset++] = (byte)(thisReal | 0x80);
-                            tempSpan[offset++] = (byte)thisCompress;
-                            tempSpan.Write(MyUnreliable[(i - thisReal)..i], ref offset);
-                        }
-
-                        //Single byte compression
-                        else
-                        {
-                            tempSpan[offset++] = (byte)((thisReal * 0x10) + thisCompress);
-                            tempSpan.Write(MyUnreliable[(i - thisReal)..i], ref offset);
-                        }
+                        tempSpan[offset++] = (byte)(thisReal | 0x80);
+                        tempSpan[offset++] = (byte)thisCompress;
+                        tempSpan.Write(MyUnreliable.Slice((i - thisReal), thisReal), ref offset);
 
                         //Reset counters
                         thisCompress = 0;
@@ -50,56 +38,17 @@ namespace ReturnHome.Utilities
                     }
 
                     thisCompress += 1;
-
-                    //check if this is the last value
-                    if (length - 1 == i)
-                    {
-                        //Compress remaining bytes and stuff....
-                        //Need to add compression bytes
-                        //If either of these are true, need 2 byte compression
-                        if (thisReal > 7 || thisCompress > 15)
-                        {
-                            tempSpan[offset++] = (byte)(thisReal | 0x80);
-                            tempSpan[offset++] = (byte)thisCompress;
-                            tempSpan.Write(MyUnreliable[(i - thisReal)..i], ref offset);
-                        }
-
-                        //Single byte compression
-                        else
-                        {
-                            tempSpan[offset++] = (byte)((thisReal * 0x10) + thisCompress);
-                            tempSpan.Write(MyUnreliable[(i - thisReal)..i], ref offset);
-                        }
-                    }
+                    continue;
                 }
 
                 //Real byte
-                else
-                {
-                    thisReal += 1;
-
-                    //check if this is the last value
-                    if (length - 1 == i)
-                    {
-                        //Compress remaining bytes and stuff....
-                        //Need to add compression bytes
-                        //If either of these are true, need 2 byte compression
-                        if (thisReal > 7 || thisCompress > 15)
-                        {
-                            tempSpan[offset++] = (byte)(thisReal | 0x80);
-                            tempSpan[offset++] = (byte)thisCompress;
-                            tempSpan.Write(MyUnreliable[(i - thisReal)..(i+1)], ref offset);
-                        }
-
-                        //Single byte compression
-                        else
-                        {
-                            tempSpan[offset++] = (byte)((thisReal * 0x10) + thisCompress);
-                            tempSpan.Write(MyUnreliable[(i - thisReal)..(i+1)], ref offset);
-                        }
-                    }
-                }
+                thisReal += 1;
             }
+
+            tempSpan[offset++] = (byte)(thisReal | 0x80);
+            tempSpan[offset++] = (byte)thisCompress;
+            if (thisReal != 0)
+                tempSpan.Write(MyUnreliable.Slice((length - thisReal), thisReal), ref offset);
 
             //Return the memory that was written too
             return tempMem.Slice(0, offset);

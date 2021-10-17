@@ -5,11 +5,20 @@ using System.Text;
 using ReturnHome.Playercharacter.Actor;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
+using QuadTrees.QTreePointF;
+using System.Drawing;
 
 namespace ReturnHome.Server.Entity.Actor
 {
-    public class Character
+    public class Character : IPointFQuadStorable
     {
+        private PointF _point;
+
+        public PointF Point
+        {
+            get { return _point; }
+        }
+
         //List to hold gear values for model, color, and equip location
         public List<Tuple<uint, uint, byte>> GearList = new List<Tuple<uint, uint, byte>>();
 
@@ -164,6 +173,7 @@ namespace ReturnHome.Server.Entity.Actor
             int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2, int baseHP, int currentPower2, int basePower,
             int healOT2, int powerOT2, Session MySession)
         {
+            _point = new PointF(xCoord, zCoord);
             CharName = charName;
             ServerID = serverID;
             ModelID = modelID;
@@ -378,7 +388,12 @@ namespace ReturnHome.Server.Entity.Actor
                 }
             }
         }
-        
+
+        public void UpdatePosition()
+        {
+            _point = new PointF(XCoord, ZCoord);
+        }
+
         public void DistributeUpdates()
         {
 
