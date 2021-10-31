@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Text;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Server.Entity.Actor
+namespace ReturnHome.Server.EntityObject.Player
 {
+  //
     public class Spell
     {
         public int SpellID { get; private set; }
@@ -32,8 +32,9 @@ namespace ReturnHome.Server.Entity.Actor
         { }
 
         //Will instantiate a spell object
-        public Spell(int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide, int thisAbilityLevel, int thisUnk2, int thisUnk3,
-                     float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
+        //Alot of this probably should move to some kind of scripting? Alot of repetitive data here on a per object instance basis, that could be maximized by scripting
+        //Only items really needed are (int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide) rest of data could be acquired from scripting
+        public Spell(int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide, int thisAbilityLevel, int thisUnk2, int thisUnk3, float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;

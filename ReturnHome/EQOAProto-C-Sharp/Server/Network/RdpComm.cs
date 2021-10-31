@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 using ReturnHome.Database.SQL;
 using ReturnHome.Opcodes;
-using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Utilities;
@@ -54,7 +54,10 @@ namespace ReturnHome.Server.Network
             _session.ResetPing();
             //Let's make sure this isn't a delayed packet etc.
             if (packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)
-				return;
+                //If this bundle number is 0x0000, we are just recycling through the counter, so don't return
+                if (!(packet.Header.ClientBundleNumber == 0x0000))
+                    return;
+            
 			
 			connectionData.lastReceivedPacketSequence = packet.Header.ClientBundleNumber;
 			
@@ -316,7 +319,7 @@ namespace ReturnHome.Server.Network
             }
 
             //If _value is over 0x3000, means the header info should be 3 bytes. is _value is 0, header will be the packet length using variable length integer.... So will have to rethink this a little bit eventually
-            byte temp = _value > 0x3000 ? 3 : 2;
+            byte temp = _value > 0x3000 ? (byte)3 : (byte)2;
             totalLength += temp;
             _headerLength += temp;
 			

@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
 using System.IO;
 
-namespace ReturnHome.Playercharacter.Actor
+namespace ReturnHome.Server.EntityObject.Player
 {
     public class Auction
     {

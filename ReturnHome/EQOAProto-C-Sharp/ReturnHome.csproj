@@ -13,6 +13,14 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Server\NewFolder1\**" />
+    <Compile Remove="Server\NewFolder\**" />
+    <EmbeddedResource Remove="Server\NewFolder1\**" />
+    <EmbeddedResource Remove="Server\NewFolder\**" />
+    <None Remove="Server\NewFolder1\**" />
+    <None Remove="Server\NewFolder\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>

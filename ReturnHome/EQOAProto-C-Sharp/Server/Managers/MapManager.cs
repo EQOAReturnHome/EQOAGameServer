@@ -2,26 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using QuadTrees;
-using ReturnHome.Server.Entity.Actor;
-using ReturnHome.Server.Network;
+using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Managers
 {
     public static class MapManager
     {
-        private static QuadTreePointF<Character> qtree = new QuadTreePointF<Character>(new RectangleF(25000.0f, 15000.0f, 2000.0f, 2000.0f));
-        private static List<Character> treeQueue = new List<Character>();
+        private static QuadTreePointF<Entity> qtree = new QuadTreePointF<Entity>(new RectangleF(25000.0f, 15000.0f, 2000.0f, 2000.0f));
+        private static List<Entity> treeQueue = new List<Entity>();
+        private static List<Entity> treeRemoveQueue = new List<Entity>();
 
-        public static void AddPlayerToTree(Character character)
+        public static void AddPlayerToTree(Entity entity)
         {
             //Should this queue players to be added simulataneously, instead of individual add's? Probably.
-            treeQueue.Add(character);
+            treeQueue.Add(entity);
         }
 
         public static void BulkAddPlayers()
@@ -33,32 +33,48 @@ namespace ReturnHome.Server.Managers
         public static void QueryNearbyPlayers()
         {
             
-            List<Character> charList = new List<Character>();
-            foreach (Character character in qtree.GetAllObjects())
+            List<Entity> charList = new List<Entity>();
+            foreach (Entity entity in qtree.GetAllObjects())
             {
-                qtree.GetObjects(new RectangleF(character.XCoord - 50.0f, character.ZCoord - 50.0f, 100.0f, 100.0f), charList);
+                qtree.GetObjects(new RectangleF(entity.x - 50.0f, entity.z - 50.0f, 100.0f, 100.0f), charList);
 
                 //Sort Character List
-                charList = charList.OrderBy(x => Vector2.Distance(new Vector2(character.XCoord, character.ZCoord), new Vector2(x.XCoord, x.ZCoord))).ToList();
+                charList = charList.OrderBy(x => Vector2.Distance(new Vector2(entity.x, entity.z), new Vector2(x.x, x.z))).ToList();
 
                 //Test order
                 //Console.Write($"List for {character.CharName}: ");
                 //foreach(Character i in charList)
-                    //Console.WriteLine($"{i.CharName} - Distance: {Vector2.Distance(new Vector2(character.XCoord, character.ZCoord), new Vector2(i.XCoord, i.ZCoord))}");
+                //Console.WriteLine($"{i.CharName} - Distance: {Vector2.Distance(new Vector2(character.XCoord, character.ZCoord), new Vector2(i.XCoord, i.ZCoord))}");
                 //Console.WriteLine();
 
                 //if(charList.Count > 23)
-                    //charList.RemoveRange(23, charList.Count - 23);
-                character.characterSession.rdpCommIn.connectionData.AddChannelObjects(charList);
+                //charList.RemoveRange(23, charList.Count - 23);
+                ((Character)entity).characterSession.rdpCommIn.connectionData.AddChannelObjects(charList);
                 charList.Clear();
 
             }
             
         }
 
-        public static void UpdatePosition(Character character)
+        public static void UpdatePosition(Entity entity)
         {
-            qtree.Move(character);
+            qtree.Move(entity);
+        }
+
+        /*
+        public static void BulkRemovePlayers()
+        {
+            for(int i = 0; i < treeRemoveQueue.Count; i++)
+        }
+        */
+
+        public static void RemovePlayerFromTree(Entity entity)
+        {
+            if (entity == null)
+                return;
+
+            qtree.Remove(entity);
+            Console.WriteLine($"Removed: {entity.CharName}");
         }
 
 

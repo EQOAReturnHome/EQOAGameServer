@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Text;
+
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Server.Entity.Actor
+namespace ReturnHome.Server.EntityObject.Player
 {
     public class Item
     {
@@ -62,8 +62,6 @@ namespace ReturnHome.Server.Entity.Actor
         public int CR { get; private set; }
         public int LR { get; private set; }
         public int AR { get; private set; }
-        private List<byte> ourMessage = new List<byte> { };
-        private List<byte> ourStats = new List<byte> { };
 
         //Stat counter
         private int Counter;
@@ -75,8 +73,7 @@ namespace ReturnHome.Server.Entity.Actor
         //This will instantiate an inventory object
         //Should we be able to instantiate a normal item and gear seperately? Seems the better choice
         //This is to instantiate 
-        public Item(int thisStacksLeft, int thisCharges, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, 
-                         int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc)
+        public Item(int thisStacksLeft, int thisCharges, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -97,10 +94,9 @@ namespace ReturnHome.Server.Entity.Actor
         }
 
         //Constructor object for armour and weapons
-        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisEquipslot,
-                         int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc,
-                         int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim, int Strength, int Stamina, int Agility, int Dexterity, int Wisdom, int Intelligence, int Charisma, int HpMax, int PowMax, 
-                         int pot, int hot, int ac, int pr, int dr, int fr, int cr, int lr, int ar, int model, uint color)
+        //Alot of this could be managed by scripting as there is a huge portion that is static
+        //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID, int thisItemCost, int thisItemIcon, int thisEquipslot, int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim, int Strength, int Stamina, int Agility, int Dexterity, int Wisdom, int Intelligence, int Charisma, int HpMax, int PowMax, int pot, int hot, int ac, int pr, int dr, int fr, int cr, int lr, int ar, int model, uint color)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -154,7 +150,6 @@ namespace ReturnHome.Server.Entity.Actor
             AR = ar;
         }
 
-        
         public void DumpItem(MemoryStream memStream)
         {
             //Start adding attributes to list for this item

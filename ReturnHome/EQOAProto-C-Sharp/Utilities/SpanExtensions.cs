@@ -195,6 +195,11 @@ namespace ReturnHome.Utilities
             span[offset++] = data;
         }
 
+        public static void Write(this ref Span<byte> span, sbyte data, ref int offset)
+        {
+            span[offset++] = (byte)data;
+        }
+
         public static void Write(this ref Span<byte> span, short data, ref int offset)
         {
             MemoryMarshal.Write(span[offset..], ref data);

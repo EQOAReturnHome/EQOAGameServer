@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Text;
+
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Playercharacter.Actor
+namespace ReturnHome.Server.EntityObject.Player
 {
     public class Hotkey
     {
@@ -17,11 +17,6 @@ namespace ReturnHome.Playercharacter.Actor
         public string EMessage { get; private set; }
         public string SLabel { get; private set; }
         public string SMessage { get; private set; }
-        private List<byte> tempMessage = new List<byte> { };
-        private List<byte> ourMessage = new List<byte> { };
-
-
-
 
         public Hotkey()
         { }

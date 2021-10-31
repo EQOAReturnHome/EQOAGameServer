@@ -4,8 +4,8 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using ReturnHome.Server.Entity.Actor;
 using ReturnHome.Utilities;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network
 {
@@ -31,8 +31,8 @@ namespace ReturnHome.Server.Network
         private Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
 
         //Holds character to share object updates for
-        private Character _character;
-        public string characterName;
+        public Entity entity;
+        public string entityName;
 
         //should be needed for transferring continents, probably can get away on just doing character changes? Could also be an easy way to flip character in and out of a channel on the client
         private bool _resetChannel = false;
@@ -43,29 +43,29 @@ namespace ReturnHome.Server.Network
             ObjectChannel = objectChannel;
         }
 
-        public void AddObject(Character character)
+        public void AddObject(Entity entity1)
         {
-            _character = character;
-            characterName = _character.CharName;
+            entity = entity1;
+            entityName = entity.CharName;
         }
 
         public void GenerateUpdate()
         {
-            if (_character == null)
+            if (entity == null)
                 return;
 
             //See if character and current message has changed
-            if (!CompareObjects(baseXOR, _character.characterUpdate))
+            if (!CompareObjects(baseXOR, entity.characterUpdate))
             {
-                CoordinateConversions.Xor_data(temp, _character.characterUpdate, baseXOR, 0xC9);
+                CoordinateConversions.Xor_data(temp, entity.characterUpdate, baseXOR, 0xC9);
                 CurrentXORResults.Add(messageCounter, temp);
                 SessionQueueMessages.PackMessage(_session, temp, ObjectChannel);
             }
         }
 
-        public void updateCharacter(Character character)
+        public void updateCharacter(Entity entity1)
         {
-            _character = character;
+            entity = entity1;
             _resetChannel = true;
         }
 

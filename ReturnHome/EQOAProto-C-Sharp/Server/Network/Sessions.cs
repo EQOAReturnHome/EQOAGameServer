@@ -6,7 +6,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
-using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Network
 {
@@ -96,7 +96,7 @@ namespace ReturnHome.Server.Network
         //This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
-            string message = $"Coordinates: X-{MyCharacter.XCoord} Y-{MyCharacter.YCoord} Z-{MyCharacter.ZCoord}";
+            string message = $"Coordinates: X-{MyCharacter.x} Y-{MyCharacter.y} Z-{MyCharacter.z}";
 
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
@@ -131,7 +131,7 @@ namespace ReturnHome.Server.Network
             if (objectUpdate)
             {
                 //Cycle over objects to update for client, currently only updating client
-                MyCharacter.characterUpdate = ObjectUpdate.SerializeClientUpdate(MyCharacter);
+                MyCharacter.characterUpdate = MyCharacter.SerializeObjectUpdate(MyCharacter);
                 objectUpdate = false;
             }
 
@@ -161,7 +161,7 @@ namespace ReturnHome.Server.Network
                     i.GenerateUpdate();
             }
 
-            PendingTermination = inGame ? _pingCount >= 300 ? true : false : _pingCount >= 4 ? true : false;
+            PendingTermination = inGame ? _pingCount >= 50 ? true : false : _pingCount >= 10 ? true : false;
                 //Send a disconnect from server to client, then remove the session
                 //For now just remove the session
 
@@ -173,6 +173,7 @@ namespace ReturnHome.Server.Network
             if (!PendingTermination) return;
             //Eventually this would kick the player out of the world and save data/free resources
             // Remove character from Character List
+            MapManager.RemovePlayerFromTree(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             SessionManager.SessionHash.TryRemove(this);
         }

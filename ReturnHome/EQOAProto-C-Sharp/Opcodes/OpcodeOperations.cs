@@ -8,9 +8,8 @@ using ReturnHome.Utilities;
 using ReturnHome.Database.SQL;
 using ReturnHome.AccountAction;
 using ReturnHome.Server.Network;
-using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network.Managers;
-using ReturnHome.Playercharacter.Actor;
 
 namespace ReturnHome.Opcodes
 {
@@ -146,10 +145,10 @@ namespace ReturnHome.Opcodes
               }
 
               //Get Inventory Item count
-              memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.InventoryItems.Count));
-              memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.InventoryItems.Count));
+              memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.Inventory.Count));
+              memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.Inventory.Count));
 
-              foreach( Item i in MySession.MyCharacter.InventoryItems)
+              foreach( Item i in MySession.MyCharacter.Inventory)
               {
                   i.DumpItem(memStream);
               }
@@ -473,7 +472,7 @@ namespace ReturnHome.Opcodes
                 Message.Write7BitDoubleEncodedInt(character.ModelID, ref offset);
 
                 ///Add Class
-                Message.Write7BitDoubleEncodedInt(character.TClass, ref offset);
+                Message.Write7BitDoubleEncodedInt(character.Class, ref offset);
 
                 ///Add Race
                 Message.Write7BitDoubleEncodedInt(character.Race, ref offset);

@@ -27,6 +27,23 @@ namespace ReturnHome.Opcodes
             {
                 MySession.CoordinateUpdate();
             }
+
+            if(message.Substring(0, 2) == "!t")
+            {
+                if(ObjectAdminChecks.ProcessChanges(MySession, message.Split(' ')))
+                {
+                    //string[] words = message.Split(' ');
+                    message = "Completed processing request";
+                    GenerateClientSpecificChat(MySession, message);
+                }
+
+                else
+                {
+                    //string[] words = message.Split(' ');
+                    message = "Error Occured";
+                    GenerateClientSpecificChat(MySession, message);
+                }
+            }
             if (message == "!o")
             {
                 MySession.unkOpcode ^= true;

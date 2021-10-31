@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Playercharacter.Actor
+namespace ReturnHome.Server.EntityObject.Player
 {
     //Memory dump always expects 4 weapon hotbars, even if it's just "null"
     public class WeaponHotbar

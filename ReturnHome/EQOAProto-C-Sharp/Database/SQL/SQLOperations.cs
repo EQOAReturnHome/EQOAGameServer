@@ -2,14 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Configuration;
 using System.Linq;
 
-using ReturnHome.Playercharacter.Actor;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
-using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Database.SQL
 {
@@ -61,8 +59,6 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(9),
                     //faceoption
                     rdr.GetInt32(10),
-                    //classIcon
-                    rdr.GetInt32(11),
                     //totalXP
                     rdr.GetInt32(12),
                     //debt
@@ -274,7 +270,7 @@ namespace ReturnHome.Database.SQL
                 //If this is 1, it needs to go to inventory
                 if (ThisItem.Location == 1)
                 {
-                    thisChar.InventoryItems.Add(ThisItem);
+                    thisChar.Inventory.Add(ThisItem);
                 }
 
                 //If this is 2, it needs to go to the Bank
@@ -345,8 +341,6 @@ namespace ReturnHome.Database.SQL
                         rdr.GetInt32(9),
                         //faceoption
                         rdr.GetInt32(10),
-                        //classIcon
-                        rdr.GetInt32(11),
                         //totalXP
                         rdr.GetInt32(12),
                         //debt
@@ -560,7 +554,7 @@ namespace ReturnHome.Database.SQL
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
                     {
-                        selectedCharacter.InventoryItems.Add(ThisItem);
+                        selectedCharacter.Inventory.Add(ThisItem);
                     }
 
                     //If this is 2, it needs to go to the Bank
@@ -592,7 +586,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharSpells", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ObjectID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -654,7 +648,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharHotkeys", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ObjectID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -695,7 +689,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharWeaponHotbar", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ObjectID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -802,11 +796,11 @@ namespace ReturnHome.Database.SQL
             {
                 charCreation.Tunar = rdr.GetInt32(5);
                 charCreation.UnusedTP = rdr.GetInt32(7);
-                charCreation.TotalAssignableTP = rdr.GetInt32(8);
-                charCreation.XCoord = rdr.GetFloat(9);
-                charCreation.YCoord = rdr.GetFloat(10);
-                charCreation.ZCoord = rdr.GetFloat(11);
-                charCreation.Facing = rdr.GetFloat(12);
+                charCreation.MaxAssignableTP = rdr.GetInt32(8);
+                charCreation.x = rdr.GetFloat(9);
+                charCreation.y = rdr.GetFloat(10);
+                charCreation.z = rdr.GetFloat(11);
+                charCreation.FacingF = rdr.GetFloat(12);
                 charCreation.World = rdr.GetInt32(13);
                 charCreation.DefaultStrength = rdr.GetInt32(14);
                 charCreation.DefaultStamina = rdr.GetInt32(15);
@@ -858,9 +852,9 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.UnusedTP);
             SecondCmd.Parameters.AddWithValue("TotalTP", 350);
             SecondCmd.Parameters.AddWithValue("World", charCreation.World);
-            SecondCmd.Parameters.AddWithValue("X", charCreation.XCoord);
-            SecondCmd.Parameters.AddWithValue("Y", charCreation.YCoord);
-            SecondCmd.Parameters.AddWithValue("Z", charCreation.ZCoord);
+            SecondCmd.Parameters.AddWithValue("X", charCreation.x);
+            SecondCmd.Parameters.AddWithValue("Y", charCreation.y);
+            SecondCmd.Parameters.AddWithValue("Z", charCreation.z);
             SecondCmd.Parameters.AddWithValue("Facing", charCreation.Facing);
             SecondCmd.Parameters.AddWithValue("Strength", charCreation.Strength);
             SecondCmd.Parameters.AddWithValue("Stamina", charCreation.Stamina);

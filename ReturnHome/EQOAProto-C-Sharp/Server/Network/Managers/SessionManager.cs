@@ -6,7 +6,7 @@ using System.Linq;
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Managers;
-using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -148,6 +148,7 @@ namespace ReturnHome.Server.Network.Managers
             NewMasterSession.AccountID = MySession.AccountID;
             NewMasterSession.MyCharacter = MyCharacter;
             NewMasterSession.MyCharacter.characterSession = NewMasterSession;
+            NewMasterSession.MyCharacter.ObjectID = NewMasterSession.SessionID;
 
             if (SessionHash.TryAdd(NewMasterSession))
             {

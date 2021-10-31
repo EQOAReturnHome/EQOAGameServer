@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ReturnHome.Server.Entity.Actor;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Managers
 {
@@ -25,6 +25,20 @@ namespace ReturnHome.Server.Managers
                 return false;
             playerList.Remove(character);
             return true;   
+        }
+
+        public static bool QueryForPlayer(string name, out Character c)
+        {
+            foreach (Character c2 in playerList)
+            {
+                if (c2.CharName == name)
+                {
+                    c = c2;
+                    return true;
+                }
+            }
+            c = default;
+            return false;
         }
     }
 }

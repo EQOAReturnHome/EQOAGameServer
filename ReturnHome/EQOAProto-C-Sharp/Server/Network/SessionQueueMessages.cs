@@ -115,7 +115,7 @@ namespace ReturnHome.Server.Network
         {
             int offset = 0;
             //Do some magic to find which counter to apply, eventually add group, and both stat and buff messages to this
-            byte xorByte = (MessageOpcodeType >= 0x00 & MessageOpcodeType <= 0x17) ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter == 0 ? 0 : (byte)(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter - session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter) : 0;
+            byte xorByte = (MessageOpcodeType >= 0x00 & MessageOpcodeType <= 0x17) ? session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter == 0 ? (byte)0 : (byte)(session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].messageCounter - session.rdpCommIn.connectionData.serverObjects.Span[MessageOpcodeType].baseMessageCounter) : (byte)0;
 
             Memory<byte> temp = new Memory<byte>(new byte[(ClientMessage.Length > 255) ? 7 + ClientMessage.Length : 5 + ClientMessage.Length]);
             Span<byte> WholeClientMessage = temp.Span;
