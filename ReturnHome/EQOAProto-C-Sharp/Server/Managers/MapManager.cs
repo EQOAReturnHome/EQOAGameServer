@@ -30,9 +30,8 @@ namespace ReturnHome.Server.Managers
             treeQueue.Clear();
         }
 
-        public static void QueryNearbyPlayers()
+        public static void QueryObjectsForDistribution()
         {
-            
             List<Entity> charList = new List<Entity>();
             foreach (Entity entity in qtree.GetAllObjects())
             {
@@ -51,9 +50,17 @@ namespace ReturnHome.Server.Managers
                 //charList.RemoveRange(23, charList.Count - 23);
                 ((Character)entity).characterSession.rdpCommIn.connectionData.AddChannelObjects(charList);
                 charList.Clear();
-
             }
-            
+        }
+
+        ///Takes a "radius" float for query
+        //Allows us to query for nearby objects to player, individual methods can handle cycling through the list for correctness
+        public static List<Entity> QueryNearbyObjects(Character myCharacter, float radius)
+        {
+            List<Entity> entityList = new();
+            qtree.GetObjects(new RectangleF(myCharacter.x - (radius / 2), myCharacter.z - (radius / 2), radius, radius), entityList);
+
+            return entityList;
         }
 
         public static void UpdatePosition(Entity entity)

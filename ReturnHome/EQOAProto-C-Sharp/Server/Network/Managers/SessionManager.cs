@@ -190,7 +190,7 @@ namespace ReturnHome.Server.Network.Managers
             Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
             MapManager.BulkAddPlayers();
-            MapManager.QueryNearbyPlayers();
+            MapManager.QueryObjectsForDistribution();
 
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());

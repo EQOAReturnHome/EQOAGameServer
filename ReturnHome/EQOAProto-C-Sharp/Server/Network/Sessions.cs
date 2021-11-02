@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using System;
-using System.Text;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;

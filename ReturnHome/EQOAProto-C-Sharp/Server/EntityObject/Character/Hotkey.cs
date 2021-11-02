@@ -39,7 +39,7 @@ namespace ReturnHome.Server.EntityObject.Player
         {
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
-            memStream.Write(Utility_Funcs.DoublePack(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
+            memStream.Write(BitConverter.GetBytes(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
 
             //North HK
             memStream.WriteByte(0);

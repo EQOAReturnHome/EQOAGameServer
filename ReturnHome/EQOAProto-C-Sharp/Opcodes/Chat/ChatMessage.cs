@@ -3,77 +3,44 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Opcodes
+namespace ReturnHome.Opcodes.Chat
 {
     public static class ChatMessage
     {
 
         public static void ProcessClientChat(Session MySession, PacketMessage ClientPacket)
         {
-
-            int offset = 0;
-
             int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[0..]);
             string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[4..(4 + messageLength * 2)]);
 
-            if (message == "!c")
+            //Admin command of sorts, possibly temporary
+            if (message[0] == '!')
             {
-                MySession.CoordinateUpdate();
+                ProcessCommands(MySession, message);
             }
 
-            if(message == "!t")
+            else if( MySession.MyCharacter.chatMode == 0)
             {
-                if(ObjectAdminChecks.ProcessChanges(MySession, message.Split(' ')))
-                {
-                    //string[] words = message.Split(' ');
-                    message = "Completed processing request";
-                    GenerateClientSpecificChat(MySession, message);
-                }
-
-                else
-                {
-                    //string[] words = message.Split(' ');
-                    message = "Error Occured";
-                    GenerateClientSpecificChat(MySession, message);
-                }
-            }
-            if (message == "!o")
-            {
-                MySession.unkOpcode ^= true;
-                if (MySession.unkOpcode)
-                {
-                    message = "Unknown opcode display is now on.";
-                }
-
-                else
-                {
-                    message = "Unknown opcode display is now off.";
-                }
-
-                GenerateClientSpecificChat(MySession, message);
+                SayChat.ProcessSay(MySession, message);
             }
 
-            if (message == "!s")
+            else if (MySession.MyCharacter.chatMode == 1)
             {
-                float speed;
-                try
-                {
-                    speed = float.Parse(message.Substring(3, messageLength - 3));
-                    ProcessOpcode.ActorSpeed(MySession, speed);
-                }
+                //Group?
+            }
 
-                catch
-                {
-                    message = "Not a valid value for speed";
-                    GenerateClientSpecificChat(MySession, message);
-                }
+            else if (MySession.MyCharacter.chatMode == 2)
+            {
+                //Guild?
+            }
+
+            else if (MySession.MyCharacter.chatMode == 3)
+            {
+                ShoutChat.ProcessShout(MySession, message);
             }
         }
 
@@ -91,9 +58,64 @@ namespace ReturnHome.Opcodes
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ProcessSayChat(Session MySession, PacketMessage ClientPacket)
+        /// <summary>
+        /// This method processes client Commands
+        /// </summary>
+        public static void ProcessCommands(Session MySession, string message)
         {
-            //This would process messages designated for "say" from a client, which we could add some pre-processing here... but should distribute to players within x range technically
+            if (message[0..2] == "!c")
+            {
+                MySession.CoordinateUpdate();
+            }
+
+            //Add a check here to verify account has admin privileges?
+            if (message[0..3] == "!t ")
+            {
+                if (ObjectAdminChecks.ProcessChanges(MySession, message.Split(' ')))
+                {
+                    message = "Completed processing request";
+                    GenerateClientSpecificChat(MySession, message);
+                }
+
+                else
+                {
+                    message = "Error Occured";
+                    GenerateClientSpecificChat(MySession, message);
+                }
+            }
+
+            if (message[0..2] == "!o")
+            {
+                MySession.unkOpcode ^= true;
+                if (MySession.unkOpcode)
+                {
+                    message = "Unknown opcode display is now on.";
+                }
+
+                else
+                {
+                    message = "Unknown opcode display is now off.";
+                }
+
+                GenerateClientSpecificChat(MySession, message);
+            }
+
+            //Should this require admin? I don' think thats important till live
+            if (message[0..3] == "!s ")
+            {
+                float speed;
+                try
+                {
+                    speed = float.Parse(message.Substring(3, message.Length - 3));
+                    ProcessOpcode.ActorSpeed(MySession, speed);
+                }
+
+                catch
+                {
+                    message = "Not a valid value for speed, please enter XX.X or XX. Suggest speed being less then 50";
+                    GenerateClientSpecificChat(MySession, message);
+                }
+            }
         }
 
         public static void ProcessShoutChat(Session MySession, PacketMessage ClientPacket)
@@ -116,7 +138,7 @@ namespace ReturnHome.Opcodes
             //Processes client messages bound for group chat
         }
 
-        public static void DistributeSpecificMessageAndColor(Session MySession, PacketMessage ClientPacket)
+        public static void DistributeSpecificMessageAndColor(Session MySession, string message, byte[] color)
         {
             //This method could
         }

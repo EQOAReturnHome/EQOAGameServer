@@ -10,6 +10,7 @@ using ReturnHome.AccountAction;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network.Managers;
+using ReturnHome.Opcodes.Chat;
 
 namespace ReturnHome.Opcodes
 {

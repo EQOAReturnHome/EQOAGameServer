@@ -15,6 +15,8 @@ namespace ReturnHome.Server.EntityObject
 
         public int Level;
 
+        public byte chatMode = 0; //Default to 0, say = 0, Shout = 3 NPC's can technically talk in chat too?
+
         //Store latest character update directly to character for other characters to pull
         //Doesn't seem right? But we can trigger each session to serialize to this array and distribute to other client's this way
         public Memory<byte> characterUpdate = new Memory<byte> ( new byte[0xC9]);
@@ -44,9 +46,11 @@ namespace ReturnHome.Server.EntityObject
         public int DefaultIntelligence;
         public int DefaultCharisma;
 
-        public Entity()
-        {
+        public bool isPlayer;
 
+        public Entity(bool isplayer)
+        {
+            isPlayer = isplayer;
         }
     }
 }

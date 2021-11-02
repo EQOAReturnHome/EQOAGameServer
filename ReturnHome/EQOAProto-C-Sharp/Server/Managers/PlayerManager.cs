@@ -40,5 +40,10 @@ namespace ReturnHome.Server.Managers
             c = default;
             return false;
         }
+
+        public static List<Character> QueryForAllPlayers()
+        {
+            return playerList;
+        }
     }
 }

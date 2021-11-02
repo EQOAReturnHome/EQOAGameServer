@@ -10,7 +10,7 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 
-namespace ReturnHome.Opcodes
+namespace ReturnHome.Opcodes.Chat
 {
     public static class ObjectAdminChecks
     {
@@ -19,6 +19,9 @@ namespace ReturnHome.Opcodes
             string message;
             if(PlayerManager.QueryForPlayer(changes[1], out Character c))
             {
+                if (c == null)
+                    return false;
+
                 message = $"Found character: {changes[1]}";
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
 
