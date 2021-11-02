@@ -28,7 +28,7 @@ namespace ReturnHome.Opcodes
                 MySession.CoordinateUpdate();
             }
 
-            if(message.Substring(0, 2) == "!t")
+            if(message == "!t")
             {
                 if(ObjectAdminChecks.ProcessChanges(MySession, message.Split(' ')))
                 {
@@ -60,7 +60,7 @@ namespace ReturnHome.Opcodes
                 GenerateClientSpecificChat(MySession, message);
             }
 
-            if (message.Substring(0, 2) == "!s")
+            if (message == "!s")
             {
                 float speed;
                 try

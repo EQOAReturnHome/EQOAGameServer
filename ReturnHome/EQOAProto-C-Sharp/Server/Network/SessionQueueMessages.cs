@@ -2,7 +2,6 @@
 
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
-using ReturnHome.PacketProcessing;
 
 namespace ReturnHome.Server.Network
 {

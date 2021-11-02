@@ -28,8 +28,6 @@ namespace ReturnHome.Server.Network
         //Place to hold all of our XOR result's till client acks. We then xor that against the baseXOR to get new base object update, clear list once a message is ack'd by client
         private Dictionary<ushort, Memory<byte>> CurrentXORResults = new Dictionary<ushort, Memory<byte>>();
 
-        private Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-
         //Holds character to share object updates for
         public Entity entity;
         public string entityName;
@@ -57,6 +55,7 @@ namespace ReturnHome.Server.Network
             //See if character and current message has changed
             if (!CompareObjects(baseXOR, entity.characterUpdate))
             {
+                Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
                 CoordinateConversions.Xor_data(temp, entity.characterUpdate, baseXOR, 0xC9);
                 CurrentXORResults.Add(messageCounter, temp);
                 SessionQueueMessages.PackMessage(_session, temp, ObjectChannel);

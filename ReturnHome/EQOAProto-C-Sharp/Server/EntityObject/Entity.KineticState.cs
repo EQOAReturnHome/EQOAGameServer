@@ -31,9 +31,9 @@ namespace ReturnHome.Server.EntityObject
         public int Target;
         public byte Movement = 1;
 
-        public float VelocityX;
-        public float VelocityY;
-        public float VelocityZ;
+        public float VelocityX = 0.0f;
+        public float VelocityY = 0.0f;
+        public float VelocityZ = 0.0f;
 
         public byte EastToWest = 0;
         public byte LateralMovement = 0;
@@ -75,7 +75,7 @@ namespace ReturnHome.Server.EntityObject
             x = X;
             y = Y;
             z = Z;
-            waypoint = new Vector3(x, y, z);
+            position = new Vector3(x, y, z);
             _point = new PointF(x, z);
         }
 

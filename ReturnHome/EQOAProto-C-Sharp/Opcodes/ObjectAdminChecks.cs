@@ -73,6 +73,13 @@ namespace ReturnHome.Opcodes
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
+                    case "vz":
+                        message = $"Changing character: {changes[1]}, {changes[2]} to {changes[3]}";
+                        c.VelocityZ = float.Parse(changes[3]);
+                        c.characterSession.objectUpdate = true;
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
                     case "move":
                         message = $"Changing character: {changes[1]}, {changes[2]} to {changes[3]}";
                         c.Movement = byte.Parse(changes[3]);
