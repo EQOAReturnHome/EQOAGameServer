@@ -22,7 +22,7 @@ namespace ReturnHome.Server.EntityObject.Player
         { }
 
         //Will instantiate a Hotkey object
-        public Hotkey(string thisDirection, string thisNLabel, string thisNMessage, string thisWLabel, string thisWMessage, string thisELabel, string thisEMessage, string thisSLabel, string thisSMessage)
+        public Hotkey(string thisDirection, string thisNMessage, string thisNLabel, string thisWMessage, string thisWLabel, string thisEMessage, string thisELabel, string thisSMessage, string thisSLabel)
         {
             Direction = thisDirection;
             NLabel = thisNLabel;
@@ -39,26 +39,26 @@ namespace ReturnHome.Server.EntityObject.Player
         {
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
-            memStream.Write(BitConverter.GetBytes(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
+            memStream.Write(Utility_Funcs.Pack((uint)HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
 
             //North HK
             memStream.WriteByte(0);
-            ConvertHotKey(memStream, NMessage, NLabel);
+            ConvertHotKey(memStream, NLabel, NMessage);
 
             //West HK
             memStream.WriteByte(2);
-            ConvertHotKey(memStream, WMessage, WLabel);
+            ConvertHotKey(memStream, WLabel, WMessage);
 
             //East HK
             memStream.WriteByte(4);
-            ConvertHotKey(memStream, EMessage, ELabel);
+            ConvertHotKey(memStream, ELabel, EMessage);
 
             //South HK
             memStream.WriteByte(6);
-            ConvertHotKey(memStream, SMessage, SLabel);
+            ConvertHotKey(memStream, SLabel, SMessage);
         }
 
-        private void ConvertHotKey(MemoryStream memStream, string message, string label)
+        private void ConvertHotKey(MemoryStream memStream, string label, string message)
         {
             //If message
             if(label != null)

@@ -52,9 +52,6 @@ namespace ReturnHome.Opcodes.Chat
                     SessionQueueMessages.PackMessage(((Character)e).characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
-
-            //Lastly send it to ourself
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
     }
 }

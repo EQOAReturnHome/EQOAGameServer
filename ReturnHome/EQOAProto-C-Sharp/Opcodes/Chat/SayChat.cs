@@ -15,7 +15,7 @@ namespace ReturnHome.Opcodes.Chat
     public static class SayChat
     {
 
-        public static float Radius = 50.0f;
+        public static float Radius = 200.0f;
 
         ///This method queries for nearby objects to player, then iterates over list, looking if any are players and distributing the message
         public static void ProcessSay(Session MySession, string message)
@@ -41,9 +41,11 @@ namespace ReturnHome.Opcodes.Chat
                     SessionQueueMessages.PackMessage(((Character)e).characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
+        }
 
-            //Lastly send it to ourself
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        public static void ProcessSay(Session MySession, string message, byte temp)
+        {
+
         }
     }
 }
