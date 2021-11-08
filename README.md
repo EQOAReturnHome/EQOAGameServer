@@ -14,26 +14,35 @@ This is super basic at this time and just automatically processes and accepts th
 We have a database utilizing mariadb at this time, to be shared soon.
 
 Functions needing to be added:
-- Some SQL Choice (raw? orm?)
-- Verifying username/password with sql.
-- Authenticating old password and replacing it with new password if correct.
-- Receiving create account requests, checking for username availability and writing the information to the database.
+~~- Some SQL Choice (raw? orm?)~~
+~~- Verifying username/password with sql.~~
+~~- Authenticating old password and replacing it with new password if correct.~~
+~~- Receiving create account requests, checking for username availability and writing the information to the database.~~
+These have been done on a seperate version, as this interfaces with the encryption for the game, it is not currently  released publicly. The server still allows for a quick login on any information at this time, though.
 
 # ReturnHome
 
-UDP server implementing the packet framework to handle packet requests up to character select, including creating and deleting characters.
-This server implements a keep alive which keeps the server select menu and Character select menu alive for a indefinite amount of time currently.
+UDP server implementing the packet framework to handle packet requests.
+This includes:
+- World Select Screen
+- Character Select Screen (Character creation and deletion)
+- Memory Dump
+- running around in the world
 
-Able to get in world with a character, and run around
+#*New Changes*
+- Able to now see other players running around, very rudimentary state. Little choppy but it's something to start with
+- Ingame chat, local say along with a (currently) global shout.
+- Ingame "admin" system via chat just for adjusting some character states, eventually to be used with NPC testing.
+- Other small, minor things.
 
-Current paths forward include:
-- ~~Starting the memory dump upon a character being selected~~ This is mostly in place now, for atleast a starting point
-- ~~Reverse engineering the game map from the client to use server side for player tracking, collision detection, etc.~~ This is done thanks to xylof
-- Create a generic program for server instances to spool zones up with. These would load map data such as navmesh. Along with creating octtree's for nearby player/npc interaction. Good starting point for multiplayer
-- too much to really list..
+#TO-DO List
+- Add Some NPC's to the world and begin developing pathing
+- Begin work with Recast Tool
+- Incorporate the stat update type
+- Implement Tells/Replies
+- Save characters upon logging off/disconnecting (Something basic like xyz, maybe hp for now)
+- Look into grouping mechanisms and the group unreliable type
 
-# Side Goals
-- Crack the patch encryption. This would be critical to pushing final live game patches to clients and would allow physical ps2's to connect via this server.
 
 # Set up
 
@@ -53,4 +62,3 @@ Once completed, opening two seperate instances of the repo in Visual Studio's, s
 
 - Database to be added with a "trial" account
 
-# Do not run everything on the same machine. At the minimum, the client should be a seperate machine or in a VM box. Otherwise it is likely the client won't connect
