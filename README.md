@@ -14,10 +14,15 @@ This is super basic at this time and just automatically processes and accepts th
 We have a database utilizing mariadb at this time, to be shared soon.
 
 Functions needing to be added:
+
 ~~- Some SQL Choice (raw? orm?)~~
+
 ~~- Verifying username/password with sql.~~
+
 ~~- Authenticating old password and replacing it with new password if correct.~~
+
 ~~- Receiving create account requests, checking for username availability and writing the information to the database.~~
+
 These have been done on a seperate version, as this interfaces with the encryption for the game, it is not currently  released publicly. The server still allows for a quick login on any information at this time, though.
 
 # ReturnHome
