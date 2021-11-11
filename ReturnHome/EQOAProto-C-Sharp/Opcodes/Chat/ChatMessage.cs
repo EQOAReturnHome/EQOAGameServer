@@ -69,7 +69,7 @@ namespace ReturnHome.Opcodes.Chat
             }
 
             //Add a check here to verify account has admin privileges?
-            if (message[0..3] == "!t ")
+            if (message[0..2] == "!t")
             {
                 if (ObjectAdminChecks.ProcessChanges(MySession, message.Split(' ')))
                 {
@@ -101,7 +101,7 @@ namespace ReturnHome.Opcodes.Chat
             }
 
             //Should this require admin? I don' think thats important till live
-            if (message[0..3] == "!s ")
+            if (message[0..2] == "!s")
             {
                 float speed;
                 try

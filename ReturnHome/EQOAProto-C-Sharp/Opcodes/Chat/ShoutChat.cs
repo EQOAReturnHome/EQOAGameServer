@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,7 +43,7 @@ namespace ReturnHome.Opcodes.Chat
             Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
 
             //This needs to be dynamic eventually, allow the color to inject a color for the text? Or maybe needs an overload for this to be for specific players to receive
-            Message.Write(new byte[] { 0x00, 0x3F, 0xFF, 0x3F }, ref offset);
+            Message.Write(new byte[] { 0x3F, 0xFF, 0x3F, 0x00 }, ref offset);
 
             foreach (Entity e in entityList)
             {
@@ -52,6 +53,17 @@ namespace ReturnHome.Opcodes.Chat
                     SessionQueueMessages.PackMessage(((Character)e).characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
+        }
+
+        public static void ProcessShout(Session MySession, PacketMessage ClientPacket)
+        {
+            //First byte seems to always be 2? can skip it for now
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[1..]);
+            string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[5..(5 + messageLength * 2)]);
+
+            //Maybe need some checks here?
+            ProcessShout(MySession, message);
+
         }
     }
 }

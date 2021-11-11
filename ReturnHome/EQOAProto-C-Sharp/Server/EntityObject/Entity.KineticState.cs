@@ -17,8 +17,8 @@ namespace ReturnHome.Server.EntityObject
         private long movement_started;
 
         //Set position to waypoint after initial position is set, should waypoint be assigned by the client update? Seems logical
-        private Vector3 waypoint;
-        private Vector3 position;
+        public Vector3 waypoint;
+        public Vector3 position;
 
 
         public byte Facing;
@@ -34,6 +34,9 @@ namespace ReturnHome.Server.EntityObject
         public float VelocityX = 0.0f;
         public float VelocityY = 0.0f;
         public float VelocityZ = 0.0f;
+        public float WayPointVelocityX = 0.0f;
+        public float WayPointVelocityY = 0.0f;
+        public float WayPointVelocityZ = 0.0f;
 
         public byte EastToWest = 0;
         public byte LateralMovement = 0;
@@ -69,13 +72,13 @@ namespace ReturnHome.Server.EntityObject
             position = new Vector3(x, y, z);
         }
 
-        public void UpdatePosition(float X, float Y, float Z)
+        public void UpdateWayPoint(float X, float Y, float Z)
         {
             movement_started = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             x = X;
             y = Y;
             z = Z;
-            position = new Vector3(x, y, z);
+            waypoint = new Vector3(x, y, z);
             _point = new PointF(x, z);
         }
 
@@ -93,9 +96,9 @@ namespace ReturnHome.Server.EntityObject
 
         public void UpdateVelocity(float velocityX, float velocityY, float velocityZ)
         {
-            VelocityX = velocityX;
-            VelocityY = velocityY;
-            VelocityZ = velocityZ;
+            WayPointVelocityX = velocityX;
+            WayPointVelocityY = velocityY;
+            WayPointVelocityZ = velocityZ;
         }
 
         public void UpdateTarget(int target)

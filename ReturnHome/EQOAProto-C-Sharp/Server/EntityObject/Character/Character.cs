@@ -115,6 +115,21 @@ namespace ReturnHome.Server.EntityObject.Player
             characterSession = MySession;
         }
 
+        public void UpdatePosition()
+        {
+            if (waypoint == position)
+                return;
+            else
+            {
+                position = waypoint;
+                VelocityX = WayPointVelocityX;
+                VelocityY = WayPointVelocityY;
+                VelocityZ = WayPointVelocityZ;
+            }
+            characterSession.objectUpdate = true;
+        }
+
+
         public void UpdateFeatures(Session MySession, int hairColor, int hairLength, int hairStyle, int faceOption)
         {
             HairColor = hairColor;

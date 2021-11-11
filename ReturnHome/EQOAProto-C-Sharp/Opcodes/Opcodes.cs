@@ -48,8 +48,9 @@
         ColoredChat = 0x0A7B, //2683 - Color text message
 
         //From client
-        ClientSayChat = 0x000B //11 - Normal say message from client
-
+        ClientSayChat = 0x000B, //11 - Normal say message from client
+        ClientShout = 0x0C01, //3073 - Shout message from client
+        ChangeChatMode = 0x000E //14 - Client requests change to "permanant" chat mode
     }
 
     public static class GameVersions

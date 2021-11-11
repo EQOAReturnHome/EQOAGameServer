@@ -14,7 +14,7 @@ namespace ReturnHome.Server.Managers
 {
     public static class MapManager
     {
-        private static QuadTreePointF<Entity> qtree = new QuadTreePointF<Entity>(new RectangleF(25000.0f, 15000.0f, 2000.0f, 2000.0f));
+        private static QuadTreePointF<Entity> qtree = new QuadTreePointF<Entity>(new RectangleF(3000.0f, 3000.0f, 24000.0f, 30000.0f));
         private static List<Entity> treeQueue = new List<Entity>();
         private static List<Entity> treeRemoveQueue = new List<Entity>();
 

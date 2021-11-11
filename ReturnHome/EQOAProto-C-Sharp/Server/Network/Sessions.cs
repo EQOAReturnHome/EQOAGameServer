@@ -126,6 +126,7 @@ namespace ReturnHome.Server.Network
 
         public void UpdateClientObject()
         {
+            MyCharacter?.UpdatePosition();
             //If changes for client object update need to go out...
             if (objectUpdate)
             {

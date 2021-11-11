@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Buffers.Binary;
 using System.IO;
 
 using ReturnHome.Utilities;
 using ReturnHome.Database.SQL;
-using ReturnHome.AccountAction;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network.Managers;
@@ -26,6 +24,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.CreateCharacter, ProcessCreateChar },
             { GameOpcode.ClientSayChat, ChatMessage.ProcessClientChat },
             { GameOpcode.RandomName, GenerateRandomName },
+            { GameOpcode.ClientShout, ShoutChat.ProcessShout},
+            { GameOpcode.ChangeChatMode, ChangeChatMode}
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -77,6 +77,12 @@ namespace ReturnHome.Opcodes
 
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
             }
+        }
+
+        public static void ChangeChatMode(Session MySession, PacketMessage ClientPacket)
+        {
+            //Just accept and change chat mode
+            MySession.MyCharacter.chatMode = ClientPacket.Data.Span[0];
         }
 
         public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
@@ -391,22 +397,17 @@ namespace ReturnHome.Opcodes
                 ///Username ends with 01, no known use, skip for now
                 offset += 1;
 
-                //Decrypting password information goes here?
-
-                string Password = "password";
-
-                ///skip encrypted password for now
+                ReadOnlyMemory<byte> Password = ClientPacket.Data.Slice(offset, 16);
                 offset += 32;
 
                 ///Uncomment once ready
-                MySession.AccountID = AccountActions.VerifyPassword(AccountName, Password);
+                MySession.AccountID = 11;
 
                 ///Theoretically we want to verify account # is not 0 here, if it is, drop it.
-                if (MySession.AccountID == 0)
+                if (MySession.AccountID == -1)
                 {
-                    ///This work?
-                    ///Just ignore the packet and let client resend. 
-                    ///Something noteable went wrong here most likely
+                    //Verifications failed, drop session?
+                    MySession.DropSession();
                     return;
                 }
             }
