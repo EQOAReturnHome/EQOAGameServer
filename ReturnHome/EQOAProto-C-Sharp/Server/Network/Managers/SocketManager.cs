@@ -13,8 +13,8 @@ namespace ReturnHome.Server.Network.Managers
         {
 			//Hardcoded for the moment, eventually could be read from a config file
 			//To create more elaborate designs for the server and zones
-			ushort endPoint = 0x73B1;
-			ushort port = 10071;
+			ushort endPoint = 0x73B0;
+			ushort port = 10070;
 			string serverName = "Default";
 			
 			//Eventually we would have listeners for multiple ports to support "multiple servers" from same ip?
