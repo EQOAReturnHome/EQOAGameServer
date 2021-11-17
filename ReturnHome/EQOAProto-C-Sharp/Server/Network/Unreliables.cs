@@ -99,6 +99,7 @@ namespace ReturnHome.Server.Network
             if (!Mysession.inGame)
             {
                 PlayerManager.AddPlayer(Mysession.MyCharacter);
+                EntityManager.AddEntity(Mysession.MyCharacter);
                 MapManager.AddPlayerToTree(Mysession.MyCharacter);
                 Mysession.inGame = true;
             }

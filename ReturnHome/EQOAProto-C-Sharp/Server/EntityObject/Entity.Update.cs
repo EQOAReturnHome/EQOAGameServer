@@ -4,13 +4,317 @@ using System.Text;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Player;
 using System.Numerics;
+using System.Buffers.Binary;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
         private static float _speedAdjust = 6.25f;
-        //This will be our class for storing our C9 object updates that will go out to clients
+
+        public void ObjectUpdateObjectID()
+        {
+            BitConverter.GetBytes(ObjectID).CopyTo(ObjectUpdate.Slice(0, 4));
+        }
+
+        public void ObjectUpdateEntity(byte temp = 0x82)
+        {
+            new byte[] { temp }.CopyTo(ObjectUpdate.Slice(4, 1));
+        }
+
+        public void ObjectUpdatePosition()
+        {
+            int offset = 5;
+            Span<byte> temp = ObjectUpdate.Span;
+            temp.Write3Bytes((uint)(Position.X * 128.0f), ref offset);
+            temp.Write3Bytes((uint)(Position.Y * 128.0f), ref offset);
+            temp.Write3Bytes((uint)(Position.Z * 128.0f), ref offset);
+        }
+
+        public void ObjectUpdateFacing()
+        {
+            ObjectUpdate.Span[14] = Facing;
+        }
+
+        public void ObjectUpdateFirstPerson()
+        {
+            ObjectUpdate.Span[15] = FirstPerson;
+        }
+
+        public void ObjectUpdateWorld()
+        {
+            ObjectUpdate.Span[16] = (byte)World;
+        }
+
+        public void ObjectUpdateKillTime()
+        {
+            BitConverter.GetBytes(KillTime).CopyTo(ObjectUpdate.Slice(17, 8));
+        }
+
+        public void ObjectUpdateHPFlag()
+        {
+            ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)0;
+        }
+
+        public void ObjectUpdateHPBar()
+        {
+            ObjectUpdate.Span[26] = (byte)((255 * CurrentHP) / HPMax);
+        }
+
+        public void ObjectUpdateModelID()
+        {
+            BitConverter.GetBytes(ModelID).CopyTo(ObjectUpdate.Slice(27, 4));
+        }
+
+        public void ObjectUpdateModelIDUpgraded()
+        {
+            BitConverter.GetBytes(ModelID).CopyTo(ObjectUpdate.Slice(31, 4));
+        }
+
+        public void ObjectUpdateModelSize()
+        {
+            BitConverter.GetBytes(ModelSize).CopyTo(ObjectUpdate.Slice(35, 4));
+        }
+
+        public void ObjectUpdateVelocities()
+        {
+            Span<byte> temp = ObjectUpdate.Span;
+            temp[39] = (byte)Math.Round(VelocityX * _speedAdjust);
+            temp[40] = (byte)Math.Round(VelocityY * _speedAdjust);
+            temp[41] = (byte)Math.Round(VelocityZ * _speedAdjust);
+        }
+
+        public void ObjectUpdateEastWest()
+        {
+            ObjectUpdate.Span[44] = EastToWest;
+        }
+
+        public void ObjectUpdateLateralMovement()
+        {
+            ObjectUpdate.Span[45] = LateralMovement;
+        }
+
+        public void ObjectUpdateNorthSouth()
+        {
+            ObjectUpdate.Span[46] = NorthToSouth;
+        }
+        public void ObjectUpdateTurning()
+        {
+            ObjectUpdate.Span[47] = Turning;
+        }
+
+        public void ObjectUpdateSpinDown()
+        {
+            ObjectUpdate.Span[48] = SpinDown;
+        }
+
+        public void ObjectUpdateCoordY()
+        {
+            BitConverter.GetBytes(y).CopyTo(ObjectUpdate.Slice(49, 4));
+        }
+
+        public void ObjectUpdateFacingF()
+        {
+            BitConverter.GetBytes(FacingF).CopyTo(ObjectUpdate.Slice(53, 4));
+        }
+
+        public void ObjectUpdateAnimation()
+        {
+            ObjectUpdate.Span[57] = Animation;
+        }
+
+        public void ObjectUpdateTarget()
+        {
+            BitConverter.GetBytes(Target).CopyTo(ObjectUpdate.Slice(58, 4));
+        }
+
+        public void ObjectUpdateUnknown()
+        {
+            BitConverter.GetBytes((ushort)0x0105).CopyTo(ObjectUpdate.Slice(62, 2));
+        }
+
+        public void ObjectUpdatePrimary()
+        {
+            BitConverter.GetBytes(Primary).CopyTo(ObjectUpdate.Slice(66, 4));
+        }
+
+        public void ObjectUpdateSecondary()
+        {
+            BitConverter.GetBytes(Secondary).CopyTo(ObjectUpdate.Slice(70, 4));
+        }
+
+        public void ObjectUpdateShield()
+        {
+            BitConverter.GetBytes(Shield).CopyTo(ObjectUpdate.Slice(74, 4));
+        }
+
+        public void ObjectUpdatePrimaryUpgraded()
+        {
+            BitConverter.GetBytes(Primary).CopyTo(ObjectUpdate.Slice(78, 4));
+        }
+
+        public void ObjectUpdateSecondaryUpgraded()
+        {
+            BitConverter.GetBytes(Secondary).CopyTo(ObjectUpdate.Slice(82, 4));
+        }
+
+        public void ObjectUpdateShieldUpgraded()
+        {
+            BitConverter.GetBytes(Shield).CopyTo(ObjectUpdate.Slice(86, 4));
+        }
+
+        public void ObjectUpdateChest()
+        {
+            ObjectUpdate.Span[92] = Chest;
+        }
+
+        public void ObjectUpdateBracer()
+        {
+            ObjectUpdate.Span[93] = Bracer;
+        }
+
+        public void ObjectUpdateGloves()
+        {
+            ObjectUpdate.Span[94] = Gloves;
+        }
+
+        public void ObjectUpdateLegs()
+        {
+            ObjectUpdate.Span[95] = Legs;
+        }
+
+        public void ObjectUpdateBoots()
+        {
+            ObjectUpdate.Span[96] = Boots;
+        }
+
+        public void ObjectUpdateHelm()
+        {
+            ObjectUpdate.Span[97] = Helm;
+        }
+
+        public void ObjectUpdateVanillaColors()
+        {
+            byte[] temp = new byte[] { 0xFF, 0xFF }; 
+            for(int i = 0; i < 6; i++)
+            {
+                temp.CopyTo(ObjectUpdate.Slice(98 + (i * 2), 2));
+            }
+        }
+
+        public void ObjectUpdateChestColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(110, 4).Span, ChestColor);
+        }
+
+        public void ObjectUpdateBracerColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(115, 4).Span, BracerColor);
+        }
+
+        public void ObjectUpdateGloveColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(120, 4).Span, GloveColor);
+        }
+
+        public void ObjectUpdateLegColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(125, 4).Span, LegColor);
+        }
+
+        public void ObjectUpdateBootsColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(130, 4).Span, BootsColor);
+        }
+
+        public void ObjectUpdateHelmColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(135, 4).Span, HelmColor);
+        }
+
+        public void ObjectUpdateRobeColor()
+        {
+            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(140, 4).Span, RobeColor);
+        }
+
+        public void ObjectUpdateHairColor()
+        {
+            ObjectUpdate.Span[144] = (byte)HairColor;
+        }
+
+        public void ObjectUpdateHairLength()
+        {
+            ObjectUpdate.Span[145] = (byte)HairLength;
+        }
+
+        public void ObjectUpdateHairStyle()
+        {
+            ObjectUpdate.Span[146] = (byte)HairStyle;
+        }
+
+        public void ObjectUpdateFaceOption()
+        {
+            ObjectUpdate.Span[147] = (byte)FaceOption;
+        }
+
+        public void ObjectUpdateRobe()
+        {
+            ObjectUpdate.Span[148] = (byte)Robe;
+        }
+
+        public void ObjectUpdateName()
+        {
+            Encoding.UTF8.GetBytes(CharName).CopyTo(ObjectUpdate.Slice(154, CharName.Length));
+        }
+
+        public void ObjectUpdateLevel()
+        {
+            ObjectUpdate.Span[178] = (byte)Level;
+        }
+
+        public void ObjectUpdateMovement()
+        {
+            ObjectUpdate.Span[179] = Movement;
+        }
+
+        public void ObjectUpdateNameColor(byte color = 255)
+        {
+            if(isPlayer)
+                ObjectUpdate.Span[180] = color == 255 ? (byte)2 : color;
+            else
+                ObjectUpdate.Span[180] = color == 255 ? (byte)0 : color;
+        }
+
+        public void ObjectUpdateNamePlate(byte color = 255)
+        {
+            ObjectUpdate.Span[181] = color == 255 ? (byte)0 : color;
+        }
+
+        public void ObjectUpdateRace()
+        {
+            ObjectUpdate.Span[182] = (byte)Race;
+        }
+
+        public void ObjectUpdateClass()
+        {
+            ObjectUpdate.Span[183] = (byte)Class;
+        }
+
+        public void ObjectUpdatePattern()
+        {
+            BitConverter.GetBytes(0xFFFFFFFF).CopyTo(ObjectUpdate.Slice(186, 4));
+        }
+
+        public void ObjectUpdateStatus(byte status = 0)
+        {
+            ObjectUpdate.Span[192] = status;
+        }
+
+        public void ObjectUpdateEnd()
+        {
+            Encoding.UTF8.GetBytes("trsq").CopyTo(ObjectUpdate.Slice(196, 4));
+        }
+
         public Memory<byte> SerializeObjectUpdate(Character character)
         {
             //Vector3 tempPosition = getPosition();
@@ -21,94 +325,6 @@ namespace ReturnHome.Server.EntityObject
             //Seems to indicate if channel is changing
             temp.Write((byte)1, ref offset);
 
-            //Ties this update channel and client together, based on the SessionID
-            temp.Write(ObjectID, ref offset);
-
-            //Unsure what this really does
-            temp.Write((byte)0x82, ref offset);
-
-            //Writes 3byte x coordinate
-            temp.Write3Bytes((uint)(position.X * 128.0f), ref offset);
-
-            //Writes 3byte y coordinate
-            temp.Write3Bytes((uint)(position.Y * 128.0f), ref offset);
-
-            //Writes 3byte z coordinate
-            temp.Write3Bytes((uint)(position.Z * 128.0f), ref offset);
-            
-            //Facing
-            temp.Write(Facing, ref offset);
-            temp.Write(character.FirstPerson, ref offset);
-            temp.Write((byte)World, ref offset);
-            //Kill time
-            temp.Write((long)0, ref offset);
-            //Hp Flag?
-            temp.Write((byte)1, ref offset);
-            temp.Write((byte) (255.0f*(CurrentHP/HPMax)), ref offset); //Formula to calculate this byte I believe (((float)character.MaxHP / character.CurrentHP) * 255), ref offset);
-            temp.Write(ModelID, ref offset);
-            //Upgraded model ID?
-            temp.Write(0, ref offset);
-            temp.Write(ModelSize, ref offset);
-            //XOffset
-            temp.Write((sbyte)Math.Round(VelocityX * _speedAdjust), ref offset);
-            temp.Write((sbyte)Math.Round(VelocityY * _speedAdjust), ref offset);
-            //ZOffset
-            temp.Write((sbyte)0 /*Math.Round(VelocityZ * _speedAdjust)*/, ref offset);
-            temp.Write((byte)0, ref offset);
-            //unk
-            temp.Write((byte)0, ref offset);
-            //East/West
-            temp.Write(EastToWest, ref offset);
-            //Direction
-            temp.Write(LateralMovement, ref offset);
-            //North/South
-            temp.Write(NorthToSouth, ref offset);
-            temp.Write(Turning, ref offset);
-            //Down/Up? Camera stuff?
-            temp.Write(SpinDown, ref offset);
-            temp.Write(0/*y*/, ref offset);
-            temp.Write(0/*FacingF*/, ref offset);
-            temp.Write(Animation, ref offset); //Has to do with "animations", may need to explore this more  character.Animation, ref offset);
-            temp.Write(Target, ref offset);
-            //Another unk
-            temp.Write((short)0x0105, ref offset);
-            //Additional unk
-            temp.Write((short)0, ref offset);
-            temp.Write(Primary, ref offset);
-            temp.Write(Secondary, ref offset);
-            temp.Write(Shield, ref offset);
-            //upgraded weapon graphics? Primary/Secondary/Shield
-            temp.Write(0, ref offset);
-            temp.Write(0, ref offset);
-            temp.Write(0, ref offset);
-            //unk again
-            temp.Write((short)0, ref offset);
-            temp.Write(Chest, ref offset);
-            temp.Write(Bracer, ref offset);
-            temp.Write(Gloves, ref offset);
-            temp.Write(Legs, ref offset);
-            temp.Write(Boots, ref offset);
-            temp.Write(Helm, ref offset);
-            //vanilla stuff related to above, believe it's colors?
-            temp.Write((ushort)0xFFFF, ref offset);
-            temp.Write((ushort)0xFFFF, ref offset);
-            temp.Write((ushort)0xFFFF, ref offset);
-            temp.Write((ushort)0xFFFF, ref offset);
-            temp.Write((ushort)0xFFFF, ref offset);
-            temp.Write((ushort)0xFFFF, ref offset);
-            temp.WriteBE(ChestColor, ref offset);
-            temp.Write((byte)0, ref offset);
-            temp.WriteBE(BracerColor, ref offset);
-            temp.Write((byte)0, ref offset);
-            temp.WriteBE(GlovesColor, ref offset);
-            temp.Write((byte)0, ref offset);
-            temp.WriteBE(LegsColor, ref offset);
-            temp.Write((byte)0, ref offset);
-            temp.WriteBE(BootsColor, ref offset);
-            temp.Write((byte)0, ref offset);
-            temp.WriteBE(HelmColor, ref offset);
-            temp.Write((byte)0, ref offset);
-            temp.WriteBE(RobeColor, ref offset);
             temp.Write((byte)HairColor, ref offset);
             temp.Write((byte)HairLength, ref offset);
             temp.Write((byte)HairStyle, ref offset);

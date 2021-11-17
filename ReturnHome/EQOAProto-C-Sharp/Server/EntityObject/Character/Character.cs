@@ -39,8 +39,6 @@ namespace ReturnHome.Server.EntityObject.Player
         public int Tunar;
         public int BankTunar;
 
-        public byte FirstPerson = 0;
-
         public Character() : base(true)
         {
 
@@ -117,11 +115,11 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public void UpdatePosition()
         {
-            if (waypoint == position)
+            if (waypoint == Position)
                 return;
             else
             {
-                position = waypoint;
+                Position = waypoint;
                 VelocityX = WayPointVelocityX;
                 VelocityY = WayPointVelocityY;
                 VelocityZ = WayPointVelocityZ;

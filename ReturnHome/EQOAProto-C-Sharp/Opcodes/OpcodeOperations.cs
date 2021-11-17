@@ -25,7 +25,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.ClientSayChat, ChatMessage.ProcessClientChat },
             { GameOpcode.RandomName, GenerateRandomName },
             { GameOpcode.ClientShout, ShoutChat.ProcessShout},
-            { GameOpcode.ChangeChatMode, ChangeChatMode}
+            { GameOpcode.ChangeChatMode, ChangeChatMode},
+            { GameOpcode.DisconnectClient, DisconnectClient}
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -83,6 +84,12 @@ namespace ReturnHome.Opcodes
         {
             //Just accept and change chat mode
             MySession.MyCharacter.chatMode = ClientPacket.Data.Span[0];
+        }
+
+        public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
+        {
+            MySession.PendingTermination = true;
+            MySession.DropSession();
         }
 
         public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
@@ -555,10 +562,10 @@ namespace ReturnHome.Opcodes
                 Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BracerColor)), ref offset);
 
                 ///Glove color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GlovesColor)), ref offset);
+                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GloveColor)), ref offset);
 
                 ///Leg color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegsColor)), ref offset);
+                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegColor)), ref offset);
 
                 ///Boot color
                 Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BootsColor)), ref offset);

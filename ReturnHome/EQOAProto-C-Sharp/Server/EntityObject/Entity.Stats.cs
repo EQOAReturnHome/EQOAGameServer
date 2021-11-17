@@ -25,8 +25,9 @@ namespace ReturnHome.Server.EntityObject
     //Influenced by CM's and gear and buffs
     public int AC;
 
-    //Calculated on the fly during combat etc
-    public int CurrentHP = 300;
+        //Calculated on the fly during combat etc
+        private bool _hpFlag = true;
+    private int _currentHP = 300;
     public int CurrentPower;
 
     public int ArcaneResist = 0;
@@ -41,7 +42,7 @@ namespace ReturnHome.Server.EntityObject
 
     //Need to calculate HP/PWR max on the fly
     //Will be influenced by archtype, level, stamina, gear, buffs and CM's
-    public int HPMax = 500;
+    private int _hpMax = 500;
     public int PWRMax = 0;
 
     //Related to regeneration of health and PowerOverTime
@@ -49,6 +50,47 @@ namespace ReturnHome.Server.EntityObject
     public int HealthOverTime;
     public int PowerOverTime;
 
+        #region Properrty sets
 
-  }
+        public int CurrentHP
+        {
+            get { return _currentHP; }
+            set
+            {
+                if (true)
+                {
+                    _currentHP = value;
+                    ObjectUpdateHPBar();
+                }
+            }
+        }
+
+        public int HPMax
+        {
+            get { return _hpMax; }
+            set
+            {
+                if (true)
+                {
+                    _hpMax = value;
+                    ObjectUpdateHPBar();
+                }
+            }
+        }
+
+        public bool HPFlag
+        {
+            get { return _hpFlag; }
+            set
+            {
+                if(true)
+                {
+                    _hpFlag = value;
+                    ObjectUpdateHPFlag();
+                }
+            }
+        }
+
+        #endregion
+    }
 }

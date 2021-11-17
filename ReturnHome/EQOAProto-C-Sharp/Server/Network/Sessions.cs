@@ -27,7 +27,7 @@ namespace ReturnHome.Server.Network
 		
 		//Helps to identify master of session
 		public bool didServerInitiate { get; private set; }
-        public bool PendingTermination { get; private set; } = false;
+        public bool PendingTermination { get; set; } = false;
 		
 		///Client IPEndPoint
         public IPEndPoint MyIPEndPoint { get; private set; }
@@ -127,15 +127,6 @@ namespace ReturnHome.Server.Network
         public void UpdateClientObject()
         {
             MyCharacter?.UpdatePosition();
-            //If changes for client object update need to go out...
-            if (objectUpdate)
-            {
-                //Cycle over objects to update for client, currently only updating client
-                MyCharacter.characterUpdate = MyCharacter.SerializeObjectUpdate(MyCharacter);
-                objectUpdate = false;
-            }
-
-            //if no update needed, stay same as before
         }
 
         /// <summary>
@@ -175,6 +166,7 @@ namespace ReturnHome.Server.Network
             // Remove character from Character List
             MapManager.RemovePlayerFromTree(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
+            EntityManager.RemoveEntity(MyCharacter);
             SessionManager.SessionHash.TryRemove(this);
         }
     }

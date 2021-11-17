@@ -6,44 +6,418 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-        public int Race;
-        public int Class;
+        private int _race;
+        private int _class;
         public string HumType;
 
-        public string CharName;
+        private string _charName;
 
-        public int HairColor;
-        public int HairLength;
-        public int HairStyle;
-        public int FaceOption;
+        private int _hairColor;
+        private int _hairLength;
+        private int _hairStyle;
+        private int _faceOption;
 
-        public int ModelID;
-        public uint ObjectID;
-        public float ModelSize = 1.0f;
-
-        //Should Armour type info be tracked here? Makes sense
-        //default is always 0
-        public byte Helm = 0;
-        public byte Chest = 0;
-        public byte Gloves = 0;
-        public byte Bracer = 0;
-        public byte Legs = 0;
-        public byte Boots = 0;
+        private byte _helm;
+        private byte _chest;
+        private byte _gloves;
+        private byte _bracers;
+        private byte _legs;
+        private byte _boots;
 
         //default is 0xFFFFFFFF, means no robe
-        public int Robe = -1;
-        public int Primary = 0;
-        public int Secondary = 0;
-        public int Shield = 0;
+        private int _robe = -1;
+        private int _primary = 0;
+        private int _secondary = 0;
+        private int _shield = 0;
+
+        private int _modelID;
+        private float _modelSize;
 
         ///Armor color
-        public uint HelmColor = 0xFFFFFFFF;
-        public uint ChestColor = 0xFFFFFFFF;
-        public uint GlovesColor = 0xFFFFFFFF;
-        public uint BracerColor = 0xFFFFFFFF;
-        public uint LegsColor = 0xFFFFFFFF;
-        public uint BootsColor = 0xFFFFFFFF;
-        public uint RobeColor = 0xFFFFFFFF;
+        private uint _helmColor = 0xFFFFFFFF;
+        private uint _chestColor = 0xFFFFFFFF;
+        private uint _glovesColor = 0xFFFFFFFF;
+        private uint _bracerColor = 0xFFFFFFFF;
+        private uint _legsColor = 0xFFFFFFFF;
+        private uint _bootsColor = 0xFFFFFFFF;
+        private uint _robeColor = 0xFFFFFFFF;
+
+        #region Objext Update Properties
+
+        public int Race
+        {
+            get { return _race; }
+            set
+            {
+                if (value >= 0 && value <= 9)
+                {
+                    _race = value;
+                    ObjectUpdateRace();
+                }
+
+                else
+                    Logger.Err($"Error setting Race value {value} for {_charName}");
+            }
+        }
+
+        public int Class
+        {
+            get { return _class; }
+            set
+            {
+                if (value >= 0 && value <= 15)
+                {
+                    _class = value;
+                    ObjectUpdateClass();
+                }
+
+                else
+                    Logger.Err($"Error setting Class value {value} for {_charName}");
+            }
+        }
+
+        public string CharName
+        {
+            get { return _charName; }
+            set
+            {
+                if (value.Length >= 2 && value.Length <= 25)
+                {
+                    _charName = value;
+                    ObjectUpdateName();
+                }
+
+                else
+                    Logger.Err($"Error setting Name {value} for {_charName}");
+            }
+        }
+
+        public int HairColor
+        {
+            get { return _hairColor; }
+            set
+            {
+                if (value >= 0 && value <= 9)
+                {
+                    _hairColor = value;
+                    ObjectUpdateHairColor();
+                }
+
+                else
+                    Logger.Err($"Error setting HairColor {value} for {_charName}");
+            }
+        }
+
+        public int HairLength
+        {
+            get { return _hairLength; }
+            set
+            {
+                if (value >= 0 && value <= 4)
+                {
+                    _hairLength = value;
+                    ObjectUpdateHairLength();
+                }
+
+                else
+                    Logger.Err($"Error setting Hair lengtb {_hairLength} for {_charName}");
+            }
+        }
+
+        public int HairStyle
+        {
+            get { return _hairStyle; }
+            set
+            {
+                if (value >= 0 && value <= 4)
+                {
+                    _hairStyle = value;
+                    ObjectUpdateHairStyle();
+                }
+
+                else
+                    Logger.Err($"Error setting Hair Style {value} for {_charName}");
+            }
+        }
+
+        public int FaceOption
+        {
+            get { return _faceOption; }
+            set
+            {
+                if (value >= 0 && value <= 4)
+                {
+                    _faceOption = value;
+                    ObjectUpdateFaceOption();
+                }
+
+                else
+                    Logger.Err($"Error setting Face {value} for {_charName}");
+            }
+        }
+
+        public int Robe
+        {
+            get { return _robe; }
+            set
+            {
+                if (value >= -1 && value <= 4)
+                {
+                    _robe = value;
+                    ObjectUpdateRobe();
+                }
+
+                else
+                    Logger.Err($"Error setting Robe {value} for {_charName}");
+            }
+        }
+
+        public int Primary
+        {
+            get { return _primary; }
+            set
+            {
+                if (true)
+                {
+                    _primary = value;
+                    ObjectUpdatePrimary();
+                }
+
+                else
+                    Logger.Err($"Error setting Primary {_primary} foe {_charName}");
+            }
+        }
+
+        public int Secondary
+        {
+            get { return _secondary; }
+            set
+            {
+                if (true)
+                {
+                    _secondary = value;
+                    ObjectUpdateSecondary();
+                }
+
+                else
+                    Logger.Err($"Error setting Secondary {_secondary} for {_charName}");
+            }
+        }
+
+        public int Shield
+        {
+            get { return _shield; }
+            set
+            {
+                if (true)
+                {
+                    _shield = value;
+                    ObjectUpdateShield();
+                }
+
+                else
+                    Logger.Err($"Error setting Shield {_shield} for {_charName}");
+            }
+        }
+
+        public byte Helm
+        {
+            get { return _helm; }
+            set
+            {
+                if (value >= 0 && value <= 8)
+                {
+                    _helm = value;
+                    ObjectUpdateHelm();
+                }
+
+                else
+                    Logger.Err($"Error setting Helm {value} for {_charName}");
+            }
+        }
+
+        public byte Chest
+        {
+            get { return _chest; }
+            set
+            {
+                if(value >= 0 && value <= 8)
+                {
+                    _chest = value;
+                    ObjectUpdateChest();
+                }
+            }
+        }
+
+        public byte Gloves
+        {
+            get { return _gloves; }
+            set
+            {
+                if ( value >= 0 && value <= 8)
+                {
+                    _gloves = value;
+                    ObjectUpdateGloves();
+                }
+            }
+        }
+
+        public byte Bracer
+        {
+            get { return _bracers; }
+            set
+            {
+                if( value >= 0 && value <= 8)
+                {
+                    _bracers = value;
+                    ObjectUpdateBracer();
+                }
+            }
+        }
+
+        public byte Legs
+        {
+            get { return _legs; }
+            set
+            {
+                if( value >= 0 && value <= 8)
+                {
+                    _legs = value;
+                    ObjectUpdateLegs();
+                }
+            }
+        }
+
+        public byte Boots
+        {
+            get { return _boots; }
+            set
+            {
+                if( value >= 0 && value <= 8)
+                {
+                    _boots = value;
+                    ObjectUpdateBoots();
+                }
+            }
+        }
+
+        public uint HelmColor
+        {
+            get { return _helmColor; }
+            set
+            {
+                if (true)
+                {
+                    _helmColor = value;
+                    ObjectUpdateHelmColor();
+                }
+            }
+        }
+
+        public uint ChestColor 
+        {
+            get { return _chestColor; }
+            set
+            {
+                if (true)
+                {
+                    _chestColor = value;
+                    ObjectUpdateChestColor();
+                }
+            }
+        }
+
+        public uint GloveColor
+        {
+            get { return _glovesColor; }
+            set
+            {
+                if (true)
+                {
+                    _glovesColor = value;
+                    ObjectUpdateGloveColor();
+                }
+            }
+        }
+
+        public uint BracerColor
+        {
+            get { return _bracerColor; }
+            set
+            {
+                if (true)
+                {
+                    _bracerColor = value;
+                    ObjectUpdateBracerColor();
+                }
+            }
+        }
+
+        public uint LegColor
+        {
+            get { return _legsColor; }
+            set
+            {
+                if (true)
+                {
+                    _legsColor = value;
+                    ObjectUpdateLegColor();
+                }
+            }
+        }
+
+        public uint BootsColor
+        {
+            get { return _bootsColor; }
+            set
+            {
+                if (true)
+                {
+                    _bootsColor = value;
+                    ObjectUpdateBootsColor();
+                }
+            }
+        }
+
+        public uint RobeColor
+        {
+            get { return _robeColor; }
+            set
+            {
+                if (true)
+                {
+                    _robeColor = value;
+                    ObjectUpdateRobeColor();
+                }
+            }
+        }
+
+        public int ModelID
+        {
+            get { return _modelID; }
+            set
+            {
+                if(true)
+                {
+                    _modelID = value;
+                    ObjectUpdateModelID();
+                }
+            }
+        }
+
+        public float ModelSize
+        {
+            get { return _modelSize; }
+            set
+            {
+                if(value >= .025f && value <= 10.0f)
+                {
+                    _modelSize = value;
+                    ObjectUpdateModelSize();
+                }
+            }
+        }
+        #endregion
 
         //This provides us with the proper gear and gear type for visual display on character
         public void EquipGear()
@@ -69,7 +443,7 @@ namespace ReturnHome.Server.EntityObject
                     ///Gloves
                     case 19:
                         Gloves = (byte)MyItem.Model;
-                        GlovesColor = MyItem.Color;
+                        GloveColor = MyItem.Color;
                         break;
 
                     ///Chest
@@ -87,7 +461,7 @@ namespace ReturnHome.Server.EntityObject
                     ///Legs
                     case 10:
                         Legs = (byte)MyItem.Model;
-                        LegsColor = MyItem.Color;
+                        LegColor = MyItem.Color;
                         break;
 
                     ///Feet

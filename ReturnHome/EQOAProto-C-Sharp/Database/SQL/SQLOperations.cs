@@ -314,8 +314,6 @@ namespace ReturnHome.Database.SQL
             {
                 if (rdr.GetInt32(1) == serverID)
                 {
-                    Console.WriteLine("ServerID Match");
-
                     //Instantiate new character object, not to be confused with a newly created character
                     selectedCharacter = new Character
                     (
@@ -435,11 +433,6 @@ namespace ReturnHome.Database.SQL
                         rdr.GetInt32(57),
                         MySession);
                     break;
-                }
-
-                else
-                {
-                    Console.WriteLine($"ServerID: {serverID.ToString("X")} RDR ServerID: {rdr.GetInt32(1).ToString("X")}");
                 }
             }
 

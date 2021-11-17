@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject;
@@ -33,7 +32,7 @@ namespace ReturnHome.Server.Network
         public string entityName;
 
         //should be needed for transferring continents, probably can get away on just doing character changes? Could also be an easy way to flip character in and out of a channel on the client
-        private bool _resetChannel = false;
+        private bool _isActive = false;
 
         public ServerObjectUpdate(Session session, byte objectChannel)
         {
@@ -45,6 +44,7 @@ namespace ReturnHome.Server.Network
         {
             entity = entity1;
             entityName = entity.CharName;
+            _isActive = true;
         }
 
         public void GenerateUpdate()
@@ -53,10 +53,11 @@ namespace ReturnHome.Server.Network
                 return;
 
             //See if character and current message has changed
-            if (!CompareObjects(baseXOR, entity.characterUpdate))
+            if (!CompareObjects(baseXOR.Slice(1, 0xC8), entity.ObjectUpdate))
             {
                 Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-                CoordinateConversions.Xor_data(temp, entity.characterUpdate, baseXOR, 0xC9);
+                temp.Span[0] = _isActive & (baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
+                CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, baseXOR.Slice(1, 0xC8), 0xC8);
                 CurrentXORResults.Add(messageCounter, temp);
                 SessionQueueMessages.PackMessage(_session, temp, ObjectChannel);
             }
@@ -65,7 +66,21 @@ namespace ReturnHome.Server.Network
         public void updateCharacter(Entity entity1)
         {
             entity = entity1;
-            _resetChannel = true;
+            _isActive = true;
+        }
+
+        public void DisableChannel()
+        {
+            entity = null;
+            if (_isActive)
+            {
+                _isActive = false;
+                Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
+                temp.Span[0] = 1;
+                baseXOR.Slice(1, 0XC8).CopyTo(temp.Slice(1, 0xC8));
+                CurrentXORResults.Add(messageCounter, temp);
+                SessionQueueMessages.PackMessage(_session, temp, ObjectChannel);
+            }
         }
 
         public void UpdateBaseXor(ushort msgCounter)

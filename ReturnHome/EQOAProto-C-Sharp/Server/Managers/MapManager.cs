@@ -40,14 +40,6 @@ namespace ReturnHome.Server.Managers
                 //Sort Character List
                 charList = charList.OrderBy(x => Vector2.Distance(new Vector2(entity.x, entity.z), new Vector2(x.x, x.z))).ToList();
 
-                //Test order
-                //Console.Write($"List for {character.CharName}: ");
-                //foreach(Character i in charList)
-                //Console.WriteLine($"{i.CharName} - Distance: {Vector2.Distance(new Vector2(character.XCoord, character.ZCoord), new Vector2(i.XCoord, i.ZCoord))}");
-                //Console.WriteLine();
-
-                //if(charList.Count > 23)
-                //charList.RemoveRange(23, charList.Count - 23);
                 ((Character)entity).characterSession.rdpCommIn.connectionData.AddChannelObjects(charList);
                 charList.Clear();
             }

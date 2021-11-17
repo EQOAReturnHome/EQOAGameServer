@@ -18,17 +18,17 @@ namespace ReturnHome.Server.EntityObject
 
         //Set position to waypoint after initial position is set, should waypoint be assigned by the client update? Seems logical
         public Vector3 waypoint;
-        public Vector3 position;
+        private Vector3 _position;
 
 
-        public byte Facing;
-        public float FacingF;
+        private byte _facing;
+        private float _facingF;
         public float Speed;
         private float movement_speed = 2.0f;
-        public byte Turning = 0;
+        private byte _turning = 0;
 
-        public byte Animation;
-        public int Target;
+        private byte _animation;
+        private int _target;
         public byte Movement = 1;
 
         public float VelocityX = 0.0f;
@@ -38,10 +38,11 @@ namespace ReturnHome.Server.EntityObject
         public float WayPointVelocityY = 0.0f;
         public float WayPointVelocityZ = 0.0f;
 
-        public byte EastToWest = 0;
-        public byte LateralMovement = 0;
-        public byte NorthToSouth = 0;
-        public byte SpinDown = 0;
+        private byte _eastToWest = 0;
+        private byte _lateralMovement = 0;
+        private byte _northToSouth = 0;
+        private byte _spinDown = 0;
+        private byte _firstPerson;
 
         //For QuadTree
         private PointF _point;
@@ -50,6 +51,152 @@ namespace ReturnHome.Server.EntityObject
         {
             get { return _point; }
         }
+
+        #region Property zone
+
+        public byte Facing
+        {
+            get { return _facing; }
+            set
+            {
+                if(true)
+                {
+                    _facing = value;
+                    ObjectUpdateFacing();
+                }    
+            }
+        }
+
+        public float FacingF
+        {
+            get { return _facingF; }
+            set
+            {
+                if(true)
+                {
+                    _facingF = value;
+                    ObjectUpdateFacingF();
+                }
+            }
+        }
+
+        public Vector3 Position
+        {
+            get { return _position; }
+            set
+            {
+                if(true)
+                {
+                    _position = value;
+                    ObjectUpdatePosition();
+                }
+            }
+        }
+        public byte EastToWest
+        {
+            get { return _eastToWest; }
+            set
+            {
+                if(true)
+                {
+                    _eastToWest = value;
+                    ObjectUpdateEastWest();
+                }
+            }
+        }
+
+        public byte LateralMovement
+        {
+            get { return _lateralMovement; }
+            set
+            {
+                if(true)
+                {
+                    _lateralMovement = value;
+                    ObjectUpdateLateralMovement();
+                }
+            }
+        }
+
+        public byte NorthToSouth
+        {
+            get { return _northToSouth; }
+            set
+            {
+                if(true)
+                {
+                    _northToSouth = value;
+                    ObjectUpdateNorthSouth();
+                }
+            }
+        }
+
+        public byte Turning
+        {
+            get { return _turning; }
+            set
+            {
+                if(true)
+                {
+                    _turning = value;
+                    ObjectUpdateTurning();
+                }
+            }
+        }
+
+        public byte SpinDown
+        {
+            get { return _spinDown; }
+            set
+            {
+                if(true)
+                {
+                    _spinDown = value;
+                    ObjectUpdateSpinDown();
+                }
+            }
+        }
+
+        public byte Animation
+        {
+            get { return _animation; }
+            set
+            {
+                if(true)
+                {
+                    _animation = value;
+                    ObjectUpdateAnimation();
+                }
+            }
+        }
+
+        public int Target
+        {
+            get { return _target; }
+            set
+            {
+                if(true)
+                {
+                    _target = value;
+                    ObjectUpdateTarget();
+                }
+            }
+        }
+
+        public byte FirstPerson
+        {
+            get { return _firstPerson; }
+            set
+            {
+                if(true)
+                {
+                    _firstPerson = value;
+                    ObjectUpdateFirstPerson();
+                }
+            }
+        }
+
+        #endregion
 
         //Calculates our speed? I suspect this will be kinda wrong depending on network latency and such...
         public void CalculateSpeed()
@@ -69,7 +216,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void SetPosition()
         {
-            position = new Vector3(x, y, z);
+            Position = new Vector3(x, y, z);
         }
 
         public void UpdateWayPoint(float X, float Y, float Z)
@@ -110,14 +257,14 @@ namespace ReturnHome.Server.EntityObject
         {
             if (movement_started == 0)
             {
-                return position;
+                return Position;
             }
 
             float delay = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - movement_started) / 1000.0f;
 
-            Vector3 d = Vector3.Subtract(waypoint, position);
+            Vector3 d = Vector3.Subtract(waypoint, Position);
 
-            float dd = Vector3.Distance(waypoint, position);
+            float dd = Vector3.Distance(waypoint, Position);
 
             if (dd > 0)
             {
@@ -126,9 +273,9 @@ namespace ReturnHome.Server.EntityObject
                 d.Z = Speed * d.Z / dd * delay;
             }
 
-            position = Vector3.Add(position, d);
+            Position = Vector3.Add(Position, d);
 
-            return position;
+            return Position;
         }
     }
 }
