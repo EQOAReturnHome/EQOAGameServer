@@ -132,6 +132,12 @@ namespace ReturnHome.Opcodes.Chat
                         c.ObjectUpdateStatus(byte.Parse(changes[3]));
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
+
+                    case "currenthp":
+                        message = $"Changing character: {changes[1]}, {changes[2]} to {changes[3]}";
+                        c.CurrentHP = int.Parse(changes[3]);
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
                     default: 
                         break;
 

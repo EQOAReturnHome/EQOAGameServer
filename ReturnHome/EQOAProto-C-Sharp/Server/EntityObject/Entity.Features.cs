@@ -25,22 +25,22 @@ namespace ReturnHome.Server.EntityObject
         private byte _boots;
 
         //default is 0xFFFFFFFF, means no robe
-        private int _robe = -1;
-        private int _primary = 0;
-        private int _secondary = 0;
-        private int _shield = 0;
+        private int _robe;
+        private int _primary;
+        private int _secondary;
+        private int _shield;
 
         private int _modelID;
         private float _modelSize;
 
         ///Armor color
-        private uint _helmColor = 0xFFFFFFFF;
-        private uint _chestColor = 0xFFFFFFFF;
-        private uint _glovesColor = 0xFFFFFFFF;
-        private uint _bracerColor = 0xFFFFFFFF;
-        private uint _legsColor = 0xFFFFFFFF;
-        private uint _bootsColor = 0xFFFFFFFF;
-        private uint _robeColor = 0xFFFFFFFF;
+        private uint _helmColor;
+        private uint _chestColor;
+        private uint _glovesColor;
+        private uint _bracerColor;
+        private uint _legsColor;
+        private uint _bootsColor;
+        private uint _robeColor;
 
         #region Objext Update Properties
 

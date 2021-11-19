@@ -108,6 +108,15 @@ namespace ReturnHome.Server.EntityObject
             ObjectUpdateNamePlate();
             ObjectUpdateUnknown();
             ObjectUpdatePattern();
+            //Set armour to defaults
+            HelmColor = 0xFFFFFFFF;
+            ChestColor = 0xFFFFFFFF;
+            BracerColor = 0xFFFFFFFF;
+            GloveColor = 0xFFFFFFFF;
+            LegColor = 0xFFFFFFFF;
+            BootsColor = 0xFFFFFFFF;
+            RobeColor = 0xFFFFFFFF;
+            Robe = -1;
             ModelSize = 1.0f;
             Movement = 1;
         }
