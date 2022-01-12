@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Configuration;
 
 using ReturnHome.Utilities;
 using ReturnHome.Database.SQL;
@@ -9,6 +10,8 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Opcodes.Chat;
+
+
 
 namespace ReturnHome.Opcodes
 {
@@ -24,9 +27,9 @@ namespace ReturnHome.Opcodes
             { GameOpcode.CreateCharacter, ProcessCreateChar },
             { GameOpcode.ClientSayChat, ChatMessage.ProcessClientChat },
             { GameOpcode.RandomName, GenerateRandomName },
-            { GameOpcode.ClientShout, ShoutChat.ProcessShout},
-            { GameOpcode.ChangeChatMode, ChangeChatMode},
-            { GameOpcode.DisconnectClient, DisconnectClient}
+            { GameOpcode.ClientShout, ShoutChat.ProcessShout },
+            { GameOpcode.ChangeChatMode, ChangeChatMode },
+            { GameOpcode.DisconnectClient, DisconnectClient }
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -62,7 +65,7 @@ namespace ReturnHome.Opcodes
             Memory<byte> temp = new Memory<byte>(new byte[2 + 4 + (Name.Length * 2)]);
             Span<byte> Message = temp.Span;
 
-            Message.Write((ushort) GameOpcode.RandomName, ref offset);
+            Message.Write((ushort)GameOpcode.RandomName, ref offset);
             Message.Write(Name.Length, ref offset);
             Message.Write(Encoding.Default.GetBytes(Name), ref offset);
             //Send Message
@@ -98,10 +101,10 @@ namespace ReturnHome.Opcodes
             ReadOnlySpan<byte> Message = ClientPacket.Data.Span;
             //Retrieve CharacterID from client
             int ServerID = Message.GetLEInt(ref offset);
-            int FaceOption = Message.GetLEInt( ref offset);
-            int HairStyle = Message.GetLEInt( ref offset);
-            int HairLength = Message.GetLEInt( ref offset);
-            int HairColor = Message.GetLEInt( ref offset);
+            int FaceOption = Message.GetLEInt(ref offset);
+            int HairStyle = Message.GetLEInt(ref offset);
+            int HairLength = Message.GetLEInt(ref offset);
+            int HairColor = Message.GetLEInt(ref offset);
 
             CharacterSQL cSQL = new();
             //Query Character
@@ -129,87 +132,87 @@ namespace ReturnHome.Opcodes
             charDump.GetPlayerWeaponHotbar(MySession);
             charDump.GetPlayerSpells(MySession);
 
-            using(MemoryStream memStream = new())
+            using (MemoryStream memStream = new())
             {
-              //Toss opcode in
-              memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MemoryDump));
+                //Toss opcode in
+                memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MemoryDump));
 
-              MySession.MyCharacter.DumpCharacter(memStream);
-              memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.MyHotkeys.Count));
+                MySession.MyCharacter.DumpCharacter(memStream);
+                memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.MyHotkeys.Count));
 
-              //cycle over all our hotkeys and append them
-              foreach(Hotkey h in MySession.MyCharacter.MyHotkeys)
-              {
-                  h.PullHotkey(memStream);
-              }
+                //cycle over all our hotkeys and append them
+                foreach (Hotkey h in MySession.MyCharacter.MyHotkeys)
+                {
+                    h.PullHotkey(memStream);
+                }
 
-              //Unknown at this time 4 byte null
-              memStream.Write(new byte[4]);
+                //Unknown at this time 4 byte null
+                memStream.Write(new byte[4]);
 
-              //Unknown at this time 4 byte null
-              memStream.Write(new byte[4]);
+                //Unknown at this time 4 byte null
+                memStream.Write(new byte[4]);
 
-              //Quest Count
-              memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.MyQuests.Count));
+                //Quest Count
+                memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.MyQuests.Count));
 
-              //Iterate over quest data and append (Should be 0 for now...)
-              foreach (Quest q in MySession.MyCharacter.MyQuests)
-              {
-                  q.DumpQuest(memStream);
-              }
+                //Iterate over quest data and append (Should be 0 for now...)
+                foreach (Quest q in MySession.MyCharacter.MyQuests)
+                {
+                    q.DumpQuest(memStream);
+                }
 
-              //Get Inventory Item count
-              memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.Inventory.Count));
-              memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.Inventory.Count));
+                //Get Inventory Item count
+                memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.Inventory.Count));
+                memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.Inventory.Count));
 
-              foreach( Item i in MySession.MyCharacter.Inventory)
-              {
-                  i.DumpItem(memStream);
-              }
+                foreach (Item i in MySession.MyCharacter.Inventory)
+                {
+                    i.DumpItem(memStream);
+                }
 
-              //While we are here, lets "equip" our equipped gear
-              MySession.MyCharacter.EquipGear();
+                //While we are here, lets "equip" our equipped gear
+                MySession.MyCharacter.EquipGear();
 
-              foreach( WeaponHotbar wb in MySession.MyCharacter.WeaponHotbars)
-              {
-                  wb.DumpWeaponHotbar(memStream);
-              }
+                foreach (WeaponHotbar wb in MySession.MyCharacter.WeaponHotbars)
+                {
+                    wb.DumpWeaponHotbar(memStream);
+                }
 
-              //Get Bank Item count
-              memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.BankItems.Count));
-              memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count));
-              foreach (Item bi in MySession.MyCharacter.BankItems)
-              {
-                  bi.DumpItem(memStream);
-              }
+                //Get Bank Item count
+                memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.BankItems.Count));
+                memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count));
+                foreach (Item bi in MySession.MyCharacter.BankItems)
+                {
+                    bi.DumpItem(memStream);
+                }
 
-              // end of bank? or could be something else for memory dump
-              memStream.WriteByte(0);
+                // end of bank? or could be something else for memory dump
+                memStream.WriteByte(0);
 
-              //Buying auctions
-              memStream.WriteByte((byte)MySession.MyCharacter.MyBuyingAuctions.Count);
-              foreach (Auction ba in MySession.MyCharacter.MyBuyingAuctions)
-              {
-                  ba.DumpAuction(memStream);
-              }
+                //Buying auctions
+                memStream.WriteByte((byte)MySession.MyCharacter.MyBuyingAuctions.Count);
+                foreach (Auction ba in MySession.MyCharacter.MyBuyingAuctions)
+                {
+                    ba.DumpAuction(memStream);
+                }
 
-              //Selling auctions
-              memStream.WriteByte((byte)MySession.MyCharacter.MySellingAuctions.Count);
-              foreach (Auction sa in MySession.MyCharacter.MySellingAuctions)
-              {
-                  sa.DumpAuction(memStream);
-              }
+                //Selling auctions
+                memStream.WriteByte((byte)MySession.MyCharacter.MySellingAuctions.Count);
+                foreach (Auction sa in MySession.MyCharacter.MySellingAuctions)
+                {
+                    sa.DumpAuction(memStream);
+                }
 
-              //Spell count and Spells
-              memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.MySpells.Count));
-              foreach (Spell s in MySession.MyCharacter.MySpells)
-              {
-                  s.DumpSpell(memStream);
-              }
+                //Spell count and Spells
+                memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.MySpells.Count));
+                foreach (Spell s in MySession.MyCharacter.MySpells)
+                {
+                    s.DumpSpell(memStream);
+                }
 
-              //Not entirely known what this is at this time
-              //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
-              memStream.Write(new byte[] {                  0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+                //Not entirely known what this is at this time
+                //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
+                memStream.Write(new byte[] {                  0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00,
@@ -223,7 +226,7 @@ namespace ReturnHome.Opcodes
                 long pos = memStream.Position;
                 buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
             }
-            
+
             int offset = 0;
             Memory<byte> temp = new byte[18];
             Span<byte> Message = temp.Span;
@@ -253,7 +256,7 @@ namespace ReturnHome.Opcodes
             CharacterSQL deletedCharacter = new CharacterSQL();
             ReadOnlySpan<byte> temp = ClientPacket.Data.Span;
             //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
-            int clientServID = temp.Get7BitDoubleEncodedInt( ref offset);
+            int clientServID = temp.Get7BitDoubleEncodedInt(ref offset);
 
             //Call SQL delete method to actually process the delete.
             deletedCharacter.DeleteCharacter(clientServID, MySession);
@@ -408,7 +411,9 @@ namespace ReturnHome.Opcodes
                 offset += 32;
 
                 ///Uncomment once ready
-                MySession.AccountID = 11;
+                //MySession.AccountID = 3;
+                MySession.AccountID = Convert.ToInt32(ConfigurationManager.AppSettings["StaticAccount"]);
+
 
                 ///Theoretically we want to verify account # is not 0 here, if it is, drop it.
                 if (MySession.AccountID == -1)
@@ -446,12 +451,12 @@ namespace ReturnHome.Opcodes
         {
             //gather expected buffer size... start with 3, opcode and character count should always be 3
             int bufferSize = 3;
-            for( int i = 0; i < MyCharacterList.Count; i++)
+            for (int i = 0; i < MyCharacterList.Count; i++)
             {
                 //Everycharacter has this as a "standard" amount of bytes
                 bufferSize += 82;
                 bufferSize += MyCharacterList[i].CharName.Length;
-                bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ServerID );
+                bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ServerID);
                 bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ModelID);
             }
 

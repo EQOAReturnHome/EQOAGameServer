@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Configuration;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network.Managers
@@ -14,7 +15,7 @@ namespace ReturnHome.Server.Network.Managers
 			//Hardcoded for the moment, eventually could be read from a config file
 			//To create more elaborate designs for the server and zones
 			ushort endPoint = 0x73B1;
-			ushort port = 10071;
+			ushort port = Convert.ToUInt16(ConfigurationManager.AppSettings["LocalServerPort"]);
 			string serverName = "Default";
 			
 			//Eventually we would have listeners for multiple ports to support "multiple servers" from same ip?
