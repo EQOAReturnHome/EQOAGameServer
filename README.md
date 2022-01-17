@@ -38,14 +38,17 @@ This includes:
 - Able to now see other players running around, very rudimentary state. Little choppy but it's something to start with
 - Ingame chat, local say along with a (currently) global shout.
 - Ingame "admin" system via chat just for adjusting some character states, eventually to be used with NPC testing.
+- World fully populated with NPCs.
+- Save characters upon logging off/disconnecting.
 - Other small, minor things.
 
 #TO-DO List
-- Add Some NPC's to the world and begin developing pathing
+- Scripting for NPC pathing, interactions,etc
+- Combat
+- Various player op codes for interacting. Spells, etc.
 - Begin work with Recast Tool
 - Incorporate the stat update type
 - Implement Tells/Replies
-- Save characters upon logging off/disconnecting (Something basic like xyz, maybe hp for now)
 - Look into grouping mechanisms and the group unreliable type
 
 
