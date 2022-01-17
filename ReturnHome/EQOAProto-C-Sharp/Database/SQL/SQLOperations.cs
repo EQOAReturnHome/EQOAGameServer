@@ -78,7 +78,7 @@ namespace ReturnHome.Database.SQL
                 npcData.Add(newActor);
 
             }
-
+            rdr.Close();
             //return the list of actors from DB
             return npcData;
         }
