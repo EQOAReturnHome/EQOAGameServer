@@ -23,7 +23,7 @@ namespace ReturnHome.Server.Managers
             if (!playerList.Contains(character))
                 return false;
             playerList.Remove(character);
-            return true;   
+            return true;
         }
 
         public static bool QueryForPlayer(string name, out Character c)
@@ -43,6 +43,12 @@ namespace ReturnHome.Server.Managers
         public static List<Character> QueryForAllPlayers()
         {
             return playerList;
+        }
+
+        //Stub method to be called on timer to save all characters in world
+        public static void SaveCharacterData()
+        {
+            //List<Entity> charList = (List<Entity>)qtree.GetAllObjects().Cast<Entity>().ToList();
         }
     }
 }

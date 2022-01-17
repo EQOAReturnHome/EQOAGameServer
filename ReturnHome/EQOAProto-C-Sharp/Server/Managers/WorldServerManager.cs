@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject.Actor;
+using ReturnHome.Server.EntityObject;
+using QuadTrees;
 
 using ReturnHome.Server.Network.Managers;
 

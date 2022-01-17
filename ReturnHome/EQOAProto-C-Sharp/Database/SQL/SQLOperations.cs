@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
@@ -15,6 +14,70 @@ namespace ReturnHome.Database.SQL
     //Class to handle all SQL Operations
     class CharacterSQL : SQLBase
     {
+
+        public void SavePlayerData(Character player)
+        {
+            //Create new sql connection calling stored proc to update data
+            using var SecondCmd = new MySqlCommand("UpdatePlayerData", con);
+            SecondCmd.CommandType = CommandType.StoredProcedure;
+
+            //charServerID used to save data for specific character, to be used
+            //in a loop whereever this method is called if saving more than one character
+            SecondCmd.Parameters.AddWithValue("charServerID", player.ServerID);
+            SecondCmd.Parameters.AddWithValue("playerLevel", player.Level);
+            //May need other default values but these hard set values are placeholders for now
+            SecondCmd.Parameters.AddWithValue("newTotalXP", 0);
+            SecondCmd.Parameters.AddWithValue("newDebt", 0);
+            SecondCmd.Parameters.AddWithValue("newBreath", 255);
+            SecondCmd.Parameters.AddWithValue("newTunar", player.Tunar);
+            SecondCmd.Parameters.AddWithValue("newBankTunar", player.BankTunar);
+            SecondCmd.Parameters.AddWithValue("newUnusedTP", player.UnusedTP);
+            SecondCmd.Parameters.AddWithValue("newTotalTP", 350);
+            SecondCmd.Parameters.AddWithValue("newX", player.x);
+            SecondCmd.Parameters.AddWithValue("newY", player.y);
+            SecondCmd.Parameters.AddWithValue("newZ", player.z);
+            SecondCmd.Parameters.AddWithValue("newFacing", player.Facing);
+            SecondCmd.Parameters.AddWithValue("newStrength", player.Strength);
+            SecondCmd.Parameters.AddWithValue("newStamina", player.Stamina);
+            SecondCmd.Parameters.AddWithValue("newAgility", player.Agility);
+            SecondCmd.Parameters.AddWithValue("newDexterity", player.Dexterity);
+            SecondCmd.Parameters.AddWithValue("newWisdom", player.Wisdom);
+            SecondCmd.Parameters.AddWithValue("newIntel", player.Intelligence);
+            SecondCmd.Parameters.AddWithValue("newCharisma", player.Charisma);
+            //May need other default or calculated values but these hard set values are placeholders for now
+            SecondCmd.Parameters.AddWithValue("newCurrentHP", 1000);
+            SecondCmd.Parameters.AddWithValue("newMaxHP", 1000);
+            SecondCmd.Parameters.AddWithValue("newCurrentPower", 500);
+            SecondCmd.Parameters.AddWithValue("newMaxPower", 500);
+            SecondCmd.Parameters.AddWithValue("newHealot", 20);
+            SecondCmd.Parameters.AddWithValue("newPowerot", 10);
+            SecondCmd.Parameters.AddWithValue("newAC", 0);
+            SecondCmd.Parameters.AddWithValue("newPoisonr", 10);
+            SecondCmd.Parameters.AddWithValue("newDiseaser", 10);
+            SecondCmd.Parameters.AddWithValue("newFirer", 10);
+            SecondCmd.Parameters.AddWithValue("newColdr", 10);
+            SecondCmd.Parameters.AddWithValue("newLightningr", 10);
+            SecondCmd.Parameters.AddWithValue("newArcaner", 10);
+            SecondCmd.Parameters.AddWithValue("newFishing", 0);
+            SecondCmd.Parameters.AddWithValue("newBaseStrength", player.DefaultStrength);
+            SecondCmd.Parameters.AddWithValue("newBaseStamina", player.DefaultStamina);
+            SecondCmd.Parameters.AddWithValue("newBaseAgility", player.DefaultAgility);
+            SecondCmd.Parameters.AddWithValue("newBaseDexterity", player.DefaultDexterity);
+            SecondCmd.Parameters.AddWithValue("newBaseWisdom", player.DefaultWisdom);
+            SecondCmd.Parameters.AddWithValue("newBaseIntel", player.DefaultIntelligence);
+            SecondCmd.Parameters.AddWithValue("newBaseCharisma", player.DefaultCharisma);
+            //See above comments regarding hard set values
+            SecondCmd.Parameters.AddWithValue("newCurrentHP2", 1000);
+            SecondCmd.Parameters.AddWithValue("newBaseHP", 1000);
+            SecondCmd.Parameters.AddWithValue("newCurrentPower2", 500);
+            SecondCmd.Parameters.AddWithValue("newBasePower", 500);
+            SecondCmd.Parameters.AddWithValue("newHealot2", 20);
+            SecondCmd.Parameters.AddWithValue("newPowerot2", 10);
+
+            //Execute parameterized statement entering it into the DB
+            //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
+            SecondCmd.ExecuteNonQuery();
+        }
 
         //Queries NPC database to populate world lists
         public List<Actor> WorldActors()

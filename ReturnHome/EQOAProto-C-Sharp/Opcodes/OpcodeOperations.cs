@@ -92,6 +92,11 @@ namespace ReturnHome.Opcodes
         public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
         {
             MySession.PendingTermination = true;
+            //Create new handle for mysql connection
+            CharacterSQL savePlayerData = new();
+            //Call the mysql update query to save player data
+            savePlayerData.SavePlayerData(MySession.MyCharacter);
+            //Actually drop the player's session
             MySession.DropSession();
         }
 
