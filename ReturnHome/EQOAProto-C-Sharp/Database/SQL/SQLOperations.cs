@@ -8,12 +8,80 @@ using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.Actor;
 
 namespace ReturnHome.Database.SQL
 {
     //Class to handle all SQL Operations
     class CharacterSQL : SQLBase
     {
+
+        //Queries NPC database to populate world lists
+        public List<Actor> WorldActors()
+        {
+            //create list to hold NPCs
+            List<Actor> npcData = new List<Actor>();
+            //Call stored procedure using connection
+            using var cmd = new MySqlCommand("GetAllNPCs", con);
+            //use command type stored proc
+            cmd.CommandType = CommandType.StoredProcedure;
+            //create reader and execute
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            //while rows exist from data set continue to read in data 
+            while (rdr.Read())
+            {
+                //create new actor object using database rows
+                Actor newActor = new Actor(
+                    //name
+                    rdr.GetString(0),
+                    //xCoord
+                    rdr.GetFloat(1),
+                    //yCoord
+                    rdr.GetFloat(2),
+                    //zCoord
+                    rdr.GetFloat(3),
+                    //facing
+                    rdr.GetInt32(4),
+                    //world
+                    rdr.GetInt32(5),
+                    //modelid
+                    rdr.GetInt32(7),
+                    //size
+                    rdr.GetFloat(8),
+                    //primary
+                    rdr.GetInt32(9),
+                    //secondary
+                    rdr.GetInt32(10),
+                    //shield
+                    rdr.GetInt32(11),
+                    //hair_color
+                    rdr.GetInt32(12),
+                    //hair_length
+                    rdr.GetInt32(13),
+                    //hair_style
+                    rdr.GetInt32(14),
+                    //level
+                    rdr.GetInt32(15),
+                    //torso
+                    rdr.GetInt32(16),
+                    //forearms
+                    rdr.GetInt32(17),
+                    //gloves
+                    rdr.GetInt32(18),
+                    //legs
+                    rdr.GetInt32(19),
+                    //feet
+                    rdr.GetInt32(20),
+                    //head
+                    rdr.GetInt32(21));
+                //add the created actor to the npcData list
+                npcData.Add(newActor);
+
+            }
+
+            //return the list of actors from DB
+            return npcData;
+        }
         //Class to pull characters from DB via serverid
         public List<Character> AccountCharacters(Session MySession)
         {

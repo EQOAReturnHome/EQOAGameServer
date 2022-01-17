@@ -6,7 +6,7 @@ namespace ReturnHome.Server.Managers
     public static class EntityManager
     {
         private static List<Entity> entityList = new();
-
+        
         public static bool AddEntity(Entity entity)
         {
             //Add entity to our tracking List

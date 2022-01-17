@@ -21,27 +21,47 @@ namespace ReturnHome.Server.Managers
         public static void AddPlayerToTree(Entity entity)
         {
             //Should this queue players to be added simulataneously, instead of individual add's? Probably.
+            
             treeQueue.Add(entity);
         }
 
         public static void BulkAddPlayers()
         {
-            qtree.AddBulk(treeQueue);
+            //iterate over treeQueue and add players to the quad tree one by one
+           for(int i = 0; i < treeQueue.Count; i++)
+            {
+                qtree.Add(treeQueue[i]);
+            }
+           
+            //clear the tree queue so it doesn't continuosly try to add the same objects to the tree
             treeQueue.Clear();
         }
 
         public static void QueryObjectsForDistribution()
         {
-            List<Entity> charList = new List<Entity>();
-            foreach (Entity entity in qtree.GetAllObjects())
+            List<Entity> entityList = new List<Entity>();
+            List<Entity> charList = (List<Entity>)qtree.GetAllObjects().Cast<Entity>().ToList();
+            foreach (Entity actor in charList)
             {
-                qtree.GetObjects(new RectangleF(entity.x - 50.0f, entity.z - 50.0f, 100.0f, 100.0f), charList);
+                if (!actor.isPlayer)
+                {
+                    entityList.Add(actor);
+                }
+            }
+
+            charList.RemoveAll(x => x.isPlayer == false);
+            foreach (Entity entity in charList)
+            {
+                qtree.GetObjects(new RectangleF(entity.x - 50.0f, entity.z - 50.0f, 100.0f, 100.0f), entityList);
 
                 //Sort Character List
-                charList = charList.OrderBy(x => Vector2.Distance(new Vector2(entity.x, entity.z), new Vector2(x.x, x.z))).ToList();
+                entityList = entityList.OrderBy(x => Vector2.Distance(new Vector2(entity.x, entity.z), new Vector2(x.x, x.z))).ToList();
 
-                ((Character)entity).characterSession.rdpCommIn.connectionData.AddChannelObjects(charList);
-                charList.Clear();
+                ((Character)entity).characterSession.rdpCommIn.connectionData.AddChannelObjects(entityList);
+
+
+
+                entityList.Clear();
             }
         }
 
@@ -50,6 +70,10 @@ namespace ReturnHome.Server.Managers
         public static List<Entity> QueryNearbyObjects(Character myCharacter, float radius)
         {
             List<Entity> entityList = new();
+            foreach (Entity entity in qtree.GetAllObjects())
+            {
+                Console.WriteLine(entity.CharName);
+            }
             qtree.GetObjects(new RectangleF(myCharacter.x - (radius / 2), myCharacter.z - (radius / 2), radius, radius), entityList);
 
             return entityList;

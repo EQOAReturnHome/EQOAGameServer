@@ -7,7 +7,6 @@ using ReturnHome.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using System.Runtime.CompilerServices;
 using ReturnHome.Server.Managers;
-using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network
 {
@@ -101,6 +100,8 @@ namespace ReturnHome.Server.Network
                 PlayerManager.AddPlayer(Mysession.MyCharacter);
                 EntityManager.AddEntity(Mysession.MyCharacter);
                 MapManager.AddPlayerToTree(Mysession.MyCharacter);
+                
+                
                 Mysession.inGame = true;
             }
 
