@@ -43,9 +43,14 @@
         RandomName = 0x12, //18
         IgnoreList = 0x1005, //4101
         ActorSpeed = 0xF8, //248
-        ClientMessage = 0x0A7A, //2682
+        ClientMessage = 0x0A7A, //2682 - White text message
         DisconnectClient = 0x09B0, //2480
-        ClientSayChat = 0x000B //11
+        ColoredChat = 0x0A7B, //2683 - Color text message
+
+        //From client
+        ClientSayChat = 0x000B, //11 - Normal say message from client
+        ClientShout = 0x0C01, //3073 - Shout message from client
+        ChangeChatMode = 0x000E //14 - Client requests change to "permanant" chat mode
     }
 
     public static class GameVersions
@@ -71,7 +76,7 @@
         public const byte ProcessAll = 99; ///Client requesting new session
         public const byte ProcessReport = 35; ///Client requesting to close session
         public const byte ProcessMessages = 32; ///Client is continuing session
-        public const byte ProcessMessageAndReport = 13; ///Client is continuing session
+        public const byte ProcessMessageAndReport = 19; ///Client is continuing session
         public const byte NewProcessReport = 3; ///Client is continuing session
         public const byte NewProcessMessages = 0; ///Client is continuing session
     }

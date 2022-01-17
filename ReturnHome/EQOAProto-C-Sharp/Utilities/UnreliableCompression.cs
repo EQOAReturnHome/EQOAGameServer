@@ -1,36 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using ReturnHome.PacketProcessing;
 
 namespace ReturnHome.Utilities
 {
+    
     class Compression
     {
-        //For uncompress
-        private int readBytes = 0;
-        private int myBytes = 0;
-        private int padding = 0;
-        private int realBytes = 0;
-        private MessageCreator _meassgeCreator;
-
-        public Compression()
+        public static Memory<byte> runLengthEncode(ReadOnlyMemory<byte> temp)
         {
-            _meassgeCreator = new();
-        }
-
-        public ReadOnlyMemory<byte> CompressUnreliable(byte[] MyUnreliable, Session MySession)
-        {
+            ReadOnlySpan<byte> MyUnreliable = temp.Span;
             int length = MyUnreliable.Length;
-
+            int offset = 0;
             int thisReal = 0;
             int thisCompress = 0;
 
-            //Considerations... Channel, MessageLength, Message #, Xor Back #
-            _meassgeCreator.MessageWriter(new byte[] { 0x00, 0xC9 });
-            _meassgeCreator.MessageWriter(BitConverter.GetBytes(MySession.ActorUpdatMessageCount));
-            MySession.ActorUpdatMessageCount += 1;
-            _meassgeCreator.MessageWriter(new byte[] { 0x00 });
+            //Start with a Memory/Span of size 0xc9, will need to resize after compression
+            Memory<byte> tempMem = new Memory<byte>(new byte[0xC9]);
+            Span<byte> tempSpan = tempMem.Span;
 
             //Cycle through every byte of update message
             //skip first 5 bytes
@@ -42,20 +28,9 @@ namespace ReturnHome.Utilities
                     //Check if prior bytes were not null
                     if (thisReal > 0)
                     {
-                        //Need to add compression bytes
-                        //If either of these are true, need 2 byte compression
-                        if (thisReal > 7 || thisCompress > 15)
-                        {
-                            _meassgeCreator.MessageWriter(new byte[] { (byte)(thisReal | 0x80), (byte)thisCompress });
-                            _meassgeCreator.MessageWriter(MyUnreliable[(i - thisReal)..i]);
-                        }
-
-                        //Single byte compression
-                        else
-                        {
-                            _meassgeCreator.MessageWriter(new byte[] { (byte)((thisReal * 0x10) + thisCompress) });
-                            _meassgeCreator.MessageWriter(MyUnreliable[(i - thisReal)..i]);
-                        }
+                        tempSpan[offset++] = (byte)(thisReal | 0x80);
+                        tempSpan[offset++] = (byte)thisCompress;
+                        tempSpan.Write(MyUnreliable.Slice((i - thisReal), thisReal), ref offset);
 
                         //Reset counters
                         thisCompress = 0;
@@ -63,64 +38,24 @@ namespace ReturnHome.Utilities
                     }
 
                     thisCompress += 1;
-
-                    //check if this is the last value
-                    if (length - 1 == i)
-                    {
-                        //Compress remaining bytes and stuff....
-                        //Need to add compression bytes
-                        //If either of these are true, need 2 byte compression
-                        if (thisReal > 7 || thisCompress > 15)
-                        {
-                            _meassgeCreator.MessageWriter(new byte[] { (byte)(thisReal | 0x80), (byte)thisCompress });
-                            _meassgeCreator.MessageWriter(MyUnreliable[(i - thisReal + 1)..i]);
-                        }
-
-                        //Single byte compression
-                        else
-                        {
-                            _meassgeCreator.MessageWriter(new byte[] { (byte)((thisReal * 0x10) + thisCompress) });
-                            _meassgeCreator.MessageWriter(MyUnreliable[(i - thisReal + 1)..i]);
-                        }
-                    }
+                    continue;
                 }
 
                 //Real byte
-                else
-                {
-                    thisReal += 1;
-
-                    //check if this is the last value
-                    if (length - 1 == i)
-                    {
-                        //Compress remaining bytes and stuff....
-                        //Need to add compression bytes
-                        //If either of these are true, need 2 byte compression
-                        if (thisReal > 7 || thisCompress > 15)
-                        {
-                            _meassgeCreator.MessageWriter(new byte[] { (byte)(thisReal | 0x80), (byte)thisCompress });
-                            _meassgeCreator.MessageWriter(MyUnreliable[(i - thisReal + 1)..(i+1)]);
-                        }
-
-                        //Single byte compression
-                        else
-                        {
-                            _meassgeCreator.MessageWriter(new byte[] { (byte)((thisReal * 0x10) + thisCompress) });
-                            _meassgeCreator.MessageWriter(MyUnreliable[(i - thisReal + 1)..(i+1)]);
-                        }
-                    }
-                }
+                thisReal += 1;
             }
 
-            //Add 0x00 to end of message
-            _meassgeCreator.MessageWriter(new byte[] { 0x00 });
+            tempSpan[offset++] = (byte)(thisReal | 0x80);
+            tempSpan[offset++] = (byte)thisCompress;
+            if (thisReal != 0)
+                tempSpan.Write(MyUnreliable.Slice((length - thisReal), thisReal), ref offset);
 
-            //Return ReadOnlyMemory Message
-            return _meassgeCreator.MessageReader();
+            //Return the memory that was written too
+            return tempMem.Slice(0, offset);
         }
 
         //Pass in Unreliable message and expected unreliable length
-        public unsafe ReadOnlyMemory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, ref int offset, int length)
+        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, ref int offset, int length)
         {
 
             byte[] messageBuf = new byte[length];
@@ -140,8 +75,7 @@ namespace ReturnHome.Utilities
 
                 while (true)
                 {
-                    local_70 = buf[offset];
-                    offset += 1;
+                    local_70 = buf[offset++];
                     if (local_70 == 0) break;
                     len_00 = (uint)local_70 & 0x7f;
                     if ((local_70 & 0x80) == 0)
@@ -152,8 +86,7 @@ namespace ReturnHome.Utilities
 
                     else
                     {
-                        local_70 = buf[offset];
-                        offset += 1;
+                        local_70 = buf[offset++];
                         uVar2 = (uint)local_70;
                     }
 
@@ -172,9 +105,8 @@ namespace ReturnHome.Utilities
                     {
                         for (int i = 0; i < len_00; i++)
                         {
-                            messageBuf[counter] = buf[offset];
+                            messageBuf[counter] = buf[offset++];
                             counter += 1;
-                            offset += 1;
                         }
                     }
                 }

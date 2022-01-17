@@ -13,12 +13,24 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Server\NewFolder1\**" />
+    <Compile Remove="Server\NewFolder\**" />
+    <EmbeddedResource Remove="Server\NewFolder1\**" />
+    <EmbeddedResource Remove="Server\NewFolder\**" />
+    <None Remove="Server\NewFolder1\**" />
+    <None Remove="Server\NewFolder\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="MySqlConnector" Version="0.69.4" />
+    <PackageReference Include="QuadTrees" Version="1.0.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Include="System.IO.Pipelines" Version="5.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Database\SQL\Character\" />
   </ItemGroup>
 </Project>

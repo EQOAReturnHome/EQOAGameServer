@@ -80,6 +80,8 @@ namespace AuthServer.Server
         public void CheckClientRequest(byte[] buffer)
         {
             ClientPacket = buffer;
+            if (buffer.Length == 0)
+                return;
 
             int MessageLength = BinaryPrimitiveWrapper.GetBEInt(this);
             uint MessageType = (uint)BinaryPrimitiveWrapper.GetBEInt(this);

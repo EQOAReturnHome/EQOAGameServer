@@ -15,168 +15,53 @@ namespace ReturnHome.Utilities
             return (ulong)(unixTime.TotalSeconds);
         }
 
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(byte val)
+        public static byte DoubleVariableLengthIntegerLength(int val)
         {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(sbyte val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(short val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(ushort val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(int val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Helper function encompassing the technique with overloads
-        public static byte[] Technique(uint val)
-        {
-            byte[] MyVal = BitConverter.GetBytes(RealTechnique((long)val));
-
-            int lastIndex = Array.FindLastIndex(MyVal, b => b != 0);
-
-            if (lastIndex == -1) { Array.Resize(ref MyVal, lastIndex + 2); }///Resizes byte array to real value 
-            else { Array.Resize(ref MyVal, lastIndex + 1); } ///Resizes byte array to real value  
-            return MyVal;
-        }
-
-        ///Performs the actual Technique for us
-        private static long RealTechnique(long value)
-        {
-            //Bool to indicate if negative
-            bool isNegative = false;
-
-            //Check for being negative, if true set bool to true
-            if (value < 0)
-            {
-                isNegative = true;
-                value = Math.Abs(value);
-            }
-
-            //First value * 2
+            uint value = (uint)val;
             value *= 2;
 
-            //Create a list to store our bytes
-            List<byte> TechniqueVal = new List<byte> { };
+            if (value >= 0 && value <= 127)
+                return 1;
 
-            //Loop over value and break it down
-            while (value != 0)
-            {
-                if (value > 0x80)
-                {
-                    TechniqueVal.Add((byte)((value & 0x7F) | 0x80));
-                    value >>= 7;
-                }
+            else if (value >= 128 && value <= 16383)
+                return 2;
 
-                else
-                {
-                    TechniqueVal.Add((byte)value);
-                    value >>= 7;
-                }
-            }
+            else if (value >= 16384 && value <= 2097151)
+                return 3;
 
-            //Get # of bytes in List
-            int length = TechniqueVal.Count;
+            else if (value >= 2097152 && value <= 268435455)
+                return 4;
 
-            //long to store new value
-            long NewValue = 0;
-            //Console.WriteLine(TechniqueVal[length - 1]);
-            for (int i = 1; i < length + 1; i++)
-            {
-                NewValue = (NewValue << 8) | TechniqueVal[length - i];
-                //Console.WriteLine(Convert.ToString(NewValue, 2));
-            }
+            else if (value >= 268435456 && value <= 4294967295)
+                return 5;
 
-            //If original value was negative, add 1 to new value
-            if (isNegative) { NewValue -= 1; }
-
-            return NewValue;
+            else
+                //Throw an error and return 0?
+                return 0;
         }
 
-        public static int Untechnique(ReadOnlySpan<byte> MyPacket, ref int offset)
+        public static byte VariableLengthIntegerLength(uint val)
         {
-            bool isNegative = false;
+            uint value = (uint)val;
 
-            //Check if value is negative, is so add 1 to first byte and check bool
-            if ((MyPacket[offset] & 1) == 1) isNegative = true; 
+            if (value >= 0 && value <= 127)
+                return 1;
 
-            //Work some magic
-            uint val = 0;
+            else if (value >= 128 && value <= 16383)
+                return 2;
 
-            //Loop over our packet
-            for (int i = 0; i < MyPacket.Length; i++)
-            {
-                //Grab the current byte and shift i * 7
-                val |= (uint)((MyPacket[offset] & 0x7f) << (i * 7));
+            else if (value >= 16384 && value <= 2097151)
+                return 3;
 
-                //Keep processing if true
-                if (!((MyPacket[offset] & 0x80) == 0))
-                {
-                    offset += 1;
-                    continue;
-                }
+            else if (value >= 2097152 && value <= 268435455)
+                return 4;
 
-                offset += 1;
-                break;
-            }
+            else if (value >= 268435456 && value <= 4294967295)
+                return 5;
 
-            //If value is supposed to be negative, add 1
-            if (isNegative) val += 1;
-
-            //Divide the unsigned value by 2 and cast to an integer
-            int newVal = (int)(val / 2);
-
-            //If its supposed to be negative, make it so
-            if (isNegative) { newVal *= -1; }
-
-            return newVal;
+            else
+                //Throw an error and return 0?
+                return 0;
         }
 
         //This method unpacks VLI data
@@ -204,34 +89,60 @@ namespace ReturnHome.Utilities
             return val;
         }
 
+        //Packing
         static public byte[] Pack(uint value)
         {
-            //Work some magic. Basic VLI
-            List<byte> myList = new List<byte> { };
+            byte[] temp = new byte[VariableLengthIntegerLength(value)];
+            byte b;
+            byte counter = 0;
 
-            int myVal = 0;
-            int shift = 0;
+            b = (byte)(value & 0xFF);
             do
             {
-                byte lower7bits = (byte)(value & 0x7f);
-                value >>= 7;
-                if (value > 0)
-                {
-                    myVal |= (lower7bits |= 128) << shift;
-                    shift += 8;
-                }
-                else
-                {
-                    myVal |= lower7bits << shift;
-                }
-            } while (value > 0);
+                value = value >> 7;
+                b = (byte)(b & 0x7f);
+                if (value != 0)
+                    b = (byte)(b | 0x80);
 
-            myList.AddRange(BitConverter.GetBytes(myVal));
-            int i = myList.Count - 1;
-            int j = 0;
-            while (myList[i] == 0) { j++; --i; }
-            myList.RemoveRange(i + 1, j);
-            return myList.ToArray();
+                temp[counter++] = (byte)b;
+                b = (byte)(value & 0xff);
+            } while (value != 0);
+            return temp;
+        }
+
+        static public byte[] DoublePack(int val)
+        {
+            uint uVar1;
+            uVar1 = (uint)val;
+            uVar1 = val < 0 ? ((~uVar1) << 1) + 1 : uVar1 <<= 1;
+
+            return Pack(uVar1);
+        }
+
+        //Unpacking
+        static public int DoubleUnpack(byte[] buffer)
+        {
+            uint val = Unpack(buffer);
+            return (int)((val & 1) != 0 ? ~((val - 1) >> 1) : val >> 1);
+        }
+
+        static public uint Unpack(byte[] buffer)
+        {
+            byte local_60;
+            uint uVar2 = 0;
+            byte uVar1 = 0;
+            byte counter = 0;
+
+            while (uVar1 < 0x40)
+            {
+                local_60 = buffer[counter++];
+                uVar2 = (uint)(uVar2 | (local_60 & 0x7f) << uVar1);
+                if ((local_60 & 0x80) == 0)
+                    break;
+                uVar1 += 7;
+            }
+
+            return uVar2;
         }
 
         public static string GetMemoryString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)
