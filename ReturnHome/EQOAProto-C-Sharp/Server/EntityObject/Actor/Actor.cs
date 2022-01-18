@@ -4,7 +4,7 @@ namespace ReturnHome.Server.EntityObject.Actor
 {
   public class Actor : Entity
   {
-    public long killtime = 0;
+        public long killtime = 0;
 
         public Actor() : base(false)
         {
@@ -36,6 +36,10 @@ namespace ReturnHome.Server.EntityObject.Actor
             Legs = (byte)legs;
             Boots = (byte)feet;
             Helm = (byte)head;
+            HPFlag = true;
+            CurrentHP = 300;
+            HPMax = 500;
+            Target = 0xFFFFFFFF;
         }
   }
 }

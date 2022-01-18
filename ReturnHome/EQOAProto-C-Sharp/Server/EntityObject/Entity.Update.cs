@@ -58,6 +58,8 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateHPBar()
         {
+            if (HPMax == 0 || CurrentHP == 0)
+                return;
             ObjectUpdate.Span[26] = (byte)((255 * CurrentHP) / HPMax);
         }
 

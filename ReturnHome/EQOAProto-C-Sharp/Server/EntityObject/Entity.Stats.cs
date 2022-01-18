@@ -26,8 +26,8 @@ namespace ReturnHome.Server.EntityObject
     public int AC;
 
     //Calculated on the fly during combat etc
-    private bool _hpFlag = true;
-    private int _currentHP = 300;
+    private bool _hpFlag;
+    private int _currentHP;
     public int CurrentPower;
 
     public int ArcaneResist = 0;
@@ -42,7 +42,7 @@ namespace ReturnHome.Server.EntityObject
 
     //Need to calculate HP/PWR max on the fly
     //Will be influenced by archtype, level, stamina, gear, buffs and CM's
-    private int _hpMax = 500;
+    private int _hpMax;
     public int PWRMax = 0;
 
     //Related to regeneration of health and PowerOverTime

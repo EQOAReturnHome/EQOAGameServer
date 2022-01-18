@@ -35,7 +35,6 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public int MaxAssignableTP;
         public int UnusedTP;
-
         public int Tunar;
         public int BankTunar;
 
@@ -50,6 +49,7 @@ namespace ReturnHome.Server.EntityObject.Player
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
                          int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, Session MySession) : base(true)
         {
+            Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;
             ObjectID = MySession.SessionID;
@@ -83,8 +83,9 @@ namespace ReturnHome.Server.EntityObject.Player
             Wisdom = wisdom;
             Intelligence = intelligence;
             Charisma = charisma;
+            HPFlag = true;
+            CurrentHP = 300;
             HPMax = 500;
-            CurrentHP = 200;// currentHP;
             CurrentPower = currentPower;
             PWRMax = maxPower;
             HealthOverTime = healOT;

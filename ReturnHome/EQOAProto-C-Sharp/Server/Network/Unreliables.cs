@@ -82,7 +82,7 @@ namespace ReturnHome.Server.Network
 
             offset++;
 
-            int Target = ClientPacket.GetLEInt(ref offset);
+            uint Target = ClientPacket.GetLEUInt(ref offset);
 
             //Update Base array for client update object, then update character object
             Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);

@@ -28,7 +28,7 @@ namespace ReturnHome.Server.EntityObject
         private byte _turning = 0;
 
         private byte _animation;
-        private int _target;
+        private uint _target;
         public byte Movement = 1;
 
         public float VelocityX = 0.0f;
@@ -171,7 +171,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public int Target
+        public uint Target
         {
             get { return _target; }
             set
@@ -249,7 +249,7 @@ namespace ReturnHome.Server.EntityObject
             WayPointVelocityZ = velocityZ;
         }
 
-        public void UpdateTarget(int target)
+        public void UpdateTarget(uint target)
         {
             Target = target;
         }
