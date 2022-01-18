@@ -38,12 +38,14 @@ namespace ReturnHome.Server.Managers
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
+            Console.WriteLine("Adding NPCs...");
             foreach (Actor myActor in myNpcList)
             {
                 myActor.SetPosition();
                 EntityManager.AddEntity(myActor);
                 MapManager.AddPlayerToTree(myActor);
             }
+            Console.WriteLine("Done.");
         }
 
         public async static void UpdateWorld()

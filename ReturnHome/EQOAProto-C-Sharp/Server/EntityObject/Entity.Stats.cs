@@ -25,8 +25,8 @@ namespace ReturnHome.Server.EntityObject
     //Influenced by CM's and gear and buffs
     public int AC;
 
-        //Calculated on the fly during combat etc
-        private bool _hpFlag = true;
+    //Calculated on the fly during combat etc
+    private bool _hpFlag = true;
     private int _currentHP = 300;
     public int CurrentPower;
 

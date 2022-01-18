@@ -88,6 +88,7 @@ namespace ReturnHome.Server.EntityObject
                 if(true)
                 {
                     _position = value;
+                    _point = new PointF(_position.X, _position.Z);
                     ObjectUpdatePosition();
                 }
             }

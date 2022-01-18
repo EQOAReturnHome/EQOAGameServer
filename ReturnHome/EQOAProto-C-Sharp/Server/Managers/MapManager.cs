@@ -39,25 +39,17 @@ namespace ReturnHome.Server.Managers
 
         public static void QueryObjectsForDistribution()
         {
-            List<Entity> entityList = new List<Entity>();
-            List<Entity> charList = (List<Entity>)qtree.GetAllObjects().Cast<Entity>().ToList();
-            foreach (Entity actor in charList)
-            {
-                if (!actor.isPlayer)
-                {
-                    entityList.Add(actor);
-                }
-            }
+            List<Entity> entityList = new();
+            List<Character> charList = PlayerManager.RequestPlayerList();
 
-            charList.RemoveAll(x => x.isPlayer == false);
-            foreach (Entity entity in charList)
+            foreach (Character entity in charList)
             {
                 qtree.GetObjects(new RectangleF(entity.x - 50.0f, entity.z - 50.0f, 100.0f, 100.0f), entityList);
 
                 //Sort Character List
                 entityList = entityList.OrderBy(x => Vector2.Distance(new Vector2(entity.x, entity.z), new Vector2(x.x, x.z))).ToList();
 
-                ((Character)entity).characterSession.rdpCommIn.connectionData.AddChannelObjects(entityList);
+                entity.characterSession.rdpCommIn.connectionData.AddChannelObjects(entityList);
 
 
 

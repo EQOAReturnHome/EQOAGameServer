@@ -13,6 +13,7 @@ namespace ReturnHome.Server
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine("Starting Server...");
 			//Load config for ServerListManager and start it
 			ServerListManager.ReadConfig(); 
 			Timer t = new(5000);
@@ -21,10 +22,13 @@ namespace ReturnHome.Server
             t.Start();
 
             //Load GameManager
+            Console.WriteLine("Starting World...");
             WorldServer.Initialize();
-			
+
+            Console.WriteLine("Starting UDP Server...");
             // Start SocketManager
 			SocketManager.Initialize();
+            Console.WriteLine("Server started.");
 			
             string stuff = Console.ReadLine();
         }

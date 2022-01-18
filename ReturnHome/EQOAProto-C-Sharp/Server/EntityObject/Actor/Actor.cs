@@ -36,7 +36,6 @@ namespace ReturnHome.Server.EntityObject.Actor
             Legs = (byte)legs;
             Boots = (byte)feet;
             Helm = (byte)head;
-
         }
   }
 }
