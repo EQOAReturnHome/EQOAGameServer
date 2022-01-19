@@ -142,7 +142,7 @@ namespace ReturnHome.Opcodes
             }
             catch
             {
-                Console.WriteLine("Master Dump Session failed");
+                Logger.Err($"Unable to create Memory Dump Session for {MySession.SessionID} : {MyCharacter.CharName}");
             }
         }
 

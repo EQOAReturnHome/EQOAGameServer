@@ -178,7 +178,7 @@ namespace ReturnHome.Server.Network
             ///Triggers creating master session
             else if ((connectionData.lastReceivedMessageSequence == 0x02) && (clientID == ((_session.InstanceID - 1) & 0xFFFF)))
             {
-                Console.WriteLine("Creating master session");
+                Logger.Info($"Creating master session for {_session.SessionID}");
                 SessionManager.CreateMasterSession(_session);
             }
 
