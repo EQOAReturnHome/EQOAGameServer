@@ -43,7 +43,7 @@ namespace ReturnHome.Server.Managers
             {
                 myActor.SetPosition();
                 EntityManager.AddEntity(myActor);
-                MapManager.AddPlayerToTree(myActor);
+                MapManager.AddObjectToTree(myActor);
             }
             Console.WriteLine("Done.");
         }

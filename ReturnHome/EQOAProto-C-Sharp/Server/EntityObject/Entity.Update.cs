@@ -302,6 +302,11 @@ namespace ReturnHome.Server.EntityObject
             ObjectUpdate.Span[183] = (byte)Class;
         }
 
+        public void ObjectUpdateNPCType()
+        {
+            BitConverter.GetBytes(_npcType).CopyTo(ObjectUpdate.Slice(186, 4));
+        }
+
         public void ObjectUpdatePattern()
         {
             BitConverter.GetBytes(0xFFFFFFFF).CopyTo(ObjectUpdate.Slice(186, 4));

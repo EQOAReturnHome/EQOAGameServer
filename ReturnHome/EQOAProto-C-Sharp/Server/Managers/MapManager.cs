@@ -18,14 +18,14 @@ namespace ReturnHome.Server.Managers
         private static List<Entity> treeQueue = new List<Entity>();
         private static List<Entity> treeRemoveQueue = new List<Entity>();
 
-        public static void AddPlayerToTree(Entity entity)
+        public static void AddObjectToTree(Entity entity)
         {
             //Should this queue players to be added simulataneously, instead of individual add's? Probably.
             
             treeQueue.Add(entity);
         }
 
-        public static void BulkAddPlayers()
+        public static void BulkAddObjects()
         {
             //iterate over treeQueue and add players to the quad tree one by one
            for(int i = 0; i < treeQueue.Count; i++)
@@ -83,7 +83,7 @@ namespace ReturnHome.Server.Managers
         }
         */
 
-        public static void RemovePlayerFromTree(Entity entity)
+        public static void RemoveObjectFromTree(Entity entity)
         {
             if (entity == null)
                 return;

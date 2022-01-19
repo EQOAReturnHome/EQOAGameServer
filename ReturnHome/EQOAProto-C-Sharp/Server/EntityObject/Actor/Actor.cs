@@ -40,6 +40,7 @@ namespace ReturnHome.Server.EntityObject.Actor
             CurrentHP = 300;
             HPMax = 500;
             Target = 0xFFFFFFFF;
+            NPCType = 0x0082;
         }
   }
 }

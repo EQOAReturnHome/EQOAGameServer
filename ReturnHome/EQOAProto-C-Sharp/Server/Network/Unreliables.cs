@@ -99,7 +99,7 @@ namespace ReturnHome.Server.Network
             {
                 PlayerManager.AddPlayer(Mysession.MyCharacter);
                 EntityManager.AddEntity(Mysession.MyCharacter);
-                MapManager.AddPlayerToTree(Mysession.MyCharacter);
+                MapManager.AddObjectToTree(Mysession.MyCharacter);
                 
                 
                 Mysession.inGame = true;

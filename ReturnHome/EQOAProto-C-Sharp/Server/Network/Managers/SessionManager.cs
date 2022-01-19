@@ -189,7 +189,7 @@ namespace ReturnHome.Server.Network.Managers
             //Should push client object update directly to character if needed
             Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
-            MapManager.BulkAddPlayers();
+            MapManager.BulkAddObjects();
             MapManager.QueryObjectsForDistribution();
 
             // The session tick outbound processes pending actions and handles outgoing messages
