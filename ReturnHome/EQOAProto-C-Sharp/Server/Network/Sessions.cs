@@ -55,6 +55,7 @@ namespace ReturnHome.Server.Network
         public bool inGame = false;
         public bool objectUpdate = false;
         public bool unkOpcode = true;
+        public bool OIDUpdate = true;
         ///Once we receive account ID, this should never change...
         public int AccountID;
 
@@ -97,6 +98,12 @@ namespace ReturnHome.Server.Network
         {
             string message = $"Coordinates: X-{MyCharacter.x} Y-{MyCharacter.y} Z-{MyCharacter.z}";
 
+            ChatMessage.GenerateClientSpecificChat(this, message);
+        }
+
+        public void TargetUpdate()
+        {
+            string message = $"Targeting ObjectID: {MyCharacter.Target}";
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 

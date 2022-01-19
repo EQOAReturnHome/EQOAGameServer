@@ -29,6 +29,8 @@
     {
         DiscVersion = 0x00, //0
         Authenticate2 = 0x01, ///1
+        Interact = 0x04, //4
+        Target = 0x0760, //1888
         CharacterSelect = 0x2C, ///44
         Camera1 = 0x07D1, ///2001
         Camera2 = 0x07F5, ///2037

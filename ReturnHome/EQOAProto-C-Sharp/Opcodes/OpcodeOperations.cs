@@ -29,7 +29,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.RandomName, GenerateRandomName },
             { GameOpcode.ClientShout, ShoutChat.ProcessShout },
             { GameOpcode.ChangeChatMode, ChangeChatMode },
-            { GameOpcode.DisconnectClient, DisconnectClient }
+            { GameOpcode.DisconnectClient, DisconnectClient },
+            { GameOpcode.Target, PlayerTarget }
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -87,6 +88,26 @@ namespace ReturnHome.Opcodes
         {
             //Just accept and change chat mode
             MySession.MyCharacter.chatMode = ClientPacket.Data.Span[0];
+        }
+
+        public static void PlayerTarget(Session mySession, PacketMessage clientPacket)
+        {
+            //Offset is 4 because first 4 bytes is targeting counter
+            int offset = 4;
+            ReadOnlySpan<byte> Message = clientPacket.Data.Span;
+           
+            uint targetID = Message.GetLEUInt(ref offset);
+
+           
+
+
+            mySession.MyCharacter.Target = targetID;
+            mySession.TargetUpdate();
+        }
+
+        public static void InteractActor(Session MySession, PacketMessage ClientPacket)
+        {
+
         }
 
         public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
@@ -591,6 +612,7 @@ namespace ReturnHome.Opcodes
             ///Handles packing message into outgoing packet
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
+
 
         public static void IgnoreList(Session MySession)
         {

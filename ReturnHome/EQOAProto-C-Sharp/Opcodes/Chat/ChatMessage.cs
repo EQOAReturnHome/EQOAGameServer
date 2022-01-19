@@ -84,6 +84,10 @@ namespace ReturnHome.Opcodes.Chat
                 }
             }
 
+            if(message[0..2] == "!oid"){
+                MySession.TargetUpdate();
+            }
+
             if (message[0..2] == "!o")
             {
                 MySession.unkOpcode ^= true;
