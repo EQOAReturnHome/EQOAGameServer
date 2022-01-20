@@ -103,19 +103,27 @@ namespace ReturnHome.Opcodes
             mySession.TargetUpdate();
         }
 
+        /*Some thoughts
+         * In Dustin's Database under NPCType, certain npc's have a specific value
+        If it has 0x80+, it is/should be unattackable
+        Bankers are 0x02. So most likely 0x82 for unattackable and banker
+        Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
+        */
         public static void InteractActor(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
             ReadOnlySpan<byte> IncMessage = ClientPacket.Data.Span;
             uint interactTarget = IncMessage.GetLEUInt(ref offset);
 
-            uint choiceCounter = 1;
-            String TextboxMessage = "Does this work";
-            uint textChoicesNum = 1;
-            String TextChoices = "yes";
-            uint textOptions = 1;
+            offset = 0;
 
-            Memory<byte> temp = new Memory<byte>(new byte[17 + (TextboxMessage.Length * 2) + (textChoicesNum * 4) + 1 + (TextChoices.Length * 2)]);
+            uint choiceCounter = 1;
+            string TextboxMessage = "Hello moto";
+            uint textChoicesNum = 1;
+            string TextChoices = "what?";
+            byte textOptions = 1;
+
+            Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (textChoicesNum * 4) + 1 + (TextChoices.Length * 2)]);
             Span<byte> Message = temp.Span;
 
             Message.Write((ushort)GameOpcode.QuestBox, ref offset);
