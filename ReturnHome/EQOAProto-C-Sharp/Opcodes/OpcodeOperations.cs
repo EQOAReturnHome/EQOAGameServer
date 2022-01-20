@@ -30,7 +30,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.ClientShout, ShoutChat.ProcessShout },
             { GameOpcode.ChangeChatMode, ChangeChatMode },
             { GameOpcode.DisconnectClient, DisconnectClient },
-            { GameOpcode.Target, PlayerTarget }
+            { GameOpcode.Target, PlayerTarget },
+            { GameOpcode.Interact, InteractActor }
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -95,11 +96,8 @@ namespace ReturnHome.Opcodes
             //Offset is 4 because first 4 bytes is targeting counter
             int offset = 4;
             ReadOnlySpan<byte> Message = clientPacket.Data.Span;
-           
+
             uint targetID = Message.GetLEUInt(ref offset);
-
-           
-
 
             mySession.MyCharacter.Target = targetID;
             mySession.TargetUpdate();
@@ -107,7 +105,31 @@ namespace ReturnHome.Opcodes
 
         public static void InteractActor(Session MySession, PacketMessage ClientPacket)
         {
+            int offset = 0;
+            ReadOnlySpan<byte> IncMessage = ClientPacket.Data.Span;
+            uint interactTarget = IncMessage.GetLEUInt(ref offset);
 
+            uint choiceCounter = 1;
+            String TextboxMessage = "Does this work";
+            uint textChoicesNum = 1;
+            String TextChoices = "yes";
+            uint textOptions = 1;
+
+            Memory<byte> temp = new Memory<byte>(new byte[17 + (TextboxMessage.Length * 2) + (textChoicesNum * 4) + 1 + (TextChoices.Length * 2)]);
+            Span<byte> Message = temp.Span;
+
+            Message.Write((ushort)GameOpcode.QuestBox, ref offset);
+            Message.Write(choiceCounter, ref offset);
+            Message.Write(TextboxMessage.Length, ref offset);
+            Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
+            Message.Write(textOptions, ref offset);
+            Message.Write(TextChoices.Length, ref offset);
+            Message.Write(Encoding.Unicode.GetBytes(TextChoices), ref offset);
+
+
+            //Send Message
+            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            Console.WriteLine(interactTarget);
         }
 
         public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
