@@ -86,11 +86,11 @@ namespace ReturnHome.Server.Network
 
             //Update Base array for client update object, then update character object
             Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);
-            Mysession.MyCharacter.UpdateWayPoint(x, y, z);
-            Mysession.MyCharacter.UpdateAnimation(Animation);
+            Mysession.MyCharacter.UpdatePosition(x, y, z);
+            Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
             Mysession.MyCharacter.UpdateVelocity(Velx, 0, Velz);
-            Mysession.MyCharacter.UpdateTarget(Target);
+            Mysession.MyCharacter.Target = Target;
             Mysession.objectUpdate = true;
 
             //Would likely need some checks here eventually? Shouldn't blindly trust client

@@ -187,7 +187,7 @@ namespace ReturnHome.Server.Network.Managers
             int sessionCount = 0;
 
             //Should push client object update directly to character if needed
-            Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
+            //test  Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
             MapManager.BulkAddObjects();
             MapManager.QueryObjectsForDistribution();

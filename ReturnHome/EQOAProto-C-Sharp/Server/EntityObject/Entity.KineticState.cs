@@ -217,16 +217,15 @@ namespace ReturnHome.Server.EntityObject
 
         public void SetPosition()
         {
+            _point = new PointF(x, z);
             Position = new Vector3(x, y, z);
         }
 
-        public void UpdateWayPoint(float X, float Y, float Z)
+        public void UpdatePosition(float X, float Y, float Z)
         {
-            movement_started = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             x = X;
             y = Y;
             z = Z;
-            waypoint = new Vector3(x, y, z);
             _point = new PointF(x, z);
         }
 
@@ -237,10 +236,13 @@ namespace ReturnHome.Server.EntityObject
             Turning = turning;
         }
 
+        /*
+         * No need for an animation update method as the property can handle it all?
         public void UpdateAnimation(byte animation)
         {
             Animation = animation;
         }
+        */
 
         public void UpdateVelocity(float velocityX, float velocityY, float velocityZ)
         {
@@ -249,6 +251,8 @@ namespace ReturnHome.Server.EntityObject
             WayPointVelocityZ = velocityZ;
         }
 
+        /*
+         * No point for a Target update method as the property can handle everything?
         public void UpdateTarget(uint target)
         {
             Target = target;
@@ -278,5 +282,6 @@ namespace ReturnHome.Server.EntityObject
 
             return Position;
         }
+        */
     }
 }

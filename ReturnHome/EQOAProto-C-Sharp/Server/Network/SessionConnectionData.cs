@@ -62,7 +62,7 @@ namespace ReturnHome.Server.Network
 
             Span<ServerObjectUpdate> temp = serverObjects.Span;
             //Iterate over List from QuadTree against Channels
-            for (int i = 1; i < serverObjects.Length; i++)
+            for (int i = 0; i < serverObjects.Length; i++)
             {
                 //Character is already in a channel
                 if (charList.Contains(temp[i].entity))
