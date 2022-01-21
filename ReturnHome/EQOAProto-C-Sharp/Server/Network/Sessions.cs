@@ -131,11 +131,6 @@ namespace ReturnHome.Server.Network
             }
         }
 
-        public void UpdateClientObject()
-        {
-            MyCharacter?.UpdatePosition();
-        }
-
         /// <summary>
         /// This will send outgoing packets as well as the final logoff message.
         /// </summary>

@@ -70,16 +70,6 @@ namespace ReturnHome.Server.Network
             offset += 12;
             byte Animation = ClientPacket.GetByte(ref offset);
 
-            //Test... See if this effects playable objects or if it is only for npc's
-            if (Animation == 0)
-            {
-                if (Facing > Mysession.MyCharacter.Facing)
-                    Animation = 4;
-
-                if (Facing < Mysession.MyCharacter.Facing)
-                    Animation = 5;
-            }
-
             offset++;
 
             uint Target = ClientPacket.GetLEUInt(ref offset);

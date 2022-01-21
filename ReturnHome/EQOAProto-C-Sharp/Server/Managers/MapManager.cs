@@ -63,10 +63,7 @@ namespace ReturnHome.Server.Managers
         public static List<Entity> QueryNearbyObjects(Character myCharacter, float radius)
         {
             List<Entity> entityList = new();
-            foreach (Entity entity in qtree.GetAllObjects())
-            {
-                Console.WriteLine(entity.CharName);
-            }
+
             qtree.GetObjects(new RectangleF(myCharacter.x - (radius / 2), myCharacter.z - (radius / 2), radius, radius), entityList);
 
             return entityList;

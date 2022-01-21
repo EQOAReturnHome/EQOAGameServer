@@ -16,7 +16,7 @@ namespace ReturnHome.Server.Managers
     {
 
         private static Stopwatch gameTimer;
-        private static int serverTick = 1000 / 5;
+        private static int serverTick = 1000 / 10;
 
         static WorldServer()
         {
@@ -37,14 +37,13 @@ namespace ReturnHome.Server.Managers
             CharacterSQL npcList = new();
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
+            //Closing DB connection
+            npcList.CloseConnection();
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");
             uint objectID = 0;
             foreach (Actor myActor in myNpcList)
             {
-                
-                
-                myActor.SetPosition();
                 EntityManager.AddEntity(myActor);
                 MapManager.AddObjectToTree(myActor);
             }

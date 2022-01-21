@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 namespace ReturnHome.Server.EntityObject.Actor
 {
@@ -19,6 +20,7 @@ namespace ReturnHome.Server.EntityObject.Actor
             x = xCoord;
             y = yCoord;
             z = zCoord;
+            Position = new Vector3(x, y, z);
             Facing = (byte)facing;
             World = world;
             ModelID = modelid;

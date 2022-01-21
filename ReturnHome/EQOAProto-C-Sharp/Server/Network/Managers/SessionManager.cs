@@ -152,7 +152,7 @@ namespace ReturnHome.Server.Network.Managers
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
-                Console.WriteLine("Ready For Memory Dump");
+                Logger.Info($"Session {NewMasterSession.SessionID} starting Memory Dump");
                 ProcessOpcode.ProcessMemoryDump(NewMasterSession);
             }
         }
@@ -200,7 +200,7 @@ namespace ReturnHome.Server.Network.Managers
             {
                 if (session.PendingTermination)
                 {
-                    Console.WriteLine("Dropping Session on server end");
+                    Logger.Info($"Dropping Session {session.SessionID}");
                     session.DropSession();
                 }
 
