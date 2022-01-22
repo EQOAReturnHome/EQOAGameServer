@@ -8,6 +8,7 @@ namespace ReturnHome.Server.Network
 {
     public class SessionConnectionData
     {
+        private Session _session;
         public ushort lastReceivedMessageSequence { get; set; }
         public ushort lastReceivedPacketSequence { get; set; }
         public ushort lastSentMessageSequence { get; set; }
@@ -28,8 +29,9 @@ namespace ReturnHome.Server.Network
          * First theory is that this reset method should reside within the World Property for entity, 
          * checking if entity is a player first then calling this method to reset all channels if world changes
          */
-        public SessionConnectionData(Session _session)
+        public SessionConnectionData(Session session)
         {
+            _session = session;
             lastReceivedMessageSequence = 0;
             lastReceivedPacketSequence = 0;
 
@@ -55,6 +57,7 @@ namespace ReturnHome.Server.Network
 
         public void AddChannelObjects(List<Entity> charList)
         {
+            charList.Remove(_session.MyCharacter);
             if (charList.Count == 0)
                 return;
 
@@ -62,7 +65,7 @@ namespace ReturnHome.Server.Network
 
             Span<ServerObjectUpdate> temp = serverObjects.Span;
             //Iterate over List from QuadTree against Channels
-            for (int i = 0; i < serverObjects.Length; i++)
+            for (int i = 1; i < serverObjects.Length; i++)
             {
                 //Character is already in a channel
                 if (charList.Contains(temp[i].entity))
@@ -72,13 +75,14 @@ namespace ReturnHome.Server.Network
                 }
 
                 else
+                    //Calls the disable methopd for the channel
                     temp[i].DisableChannel();
             }
 
             if (charList.Count == 0)
                 return;
 
-            for(int i = 0; i < serverObjects.Length; i++)
+            for(int i = 1; i < serverObjects.Length; i++)
             {
                 if(temp[i].entity == null)
                 {

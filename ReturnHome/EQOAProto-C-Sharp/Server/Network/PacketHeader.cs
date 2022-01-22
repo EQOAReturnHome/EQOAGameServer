@@ -95,6 +95,11 @@ namespace ReturnHome.Server.Network
                 ClientMessageAck = buffer.GetLEUShort(ref offset);
                 RDPReport = true;
             }
+            if (HasBundleFlag(PacketBundleFlags.UnknownSingleByte))
+            {
+                if(buffer.GetByte(ref offset) == 0xFF)
+                    _ = buffer.GetByte(ref offset);
+            }
 
             if (temp.Length > (offset + 4))
             {

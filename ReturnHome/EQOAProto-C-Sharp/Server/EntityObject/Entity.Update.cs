@@ -322,7 +322,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateNPCType()
         {
-            BitConverter.GetBytes(_npcType).CopyTo(ObjectUpdate.Slice(186, 4));
+            BitConverter.GetBytes(_npcType).CopyTo(ObjectUpdate.Slice(184, 2));
         }
 
         public void ObjectUpdatePattern()

@@ -14,7 +14,7 @@ namespace ReturnHome.Server.EntityObject.Actor
 
         public Actor(string charName, float xCoord, float yCoord, float zCoord, int facing, int world, int modelid, float size,
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
-            int gloves, int legs, int feet, int head) : base(false)
+            int gloves, int legs, int feet, int head, uint npcType) : base(false)
         {
             CharName = charName;
             x = xCoord;
@@ -42,7 +42,7 @@ namespace ReturnHome.Server.EntityObject.Actor
             CurrentHP = 300;
             HPMax = 500;
             Target = 0xFFFFFFFF;
-            NPCType = 0x0082;
+            NPCType = (ushort)npcType;
         }
   }
 }

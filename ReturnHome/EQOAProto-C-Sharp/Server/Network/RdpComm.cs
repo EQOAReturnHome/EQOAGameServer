@@ -208,6 +208,7 @@ namespace ReturnHome.Server.Network
         private int _offset;
         private int _value = 0;
 		public int totalLength;
+        public int MessageLength;
 		private int _headerLength;
 		public int maxSize = 1200;
 		private Memory<byte> temp;
@@ -217,6 +218,7 @@ namespace ReturnHome.Server.Network
             _session = session;
 			_offset = 0;
 			totalLength = 0;
+            MessageLength = 0;
 			_headerLength = 0;
             _listener = listener;
         }
@@ -227,7 +229,8 @@ namespace ReturnHome.Server.Network
             {
                 List<ReadOnlyMemory<byte>> messageList;
 
-                (totalLength, messageList) = _session.sessionQueue.GatherMessages();
+                (MessageLength, messageList) = _session.sessionQueue.GatherMessages();
+                totalLength += MessageLength;
 				//Calculate expected expected outgoing packet length
 				// 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
 				GetHeaderLength();
@@ -259,6 +262,17 @@ namespace ReturnHome.Server.Network
                     AddSessionAck(packet);
                 }
 
+                int test = 0;
+                if (_session.RdpReport)
+                    test += 4;
+
+                if (_session.clientUpdateAck)
+                    test += 4;
+                foreach (ReadOnlyMemory<byte> mes in messageList)
+                    test += mes.Length;
+                //crc
+                test += 4;
+                //_ = (test + _offset) > totalLength ? throw new Exception($"Issue with length. test: {test} offset: {_offset} totalLength: {totalLength}") : true;
                 AddRDPReport(packet);
                 _session.Reset();
 				
@@ -269,6 +283,8 @@ namespace ReturnHome.Server.Network
 
                 //Adjust offset to last 4 bytes
                 _offset = packet.Length - 4;
+
+                _ = packet[packet.Length - 4] != 0 ? throw new Exception("Error occured with PAcket Length") : true;
 
                 //Add CRC
                 packet.Write(CRC.calculateCRC(packet[0..(packet.Length - 4)]), ref _offset);
@@ -346,6 +362,69 @@ namespace ReturnHome.Server.Network
 		{
             foreach( ReadOnlyMemory<byte> message in messageList)
             {
+                /*This should be temporary for testing purposes... may need to be wrapped in some debugger option
+                 *Let's verify each mnessage is the correct length, throw an exception if not
+                 **/
+                ReadOnlySpan<byte> temp = message.Span;
+                int ExpectedMessageLength;
+                int ActualMessageLength = 0;
+
+                int offset = 0;
+                byte messageType = temp[offset++];
+                if(temp[offset] == 0xFF)
+                {
+                    offset++;
+                    ExpectedMessageLength = temp.GetLEUShort(ref offset);
+
+                }
+
+                else
+                {
+                    ExpectedMessageLength = temp.GetByte(ref offset);
+                }
+
+                if((messageType == 0xFB) || (messageType == 0xF9) || (messageType == 0xFA))
+                {
+                    offset += 2;
+                    for (int i = offset; i < temp.Length; i++)
+                        ActualMessageLength++;
+                }
+
+                else if(messageType <= 0x43)
+                {
+                    offset += 3;
+                    //Little more complicated to calculate
+                    for( int i = offset; i < (temp.Length - 1); i++)
+                    {
+                        int realBytes = 0;
+
+                        if((temp[i] & 0x80) == 0x80)
+                        {
+                            realBytes += temp[i++] % 0x80;
+                            ActualMessageLength += realBytes;
+                            ActualMessageLength += temp[i];
+                            i += realBytes;
+                        }
+
+                        else
+                        {
+                            realBytes += temp[i++] >> 4;
+                            ActualMessageLength += realBytes;
+                            ActualMessageLength += temp[i] % 0x10;
+                            i += realBytes;
+                        }
+                    }
+
+                }
+
+                else
+                {
+                    for (int i = offset; i < temp.Length; i++)
+                        ActualMessageLength++;
+                }
+
+                _ = ActualMessageLength != ExpectedMessageLength ? throw new Exception($"Message Length is {ActualMessageLength} and expected is {ExpectedMessageLength}") : true;
+
                 packet.Write(message, ref _offset);
             }
 		}

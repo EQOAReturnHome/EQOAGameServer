@@ -9,6 +9,7 @@ namespace ReturnHome.Opcodes.Chat
         public static bool ProcessChanges(Session MySession, string[] changes)
         {
             string message;
+            /*Have this utilize players target as the source for change*/
             if(EntityManager.QueryForEntity(changes[1], out Entity c))
             {
                 if (c == null)
