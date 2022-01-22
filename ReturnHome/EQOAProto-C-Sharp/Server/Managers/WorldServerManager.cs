@@ -25,13 +25,6 @@ namespace ReturnHome.Server.Managers
 
         public static void Initialize()
         {
-            var thread = new Thread(() =>
-                        {
-                            UpdateWorld();
-                        });
-            thread.Name = "World Manager";
-            thread.Priority = ThreadPriority.AboveNormal;
-            thread.Start();
 
             //Creates NPC List
             CharacterSQL npcList = new();
@@ -42,13 +35,21 @@ namespace ReturnHome.Server.Managers
             uint objectID = 0;
             foreach (Actor myActor in myNpcList)
             {
-                
-                
+
+
                 myActor.SetPosition();
                 EntityManager.AddEntity(myActor);
                 MapManager.AddObjectToTree(myActor);
             }
             Console.WriteLine("Done.");
+            var thread = new Thread(() =>
+                        {
+                            UpdateWorld();
+                        });
+            thread.Name = "World Manager";
+            thread.Priority = ThreadPriority.AboveNormal;
+            thread.Start();
+
         }
 
         public async static void UpdateWorld()

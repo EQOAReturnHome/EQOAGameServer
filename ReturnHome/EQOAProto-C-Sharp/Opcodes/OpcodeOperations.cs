@@ -10,6 +10,8 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Opcodes.Chat;
+using ReturnHome.Server.Managers;
+using ReturnHome.Server.EntityObject;
 
 
 
@@ -116,14 +118,27 @@ namespace ReturnHome.Opcodes
             uint interactTarget = IncMessage.GetLEUInt(ref offset);
 
             offset = 0;
+            uint choicesLength = 0;
+
+            EventManager eManager = new EventManager();
+            Entity npcEntity = new Entity(false);
+
+
+            if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
+            {
+                npcEntity.CharName = npc.CharName;
+            }
+
+            //string textChoices = "String standin;
 
             uint choiceCounter = 1;
-            string TextboxMessage = "Hello moto";
+            //string TextboxMessage = "tst";
+            string TextboxMessage = eManager.GetNPCDialogue(npcEntity.CharName); ;
             uint textChoicesNum = 1;
-            string TextChoices = "what?";
+
             byte textOptions = 1;
 
-            Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (textChoicesNum * 4) + 1 + (TextChoices.Length * 2)]);
+            Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (textChoicesNum * 4) + 1 + (choicesLength * 2)]);
             Span<byte> Message = temp.Span;
 
             Message.Write((ushort)GameOpcode.QuestBox, ref offset);
@@ -131,8 +146,13 @@ namespace ReturnHome.Opcodes
             Message.Write(TextboxMessage.Length, ref offset);
             Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
             Message.Write(textOptions, ref offset);
-            Message.Write(TextChoices.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(TextChoices), ref offset);
+
+            /*for (int i = 0; i < textChoices.Count; i++)
+            {
+                Message.Write(textChoices[i].Length, ref offset);
+                Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
+            }*/
+
 
 
             //Send Message

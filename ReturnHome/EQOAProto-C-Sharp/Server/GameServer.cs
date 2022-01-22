@@ -29,8 +29,15 @@ namespace ReturnHome.Server
             // Start SocketManager
 			SocketManager.Initialize();
             Console.WriteLine("Server started.");
-			
+            EventManager eManager = new EventManager();
+          
+           
+           
+
             string stuff = Console.ReadLine();
+
+
+
         }
     }
 }

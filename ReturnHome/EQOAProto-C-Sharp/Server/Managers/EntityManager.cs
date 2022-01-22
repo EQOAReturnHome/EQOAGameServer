@@ -38,6 +38,18 @@ namespace ReturnHome.Server.Managers
             return true;   
         }
 
+        public static bool QueryForEntity(uint ObjectID, out Entity e)
+        {
+            if (_idCreator.QueryEntity(ObjectID, out Entity ent))
+            {
+                e = ent;
+                return true;
+            }
+
+            e = default;
+            return false;
+        }
+
         public static bool QueryForEntity(string name, out Entity c)
         {
             foreach (Entity c2 in entityList)
