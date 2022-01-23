@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,8 @@ namespace ReturnHome.Server.Managers
             lua.LoadCLRPackage();
             lua["events"] = events;
 
-            lua.DoFile("../../../Scripts/Freeport/" + npcName + ".lua");
+            string[] file =  Directory.GetFiles("../../../Scripts/", npcName + ".lua" , SearchOption.AllDirectories);
+            lua.DoFile(file[0]);
             LuaFunction callFunction = lua.GetFunction("event_say");
             callFunction.Call();
             string returnNPC = lua["npcDialogue"] as string;

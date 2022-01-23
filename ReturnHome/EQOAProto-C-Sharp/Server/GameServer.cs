@@ -30,6 +30,7 @@ namespace ReturnHome.Server
 			SocketManager.Initialize();
             Console.WriteLine("Server started.");
             EventManager eManager = new EventManager();
+            //Console.WriteLine(eManager.GetNPCDialogue("Bishop Gunder"));
           
            
            
