@@ -3,6 +3,8 @@ using QuadTrees.QTreePointF;
 using System.Drawing;
 using System.Numerics;
 using ReturnHome.Utilities;
+using ReturnHome.Opcodes;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -18,9 +20,6 @@ namespace ReturnHome.Server.EntityObject
         private float _velocityY = 0.0f;
         private float _velocityZ = 0.0f;
 
-        //Should be set to time once player is identified as moving, if player stops set back to 0
-        private long movement_started;
-
         //Set position to waypoint after initial position is set, should waypoint be assigned by the client update? Seems logical
         public Vector3 waypoint;
         private Vector3 _position;
@@ -29,11 +28,11 @@ namespace ReturnHome.Server.EntityObject
         private byte _facing;
         private float _facingF;
         public float Speed;
-        private float movement_speed = 2.0f;
         private byte _turning = 0;
 
         private byte _animation;
         private uint _target;
+        public uint TargetCounter = 1;
         public byte Movement = 1;
 
         private byte _eastToWest = 0;
@@ -216,11 +215,16 @@ namespace ReturnHome.Server.EntityObject
             get { return _target; }
             set
             {
-                if(true)
+                if (true)
                 {
                     _target = value;
                     ObjectUpdateTarget();
-                }
+
+                    if (isPlayer && ObjectID != 0)
+                    {
+                        //Get target information about the object
+                        ProcessOpcode.TargetInformation(((Character)this).characterSession, _target);
+                } }
             }
         }
 

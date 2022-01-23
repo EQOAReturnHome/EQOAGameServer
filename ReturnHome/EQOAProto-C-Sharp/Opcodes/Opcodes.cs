@@ -27,32 +27,36 @@
 
     public enum GameOpcode : ushort
     {
+        //Server/Client shared opcodes
         DiscVersion = 0x00, //0
-        Authenticate2 = 0x01, ///1
-        Interact = 0x04, //4
-        Target = 0x0760, //1888
+        RandomName = 0x12, //18
+
+        //Server Only Opcodes
         CharacterSelect = 0x2C, ///44
         Camera1 = 0x07D1, ///2001
         Camera2 = 0x07F5, ///2037
-        Authenticate = 0x0904, ///2308
         GameServers = 0x07B3, ///1971
         DelCharacter = 0x2D, ///45
-        CreateCharacter = 0x2B, ///43
         NameTaken = 0x2F, ///47
-        SELECTED_CHAR = 0x2A, // 42
         MemoryDump = 0x0D, //13
         Time = 0x13, //19
-        RandomName = 0x12, //18
         IgnoreList = 0x1005, //4101
         ActorSpeed = 0xF8, //248
         ClientMessage = 0x0A7A, //2682 - White text message
         DisconnectClient = 0x09B0, //2480
         ColoredChat = 0x0A7B, //2683 - Color text message
+        TargetInformation = 0x0761, //Target information for player/Actor
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
         ClientShout = 0x0C01, //3073 - Shout message from client
-        ChangeChatMode = 0x000E //14 - Client requests change to "permanant" chat mode
+        ChangeChatMode = 0x000E, //14 - Client requests change to "permanant" chat mode
+        Authenticate = 0x0904, ///2308
+        Authenticate2 = 0x01, ///1
+        Interact = 0x04, //4
+        Target = 0x0760, //1888
+        CreateCharacter = 0x2B, ///43
+        SELECTED_CHAR = 0x2A, // 42
     }
 
     public static class GameVersions

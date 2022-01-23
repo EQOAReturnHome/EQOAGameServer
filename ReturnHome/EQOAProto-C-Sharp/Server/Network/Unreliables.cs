@@ -80,7 +80,7 @@ namespace ReturnHome.Server.Network
             Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
             Mysession.MyCharacter.UpdateVelocity(Velx, 0, Velz);
-            Mysession.MyCharacter.Target = Target;
+            //Mysession.MyCharacter.Target = Target;
             Mysession.objectUpdate = true;
 
             //Would likely need some checks here eventually? Shouldn't blindly trust client
