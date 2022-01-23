@@ -46,12 +46,8 @@ namespace ReturnHome.Server.Network
         public bool BundleTypeTransition = false;
 
         public bool serverSelect;
-
+        public SegmentBodyFlags PacketBodyFlags = new();
         public bool characterInWorld = false;
-        public bool RdpReport = false;
-        public bool RdpMessage = false;
-        public bool SessionAck = false;
-        public bool clientUpdateAck = false;
         public bool inGame = false;
         public bool objectUpdate = false;
         public bool unkOpcode = true;
@@ -110,13 +106,6 @@ namespace ReturnHome.Server.Network
         public void ResetPing()
         {
             _pingCount = 0;
-        }
-
-        ///Resets our bool's for next message
-        public void Reset()
-        {
-            RdpReport = false;
-            RdpMessage = false;
         }
 
         //Override the GetHashcodeMethod so that Hashset works properly as our SessionHolder

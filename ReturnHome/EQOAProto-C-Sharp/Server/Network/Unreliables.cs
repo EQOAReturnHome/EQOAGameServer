@@ -33,7 +33,7 @@ namespace ReturnHome.Server.Network
                 if (Mysession.rdpCommIn.connectionData.client.BaseXorMessage > (message.Header.MessageNumber - message.Header.XorByte))
                 {
                     //ensure client got ack by resending it
-                    Mysession.clientUpdateAck = true;
+                    Mysession.PacketBodyFlags.clientUpdateAck = true;
                     return;
                 }
             }
@@ -101,7 +101,7 @@ namespace ReturnHome.Server.Network
             }
 
             //Tells us we need to tell client we ack this message
-            Mysession.clientUpdateAck = true;
+            Mysession.PacketBodyFlags.clientUpdateAck = true;
         }
     }
 }

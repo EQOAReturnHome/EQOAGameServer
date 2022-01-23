@@ -48,7 +48,7 @@ namespace ReturnHome.Server.Network.Managers
                 if (SessionHash.TryAdd(ClientSession))
                 {
                     Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
-                    ClientSession.SessionAck = true;
+                    ClientSession.PacketBodyFlags.SessionAck = true;
                     //Success, keep processing data
                     ClientSession.ProcessPacket(packet);
                 }

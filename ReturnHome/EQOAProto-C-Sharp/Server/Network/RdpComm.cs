@@ -88,12 +88,10 @@ namespace ReturnHome.Server.Network
                         {
                             case (byte)MessageType.PingMessage:
                                 ProcessOpcode.ProcessPingRequest(_session, message);
-                                _session.RdpReport = true;
                                 break;
 
                             case (byte)MessageType.ReliableMessage:
                                 ProcessOpcode.ProcessOpcodes(_session, message);
-                                _session.RdpReport = true;
                                 break;
 
                             case (byte)MessageType.UnreliableMessage:
@@ -225,18 +223,26 @@ namespace ReturnHome.Server.Network
 		
         public void PrepPackets()
         {
-            if (_session.sessionQueue.CheckQueue() || _session.RdpReport || _session.clientUpdateAck)
+            if (_session.sessionQueue.CheckQueue() || _session.PacketBodyFlags.RdpReport || _session.PacketBodyFlags.clientUpdateAck)
             {
-                List<ReadOnlyMemory<byte>> messageList;
+                List<ReadOnlyMemory<byte>> messageList = new(); ;
 
-                (MessageLength, messageList) = _session.sessionQueue.GatherMessages();
+                //Take this instance for processing, probablky need to introduce some locking mechanism on this
+                SegmentBodyFlags segmentFlags = _session.PacketBodyFlags;
+
+                //Replace with a new instance for next packet
+                _session.PacketBodyFlags = new();
+
+                MessageLength = _session.sessionQueue.GatherMessages(segmentFlags, messageList);
                 totalLength += MessageLength;
-				//Calculate expected expected outgoing packet length
-				// 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
-				GetHeaderLength();
+                Logger.Info($"Session: {_session.SessionID} Adding {MessageLength} to PacketLength. Total: {totalLength}");
+
+                //Calculate expected expected outgoing packet length
+                // 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
+                GetHeaderLength(segmentFlags);
 				temp = new Memory<byte>(new byte[totalLength]);
                 Span<byte> packet = temp.Span;
-				
+
 				//Jump offset past endpoints and bundle header information
 				if (_value > 0x3000)// || _session.CancelConnection)
 					_offset += 7;
@@ -248,33 +254,34 @@ namespace ReturnHome.Server.Network
                 AddSession(packet);
 
                 //Add bundle type first
-                AddBundleType(packet);
+                AddBundleType(packet, segmentFlags);
 
                 ///Add session ack here if it has not been done yet
                 ///Lets client know we acknowledge session
                 ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
-                if (_session.SessionAck)
+                if (segmentFlags.SessionAck)
                 {
                     //Change this to false then process
-                    _session.SessionAck = false;
+                    segmentFlags.SessionAck = false;
 
                     ///To ack session, we just repeat session information as an ack
                     AddSessionAck(packet);
                 }
 
                 int test = 0;
-                if (_session.RdpReport)
+                test += 2;
+                if (segmentFlags.RdpReport)
                     test += 4;
 
-                if (_session.clientUpdateAck)
+                if (segmentFlags.clientUpdateAck)
                     test += 4;
                 foreach (ReadOnlyMemory<byte> mes in messageList)
                     test += mes.Length;
+
                 //crc
                 test += 4;
-                //_ = (test + _offset) > totalLength ? throw new Exception($"Issue with length. test: {test} offset: {_offset} totalLength: {totalLength}") : true;
-                AddRDPReport(packet);
-                _session.Reset();
+                _ = (test + _offset) > totalLength ? throw new Exception($"Issue with length. test: {test} offset: {_offset} totalLength: {totalLength}, RDPReport: {_session.PacketBodyFlags.RdpReport} UpdateAck: {segmentFlags.clientUpdateAck}") : true;
+                AddRDPReport(packet, segmentFlags);
 				
 				AddMessages(packet, messageList);
 				
@@ -302,12 +309,13 @@ namespace ReturnHome.Server.Network
                 _value = 0;
             }
         }
-		
-		private int GetHeaderLength()
-		{
-			//Client/Server endpoints
-			totalLength += 4;
-			_headerLength += 4;
+
+        private void GetHeaderLength(SegmentBodyFlags segmentFlags)
+        {
+            //Client/Server endpoints
+            totalLength += 4;
+            Logger.Info($"Session: {_session.SessionID} Adding 4 to PacketLength. Total: {totalLength}");
+            _headerLength += 4;
 
             if (_session.Instance) //When server initiates instance with the client, it will use this
             {
@@ -318,6 +326,7 @@ namespace ReturnHome.Server.Network
             {
                 //This needs to be more dynamic, technically the sessionID length can vary when packed but 3 is super common
                 totalLength += 3;
+                Logger.Info($"Session: {_session.SessionID} Adding 3 to PacketLength. Total: {totalLength}");
                 _headerLength += 3;
                 _value |= 0x04000;
             }
@@ -330,6 +339,7 @@ namespace ReturnHome.Server.Network
             if (_session.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
             {
                 totalLength += 4;
+                Logger.Info($"Session: {_session.SessionID} Adding 4 to PacketLength. Total: {totalLength}");
                 _headerLength += 4;
                 _value |= 0x02000;
             }
@@ -337,26 +347,36 @@ namespace ReturnHome.Server.Network
             //If _value is over 0x3000, means the header info should be 3 bytes. is _value is 0, header will be the packet length using variable length integer.... So will have to rethink this a little bit eventually
             byte temp = _value > 0x3000 ? (byte)3 : (byte)2;
             totalLength += temp;
+            Logger.Info($"Session: {_session.SessionID} Adding {temp} to PacketLength. Total: {totalLength}");
             _headerLength += temp;
-			
-			//Bundle Type & Bundle #
-			totalLength += 3;
-			
-			if(_session.SessionAck)
-				totalLength += 4;
-			
-			if (_session.RdpReport)
-				totalLength += 4;
-			
-			if (_session.clientUpdateAck)
-				totalLength += 4;
-			
-			//Add 4 more for CRC upfront
-			//If we ever implement server transfers, may need to rethink this as those do not use crc
-			totalLength += 4;
 
-            return totalLength;
-		}
+            //Bundle Type & Bundle #
+            totalLength += 3;
+            Logger.Info($"Session: {_session.SessionID} Adding 3 to PacketLength. Total: {totalLength}");
+
+            if (segmentFlags.SessionAck)
+            {
+                totalLength += 4;
+                Logger.Info($"Session: {_session.SessionID} Adding 4 to PacketLength. Total: {totalLength}");
+            }
+
+            if (segmentFlags.RdpReport)
+            {
+                totalLength += 4;
+                Logger.Info($"Session: {_session.SessionID} Adding 4 rdp to PacketLength. Total: {totalLength}");
+            }
+
+            if (segmentFlags.clientUpdateAck)
+            {
+                totalLength += 4;
+                Logger.Info($"Session: {_session.SessionID} Adding 4 client to PacketLength. Total: {totalLength}");
+            }
+
+            //Add 4 more for CRC upfront
+            //If we ever implement server transfers, may need to rethink this as those do not use crc
+            totalLength += 4;
+            Logger.Info($"Session: {_session.SessionID} Adding 4 crc to PacketLength. Total: {totalLength}");
+        }
 
 		private void AddMessages(Span<byte> packet, List<ReadOnlyMemory<byte>> messageList)
 		{
@@ -430,11 +450,11 @@ namespace ReturnHome.Server.Network
 		}
 
         ///Identifies if full RDPReport is needed or just the current bundle #
-        private void AddRDPReport(Span<byte> packet)
+        private void AddRDPReport(Span<byte> packet, SegmentBodyFlags segmentFlags)
         {
             packet.Write(_session.rdpCommIn.connectionData.lastSentPacketSequence++, ref _offset);
             ///If RDP Report == True, Current bundle #, Last Bundle received # and Last message received #
-            if (_session.RdpReport)
+            if (segmentFlags.RdpReport)
             {
                 Logger.Info("Full RDP Report");
 
@@ -444,36 +464,34 @@ namespace ReturnHome.Server.Network
             }
 
             //If ingame, include 4029 ack's
-            if (_session.clientUpdateAck)
+            if (segmentFlags.clientUpdateAck)
             {
                 packet.Write((byte)0x40, ref _offset);
                 packet.Write(_session.rdpCommIn.connectionData.client.BaseXorMessage, ref _offset);
                 packet.Write((byte)0xF8, ref _offset);
-                _session.clientUpdateAck = false;
-                return;
             }
         }
 
         ///Add our bundle type
         ///Consideration for in world or "certain packet" # is needed during conversion. For now something basic will work
-        private void AddBundleType(Span<byte> packet)
+        private void AddBundleType(Span<byte> packet, SegmentBodyFlags segmentFlags)
         {
             byte segBody = 0;
 
             //Always has this
             segBody |= 0x20;
 
-            if (_session.RdpReport)
+            if (segmentFlags.RdpReport)
             {
                 segBody |= 0x03;
             }
 
-            if (_session.clientUpdateAck)
+            if (segmentFlags.clientUpdateAck)
             {
                 segBody |= 0x10;
             }
 
-            if (_session.SessionAck)
+            if (segmentFlags.SessionAck)
             {
                 segBody |= 0x40;
             }

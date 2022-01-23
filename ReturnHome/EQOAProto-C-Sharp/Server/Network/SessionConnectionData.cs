@@ -9,12 +9,26 @@ namespace ReturnHome.Server.Network
     public class SessionConnectionData
     {
         private Session _session;
-        public ushort lastReceivedMessageSequence { get; set; }
+        public ushort _lastReceivedMessageSequence { get; set; } = 0;
         public ushort lastReceivedPacketSequence { get; set; }
         public ushort lastSentMessageSequence { get; set; }
         public ushort lastSentPacketSequence { get; set; }
         public ushort clientLastReceivedMessage { get; set; }
         public ushort clientLastReceivedMessageFinal { get; set; }
+
+        //This property will trigger the rdpreport bool when it increments
+        public ushort lastReceivedMessageSequence
+        {
+            get { return _lastReceivedMessageSequence; }
+            set
+            {
+                if (_lastReceivedMessageSequence <= value)
+                {
+                    _lastReceivedMessageSequence = value;
+                    _session.PacketBodyFlags.RdpReport = true;
+                }
+            }
+        }
         public ClientObjectUpdate client {get; set;}
 
         //Create an array of all 24 object updates
