@@ -111,7 +111,6 @@ namespace ReturnHome.Server.Network
                     {
                         msgNum = buffer.GetLEUShort(ref offset);
                         ChannelAcks.Add(chk, msgNum);
-                        chk = buffer.GetByte(ref offset);
                     }
 
                     else if (chk == 0xF8)
