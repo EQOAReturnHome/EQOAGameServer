@@ -30,22 +30,25 @@ namespace ReturnHome.Server.Network
             else
                 Size = bigCheck;
 
-            if((byte)MessageType.UnreliableMessage != messageType)
+            if ((byte)MessageType.UnreliableMessage != messageType)
                 MessageNumber = buffer.GetLEUShort(ref offset);
 
             if ((byte)MessageType.PingMessage == messageType)
                 return;
 
             //unreliables and Reliables have opcodes. No  other opcode type/channel does
-            if ((byte)MessageType.UnreliableMessage == messageType || (byte)MessageType.ReliableMessage == messageType)
+            else if ((byte)MessageType.UnreliableMessage == messageType || (byte)MessageType.ReliableMessage == messageType)
             {
                 Opcode = buffer.GetLEUShort(ref offset);
                 //Subtract 2 from size after reading opcode
                 Size -= 2;
             }
 
-            if (messageType == (byte)MessageType.ClientUpdate)
+            else if (messageType == (byte)MessageType.ClientUpdate)
                 XorByte = buffer.GetByte(ref offset);
+
+            else
+                throw new Exception("Error occured on processing data");
 
         }
     }

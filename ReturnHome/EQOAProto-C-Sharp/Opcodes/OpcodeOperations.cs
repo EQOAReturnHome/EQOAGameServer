@@ -12,9 +12,6 @@ using ReturnHome.Server.Network.Managers;
 using ReturnHome.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject;
-using ReturnHome.Opcodes;
-
-
 
 namespace ReturnHome.Opcodes
 {
@@ -241,7 +238,7 @@ namespace ReturnHome.Opcodes
             }
             catch
             {
-                Console.WriteLine("Master Dump Session failed");
+                Logger.Err($"Unable to create Memory Dump Session for {MySession.SessionID} : {MyCharacter.CharName}");
             }
         }
 
@@ -407,6 +404,7 @@ namespace ReturnHome.Opcodes
             //Later this will need to include a character/world combination if additional servers are spun up.
             if (CharName == createCharacter.CheckName(CharName))
             {
+                offset = 0;
                 Memory<byte> temp2 = new byte[2];
                 Span<byte> Message = temp2.Span;
                 Message.Write((ushort)GameOpcode.NameTaken, ref offset);

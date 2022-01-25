@@ -21,6 +21,13 @@ namespace ReturnHome.Server.Managers
                 entity.ObjectID = ObjectID;
             }
 
+            else
+            {
+                if (!_idCreator.AddEntity(entity))
+                    return false;
+
+            }
+
             //Add entity to our tracking List
             if (entityList.Contains(entity))
                 //Return false here? Boot in world entity and load new one?
@@ -40,7 +47,7 @@ namespace ReturnHome.Server.Managers
 
         public static bool QueryForEntity(uint ObjectID, out Entity e)
         {
-            if (_idCreator.QueryEntity(ObjectID, out Entity ent))
+            if(_idCreator.QueryEntity(ObjectID, out Entity ent))
             {
                 e = ent;
                 return true;

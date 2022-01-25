@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using ReturnHome.Utilities;
 
@@ -26,6 +25,7 @@ namespace ReturnHome.Server.Network
         public ushort ClientBundleNumber { get; set; }
         public ushort ClientBundleAck { get; set; }
         public ushort ClientMessageAck { get; set; }
+
         public Dictionary<byte, ushort> ChannelAcks;
 
         public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
@@ -78,45 +78,49 @@ namespace ReturnHome.Server.Network
             //Read Bundle Type, needs abit of a work around....
             bundleFlags = (PacketBundleFlags)buffer.GetByte(ref offset);
 
-            if (HasBundleFlag(PacketBundleFlags.ProcessAll))
+            if (HasBundleFlag(PacketBundleFlags.ProcessAck))
             {
                 SessionAckID = buffer.GetLEUInt(ref offset);
-
-                RDPReport = true;
-                ProcessMessage = true;
                 SessionAck = true;
             }
 
             ClientBundleNumber = buffer.GetLEUShort(ref offset);
 
-            if (HasBundleFlag(PacketBundleFlags.NewProcessReport) || HasBundleFlag(PacketBundleFlags.ProcessReport))
+            if (HasBundleFlag(PacketBundleFlags.RDPReport))
             {
                 ClientBundleAck = buffer.GetLEUShort(ref offset);
                 ClientMessageAck = buffer.GetLEUShort(ref offset);
                 RDPReport = true;
             }
 
-            if (temp.Length > (offset + 4))
+            if (HasBundleFlag(PacketBundleFlags.UnknownSingleByte))
             {
-                byte chk = buffer.GetByte(ref offset);
-                if (chk >= 0x00 & chk <= 0x17)
+                if(buffer.GetByte(ref offset) == 0xFF)
+                    _ = buffer.GetByte(ref offset);
+            }
+
+            if (HasBundleFlag(PacketBundleFlags.ProcessUnreliableAcks))
+            {
+                byte chk;
+                ushort msgNum;
+                ChannelAcks = new();
+                do
                 {
-                    ChannelAcks = new();
-                    ushort msgNum = buffer.GetLEUShort(ref offset);
-
-                    while (true)
+                    chk = buffer.GetByte(ref offset);
+                    if ((chk >= 0 && chk <= 0x17) || (chk >= 0x40 && chk <= 0x43))
                     {
-                        ChannelAcks.Add(chk, msgNum);
-                        chk = buffer.GetByte(ref offset);
-                        if (chk == 0xF8)
-                            break;
-
                         msgNum = buffer.GetLEUShort(ref offset);
+                        ChannelAcks.Add(chk, msgNum);
                     }
-                }
 
-                else
-                    offset -= 1;
+                    else if (chk == 0xF8)
+                        break;
+
+                    else
+                        throw new Exception("An Error has occured processing this packet, no more reliable ack's and did not meet the 0xF8 terminator");
+
+                } while (true);
+
             }
 
 			if (HasBundleFlag(PacketBundleFlags.NewProcessMessages) || HasBundleFlag(PacketBundleFlags.ProcessMessages))

@@ -74,8 +74,6 @@ namespace ReturnHome.Server.EntityObject.Player
             x = xCoord;
             y = yCoord;
             z = zCoord;
-            //set our base vactor 3 herw
-            SetPosition();
             Facing = (byte)(facing / 0.0245433693f);
             Strength = strength;
             Stamina = stamina;
@@ -114,21 +112,6 @@ namespace ReturnHome.Server.EntityObject.Player
             //PowerOT2 = powerOT2;
             characterSession = MySession;
         }
-
-        public void UpdatePosition()
-        {
-            if (waypoint == Position)
-                return;
-            else
-            {
-                Position = waypoint;
-                VelocityX = WayPointVelocityX;
-                VelocityY = WayPointVelocityY;
-                VelocityZ = WayPointVelocityZ;
-            }
-            characterSession.objectUpdate = true;
-        }
-
 
         public void UpdateFeatures(Session MySession, int hairColor, int hairLength, int hairStyle, int faceOption)
         {

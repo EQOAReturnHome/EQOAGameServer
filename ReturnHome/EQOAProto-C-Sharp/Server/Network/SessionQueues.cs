@@ -64,16 +64,15 @@ namespace ReturnHome.Server.Network
             //If either of these have items in the queue, return true
             if (!OutGoingReliableMessageQueue.IsEmpty || !OutGoingUnreliableMessageQueue.IsEmpty)
             {
-                _session.RdpMessage = true;
+                _session.PacketBodyFlags.RdpMessage = true;
                 return true;
             }
 
             return false;
         }
 
-        public (int, List<ReadOnlyMemory<byte>>) GatherMessages()
+        public int GatherMessages(SegmentBodyFlags PacketBodyFlags, List<ReadOnlyMemory<byte>> messageList)
         {
-            List<ReadOnlyMemory<byte>> messageList = new();
             int messageLength = 0;
 
             //Resend queue is not needed here since we loop it back into the reliable queue on the check
@@ -96,7 +95,7 @@ namespace ReturnHome.Server.Network
                             //Place into resend queue
                             if (ResendMessageQueue.TryAdd(reliableMessage.Messagenumber, reliableMessage))
                             {
-                                _session.RdpMessage = true;
+                                PacketBodyFlags.RdpMessage = true;
 
                                 //continue processing
                                 continue;
@@ -106,7 +105,7 @@ namespace ReturnHome.Server.Network
                                 //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
                                 if (ResendMessageQueue.TryUpdate(reliableMessage.Messagenumber, reliableMessage, reliableMessage))
                                 {
-                                    _session.RdpMessage = true;
+                                    PacketBodyFlags.RdpMessage = true;
                                     continue;
                                 }
 
@@ -118,7 +117,7 @@ namespace ReturnHome.Server.Network
                     }
 
                     else
-                        return (messageLength, messageList);
+                        return messageLength;
                 }
 
                 //process unreliable messages
@@ -131,20 +130,19 @@ namespace ReturnHome.Server.Network
                             //Place message into outgoing message
                             messageList.Add(reliableMessage.Message);
                             messageLength += reliableMessage.Message.Length;
-                            _session.RdpMessage = true;
                             continue;
                         }
                     }
 
                     else
-                        return (messageLength, messageList);
+                        return messageLength;
                 }
 
                 //Shouldn't hit this unless there is no messages at all
                 break;
             }
 
-			return (messageLength, messageList);
+			return messageLength;
         }
 
         public int CalculateMessageList(List<ReadOnlyMemory<byte>> messageList)

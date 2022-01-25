@@ -9,6 +9,7 @@ using System.Numerics;
 using QuadTrees;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Managers
 {
@@ -62,15 +63,15 @@ namespace ReturnHome.Server.Managers
         public static List<Entity> QueryNearbyObjects(Character myCharacter, float radius)
         {
             List<Entity> entityList = new();
-            foreach (Entity entity in qtree.GetAllObjects())
-            {
-                Console.WriteLine(entity.CharName);
-            }
+
             qtree.GetObjects(new RectangleF(myCharacter.x - (radius / 2), myCharacter.z - (radius / 2), radius, radius), entityList);
 
             return entityList;
         }
 
+        /*Should we maybe build a queue for this and move players on everytick rather when their updates come in?
+         * makes everything more accurate on the state
+         */
         public static void UpdatePosition(Entity entity)
         {
             qtree.Move(entity);
@@ -83,13 +84,17 @@ namespace ReturnHome.Server.Managers
         }
         */
 
+        /*
+         * Should all players be removed on a per tick basis?
+         */
+
         public static void RemoveObjectFromTree(Entity entity)
         {
             if (entity == null)
                 return;
 
             qtree.Remove(entity);
-            Console.WriteLine($"Removed: {entity.CharName}");
+            Logger.Info($"Removed: {entity.CharName} from tree");
         }
 
 

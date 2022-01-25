@@ -48,7 +48,7 @@ namespace ReturnHome.Server.Network.Managers
                 if (SessionHash.TryAdd(ClientSession))
                 {
                     Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
-                    ClientSession.SessionAck = true;
+                    ClientSession.PacketBodyFlags.SessionAck = true;
                     //Success, keep processing data
                     ClientSession.ProcessPacket(packet);
                 }
@@ -149,10 +149,11 @@ namespace ReturnHome.Server.Network.Managers
             NewMasterSession.MyCharacter = MyCharacter;
             NewMasterSession.MyCharacter.characterSession = NewMasterSession;
             NewMasterSession.MyCharacter.ObjectID = NewMasterSession.SessionID;
+            EntityManager.AddEntity(MyCharacter);
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
-                Console.WriteLine("Ready For Memory Dump");
+                Logger.Info($"Session {NewMasterSession.SessionID} starting Memory Dump");
                 ProcessOpcode.ProcessMemoryDump(NewMasterSession);
             }
         }
@@ -187,7 +188,7 @@ namespace ReturnHome.Server.Network.Managers
             int sessionCount = 0;
 
             //Should push client object update directly to character if needed
-            Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
+            //test  Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
             MapManager.BulkAddObjects();
             MapManager.QueryObjectsForDistribution();
@@ -200,7 +201,7 @@ namespace ReturnHome.Server.Network.Managers
             {
                 if (session.PendingTermination)
                 {
-                    Console.WriteLine("Dropping Session on server end");
+                    Logger.Info($"Dropping Session {session.SessionID}");
                     session.DropSession();
                 }
 

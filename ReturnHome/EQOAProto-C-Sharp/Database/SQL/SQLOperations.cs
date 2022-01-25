@@ -136,7 +136,10 @@ namespace ReturnHome.Database.SQL
                     //feet
                     rdr.GetInt32(20),
                     //head
-                    rdr.GetInt32(21));
+                    rdr.GetInt32(21),
+                    //NPC Type
+                    //Should be a ushort but throws an overflow error, needs to be looked at eventually, cast to ushort in Actor.cs
+                    rdr.GetUInt32(22));
                 //add the created actor to the npcData list
                 npcData.Add(newActor);
 
@@ -582,7 +585,6 @@ namespace ReturnHome.Database.SQL
                 //Hold character value so we have names to compare against 
                 if (SecondRdr.GetString(0) == selectedCharacter.CharName)
                 {
-                    Console.WriteLine("Getting character item's");
                     Item ThisItem = new Item(
                       //Stacksleft
                       SecondRdr.GetInt32(1),
@@ -693,9 +695,6 @@ namespace ReturnHome.Database.SQL
                         selectedCharacter.AuctionItems.Add(ThisItem);
                     }
                 }
-
-                else
-                    Console.WriteLine("Wrong Character");
             }
             SecondRdr.Close();
 

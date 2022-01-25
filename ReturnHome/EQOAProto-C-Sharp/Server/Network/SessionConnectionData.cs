@@ -8,21 +8,44 @@ namespace ReturnHome.Server.Network
 {
     public class SessionConnectionData
     {
-        public ushort lastReceivedMessageSequence { get; set; }
+        private Session _session;
+        public ushort _lastReceivedMessageSequence { get; set; } = 0;
         public ushort lastReceivedPacketSequence { get; set; }
         public ushort lastSentMessageSequence { get; set; }
         public ushort lastSentPacketSequence { get; set; }
         public ushort clientLastReceivedMessage { get; set; }
         public ushort clientLastReceivedMessageFinal { get; set; }
+
+        //This property will trigger the rdpreport bool when it increments
+        public ushort lastReceivedMessageSequence
+        {
+            get { return _lastReceivedMessageSequence; }
+            set
+            {
+                if (_lastReceivedMessageSequence <= value)
+                {
+                    _lastReceivedMessageSequence = value;
+                    _session.PacketBodyFlags.RdpReport = true;
+                }
+            }
+        }
         public ClientObjectUpdate client {get; set;}
 
         //Create an array of all 24 object updates
         //Need a way to ensure no more then 24 objects can be allocated, array may be best?
         public Memory<ServerObjectUpdate> serverObjects;
 
-
-        public SessionConnectionData(Session _session)
+        /*
+         * Need to be able to do a full cycle reset for server objects.
+         * Whenever a player moves/teleports to a new map/world, all of the c9 channels need to be reset
+         * or it causes issues for the client as they remain in the old world or something
+         * Should be as simple as a for/foreach loop in a reset method calling the ServerObjects Reset method
+         * First theory is that this reset method should reside within the World Property for entity, 
+         * checking if entity is a player first then calling this method to reset all channels if world changes
+         */
+        public SessionConnectionData(Session session)
         {
+            _session = session;
             lastReceivedMessageSequence = 0;
             lastReceivedPacketSequence = 0;
 
@@ -48,14 +71,15 @@ namespace ReturnHome.Server.Network
 
         public void AddChannelObjects(List<Entity> charList)
         {
+            charList.Remove(_session.MyCharacter);
             if (charList.Count == 0)
                 return;
 
             charList = charList.GetRange(0, charList.Count > 23 ? 23 : charList.Count);
 
             Span<ServerObjectUpdate> temp = serverObjects.Span;
-            //Iterate over List from QuadTree against Channels, skip ourself
-            for (int i = 0; i < serverObjects.Length; i++)
+            //Iterate over List from QuadTree against Channels
+            for (int i = 1; i < serverObjects.Length; i++)
             {
                 //Character is already in a channel
                 if (charList.Contains(temp[i].entity))
@@ -65,13 +89,14 @@ namespace ReturnHome.Server.Network
                 }
 
                 else
-                    temp[i].DisableChannel();
+                    //Calls the disable methopd for the channel
+                    temp[i].DeactivateChannel();
             }
 
             if (charList.Count == 0)
                 return;
 
-            for(int i = 0; i < serverObjects.Length; i++)
+            for(int i = 1; i < serverObjects.Length; i++)
             {
                 if(temp[i].entity == null)
                 {

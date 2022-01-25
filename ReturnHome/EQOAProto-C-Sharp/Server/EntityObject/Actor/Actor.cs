@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 
 namespace ReturnHome.Server.EntityObject.Actor
 {
@@ -13,12 +14,13 @@ namespace ReturnHome.Server.EntityObject.Actor
 
         public Actor(string charName, float xCoord, float yCoord, float zCoord, int facing, int world, int modelid, float size,
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
-            int gloves, int legs, int feet, int head) : base(false)
+            int gloves, int legs, int feet, int head, uint npcType) : base(false)
         {
             CharName = charName;
             x = xCoord;
             y = yCoord;
             z = zCoord;
+            Position = new Vector3(x, y, z);
             Facing = (byte)facing;
             World = world;
             ModelID = modelid;
@@ -40,7 +42,7 @@ namespace ReturnHome.Server.EntityObject.Actor
             CurrentHP = 300;
             HPMax = 500;
             Target = 0xFFFFFFFF;
-            NPCType = 0x0082;
+            NPCType = (ushort)npcType;
         }
   }
 }

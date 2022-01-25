@@ -3,18 +3,22 @@ using QuadTrees.QTreePointF;
 using System.Drawing;
 using System.Numerics;
 using ReturnHome.Utilities;
+using ReturnHome.Opcodes;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity : IPointFQuadStorable
     {
         public int World;
+
         public float x;
         public float y;
         public float z;
 
-        //Should be set to time once player is identified as moving, if player stops set back to 0
-        private long movement_started;
+        private float _velocityX = 0.0f;
+        private float _velocityY = 0.0f;
+        private float _velocityZ = 0.0f;
 
         //Set position to waypoint after initial position is set, should waypoint be assigned by the client update? Seems logical
         public Vector3 waypoint;
@@ -24,19 +28,10 @@ namespace ReturnHome.Server.EntityObject
         private byte _facing;
         private float _facingF;
         public float Speed;
-        private float movement_speed = 2.0f;
         private byte _turning = 0;
 
         private byte _animation;
-        private uint _target;
         public byte Movement = 1;
-
-        public float VelocityX = 0.0f;
-        public float VelocityY = 0.0f;
-        public float VelocityZ = 0.0f;
-        public float WayPointVelocityX = 0.0f;
-        public float WayPointVelocityY = 0.0f;
-        public float WayPointVelocityZ = 0.0f;
 
         private byte _eastToWest = 0;
         private byte _lateralMovement = 0;
@@ -53,6 +48,45 @@ namespace ReturnHome.Server.EntityObject
         }
 
         #region Property zone
+
+        public float VelocityX
+        {
+            get { return _velocityX; }
+            set
+            {
+                if(true)
+                {
+                    _velocityX = value;
+                    ObjectUpdateVelocityX();
+                }
+            }
+        }
+
+        public float VelocityY
+        {
+            get { return _velocityY; }
+            set
+            {
+                if (true)
+                {
+                    _velocityY = value;
+                    ObjectUpdateVelocityY();
+                }
+            }
+        }
+
+        public float VelocityZ
+        {
+            get { return _velocityZ; }
+            set
+            {
+                if (true)
+                {
+                    _velocityZ = value;
+                    ObjectUpdateVelocityZ();
+                }
+            }
+        }
 
         public byte Facing
         {
@@ -88,6 +122,9 @@ namespace ReturnHome.Server.EntityObject
                 if(true)
                 {
                     _position = value;
+                    x = _position.X;
+                    y = _position.Y;
+                    z = _position.Z;
                     _point = new PointF(_position.X, _position.Z);
                     ObjectUpdatePosition();
                 }
@@ -171,19 +208,6 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public uint Target
-        {
-            get { return _target; }
-            set
-            {
-                if(true)
-                {
-                    _target = value;
-                    ObjectUpdateTarget();
-                }
-            }
-        }
-
         public byte FirstPerson
         {
             get { return _firstPerson; }
@@ -215,19 +239,9 @@ namespace ReturnHome.Server.EntityObject
 
         }
 
-        public void SetPosition()
+        public void UpdatePosition(float X, float Y, float Z)
         {
-            Position = new Vector3(x, y, z);
-        }
-
-        public void UpdateWayPoint(float X, float Y, float Z)
-        {
-            movement_started = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-            x = X;
-            y = Y;
-            z = Z;
-            waypoint = new Vector3(x, y, z);
-            _point = new PointF(x, z);
+            Position = new Vector3(X, Y, Z);
         }
 
         public void UpdateFacing(byte facing, byte turning)
@@ -237,18 +251,23 @@ namespace ReturnHome.Server.EntityObject
             Turning = turning;
         }
 
+        /*
+         * No need for an animation update method as the property can handle it all?
         public void UpdateAnimation(byte animation)
         {
             Animation = animation;
         }
+        */
 
         public void UpdateVelocity(float velocityX, float velocityY, float velocityZ)
         {
-            WayPointVelocityX = velocityX;
-            WayPointVelocityY = velocityY;
-            WayPointVelocityZ = velocityZ;
+            VelocityX = velocityX;
+            VelocityY = velocityY;
+            VelocityZ = velocityZ;
         }
 
+        /*
+         * No point for a Target update method as the property can handle everything?
         public void UpdateTarget(uint target)
         {
             Target = target;
@@ -278,5 +297,6 @@ namespace ReturnHome.Server.EntityObject
 
             return Position;
         }
+        */
     }
 }

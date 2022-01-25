@@ -78,12 +78,30 @@ namespace ReturnHome.Server.EntityObject
             BitConverter.GetBytes(ModelSize).CopyTo(ObjectUpdate.Slice(35, 4));
         }
 
-        public void ObjectUpdateVelocities()
+        public void ObjectUpdateVelocityX()
         {
-            Span<byte> temp = ObjectUpdate.Span;
-            temp[39] = (byte)Math.Round(VelocityX * _speedAdjust);
-            temp[40] = (byte)Math.Round(VelocityY * _speedAdjust);
-            temp[41] = (byte)Math.Round(VelocityZ * _speedAdjust);
+            sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
+            if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
+            if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
+            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(39, 1));
+        }
+
+        public void ObjectUpdateVelocityY()
+        {
+            /*Don't need to adjust Y, for now
+            sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
+            if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
+            if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
+            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(39, 1));
+            */
+        }
+
+        public void ObjectUpdateVelocityZ()
+        {
+            sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
+            if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
+            if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
+            new byte[] { (byte)svz }.CopyTo(ObjectUpdate.Slice(39, 1));
         }
 
         public void ObjectUpdateEastWest()
@@ -304,7 +322,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateNPCType()
         {
-            BitConverter.GetBytes(_npcType).CopyTo(ObjectUpdate.Slice(186, 4));
+            BitConverter.GetBytes(_npcType).CopyTo(ObjectUpdate.Slice(184, 2));
         }
 
         public void ObjectUpdatePattern()

@@ -33,7 +33,7 @@ namespace ReturnHome.Server.Network
                 if (Mysession.rdpCommIn.connectionData.client.BaseXorMessage > (message.Header.MessageNumber - message.Header.XorByte))
                 {
                     //ensure client got ack by resending it
-                    Mysession.clientUpdateAck = true;
+                    Mysession.PacketBodyFlags.clientUpdateAck = true;
                     return;
                 }
             }
@@ -70,27 +70,17 @@ namespace ReturnHome.Server.Network
             offset += 12;
             byte Animation = ClientPacket.GetByte(ref offset);
 
-            //Test... See if this effects playable objects or if it is only for npc's
-            if (Animation == 0)
-            {
-                if (Facing > Mysession.MyCharacter.Facing)
-                    Animation = 4;
-
-                if (Facing < Mysession.MyCharacter.Facing)
-                    Animation = 5;
-            }
-
             offset++;
 
             uint Target = ClientPacket.GetLEUInt(ref offset);
 
             //Update Base array for client update object, then update character object
             Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);
-            Mysession.MyCharacter.UpdateWayPoint(x, y, z);
-            Mysession.MyCharacter.UpdateAnimation(Animation);
+            Mysession.MyCharacter.UpdatePosition(x, y, z);
+            Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
             Mysession.MyCharacter.UpdateVelocity(Velx, 0, Velz);
-            Mysession.MyCharacter.UpdateTarget(Target);
+            //Mysession.MyCharacter.Target = Target;
             Mysession.objectUpdate = true;
 
             //Would likely need some checks here eventually? Shouldn't blindly trust client
@@ -111,7 +101,7 @@ namespace ReturnHome.Server.Network
             }
 
             //Tells us we need to tell client we ack this message
-            Mysession.clientUpdateAck = true;
+            Mysession.PacketBodyFlags.clientUpdateAck = true;
         }
     }
 }

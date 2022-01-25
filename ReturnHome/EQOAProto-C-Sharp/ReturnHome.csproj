@@ -13,10 +13,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Database\SQL\Character\**" />
     <Compile Remove="Server\EntityObject\NewFolder\**" />
     <Compile Remove="Server\NewFolder1\**" />
+    <Compile Remove="Server\NewFolder\**" />
+    <EmbeddedResource Remove="Database\SQL\Character\**" />
     <EmbeddedResource Remove="Server\EntityObject\NewFolder\**" />
     <EmbeddedResource Remove="Server\NewFolder1\**" />
+    <EmbeddedResource Remove="Server\NewFolder\**" />
+    <None Remove="Database\SQL\Character\**" />
     <None Remove="Server\EntityObject\NewFolder\**" />
     <None Remove="Server\NewFolder1\**" />
   </ItemGroup>
@@ -33,8 +38,5 @@
     <PackageReference Include="QuadTrees" Version="1.0.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Include="System.IO.Pipelines" Version="5.0.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Database\SQL\Character\" />
   </ItemGroup>
 </Project>
