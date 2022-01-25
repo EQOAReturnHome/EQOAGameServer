@@ -56,6 +56,15 @@ namespace ReturnHome.Server.EntityObject
             _maxSize = 249999;
         }
 
+        //Basic Add for adding characters to the tracking object
+        public bool AddEntity(Entity ent)
+        {
+            if (_playerObjectID.TryAdd(ent.ObjectID, ent))
+                return true;
+
+            return false;
+        }
+
         public bool GenerateID(Entity entity, out uint ObjectID)
         {
             ObjectID = 0;

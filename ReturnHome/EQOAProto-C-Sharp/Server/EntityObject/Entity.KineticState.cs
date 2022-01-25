@@ -31,8 +31,6 @@ namespace ReturnHome.Server.EntityObject
         private byte _turning = 0;
 
         private byte _animation;
-        private uint _target;
-        public uint TargetCounter = 1;
         public byte Movement = 1;
 
         private byte _eastToWest = 0;
@@ -207,24 +205,6 @@ namespace ReturnHome.Server.EntityObject
                     _animation = value;
                     ObjectUpdateAnimation();
                 }
-            }
-        }
-
-        public uint Target
-        {
-            get { return _target; }
-            set
-            {
-                if (true)
-                {
-                    _target = value;
-                    ObjectUpdateTarget();
-
-                    if (isPlayer && ObjectID != 0)
-                    {
-                        //Get target information about the object
-                        ProcessOpcode.TargetInformation(((Character)this).characterSession, _target);
-                } }
             }
         }
 
