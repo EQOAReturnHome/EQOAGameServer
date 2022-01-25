@@ -149,6 +149,7 @@ namespace ReturnHome.Server.Network.Managers
             NewMasterSession.MyCharacter = MyCharacter;
             NewMasterSession.MyCharacter.characterSession = NewMasterSession;
             NewMasterSession.MyCharacter.ObjectID = NewMasterSession.SessionID;
+            EntityManager.AddEntity(MyCharacter);
 
             if (SessionHash.TryAdd(NewMasterSession))
             {

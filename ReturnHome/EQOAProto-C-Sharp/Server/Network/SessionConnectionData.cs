@@ -90,7 +90,7 @@ namespace ReturnHome.Server.Network
 
                 else
                     //Calls the disable methopd for the channel
-                    temp[i].DisableChannel();
+                    temp[i].DeactivateChannel();
             }
 
             if (charList.Count == 0)

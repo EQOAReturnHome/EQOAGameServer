@@ -51,6 +51,9 @@ namespace ReturnHome.Server.EntityObject
                 Current = 200000;
                 _increase = 2;
             }
+            //Primary use is for this to be for adding npc's dynamically, we currently create player Object id's another way, but should likely be incorporated here, too/
+            //Doing this for now for testing
+            _maxSize = 249999;
         }
 
         public bool GenerateID(Entity entity, out uint ObjectID)

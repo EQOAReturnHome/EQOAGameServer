@@ -69,17 +69,12 @@ namespace ReturnHome.Server.Network
             _isActive = true;
         }
 
-        public void DisableChannel()
+        public void DeactivateChannel()
         {
             entity = null;
             if (_isActive)
             {
                 _isActive = false;
-                Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-                temp.Span[0] = 1;
-                baseXOR.Slice(1, 0XC8).CopyTo(temp.Slice(1, 0xC8));
-                CurrentXORResults.Add(messageCounter, temp);
-                SessionQueueMessages.PackMessage(_session, temp, ObjectChannel);
             }
         }
 

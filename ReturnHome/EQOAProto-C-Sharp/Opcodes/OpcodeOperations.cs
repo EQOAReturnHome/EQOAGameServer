@@ -308,6 +308,7 @@ namespace ReturnHome.Opcodes
             //Later this will need to include a character/world combination if additional servers are spun up.
             if (CharName == createCharacter.CheckName(CharName))
             {
+                offset = 0;
                 Memory<byte> temp2 = new byte[2];
                 Span<byte> Message = temp2.Span;
                 Message.Write((ushort)GameOpcode.NameTaken, ref offset);
