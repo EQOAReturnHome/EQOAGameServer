@@ -48,7 +48,11 @@
         ClientMessage = 0x0A7A, //2682 - White text message
         DisconnectClient = 0x09B0, //2480
         ColoredChat = 0x0A7B, //2683 - Color text message
-        QuestBox = 0x34, //52
+        DialogueBox = 0x34, //52
+        DialogueBoxOption = 0x35, //53
+        AddInvItem = 0x3B, //59
+        AddQuestLog = 0x007C, //124
+        BankUI = 0x124D, //4685
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client

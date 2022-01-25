@@ -12,6 +12,7 @@ using ReturnHome.Server.Network.Managers;
 using ReturnHome.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Opcodes;
 
 
 
@@ -33,7 +34,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.ChangeChatMode, ChangeChatMode },
             { GameOpcode.DisconnectClient, DisconnectClient },
             { GameOpcode.Target, PlayerTarget },
-            { GameOpcode.Interact, InteractActor }
+            { GameOpcode.Interact, InteractActor },
+            { GameOpcode.DialogueBoxOption, InteractActor },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -93,6 +95,10 @@ namespace ReturnHome.Opcodes
             MySession.MyCharacter.chatMode = ClientPacket.Data.Span[0];
         }
 
+        public static void AddInvItem(Session MySession, Item item)
+        {
+        }
+
         public static void PlayerTarget(Session mySession, PacketMessage clientPacket)
         {
             //Offset is 4 because first 4 bytes is targeting counter
@@ -111,53 +117,96 @@ namespace ReturnHome.Opcodes
         Bankers are 0x02. So most likely 0x82 for unattackable and banker
         Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
         */
+
+        /*LOOK HERE Use multiple 0x46 to send multiple dialogue boxes without response*/
         public static void InteractActor(Session MySession, PacketMessage ClientPacket)
         {
+            //Read the incoming message and get the objectID that was interacted with
             int offset = 0;
             ReadOnlySpan<byte> IncMessage = ClientPacket.Data.Span;
             uint interactTarget = IncMessage.GetLEUInt(ref offset);
-
-            offset = 0;
-            uint choicesLength = 0;
-
-            EventManager eManager = new EventManager();
-            Entity npcEntity = new Entity(false);
-
-
-            if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
+            if (ClientPacket.Header.Opcode == 4)
             {
-                npcEntity.CharName = npc.CharName;
+                
+                //Create new instance of the event manager
+                EventManager eManager = new EventManager();
+                Entity npcEntity = new Entity(false);
+                Dialogue dialogue = MySession.MyCharacter.MyDialogue;
+
+                //Gets NPC name from ObjectID
+                if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
+                {
+                    npcEntity.CharName = npc.CharName;
+                    dialogue.npcName = npc.CharName;
+                }
+
+
+
+
+                //Reset offset for outgoing message
+                offset = 0;
+                //Length of choices
+                uint choicesLength = 0;
+                //Dialogue at top of box
+                string TextboxMessage;
+                //The number of text choices that exist
+                //uint textChoicesNum = 0;
+                //List of dialogue options
+                List<string> textChoices = new List<String>();
+                //Counter to keep track of how many 
+                uint choiceCounter = 0;
+                byte textOptions = 1;
+
+
+
+
+                MySession.MyCharacter = eManager.GetNPCDialogue(GameOpcode.DialogueBox, MySession.MyCharacter);
+                if (dialogue.diagOptions != null)
+                {
+
+                    textChoices = dialogue.diagOptions;
+                    choiceCounter = (uint)textChoices.Count;
+
+                    //Length of choices
+                    foreach (string choice in textChoices)
+                    {
+                        choicesLength += (uint)choice.Length;
+
+                    }
+                    textOptions = (byte)textChoices.Count;
+                }
+
+                TextboxMessage = dialogue.dialogue;
+
+
+
+
+                Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
+                Span<byte> Message = temp.Span;
+
+                Message.Write((ushort)GameOpcode.DialogueBox, ref offset);
+                Message.Write(choiceCounter, ref offset);
+                Message.Write(TextboxMessage.Length, ref offset);
+                Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
+                Message.Write(textOptions, ref offset);
+
+                if (dialogue.diagOptions != null)
+                {
+                    for (int i = 0; i < textChoices.Count; i++)
+                    {
+                        Message.Write(textChoices[i].Length, ref offset);
+                        Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
+                    }
+                    textChoices.Clear();
+                    dialogue.diagOptions = null;
+                }
+
+
+
+                //Send Message
+                SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
             }
 
-            //string textChoices = "String standin;
-
-            uint choiceCounter = 1;
-            //string TextboxMessage = "tst";
-            string TextboxMessage = eManager.GetNPCDialogue(npcEntity.CharName); ;
-            uint textChoicesNum = 1;
-
-            byte textOptions = 1;
-
-            Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (textChoicesNum * 4) + 1 + (choicesLength * 2)]);
-            Span<byte> Message = temp.Span;
-
-            Message.Write((ushort)GameOpcode.QuestBox, ref offset);
-            Message.Write(choiceCounter, ref offset);
-            Message.Write(TextboxMessage.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
-            Message.Write(textOptions, ref offset);
-
-            /*for (int i = 0; i < textChoices.Count; i++)
-            {
-                Message.Write(textChoices[i].Length, ref offset);
-                Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
-            }*/
-
-
-
-            //Send Message
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-            Console.WriteLine(interactTarget);
         }
 
         public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)

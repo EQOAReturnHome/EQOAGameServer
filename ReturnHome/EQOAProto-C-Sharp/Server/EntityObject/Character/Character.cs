@@ -21,6 +21,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
+        public Dialogue MyDialogue = new Dialogue();
 
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;

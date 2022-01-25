@@ -2,6 +2,8 @@
 using System.Timers;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
+using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Opcodes;
 
 namespace ReturnHome.Server
 {
@@ -29,10 +31,13 @@ namespace ReturnHome.Server
             // Start SocketManager
 			SocketManager.Initialize();
             Console.WriteLine("Server started.");
-            EventManager eManager = new EventManager();
-            //Console.WriteLine(eManager.GetNPCDialogue("Bishop Gunder"));
-          
-           
+           /* EventManager eManager = new EventManager();
+            Dialogue newDiag = new Dialogue("Aeric Sparelli", 0, 2);
+            Dialogue thisDiag = eManager.GetNPCDialogue(GameOpcode.DialogueBoxOption,newDiag);
+            foreach(string dialogue in thisDiag.diagOptions)
+            {
+                Console.WriteLine(dialogue);
+            }*/
            
 
             string stuff = Console.ReadLine();
