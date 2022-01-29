@@ -649,5 +649,10 @@ namespace ReturnHome.Opcodes
             //For now send a standard speed
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
+
+        public static void ActorSpeed(Session MySession, PacketMessage Message)
+        {
+
+        }
     }
 }

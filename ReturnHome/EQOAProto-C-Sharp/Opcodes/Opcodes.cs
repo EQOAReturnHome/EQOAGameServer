@@ -46,6 +46,8 @@
         DisconnectClient = 0x09B0, //2480
         ColoredChat = 0x0A7B, //2683 - Color text message
         TargetInformation = 0x0761, //Target information for player/Actor
+        EquipItem = 0x3F,
+        UnequipItem = 0x40,
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -57,6 +59,7 @@
         Target = 0x0760, //1888
         CreateCharacter = 0x2B, ///43
         SELECTED_CHAR = 0x2A, // 42
+        InteractItem = 0x3E
     }
 
     public static class GameVersions
