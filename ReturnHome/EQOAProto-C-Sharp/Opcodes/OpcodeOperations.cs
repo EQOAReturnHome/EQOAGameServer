@@ -33,6 +33,11 @@ namespace ReturnHome.Opcodes
             { GameOpcode.Target, PlayerTarget },
             { GameOpcode.Interact, InteractActor },
             { GameOpcode.DialogueBoxOption, InteractActor },
+            { GameOpcode.BankUI, InteractActor },
+            { GameOpcode.MerchantDiag, InteractActor },
+            { GameOpcode.DepositBankTunar, InteractActor },
+            { GameOpcode.PlayerTunar, InteractActor },
+            { GameOpcode.ConfirmBankTunar, InteractActor },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -118,13 +123,106 @@ namespace ReturnHome.Opcodes
         /*LOOK HERE Use multiple 0x46 to send multiple dialogue boxes without response*/
         public static void InteractActor(Session MySession, PacketMessage ClientPacket)
         {
-            //Read the incoming message and get the objectID that was interacted with
             int offset = 0;
+            Console.WriteLine(ClientPacket.Header.Opcode);
+
             ReadOnlySpan<byte> IncMessage = ClientPacket.Data.Span;
+            //Bank popup window
+            if (ClientPacket.Header.Opcode == 4685)
+            {
+                //reset offset
+                offset = 0;
+                //Define Memory span
+                Memory<byte> temp = new byte[2];
+                Span<byte> Message = temp.Span;
+                //Write bank op code back to memory span
+                Message.Write((ushort)GameOpcode.BankUI, ref offset);
+                //Send bank op code back to player
+                SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                //Exit method early without processing any other conditions
+                return;
+            }
+
+            //Deposit bank tunar
+            if (ClientPacket.Header.Opcode == 4693)
+            {
+                Console.WriteLine("4693");
+                offset = 0;
+                uint targetNPC = IncMessage.GetLEUInt(ref offset);
+                uint giveOrTake = IncMessage.Get7BitEncodedInt(ref offset);
+                int transferAmount = IncMessage.Get7BitDoubleEncodedInt(ref offset);
+
+                int newPlayerAmt = 0;
+                int newBankAmt = 0;
+
+                Console.WriteLine(targetNPC);
+                Console.WriteLine(giveOrTake);
+                Console.WriteLine(transferAmount);
+
+                //deposit
+                if (giveOrTake == 0)
+                {
+                    Console.WriteLine("Deposit");
+                    newPlayerAmt = MySession.MyCharacter.Tunar - transferAmount;
+                    Console.WriteLine(newPlayerAmt);
+                    newBankAmt = MySession.MyCharacter.BankTunar + transferAmount;
+                    Console.WriteLine(newBankAmt);
+                    //Define memory span
+                    Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
+                    Span<byte> messagePlayer = playerTemp.Span;
+
+                    Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
+                    Span<byte> messageBank = bankTemp.Span;
+
+                    offset = 0;
+                    messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
+                    messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
+
+                    offset = 0;
+                    messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
+                    messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
+
+
+                    SessionQueueMessages.PackMessage(MySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
+                    SessionQueueMessages.PackMessage(MySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+                }
+                //withdraw
+                else if (giveOrTake == 1)
+                {
+                    Console.WriteLine("Withdraw");
+                    newPlayerAmt = MySession.MyCharacter.Tunar + transferAmount;
+                    Console.WriteLine(newPlayerAmt);
+                    newBankAmt = MySession.MyCharacter.BankTunar - transferAmount;
+                    Console.WriteLine(newBankAmt);
+                    //Define memory span
+                    Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
+                    Span<byte> messagePlayer = playerTemp.Span;
+
+                    Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
+                    Span<byte> messageBank = bankTemp.Span;
+
+                    offset = 0;
+                    messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
+                    messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
+
+                    offset = 0;
+                    messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
+                    messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
+
+                    SessionQueueMessages.PackMessage(MySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+                    SessionQueueMessages.PackMessage(MySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
+                }
+                return;
+            }
+
+
+
+            //Read the incoming message and get the objectID that was interacted with
+            IncMessage = ClientPacket.Data.Span;
             uint interactTarget = IncMessage.GetLEUInt(ref offset);
             if (ClientPacket.Header.Opcode == 4)
             {
-                
+
                 //Create new instance of the event manager
                 EventManager eManager = new EventManager();
                 Entity npcEntity = new Entity(false);

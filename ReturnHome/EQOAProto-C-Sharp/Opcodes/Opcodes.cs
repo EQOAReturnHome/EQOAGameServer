@@ -47,10 +47,11 @@
         ColoredChat = 0x0A7B, //2683 - Color text message
         TargetInformation = 0x0761, //Target information for player/Actor
         DialogueBox = 0x34, //52
-        DialogueBoxOption = 0x35, //53
         AddInvItem = 0x3B, //59
         AddQuestLog = 0x007C, //124
-        BankUI = 0x124D, //4685
+        PlayerTunar = 0x0052, //82
+        ConfirmBankTunar = 0x1253, //4691
+
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -62,6 +63,10 @@
         Target = 0x0760, //1888
         CreateCharacter = 0x2B, ///43
         SELECTED_CHAR = 0x2A, // 42
+        BankUI = 0x124D, //4685
+        DepositBankTunar = 0x1255, //4693
+        MerchantDiag = 0x4C, //76
+        DialogueBoxOption = 0x35, //53
     }
 
     public static class GameVersions
