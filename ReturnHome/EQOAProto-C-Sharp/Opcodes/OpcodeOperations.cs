@@ -164,54 +164,37 @@ namespace ReturnHome.Opcodes
                 {
                     Console.WriteLine("Deposit");
                     newPlayerAmt = MySession.MyCharacter.Tunar - transferAmount;
-                    Console.WriteLine(newPlayerAmt);
+                    MySession.MyCharacter.Tunar = newPlayerAmt;
                     newBankAmt = MySession.MyCharacter.BankTunar + transferAmount;
-                    Console.WriteLine(newBankAmt);
-                    //Define memory span
-                    Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
-                    Span<byte> messagePlayer = playerTemp.Span;
-
-                    Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
-                    Span<byte> messageBank = bankTemp.Span;
-
-                    offset = 0;
-                    messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-                    messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
-
-                    offset = 0;
-                    messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
-                    messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
-
-
-                    SessionQueueMessages.PackMessage(MySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
-                    SessionQueueMessages.PackMessage(MySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+                    MySession.MyCharacter.BankTunar = newBankAmt;
                 }
                 //withdraw
                 else if (giveOrTake == 1)
                 {
                     Console.WriteLine("Withdraw");
                     newPlayerAmt = MySession.MyCharacter.Tunar + transferAmount;
-                    Console.WriteLine(newPlayerAmt);
+                    MySession.MyCharacter.Tunar = newPlayerAmt;
                     newBankAmt = MySession.MyCharacter.BankTunar - transferAmount;
-                    Console.WriteLine(newBankAmt);
-                    //Define memory span
-                    Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
-                    Span<byte> messagePlayer = playerTemp.Span;
-
-                    Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
-                    Span<byte> messageBank = bankTemp.Span;
-
-                    offset = 0;
-                    messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-                    messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
-
-                    offset = 0;
-                    messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
-                    messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
-
-                    SessionQueueMessages.PackMessage(MySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
-                    SessionQueueMessages.PackMessage(MySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
+                    MySession.MyCharacter.BankTunar = newBankAmt;
                 }
+
+                //Define memory span
+                Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
+                Span<byte> messagePlayer = playerTemp.Span;
+
+                Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
+                Span<byte> messageBank = bankTemp.Span;
+
+                offset = 0;
+                messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
+                messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
+
+                offset = 0;
+                messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
+                messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
+
+                SessionQueueMessages.PackMessage(MySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+                SessionQueueMessages.PackMessage(MySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
                 return;
             }
 
