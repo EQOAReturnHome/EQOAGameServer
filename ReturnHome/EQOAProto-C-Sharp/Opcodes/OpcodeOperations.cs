@@ -198,18 +198,20 @@ namespace ReturnHome.Opcodes
                 return;
             }
 
+            if (ClientPacket.Header.Opcode == 4692)
 
 
-            //Read the incoming message and get the objectID that was interacted with
-            IncMessage = ClientPacket.Data.Span;
+
+                //Read the incoming message and get the objectID that was interacted with
+                IncMessage = ClientPacket.Data.Span;
             uint interactTarget = IncMessage.GetLEUInt(ref offset);
             if (ClientPacket.Header.Opcode == 4)
             {
-
                 //Create new instance of the event manager
                 EventManager eManager = new EventManager();
                 Entity npcEntity = new Entity(false);
                 Dialogue dialogue = MySession.MyCharacter.MyDialogue;
+                ushort dialogueType = (ushort)GameOpcode.DialogueBox;
 
                 //Gets NPC name from ObjectID
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
@@ -217,10 +219,6 @@ namespace ReturnHome.Opcodes
                     npcEntity.CharName = npc.CharName;
                     dialogue.npcName = npc.CharName;
                 }
-
-
-
-
                 //Reset offset for outgoing message
                 offset = 0;
                 //Length of choices
@@ -230,18 +228,14 @@ namespace ReturnHome.Opcodes
                 //The number of text choices that exist
                 //uint textChoicesNum = 0;
                 //List of dialogue options
-                List<string> textChoices = new List<String>();
+                List<string> textChoices = new List<string>();
                 //Counter to keep track of how many 
                 uint choiceCounter = 0;
-                byte textOptions = 1;
+                byte textOptions = 0;
 
-
-
-
-                MySession.MyCharacter = eManager.GetNPCDialogue(GameOpcode.DialogueBox, MySession.MyCharacter);
+                dialogue = eManager.GetNPCDialogue(GameOpcode.DialogueBox, MySession.MyCharacter);
                 if (dialogue.diagOptions != null)
                 {
-
                     textChoices = dialogue.diagOptions;
                     choiceCounter = (uint)textChoices.Count;
 
@@ -249,34 +243,41 @@ namespace ReturnHome.Opcodes
                     foreach (string choice in textChoices)
                     {
                         choicesLength += (uint)choice.Length;
-
+                        Console.WriteLine(choice);
                     }
                     textOptions = (byte)textChoices.Count;
+                    dialogueType = (ushort)GameOpcode.OptionBox;
+                    Console.WriteLine("OptionBox");
+                }
+                else if (dialogue.diagOptions == null)
+                {
+                    dialogueType = (ushort)GameOpcode.DialogueBox;
+                    Console.WriteLine("Dialogue Box");
                 }
 
                 TextboxMessage = dialogue.dialogue;
 
-
-
-
                 Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
                 Span<byte> Message = temp.Span;
 
-                Message.Write((ushort)GameOpcode.DialogueBox, ref offset);
+                Message.Write(dialogueType, ref offset);
                 Message.Write(choiceCounter, ref offset);
                 Message.Write(TextboxMessage.Length, ref offset);
                 Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
-                Message.Write(textOptions, ref offset);
-
-                if (dialogue.diagOptions != null)
+                if (dialogueType == (ushort)GameOpcode.OptionBox)
                 {
-                    for (int i = 0; i < textChoices.Count; i++)
+                    Message.Write(textOptions, ref offset);
+
+                    if (dialogue.diagOptions != null)
                     {
-                        Message.Write(textChoices[i].Length, ref offset);
-                        Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
+                        for (int i = 0; i < textChoices.Count; i++)
+                        {
+                            Message.Write(textChoices[i].Length, ref offset);
+                            Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
+                        }
+                        textChoices.Clear();
+                        dialogue.diagOptions = null;
                     }
-                    textChoices.Clear();
-                    dialogue.diagOptions = null;
                 }
 
 

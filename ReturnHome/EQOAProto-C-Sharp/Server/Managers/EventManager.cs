@@ -21,9 +21,11 @@ namespace ReturnHome.Server.Managers
     public class EventManager
     {
 
-        public Character GetNPCDialogue(GameOpcode opcode, Character player)
+        public Dialogue GetNPCDialogue(GameOpcode opcode, Character player)
         {
-
+            string npcString;
+            string npcStatement;
+            Dialogue npcDialogue = new Dialogue();
             //Strip white spaces from NPC name and replace with Underscores
             player.MyDialogue.npcName = player.MyDialogue.npcName.Replace(" ", "_");
 
@@ -46,53 +48,40 @@ namespace ReturnHome.Server.Managers
             lua.DoFile(file[0]);
 
             //switch to find correct lua function based on op code from NPC Interact 0x04
-            if (opcode == GameOpcode.DialogueBox)
+            if (opcode == GameOpcode.DialogueBox || opcode == GameOpcode.OptionBox)
             {
-                lua["choice"] = player.MyDialogue.choice;
-                lua["counter"] = player.MyDialogue.counter;
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = lua.GetFunction("event_say");
                 callFunction.Call();
-                player.MyDialogue.dialogue = (string)lua["npcDialogue"];
-                string diagOptions;
-                try
+                //player.MyDialogue.dialogue = (string)lua["npcDialogue"];
+                npcString = (string)lua["npcDialogue"];
+                if (npcString.Contains(":::"))
                 {
-                    if (lua["diagOptions"] != null)
+                    npcStatement = npcString.Split(":::")[0];
+                    Console.WriteLine("In the event Manager");
+                    if (npcString.Split(":::")[1] != null)
                     {
 
-                        diagOptions = (string)lua["diagOptions"];
-                        player.MyDialogue.diagOptions = diagOptions.Split('%').ToList();
+                        string npcOptionString = npcString.Split(":::")[1];
+                        List<string> npcOptions = npcOptionString.Split("%").ToList();
+                        npcDialogue.dialogue = npcStatement;
+                        npcDialogue.diagOptions = npcOptions;
                     }
-
-
-
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine(ex);
-                    throw;
+                    npcDialogue.dialogue = npcString;
+                    npcDialogue.diagOptions = null;
                 }
 
 
-            }
-            else if (opcode == GameOpcode.DialogueBoxOption)
-            {
-                lua["choice"] = player.MyDialogue.choice;
-                lua["diagOptions"] = player.MyDialogue.diagOptions;
-                //Call lua function for continued interaction/branching dialogue
-                LuaFunction callFunction = lua.GetFunction("event_say_continue");
-                callFunction.Call();
-                player.MyDialogue.dialogue = (string)lua["dialogue"];
-                string diagOptions = (string)lua["diagOptions"];
-                player.MyDialogue.diagOptions = diagOptions.Split('%').ToList();
-
-
 
             }
-
-
-            return player;
-
+            return npcDialogue;
         }
     }
+
+
+
+
 }

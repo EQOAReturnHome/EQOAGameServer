@@ -28,11 +28,5 @@ namespace ReturnHome.Server.EntityObject.Player
             this.counter = counter;
             this.choice = choice;
         }
-
-        public Dialogue convertLuaArray(Dialogue dialogue, string luaString)
-        {
-            dialogue.diagOptions.Add(luaString);
-            return dialogue;
-        }
     }
 }

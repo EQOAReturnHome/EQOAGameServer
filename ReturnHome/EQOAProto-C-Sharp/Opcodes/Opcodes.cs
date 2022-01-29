@@ -46,11 +46,13 @@
         DisconnectClient = 0x09B0, //2480
         ColoredChat = 0x0A7B, //2683 - Color text message
         TargetInformation = 0x0761, //Target information for player/Actor
-        DialogueBox = 0x34, //52
+        OptionBox = 0x34, //52
         AddInvItem = 0x3B, //59
         AddQuestLog = 0x007C, //124
         PlayerTunar = 0x0052, //82
         ConfirmBankTunar = 0x1253, //4691
+        DepositBankItem = 0x1254, //4692
+        DialogueBox = 0x46, //70
 
 
         //From client
