@@ -54,6 +54,8 @@
         DepositBankItem = 0x1254, //4692
         DialogueBox = 0x46, //70
 
+        EquipItem = 0x3F,
+        UnequipItem = 0x40,
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -65,6 +67,7 @@
         Target = 0x0760, //1888
         CreateCharacter = 0x2B, ///43
         SELECTED_CHAR = 0x2A, // 42
+        InteractItem = 0x3E
         BankUI = 0x124D, //4685
         DepositBankTunar = 0x1255, //4693
         MerchantDiag = 0x4C, //76
