@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
-using ReturnHome.Server.EntityObject.Player;
-using System.Runtime.CompilerServices;
 using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.Network
@@ -51,13 +48,21 @@ namespace ReturnHome.Server.Network
 
             Mysession.MyCharacter.World = ClientPacket[offset++];
 
-            float x = CoordinateConversions.ConvertXZToFloat(ClientPacket.GetLEUInt24(ref offset));
-            float y = CoordinateConversions.ConvertYToFloat(ClientPacket.GetLEUInt24(ref offset));
-            float z = CoordinateConversions.ConvertXZToFloat(ClientPacket.GetLEUInt24(ref offset));
+            uint X = ClientPacket.GetLEUInt24(ref offset);
+            uint Y = ClientPacket.GetLEUInt24(ref offset);
+            uint Z = ClientPacket.GetLEUInt24(ref offset);
 
-            float Velx = 15.3f * 2 * ClientPacket.GetBEUShort(ref offset) / 0xffff - 15.3f;
-            float Vely = 15.3f * 2 * ClientPacket.GetBEUShort(ref offset) / 0xffff - 15.3f;
-            float Velz = 15.3f * 2 * ClientPacket.GetBEUShort(ref offset) / 0xffff - 15.3f;
+            float x = CoordinateConversions.ConvertXZToFloat(X);
+            float y = CoordinateConversions.ConvertYToFloat(Y);
+            float z = CoordinateConversions.ConvertXZToFloat(Z);
+
+            int velx = ClientPacket.GetBEUShort(ref offset);
+            int vely = ClientPacket.GetBEUShort(ref offset);
+            int velz = ClientPacket.GetBEUShort(ref offset);
+
+            float Velx = 15.3f * 2 * velx / 0xffff - 15.3f;
+            float Vely = 15.3f * 2 * vely / 0xffff - 15.3f;
+            float Velz = 15.3f * 2 * velz / 0xffff - 15.3f;
 
             //Skip 6 bytes...
             offset += 6;
