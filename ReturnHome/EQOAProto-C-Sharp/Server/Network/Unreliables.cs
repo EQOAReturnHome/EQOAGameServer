@@ -46,7 +46,18 @@ namespace ReturnHome.Server.Network
             ReadOnlySpan<byte> ClientPacket = MyPacket.Span;
             int offset = 0;
 
-            Mysession.MyCharacter.World = ClientPacket[offset++];
+            byte world = ClientPacket[offset++];
+            if(Mysession.MyCharacter.World != world)
+            {
+                if (Mysession.MyCharacter.ExpectedWorld == world)
+                {
+                    Mysession.MyCharacter.World = world;
+                }
+
+                //Need to boot from server? Probably cheating?
+                else
+                    return;
+            }
 
             uint X = ClientPacket.GetLEUInt24(ref offset);
             uint Y = ClientPacket.GetLEUInt24(ref offset);

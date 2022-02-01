@@ -108,5 +108,15 @@ namespace ReturnHome.Server.Network
                 continue;
             }
         }
+
+        public void ResetChannels()
+        {
+            Span<ServerObjectUpdate> temp = serverObjects.Span;
+
+            for (int i = 0; i < serverObjects.Length; i++)
+            {
+                temp[i].DeactivateChannel();
+            }
+        }
     }
 }

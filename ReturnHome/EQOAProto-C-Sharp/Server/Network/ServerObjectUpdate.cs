@@ -55,6 +55,7 @@ namespace ReturnHome.Server.Network
             //See if character and current message has changed
             if (!CompareObjects(baseXOR.Slice(1, 0xC8), entity.ObjectUpdate))
             {
+                _isActive = true;
                 Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
                 temp.Span[0] = _isActive & (baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                 CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, baseXOR.Slice(1, 0xC8), 0xC8);
@@ -71,11 +72,21 @@ namespace ReturnHome.Server.Network
 
         public void DeactivateChannel()
         {
-            entity = null;
+            //entity = null;
             if (_isActive)
             {
                 _isActive = false;
+                Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
+                temp.Span[0] = _isActive & (baseXOR.Span[0] == 1) ? (byte)1 : (byte)0;
+                CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, baseXOR.Slice(1, 0xC8), 0xC8);
+                CurrentXORResults.Add(messageCounter, temp);
+                SessionQueueMessages.PackMessage(_session, temp, ObjectChannel);
             }
+        }
+
+        public void Reset()
+        {
+            baseXOR = new byte[0xC9];
         }
 
         public void UpdateBaseXor(ushort msgCounter)

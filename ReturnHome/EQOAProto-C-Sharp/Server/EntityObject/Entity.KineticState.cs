@@ -10,7 +10,7 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity : IPointFQuadStorable
     {
-        public int World;
+        private int _world;
 
         public float x;
         public float y;
@@ -48,6 +48,19 @@ namespace ReturnHome.Server.EntityObject
         }
 
         #region Property zone
+
+        public int World
+        {
+            get { return _world; }
+            set
+            {
+                if(true)
+                {
+                    _world = value;
+                    ObjectUpdateWorld();
+                }
+            }
+        }
 
         public float VelocityX
         {

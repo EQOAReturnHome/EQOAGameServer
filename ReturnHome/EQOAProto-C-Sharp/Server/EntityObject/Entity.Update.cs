@@ -19,7 +19,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateEntity(byte temp = 0x82)
         {
-            new byte[] { temp }.CopyTo(ObjectUpdate.Slice(4, 1));
+            ObjectUpdate.Span[4] = temp;
         }
 
         public void ObjectUpdatePosition()

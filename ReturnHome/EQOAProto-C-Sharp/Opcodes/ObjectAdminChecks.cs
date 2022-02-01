@@ -1,6 +1,8 @@
-﻿using ReturnHome.Server.EntityObject;
+﻿using System;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Opcodes.Chat
 {
@@ -15,11 +17,48 @@ namespace ReturnHome.Opcodes.Chat
                 if (c == null)
                     return false;
 
+                int offset = 0;
+                Memory<byte> temp;
+                Span<byte> thisMessage;
                 message = $"Found character: {c.CharName}";
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
 
                 switch(changes[1])
                 {
+                    case "Lavastorm":
+                        temp = new byte[31];
+                        thisMessage = temp.Span;
+                        offset = 0;
+                        thisMessage.Write((ushort)0x07F6, ref offset);
+                        thisMessage.Write((byte)3, ref offset);
+                        thisMessage.Write(7906.09f, ref offset);
+                        thisMessage.Write(75.2822f, ref offset);
+                        thisMessage.Write(5914.65f, ref offset);
+                        thisMessage.Write(-2.40847f, ref offset);
+                        offset += 8;
+                        thisMessage.Write(MySession.MyCharacter.Teleportcounter++, ref offset);
+                        SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                        MySession.MyCharacter.ExpectedWorld = 3;
+                        MySession.rdpCommIn.connectionData.ResetChannels();
+                        break;
+
+                    case "Tunaria":
+                        temp = new byte[31];
+                        thisMessage = temp.Span;
+                        offset = 0; 
+                        thisMessage.Write((ushort)0x07F6, ref offset);
+                        thisMessage.Write((byte)0, ref offset);
+                        thisMessage.Write(25273f, ref offset);
+                        thisMessage.Write(54.125f, ref offset);
+                        thisMessage.Write(15723.3f, ref offset);
+                        thisMessage.Write(-1.56333f, ref offset);
+                        offset += 8;
+                        thisMessage.Write(MySession.MyCharacter.Teleportcounter++, ref offset);
+                        SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                        MySession.MyCharacter.ExpectedWorld = 0;
+                        MySession.rdpCommIn.connectionData.ResetChannels();
+                        break;
+
                     case "animation":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
                         c.Animation = byte.Parse(changes[2]);

@@ -30,7 +30,8 @@ namespace ReturnHome.Opcodes
             { GameOpcode.ClientShout, ShoutChat.ProcessShout },
             { GameOpcode.ChangeChatMode, ChangeChatMode },
             { GameOpcode.DisconnectClient, DisconnectClient },
-            { GameOpcode.Target, PlayerTarget }
+            { GameOpcode.Target, PlayerTarget },
+            { GameOpcode.EnableChannel, EnableChannel }
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -650,9 +651,9 @@ namespace ReturnHome.Opcodes
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ActorSpeed(Session MySession, PacketMessage Message)
+        public static void EnableChannel(Session MySession, PacketMessage message)
         {
-
+            MySession.rdpCommIn.connectionData.serverObjects.Span[0].updateCharacter(MySession.MyCharacter);
         }
     }
 }

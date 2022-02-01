@@ -59,7 +59,8 @@
         Target = 0x0760, //1888
         CreateCharacter = 0x2B, ///43
         SELECTED_CHAR = 0x2A, // 42
-        InteractItem = 0x3E
+        InteractItem = 0x3E,
+        EnableChannel = 0x49
     }
 
     public static class GameVersions
