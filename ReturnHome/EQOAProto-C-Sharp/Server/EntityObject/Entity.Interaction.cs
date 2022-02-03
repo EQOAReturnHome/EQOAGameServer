@@ -215,9 +215,39 @@ namespace ReturnHome.Server.EntityObject
         public void ProcessDialogue(Session mySession, PacketMessage clientPacket)
         {
             int offset = 0;
+            uint interactTarget = 0;
             //Read the incoming message and get the objectID that was interacted with
             ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-            uint interactTarget = IncMessage.GetLEUInt(ref offset);
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            {
+                interactTarget = IncMessage.GetLEUInt(ref offset);
+            }
+
+            
+            
+            if (clientPacket.Header.Opcode == 53)
+            {
+                try
+                {
+                    offset = 0;
+                    uint optionCounter = IncMessage.GetLEUInt(ref offset);
+                    Console.WriteLine("DialogueBoxOption Counter " + optionCounter);
+                    mySession.MyCharacter.MyDialogue.choice = IncMessage.GetByte(ref offset);
+                    Console.WriteLine("Option selected " + mySession.MyCharacter.MyDialogue.choice);
+                    if(mySession.MyCharacter.MyDialogue.choice == 255)
+                    {
+                        mySession.MyCharacter.MyDialogue.choice = 1000;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    throw;
+                }
+
+
+            }
 
             //Create new instance of the event manager
             EventManager eManager = new EventManager();
@@ -241,7 +271,7 @@ namespace ReturnHome.Server.EntityObject
             byte textOptions = 0;
             Console.WriteLine("choice is: " + choiceCounter);
             //Gets NPC name from ObjectID
-            if (choiceCounter == 0)
+            if (clientPacket.Header.Opcode == 4)
             {
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
                 {
@@ -261,16 +291,13 @@ namespace ReturnHome.Server.EntityObject
                 foreach (string choice in textChoices)
                 {
                     choicesLength += (uint)choice.Length;
-                    Console.WriteLine(choice);
                 }
                 textOptions = (byte)textChoices.Count;
                 dialogueType = (ushort)GameOpcode.OptionBox;
-                Console.WriteLine("OptionBox");
             }
             else if (dialogue.diagOptions == null)
             {
                 dialogueType = (ushort)GameOpcode.DialogueBox;
-                Console.WriteLine("Dialogue Box");
             }
 
             TextboxMessage = dialogue.dialogue;

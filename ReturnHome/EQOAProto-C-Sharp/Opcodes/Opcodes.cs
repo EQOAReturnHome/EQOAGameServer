@@ -67,7 +67,7 @@
         Target = 0x0760, //1888
         CreateCharacter = 0x2B, ///43
         SELECTED_CHAR = 0x2A, // 42
-        InteractItem = 0x3E
+        InteractItem = 0x3E,
         BankUI = 0x124D, //4685
         DepositBankTunar = 0x1255, //4693
         MerchantDiag = 0x4C, //76

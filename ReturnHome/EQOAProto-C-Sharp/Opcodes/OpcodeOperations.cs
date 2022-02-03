@@ -120,7 +120,6 @@ namespace ReturnHome.Opcodes
         Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
         */
 
-        /*LOOK HERE Use multiple 0x46 to send multiple dialogue boxes without response*/
         public static void InteractActor(Session MySession, PacketMessage clientPacket)
         {
             int offset = 0;
@@ -146,7 +145,7 @@ namespace ReturnHome.Opcodes
 
             }
             //Dialogue and Quest Interaction
-            if (clientPacket.Header.Opcode == 4 || clientPacket.Header.Opcode == 35)
+            if (clientPacket.Header.Opcode == 4 || clientPacket.Header.Opcode == 53)
             {
                 MySession.MyCharacter.ProcessDialogue(MySession, clientPacket);
             }

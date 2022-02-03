@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\Beebster\Documents\Source\Repos\EQOA_Proto_C-sharp\Backup1\</UpgradeBackupLocation>
     <OldToolsVersion>Current</OldToolsVersion>
@@ -26,7 +26,7 @@
     <None Remove="Server\NewFolder1\**" />
   </ItemGroup>
   <ItemGroup>
-  <EmbeddedResource Include="Scripts\*\*.lua"/>
+  <EmbeddedResource Include="Scripts\*\*.lua" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />

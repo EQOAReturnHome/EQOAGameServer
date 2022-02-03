@@ -44,6 +44,7 @@ namespace ReturnHome.Server.Managers
             //pass lua a reference to the EventManager class which allows referencing methods and attributes of the class in Lua
             lua["events"] = events;
             lua["dialogue"] = player.MyDialogue.dialogue;
+            lua["choice"] = player.MyDialogue.choice;
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);
 
@@ -53,12 +54,10 @@ namespace ReturnHome.Server.Managers
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = lua.GetFunction("event_say");
                 callFunction.Call();
-                //player.MyDialogue.dialogue = (string)lua["npcDialogue"];
                 npcString = (string)lua["npcDialogue"];
                 if (npcString.Contains(":::"))
                 {
                     npcStatement = npcString.Split(":::")[0];
-                    Console.WriteLine("In the event Manager");
                     if (npcString.Split(":::")[1] != null)
                     {
 
@@ -77,6 +76,7 @@ namespace ReturnHome.Server.Managers
 
 
             }
+            player.MyDialogue.choice = 1000;
             return npcDialogue;
         }
     }
