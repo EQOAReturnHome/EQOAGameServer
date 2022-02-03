@@ -18,14 +18,14 @@ namespace ReturnHome.Server.Managers
     //If it's discovered it has to be a static class for functionality later on
     //We can go the route of using Lua's Register function but you can't pass
     //static classes to Lua because you can't instantiate them.
-    public class EventManager
+    public static class EventManager
     {
 
-        public Dialogue GetNPCDialogue(GameOpcode opcode, Character player)
+        public static Dialogue GetNPCDialogue(GameOpcode opcode, Character player)
         {
             string npcString;
             string npcStatement;
-            Dialogue npcDialogue = new Dialogue();
+            //Dialogue npcDialogue = new Dialogue();
             //Strip white spaces from NPC name and replace with Underscores
             player.MyDialogue.npcName = player.MyDialogue.npcName.Replace(" ", "_");
 
@@ -33,16 +33,13 @@ namespace ReturnHome.Server.Managers
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
             string[] file = Directory.GetFiles("../../../Scripts/", player.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
 
-            //Instantiate EventManager class to pass to Lua scripts
-            EventManager events = new EventManager();
-
             //Create new lua object
             Lua lua = new Lua();
             //load lua CLR library 
             lua.LoadCLRPackage();
 
             //pass lua a reference to the EventManager class which allows referencing methods and attributes of the class in Lua
-            lua["events"] = events;
+            //lua["events"] = events;
             lua["dialogue"] = player.MyDialogue.dialogue;
             lua["choice"] = player.MyDialogue.choice;
             //Call the Lua script found by the Dictionary Find above
@@ -63,21 +60,21 @@ namespace ReturnHome.Server.Managers
 
                         string npcOptionString = npcString.Split(":::")[1];
                         List<string> npcOptions = npcOptionString.Split("%").ToList();
-                        npcDialogue.dialogue = npcStatement;
-                        npcDialogue.diagOptions = npcOptions;
+                        player.MyDialogue.dialogue = npcStatement;
+                        player.MyDialogue.diagOptions = npcOptions;
                     }
                 }
                 else
                 {
-                    npcDialogue.dialogue = npcString;
-                    npcDialogue.diagOptions = null;
+                    player.MyDialogue.dialogue = npcString;
+                    player.MyDialogue.diagOptions = null;
                 }
 
 
 
             }
             player.MyDialogue.choice = 1000;
-            return npcDialogue;
+            return player.MyDialogue;
         }
     }
 

@@ -9,6 +9,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
+
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
@@ -250,7 +251,7 @@ namespace ReturnHome.Server.EntityObject
             }
 
             //Create new instance of the event manager
-            EventManager eManager = new EventManager();
+            //EventManager eManager = new EventManager();
             Entity npcEntity = new Entity(false);
             Dialogue dialogue = mySession.MyCharacter.MyDialogue;
             ushort dialogueType = (ushort)GameOpcode.DialogueBox;
@@ -281,7 +282,7 @@ namespace ReturnHome.Server.EntityObject
             }
 
 
-            dialogue = eManager.GetNPCDialogue(GameOpcode.DialogueBox, mySession.MyCharacter);
+            dialogue = EventManager.GetNPCDialogue(GameOpcode.DialogueBox, mySession.MyCharacter);
             if (dialogue.diagOptions != null)
             {
                 textChoices = dialogue.diagOptions;
