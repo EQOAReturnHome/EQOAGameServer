@@ -213,6 +213,127 @@ namespace ReturnHome.Server.EntityObject
             SessionQueueMessages.PackMessage(mySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
             return;
         }
+
+        public void SendDialogue(Session mySession)
+        {
+
+            int offset = 0;
+            uint interactTarget = 0;
+            //Read the incoming message and get the objectID that was interacted with
+            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            {
+                interactTarget = IncMessage.GetLEUInt(ref offset);
+            }
+
+            if (clientPacket.Header.Opcode == 53)
+            {
+                try
+                {
+                    offset = 0;
+                    uint optionCounter = IncMessage.GetLEUInt(ref offset);
+                    Console.WriteLine("DialogueBoxOption Counter " + optionCounter);
+                    mySession.MyCharacter.MyDialogue.choice = IncMessage.GetByte(ref offset);
+                    Console.WriteLine("Option selected " + mySession.MyCharacter.MyDialogue.choice);
+                    if (mySession.MyCharacter.MyDialogue.choice == 255)
+                    {
+                        mySession.MyCharacter.MyDialogue.choice = 1000;
+                        mySession.MyCharacter.MyDialogue.diagOptions = null;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    throw;
+                }
+            }
+            //Create new instance of the event manager
+            //EventManager eManager = new EventManager();
+            Entity npcEntity = new Entity(false);
+            Dialogue dialogue = mySession.MyCharacter.MyDialogue;
+            GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
+            if (clientPacket.Header.Opcode == 53)
+            {
+                dialogueType = GameOpcode.DialogueBoxOption;
+            }
+            else if (clientPacket.Header.Opcode == 4)
+            {
+                dialogueType = GameOpcode.DialogueBox;
+
+            }
+
+            //Reset offset for outgoing message
+            offset = 0;
+            //Length of choices
+            uint choicesLength = 0;
+            //Dialogue at top of box
+            string TextboxMessage;
+            //The number of text choices that exist
+            //uint textChoicesNum = 0;
+            //List of dialogue options
+            List<string> textChoices = new List<string>();
+            //Counter to keep track of how many
+            //int choiceCounter = IncMessage.GetLEInt(ref offset);
+            uint choiceCounter = mySession.MyCharacter.MyDialogue.counter;
+            byte textOptions = 0;
+            Console.WriteLine("choice is: " + choiceCounter);
+            //Gets NPC name from ObjectID
+            if (clientPacket.Header.Opcode == 4)
+            {
+                if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
+                {
+                    Console.WriteLine("In the query: " + npc.CharName);
+                    dialogue.npcName = npc.CharName;
+                }
+            }
+
+            dialogue = EventManager.GetNPCDialogue(dialogueType, mySession);
+            if (dialogue.diagOptions != null)
+            {
+                textChoices = dialogue.diagOptions;
+                choiceCounter = (uint)textChoices.Count;
+
+                //Length of choices
+                foreach (string choice in textChoices)
+                {
+                    choicesLength += (uint)choice.Length;
+                }
+                textOptions = (byte)textChoices.Count;
+                dialogueType = GameOpcode.OptionBox;
+            }
+            else if (dialogue.diagOptions == null)
+            {
+                dialogueType = GameOpcode.DialogueBox;
+            }
+
+            TextboxMessage = dialogue.dialogue;
+
+            Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
+            Span<byte> Message = temp.Span;
+
+            Message.Write((ushort)dialogueType, ref offset);
+            Message.Write(choiceCounter, ref offset);
+            Message.Write(TextboxMessage.Length, ref offset);
+            Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
+            if (dialogueType == GameOpcode.OptionBox)
+            {
+                Message.Write(textOptions, ref offset);
+
+                if (dialogue.diagOptions != null)
+                {
+                    for (int i = 0; i < textChoices.Count; i++)
+                    {
+                        Message.Write(textChoices[i].Length, ref offset);
+                        Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
+                    }
+                }
+            }
+            //Send Message
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            mySession.MyCharacter.MyDialogue.choice = 1000;
+
+        }
         public void ProcessDialogue(Session mySession, PacketMessage clientPacket)
         {
             int offset = 0;
@@ -254,7 +375,9 @@ namespace ReturnHome.Server.EntityObject
             if (clientPacket.Header.Opcode == 53)
             {
                 dialogueType = GameOpcode.DialogueBoxOption;
-            } else if(clientPacket.Header.Opcode == 4){
+            }
+            else if (clientPacket.Header.Opcode == 4)
+            {
                 dialogueType = GameOpcode.DialogueBox;
 
             }
@@ -329,6 +452,6 @@ namespace ReturnHome.Server.EntityObject
             SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
             mySession.MyCharacter.MyDialogue.choice = 1000;
         }
-        
+
     }
 }
