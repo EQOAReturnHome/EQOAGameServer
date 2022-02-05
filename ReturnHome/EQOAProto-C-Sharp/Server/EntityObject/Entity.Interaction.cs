@@ -95,7 +95,7 @@ namespace ReturnHome.Server.EntityObject
 
             sbyte difference = (sbyte)(Level - _ourTarget.Level);
 
-            switch(difference)
+            switch (difference)
             {
                 //Red con target
                 case <= -3:
@@ -224,8 +224,6 @@ namespace ReturnHome.Server.EntityObject
                 interactTarget = IncMessage.GetLEUInt(ref offset);
             }
 
-            
-            
             if (clientPacket.Header.Opcode == 53)
             {
                 try
@@ -235,9 +233,10 @@ namespace ReturnHome.Server.EntityObject
                     Console.WriteLine("DialogueBoxOption Counter " + optionCounter);
                     mySession.MyCharacter.MyDialogue.choice = IncMessage.GetByte(ref offset);
                     Console.WriteLine("Option selected " + mySession.MyCharacter.MyDialogue.choice);
-                    if(mySession.MyCharacter.MyDialogue.choice == 255)
+                    if (mySession.MyCharacter.MyDialogue.choice == 255)
                     {
                         mySession.MyCharacter.MyDialogue.choice = 1000;
+                        mySession.MyCharacter.MyDialogue.diagOptions = null;
                         return;
                     }
                 }
@@ -246,15 +245,19 @@ namespace ReturnHome.Server.EntityObject
                     Console.WriteLine(ex);
                     throw;
                 }
-
-
             }
-
             //Create new instance of the event manager
             //EventManager eManager = new EventManager();
             Entity npcEntity = new Entity(false);
             Dialogue dialogue = mySession.MyCharacter.MyDialogue;
-            ushort dialogueType = (ushort)GameOpcode.DialogueBox;
+            GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
+            if (clientPacket.Header.Opcode == 53)
+            {
+                dialogueType = GameOpcode.DialogueBoxOption;
+            } else if(clientPacket.Header.Opcode == 4){
+                dialogueType = GameOpcode.DialogueBox;
+
+            }
 
             //Reset offset for outgoing message
             offset = 0;
@@ -281,8 +284,7 @@ namespace ReturnHome.Server.EntityObject
                 }
             }
 
-
-            dialogue = EventManager.GetNPCDialogue(GameOpcode.DialogueBox, mySession.MyCharacter);
+            dialogue = EventManager.GetNPCDialogue(dialogueType, mySession);
             if (dialogue.diagOptions != null)
             {
                 textChoices = dialogue.diagOptions;
@@ -294,11 +296,11 @@ namespace ReturnHome.Server.EntityObject
                     choicesLength += (uint)choice.Length;
                 }
                 textOptions = (byte)textChoices.Count;
-                dialogueType = (ushort)GameOpcode.OptionBox;
+                dialogueType = GameOpcode.OptionBox;
             }
             else if (dialogue.diagOptions == null)
             {
-                dialogueType = (ushort)GameOpcode.DialogueBox;
+                dialogueType = GameOpcode.DialogueBox;
             }
 
             TextboxMessage = dialogue.dialogue;
@@ -306,11 +308,11 @@ namespace ReturnHome.Server.EntityObject
             Memory<byte> temp = new Memory<byte>(new byte[11 + (TextboxMessage.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
             Span<byte> Message = temp.Span;
 
-            Message.Write(dialogueType, ref offset);
+            Message.Write((ushort)dialogueType, ref offset);
             Message.Write(choiceCounter, ref offset);
             Message.Write(TextboxMessage.Length, ref offset);
             Message.Write(Encoding.Unicode.GetBytes(TextboxMessage), ref offset);
-            if (dialogueType == (ushort)GameOpcode.OptionBox)
+            if (dialogueType == GameOpcode.OptionBox)
             {
                 Message.Write(textOptions, ref offset);
 
@@ -321,16 +323,12 @@ namespace ReturnHome.Server.EntityObject
                         Message.Write(textChoices[i].Length, ref offset);
                         Message.Write(Encoding.Unicode.GetBytes(textChoices[i]), ref offset);
                     }
-                    textChoices.Clear();
-                    dialogue.diagOptions = null;
                 }
             }
-
-
-
             //Send Message
             SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-
+            mySession.MyCharacter.MyDialogue.choice = 1000;
         }
+        
     }
 }

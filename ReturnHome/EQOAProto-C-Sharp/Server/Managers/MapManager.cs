@@ -10,6 +10,8 @@ using QuadTrees;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Utilities;
+using ReturnHome.Server.Network;
+using ReturnHome.Opcodes;
 
 namespace ReturnHome.Server.Managers
 {
@@ -22,18 +24,18 @@ namespace ReturnHome.Server.Managers
         public static void AddObjectToTree(Entity entity)
         {
             //Should this queue players to be added simulataneously, instead of individual add's? Probably.
-            
+
             treeQueue.Add(entity);
         }
 
         public static void BulkAddObjects()
         {
             //iterate over treeQueue and add players to the quad tree one by one
-           for(int i = 0; i < treeQueue.Count; i++)
+            for (int i = 0; i < treeQueue.Count; i++)
             {
                 qtree.Add(treeQueue[i]);
             }
-           
+
             //clear the tree queue so it doesn't continuosly try to add the same objects to the tree
             treeQueue.Clear();
         }
@@ -97,6 +99,28 @@ namespace ReturnHome.Server.Managers
             Logger.Info($"Removed: {entity.CharName} from tree");
         }
 
+        public static void LuaTest(string testString)
+        {
+            Console.WriteLine(testString);
+        }
+
+        public static void TeleportPlayer(Session mySession, byte world, float x, float y, float z, float facing)
+        {
+            Memory<byte> temp;
+            Span<byte> thisMessage;
+            temp = new byte[31];
+            thisMessage = temp.Span;
+            int offset = 0;
+            thisMessage.Write((ushort)0x07F6, ref offset);
+            thisMessage.Write(world, ref offset); //world
+            thisMessage.Write(x, ref offset); // x
+            thisMessage.Write(y, ref offset); // y
+            thisMessage.Write(z, ref offset); // z
+            thisMessage.Write(facing, ref offset); //Facing
+            offset += 8;
+            thisMessage.Write(mySession.MyCharacter.Teleportcounter++, ref offset); //counter
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        }
 
     }
 }

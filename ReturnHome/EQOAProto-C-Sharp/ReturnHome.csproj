@@ -29,6 +29,22 @@
   <EmbeddedResource Include="Scripts\*\*.lua" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Remove="Scripts\bobble_by_water\coachman_boblon.lua" />
+    <EmbeddedResource Remove="Scripts\muniels_tea_garden\coachman_farn.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Scripts\darvar_manor\Coachman_Darva.lua" />
+    <None Remove="Scripts\ft_seriak\Coachman_D%27larik.lua" />
+    <None Remove="Scripts\grobb\Coachman_Zuggug.lua" />
+    <None Remove="Scripts\highbourne\Coachman_Galdah.lua" />
+    <None Remove="Scripts\klick_anon\Coachman_Rizkar.lua" />
+    <None Remove="Scripts\oasis_of_marr\coachwoman_dernia.lua" />
+    <None Remove="Scripts\oggok\Coachman_Dilga.lua" />
+    <None Remove="Scripts\rivervale\Coachman_Huff.lua" />
+    <None Remove="Scripts\south_crossroads\Coachman_Niocla.lua" />
+    <None Remove="Scripts\surefall_glade\Coachman_Frender.lua" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>

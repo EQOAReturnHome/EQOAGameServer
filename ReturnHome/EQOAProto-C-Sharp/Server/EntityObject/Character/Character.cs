@@ -22,6 +22,9 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
         public Dialogue MyDialogue = new Dialogue();
+        public Dictionary<string, bool> playerFlags = new Dictionary<string, bool>();
+
+
 
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
@@ -39,6 +42,8 @@ namespace ReturnHome.Server.EntityObject.Player
         public int Tunar;
         public int BankTunar;
 
+        public int Teleportcounter { get; internal set; }
+
         public Character() : base(true)
         {
 
@@ -50,6 +55,7 @@ namespace ReturnHome.Server.EntityObject.Player
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
                          int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, Session MySession) : base(true)
         {
+            //playerFlags.Add("Freeport", true);
             Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;
@@ -151,6 +157,23 @@ namespace ReturnHome.Server.EntityObject.Player
             //include database values when we figure out what it does.
             memStream.Write(BitConverter.GetBytes(0.0f));
             memStream.Write(BitConverter.GetBytes(0.0f));
+        }
+        public bool GetPlayerFlags(Session mySession, string flagKey)
+        {
+            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public void SetPlayerFlag(Session mySession, string flagKey, bool flagValue)
+        {
+            if (!mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+            {
+                mySession.MyCharacter.playerFlags.Add(flagKey, flagValue);
+            }
         }
     }
 }

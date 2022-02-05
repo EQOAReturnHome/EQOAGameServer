@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using NLua;
-using System.Collections;
+using ReturnHome.Server.Network;
 
 namespace ReturnHome.Server.Managers
 {
@@ -21,17 +21,18 @@ namespace ReturnHome.Server.Managers
     public static class EventManager
     {
 
-        public static Dialogue GetNPCDialogue(GameOpcode opcode, Character player)
+        public static Dialogue GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
             string npcString;
             string npcStatement;
+            
             //Dialogue npcDialogue = new Dialogue();
             //Strip white spaces from NPC name and replace with Underscores
-            player.MyDialogue.npcName = player.MyDialogue.npcName.Replace(" ", "_");
+            mySession.MyCharacter.MyDialogue.npcName = mySession.MyCharacter.MyDialogue.npcName.Replace(" ", "_");
 
             //Find Lua script recursively through scripts directory by zone
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
-            string[] file = Directory.GetFiles("../../../Scripts/", player.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+            string[] file = Directory.GetFiles("../../../Scripts/", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
 
             //Create new lua object
             Lua lua = new Lua();
@@ -40,13 +41,24 @@ namespace ReturnHome.Server.Managers
 
             //pass lua a reference to the EventManager class which allows referencing methods and attributes of the class in Lua
             //lua["events"] = events;
-            lua["dialogue"] = player.MyDialogue.dialogue;
-            lua["choice"] = player.MyDialogue.choice;
+            lua["dialogue"] = mySession.MyCharacter.MyDialogue.dialogue;
+            lua["choice"] = mySession.MyCharacter.MyDialogue.choice;
+            if (opcode == GameOpcode.DialogueBoxOption)
+            {
+                string choiceOption = mySession.MyCharacter.MyDialogue.diagOptions[(int)mySession.MyCharacter.MyDialogue.choice];
+                lua["choice"] = choiceOption;
+            }
+
+
+            lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
+            lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
+            lua["mySession"] = mySession;
+            lua["TeleportPlayer"] = MapManager.TeleportPlayer;
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);
 
             //switch to find correct lua function based on op code from NPC Interact 0x04
-            if (opcode == GameOpcode.DialogueBox || opcode == GameOpcode.OptionBox)
+            if (opcode == GameOpcode.DialogueBox || opcode == GameOpcode.DialogueBoxOption)
             {
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = lua.GetFunction("event_say");
@@ -59,22 +71,18 @@ namespace ReturnHome.Server.Managers
                     {
 
                         string npcOptionString = npcString.Split(":::")[1];
-                        List<string> npcOptions = npcOptionString.Split("%").ToList();
-                        player.MyDialogue.dialogue = npcStatement;
-                        player.MyDialogue.diagOptions = npcOptions;
+                        mySession.MyCharacter.MyDialogue.diagOptions = npcOptionString.Split("%").ToList();
+                        mySession.MyCharacter.MyDialogue.dialogue = npcStatement;
                     }
                 }
                 else
                 {
-                    player.MyDialogue.dialogue = npcString;
-                    player.MyDialogue.diagOptions = null;
+                    mySession.MyCharacter.MyDialogue.dialogue = npcString;
+                    mySession.MyCharacter.MyDialogue.diagOptions = null;
                 }
-
-
-
             }
-            player.MyDialogue.choice = 1000;
-            return player.MyDialogue;
+            mySession.MyCharacter.MyDialogue.choice = 1000;
+            return mySession.MyCharacter.MyDialogue;
         }
     }
 

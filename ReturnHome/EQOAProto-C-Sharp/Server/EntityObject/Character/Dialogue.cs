@@ -20,6 +20,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public uint choice = 0;
         public string dialogue;
         public List<string> diagOptions;
+        public List<string> npcOptions;
 
         public Dialogue()
         {
