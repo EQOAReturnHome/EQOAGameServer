@@ -190,8 +190,7 @@ namespace ReturnHome.Server.Network.Managers
             //Should push client object update directly to character if needed
             //test  Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
-            MapManager.BulkAddObjects();
-            MapManager.QueryObjectsForDistribution();
+            MapManager.UpdateMaps();
 
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());

@@ -155,7 +155,7 @@ namespace ReturnHome.Server.Network
             if (!PendingTermination) return;
             //Eventually this would kick the player out of the world and save data/free resources
             // Remove character from Character List
-            MapManager.RemoveObjectFromTree(MyCharacter);
+            MapManager.RemoveObject(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             EntityManager.RemoveEntity(MyCharacter);
             SessionManager.SessionHash.TryRemove(this);

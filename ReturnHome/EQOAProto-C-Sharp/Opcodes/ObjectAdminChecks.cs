@@ -2,7 +2,6 @@
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
-using ReturnHome.Utilities;
 
 namespace ReturnHome.Opcodes.Chat
 {
@@ -25,38 +24,37 @@ namespace ReturnHome.Opcodes.Chat
 
                 switch(changes[1])
                 {
-                    case "Lavastorm":
-                        temp = new byte[31];
-                        thisMessage = temp.Span;
-                        offset = 0;
-                        thisMessage.Write((ushort)0x07F6, ref offset);
-                        thisMessage.Write((byte)3, ref offset);
-                        thisMessage.Write(7906.09f, ref offset);
-                        thisMessage.Write(75.2822f, ref offset);
-                        thisMessage.Write(5914.65f, ref offset);
-                        thisMessage.Write(-2.40847f, ref offset);
-                        offset += 8;
-                        thisMessage.Write(MySession.MyCharacter.Teleportcounter++, ref offset);
-                        SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-                        MySession.MyCharacter.ExpectedWorld = 3;
-                        MySession.rdpCommIn.connectionData.ResetChannels();
+                    case "Zone":
+                        message = $"Map: {MySession.MyCharacter.map.Name}";
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
-                    case "Tunaria":
-                        temp = new byte[31];
-                        thisMessage = temp.Span;
-                        offset = 0; 
-                        thisMessage.Write((ushort)0x07F6, ref offset);
-                        thisMessage.Write((byte)0, ref offset);
-                        thisMessage.Write(25273f, ref offset);
-                        thisMessage.Write(54.125f, ref offset);
-                        thisMessage.Write(15723.3f, ref offset);
-                        thisMessage.Write(-1.56333f, ref offset);
-                        offset += 8;
-                        thisMessage.Write(MySession.MyCharacter.Teleportcounter++, ref offset);
-                        SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-                        MySession.MyCharacter.ExpectedWorld = 0;
-                        MySession.rdpCommIn.connectionData.ResetChannels();
+                    case "Lava":
+                        MapManager.Teleport(MySession, 3, 7906.09f, 75.2822f, 5914.65f, -2.40847f);
+                        break;
+
+                    case "Tun":
+                        MapManager.Teleport(MySession, 0, 25273f, 54.125f, 15723.3f, -1.56333f);
+                        break;
+
+                    case "Arc":
+                        MapManager.Teleport(MySession, 2, 7065.4609375f, 57.65724563598633f, 3499.9208984375f, -3.1183998584747314f);
+                        break;
+
+                    case "Rathe":
+                        MapManager.Teleport(MySession, 1, 8949.796875f, 54.125919342041016f, 7189.22314453125f, -1.4557989835739136f);
+                        break;
+
+                    case "pos":
+                        MapManager.Teleport(MySession, 4, 4823.9443359375f, 250.42288208007812f, 5504.09716796875f, -3.1277709007263184f);
+                        break;
+
+                    case "pod":
+                        MapManager.Teleport(MySession, 5, 5063.4736328125f, -24.68804931640625f, 3880.777587890625f, 3.1250364780426025f);
+                        break;
+
+                    case "zp":
+                        MapManager.Teleport(MySession, 5, 4872.84375f, 147.65725708007812f, 7047.947265625f, -1.588308334350586f);
                         break;
 
                     case "animation":
@@ -178,9 +176,9 @@ namespace ReturnHome.Opcodes.Chat
                         c.CurrentHP = int.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
+
                     default: 
                         break;
-
                 }
 
                 return true;

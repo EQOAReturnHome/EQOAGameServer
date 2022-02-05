@@ -49,14 +49,8 @@ namespace ReturnHome.Server.Network
             byte world = ClientPacket[offset++];
             if(Mysession.MyCharacter.World != world)
             {
-                if (Mysession.MyCharacter.ExpectedWorld == world)
-                {
-                    Mysession.MyCharacter.World = world;
-                }
-
-                //Need to boot from server? Probably cheating?
-                else
-                    return;
+                //Ignore? Client could of sent before teleport and delayed receive on our end
+                //Client shouldn't really be telling us where we are anyway, perse?
             }
 
             uint X = ClientPacket.GetLEUInt24(ref offset);
@@ -105,7 +99,7 @@ namespace ReturnHome.Server.Network
             {
                 PlayerManager.AddPlayer(Mysession.MyCharacter);
                 EntityManager.AddEntity(Mysession.MyCharacter);
-                MapManager.AddObjectToTree(Mysession.MyCharacter);
+                MapManager.Add(Mysession.MyCharacter);
                 
                 
                 Mysession.inGame = true;

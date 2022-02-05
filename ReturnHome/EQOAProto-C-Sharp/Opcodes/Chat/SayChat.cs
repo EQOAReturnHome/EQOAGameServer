@@ -23,7 +23,7 @@ namespace ReturnHome.Opcodes.Chat
             message = $"{MySession.MyCharacter.CharName}: " + message;
 
             //Query for nearby objects
-            List<Entity> entityList = MapManager.QueryNearbyObjects(MySession.MyCharacter, Radius);
+            List<Entity> entityList = MapManager.QueryObjects(MySession.MyCharacter, Radius);
 
             int offset = 0;
 

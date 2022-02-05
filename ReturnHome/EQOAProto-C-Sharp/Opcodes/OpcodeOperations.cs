@@ -653,7 +653,12 @@ namespace ReturnHome.Opcodes
 
         public static void EnableChannel(Session MySession, PacketMessage message)
         {
-            MySession.rdpCommIn.connectionData.serverObjects.Span[0].updateCharacter(MySession.MyCharacter);
+            //Activate client channel
+            MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);
+            Console.WriteLine("Received 0x49");
+
+            //Plop player into correct quad tree
+            MapManager.Add(MySession.MyCharacter);
         }
     }
 }

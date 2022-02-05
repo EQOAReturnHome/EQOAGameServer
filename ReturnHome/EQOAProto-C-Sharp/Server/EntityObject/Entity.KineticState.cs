@@ -3,8 +3,7 @@ using QuadTrees.QTreePointF;
 using System.Drawing;
 using System.Numerics;
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
-using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Zone;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -15,7 +14,7 @@ namespace ReturnHome.Server.EntityObject
         public float x;
         public float y;
         public float z;
-
+        public Map map;
         private float _velocityX = 0.0f;
         private float _velocityY = 0.0f;
         private float _velocityZ = 0.0f;
@@ -57,6 +56,8 @@ namespace ReturnHome.Server.EntityObject
                 if(true)
                 {
                     _world = value;
+                    if(isPlayer)
+                        Console.WriteLine($"World {_world}");
                     ObjectUpdateWorld();
                 }
             }

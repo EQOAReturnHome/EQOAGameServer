@@ -31,12 +31,13 @@ namespace ReturnHome.Server.Managers
             List<Actor> myNpcList = npcList.WorldActors();
             //Closing DB connection
             npcList.CloseConnection();
+            MapManager.Initialize();
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");
             foreach (Actor myActor in myNpcList)
             {
                 EntityManager.AddEntity(myActor);
-                MapManager.AddObjectToTree(myActor);
+                MapManager.Add(myActor);
             }
             Console.WriteLine("Done.");
 
