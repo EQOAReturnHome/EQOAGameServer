@@ -131,7 +131,6 @@ namespace ReturnHome.Server.Zone
         public List<Entity> Query(Entity e, float Radius)
         {
             List<Entity> entityList = new();
-
             _qtree.GetObjects(new RectangleF(e.x - (Radius / 2), e.z - (Radius / 2), Radius, Radius), entityList);
 
             return entityList;
