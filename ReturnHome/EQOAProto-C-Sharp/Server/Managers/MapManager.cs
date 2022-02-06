@@ -106,6 +106,7 @@ namespace ReturnHome.Server.Managers
 
         public static void TeleportPlayer(Session mySession, byte world, float x, float y, float z, float facing)
         {
+            
             Memory<byte> temp;
             Span<byte> thisMessage;
             temp = new byte[31];

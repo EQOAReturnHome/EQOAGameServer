@@ -127,6 +127,13 @@ namespace ReturnHome.Opcodes
 
             ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
 
+            //Merchant popup window
+            if (clientPacket.Header.Opcode == 76)
+            {
+                Console.WriteLine("Merchant Interaction");
+            }
+
+
             //Bank popup window
             if (clientPacket.Header.Opcode == 4685)
             {
@@ -139,7 +146,11 @@ namespace ReturnHome.Opcodes
                 MySession.MyCharacter.BankTunar(MySession, clientPacket);
             }
 
-            //Deposit Bank Item
+            //Deposit Bank
+            //
+
+
+
             if (clientPacket.Header.Opcode == 4692)
             {
 

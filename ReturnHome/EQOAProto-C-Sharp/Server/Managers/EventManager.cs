@@ -14,19 +14,10 @@ using ReturnHome.Server.Network;
 
 namespace ReturnHome.Server.Managers
 {
-    //Can't really be a static class because then Lua can't access the methods from it.
-    //If it's discovered it has to be a static class for functionality later on
-    //We can go the route of using Lua's Register function but you can't pass
-    //static classes to Lua because you can't instantiate them.
     public static class EventManager
     {
-
-        public static Dialogue GetNPCDialogue(GameOpcode opcode, Session mySession)
+        public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
-            string npcString;
-            string npcStatement;
-            
-            //Dialogue npcDialogue = new Dialogue();
             //Strip white spaces from NPC name and replace with Underscores
             mySession.MyCharacter.MyDialogue.npcName = mySession.MyCharacter.MyDialogue.npcName.Replace(" ", "_");
 
@@ -38,55 +29,29 @@ namespace ReturnHome.Server.Managers
             Lua lua = new Lua();
             //load lua CLR library 
             lua.LoadCLRPackage();
-
-            //pass lua a reference to the EventManager class which allows referencing methods and attributes of the class in Lua
-            //lua["events"] = events;
-            lua["dialogue"] = mySession.MyCharacter.MyDialogue.dialogue;
-            lua["choice"] = mySession.MyCharacter.MyDialogue.choice;
+            //If the op code to be sent is a dialogue box make sure we capture dialogue choices 
             if (opcode == GameOpcode.DialogueBoxOption)
             {
+                //send the dialogue choice to the lua script based on the chosen option index
                 string choiceOption = mySession.MyCharacter.MyDialogue.diagOptions[(int)mySession.MyCharacter.MyDialogue.choice];
+                //pass the string choice to the Lua as choice
                 lua["choice"] = choiceOption;
             }
-
-
+            //Create handles for the lua script to access some c# variables and methods
             lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
             lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
-            lua["mySession"] = mySession;
+            lua["SendDialogue"] = mySession.MyCharacter.SendDialogue;
             lua["TeleportPlayer"] = MapManager.TeleportPlayer;
+            lua["mySession"] = mySession;
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);
-
             //switch to find correct lua function based on op code from NPC Interact 0x04
             if (opcode == GameOpcode.DialogueBox || opcode == GameOpcode.DialogueBoxOption)
             {
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = lua.GetFunction("event_say");
                 callFunction.Call();
-                npcString = (string)lua["npcDialogue"];
-                if (npcString.Contains(":::"))
-                {
-                    npcStatement = npcString.Split(":::")[0];
-                    if (npcString.Split(":::")[1] != null)
-                    {
-
-                        string npcOptionString = npcString.Split(":::")[1];
-                        mySession.MyCharacter.MyDialogue.diagOptions = npcOptionString.Split("%").ToList();
-                        mySession.MyCharacter.MyDialogue.dialogue = npcStatement;
-                    }
-                }
-                else
-                {
-                    mySession.MyCharacter.MyDialogue.dialogue = npcString;
-                    mySession.MyCharacter.MyDialogue.diagOptions = null;
-                }
             }
-            mySession.MyCharacter.MyDialogue.choice = 1000;
-            return mySession.MyCharacter.MyDialogue;
         }
     }
-
-
-
-
 }
