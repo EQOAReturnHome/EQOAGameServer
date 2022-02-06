@@ -200,7 +200,6 @@ namespace ReturnHome.Server.Network.Managers
             {
                 if (session.PendingTermination)
                 {
-                    Logger.Info($"Dropping Session {session.SessionID}");
                     session.DropSession();
                 }
 

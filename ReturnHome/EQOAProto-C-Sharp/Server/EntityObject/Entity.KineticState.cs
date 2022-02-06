@@ -56,8 +56,6 @@ namespace ReturnHome.Server.EntityObject
                 if(true)
                 {
                     _world = value;
-                    if(isPlayer)
-                        Console.WriteLine($"World {_world}");
                     ObjectUpdateWorld();
                 }
             }

@@ -92,7 +92,7 @@ namespace ReturnHome.Server.Network
         //This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
-            string message = $"Coordinates: X-{MyCharacter.x} Y-{MyCharacter.y} Z-{MyCharacter.z}";
+            string message = $"Coordinates: X: {MyCharacter.x} Y: {MyCharacter.y} Z: {MyCharacter.z} F: {MyCharacter.FacingF}";
 
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
@@ -150,9 +150,11 @@ namespace ReturnHome.Server.Network
             rdpCommOut.PrepPackets();
         }
 
-        public void DropSession()
+        //Optional override for dropping the session, currently simplifies for removing a character when they log out
+        public void DropSession(bool Override = false)
         {
-            if (!PendingTermination) return;
+            if (!PendingTermination & !Override) return;
+            Logger.Info($"Dropping Session {SessionID}");
             //Eventually this would kick the player out of the world and save data/free resources
             // Remove character from Character List
             MapManager.RemoveObject(MyCharacter);

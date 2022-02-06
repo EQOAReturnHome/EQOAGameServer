@@ -70,13 +70,10 @@ namespace ReturnHome.Server.Network
                         entity = null;
 
                         DeactivateChannel();
-                        Console.WriteLine($"Deactivated channel: {_objectChannel}");
                         return;
                     }
 
                     _isActive = true;
-
-                    Console.WriteLine($"Activated Channel {_objectChannel}.");
                 }
             }
         }

@@ -57,6 +57,10 @@ namespace ReturnHome.Opcodes.Chat
                         MapManager.Teleport(MySession, 5, 4872.84375f, 147.65725708007812f, 7047.947265625f, -1.588308334350586f);
                         break;
 
+                    case "iod":
+                        MapManager.Teleport(MySession, 0, 24568f, 53.5f, 3502f, -3.0826661586761475f);
+                        break;
+
                     case "animation":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
                         c.Animation = byte.Parse(changes[2]);

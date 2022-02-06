@@ -113,13 +113,14 @@ namespace ReturnHome.Opcodes
 
         public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
         {
-            MySession.PendingTermination = true;
             //Create new handle for mysql connection
             CharacterSQL savePlayerData = new();
             //Call the mysql update query to save player data
             savePlayerData.SavePlayerData(MySession.MyCharacter);
+            savePlayerData.CloseConnection();
             //Actually drop the player's session
-            MySession.DropSession();
+            MySession.PendingTermination = true;
+            MySession.DropSession(true);
         }
 
         public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
@@ -655,10 +656,14 @@ namespace ReturnHome.Opcodes
         {
             //Activate client channel
             MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);
-            Console.WriteLine("Received 0x49");
 
-            //Plop player into correct quad tree
-            MapManager.Add(MySession.MyCharacter);
+            //If player changed worlds, is currently not existing in a quad tree, let's place into correct quadTree
+            if (MySession.MyCharacter.World != MySession.MyCharacter.ExpectedWorld)
+            {
+                //Update Character world
+                MySession.MyCharacter.World = MySession.MyCharacter.ExpectedWorld;
+                MapManager.Add(MySession.MyCharacter);
+            }
         }
     }
 }

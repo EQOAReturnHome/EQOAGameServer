@@ -90,7 +90,7 @@ namespace ReturnHome.Server.Managers
         {
             if (groupTeleport)
             {
-                //Eventually we would check if the player is in a  group, and verify their distance from player to see if they teleport with them
+                //Eventually we would check if the player is in a  group, and verify their distance from players to see if they teleport with them
                 if (false)
                 {
 
@@ -115,11 +115,10 @@ namespace ReturnHome.Server.Managers
             session.rdpCommIn.connectionData.DisableChannels();
 
             //Check if player is changing maps, if so remove them from the current map
-            //Set new map also
             if (session.MyCharacter.World != world)
             {
+                session.MyCharacter.ExpectedWorld = world;
                 RemoveObject(session.MyCharacter);
-                session.MyCharacter.World = world;
             }
         }
     }
