@@ -1,6 +1,9 @@
 function event_say()
+diagOptions = {}
     npcDialogue = " "
-end
-function event_say()
+SendDialogue(mySession, npcDialogue, diagOptions)
+endfunction event_say()
+diagOptions = {}
     npcDialogue = " "
+SendDialogue(mySession, npcDialogue, diagOptions)
 end

@@ -160,6 +160,30 @@ namespace ReturnHome.Server.EntityObject
             return;
         }
 
+        public void BankItem(Session mySession, PacketMessage clientPacket)
+        {
+            int offset = 0;
+            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+
+            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+            uint giveOrTake = IncMessage[offset++];
+            uint itemToTransfer = IncMessage.GetLEUInt(ref offset);
+            Console.WriteLine(targetNPC);
+            Console.WriteLine(giveOrTake);
+            Console.WriteLine(itemToTransfer);
+
+            //Deposit Item
+            if(giveOrTake == 0)
+            {
+
+            }else if(giveOrTake == 1){
+
+            }
+
+
+
+        }
+
         //Method for withdrawing and depositing bank tunar
         public void BankTunar(Session mySession, PacketMessage clientPacket)
         {
@@ -223,65 +247,63 @@ namespace ReturnHome.Server.EntityObject
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
         public void SendDialogue(Session mySession, string dialogue, LuaTable diagOptions)
         {
-            //Clear player's previous dialogue options
+            //Clear player's previous dialogue options before adding new ones.
             mySession.MyCharacter.MyDialogue.diagOptions.Clear();
             //loop over luatable, assigning every value to an element of the players diagOptions list
-            //LuaTables come back from lua scripts as effectively Dict<object,object>
+            //lua table always returns a dict type object of <object,object>
             foreach (KeyValuePair<object, object> k in diagOptions)
             {
                 mySession.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
             }
-
-            //If the dialogue isn't a Yes or no choice sort alphabetically
-            //this maintains order with coaches across multiple dialogues
+            //If it's not a yes/no choice then sort alphabetically.
+            //This forces it to return choices the same every time.
             if (!mySession.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
             {
                 mySession.MyCharacter.MyDialogue.diagOptions.Sort();
             }
-
-            //create offset for message
             int offset = 0;
             //Length of choices
             uint choicesLength = 0;
-            //Keeps track of counter for player messages
+            //set choice counter for player
             uint choiceCounter = mySession.MyCharacter.MyDialogue.counter;
-            //create dialoguetype variable and set it default to option box type
+            byte textOptions = 0;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
-
-            //Check if player's diagOptions are null. If they aren't, count diagOptions
+            //if dialogue options exist set choice counter update
             if (mySession.MyCharacter.MyDialogue.diagOptions != null)
             {
                 choiceCounter = (uint)mySession.MyCharacter.MyDialogue.diagOptions.Count;
-                //Calculate the length of choicdes of dialogue options
+                //Length of choices
                 foreach (string choice in mySession.MyCharacter.MyDialogue.diagOptions)
                 {
                     choicesLength += (uint)choice.Length;
                 }
-                //If the palyer's diag options are not null generate an option box instead of regular dialogue
+                //count the number of textOptions
+                textOptions = (byte)mySession.MyCharacter.MyDialogue.diagOptions.Count;
+                //set dialogue type to option
                 dialogueType = GameOpcode.OptionBox;
             }
-
-            //IIf the player's dialogue options are less than or equal to 0 send regular dialogue box
+            //if there are no diagOptions send onlly diag box.
             if (mySession.MyCharacter.MyDialogue.diagOptions.Count <= 0)
             {
                 dialogueType = GameOpcode.DialogueBox;
             }
-
-            //Create variable memory span based on dialogue length, choiceCounters, and the choice length.
+            //set player dialogue to the incoming dialogue
+            mySession.MyCharacter.MyDialogue.dialogue = dialogue;
+            //create variable memory span for sending out dialogue
             Memory<byte> temp = new Memory<byte>(new byte[11 + (dialogue.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
             Span<byte> Message = temp.Span;
-            //Write dialogue type, chocie counter, diag length, and actual dialogue to message
+            //Write diag type, counter, dialogue length, and actual text to memssage
             Message.Write((ushort)dialogueType, ref offset);
             Message.Write(choiceCounter, ref offset);
             Message.Write(dialogue.Length, ref offset);
             Message.Write(Encoding.Unicode.GetBytes(dialogue), ref offset);
-            //If the message type is an option box write the dialogue options to the message as well.
+            //if it's an option box iterate through options and write options to message
             if (dialogueType == GameOpcode.OptionBox)
             {
-                //Check to make sure somehow diagOptions wasn't null
+                Message.Write(textOptions, ref offset);
+
                 if (mySession.MyCharacter.MyDialogue.diagOptions != null)
                 {
-                    //Iterate over each diagOption writing its length and text to the Message.
                     for (int i = 0; i < mySession.MyCharacter.MyDialogue.diagOptions.Count; i++)
                     {
                         Message.Write(mySession.MyCharacter.MyDialogue.diagOptions[i].Length, ref offset);
@@ -294,45 +316,50 @@ namespace ReturnHome.Server.EntityObject
             mySession.MyCharacter.MyDialogue.choice = 1000;
         }
 
-        //Process dialogue called from the opcode ops to enter dialogue workflow.
         public void ProcessDialogue(Session mySession, PacketMessage clientPacket)
         {
-            //Create offset for message
+            //set offset
             int offset = 0;
             uint interactTarget = 0;
             //Read the incoming message and get the objectID that was interacted with
             ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-            //If the op code is just an interact type pull the interact target off message
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
             {
                 interactTarget = IncMessage.GetLEUInt(ref offset);
             }
-            //If the op code is a dialogue choice go this route
+            //if option choice incoming
             if (clientPacket.Header.Opcode == 53)
             {
-                //reset offset for message type
-                offset = 0;
-                //get option counter to keep track
-                uint optionCounter = IncMessage.GetLEUInt(ref offset);
-                //Get the choice from the option message
-                mySession.MyCharacter.MyDialogue.choice = IncMessage.GetByte(ref offset);
-                //If the message is a 255(exit dialogue option)
-                if (mySession.MyCharacter.MyDialogue.choice == 255)
+                //try to pull the option counter and players choice out of message
+                try
                 {
-                    //Set the option to very high 1000 so it doesn't retrigger exit
-                    mySession.MyCharacter.MyDialogue.choice = 1000;
-                    //immediately end message generation, no return send
-                    return;
+                    offset = 0;
+                    uint optionCounter = IncMessage.GetLEUInt(ref offset);
+                    mySession.MyCharacter.MyDialogue.choice = IncMessage.GetByte(ref offset);
+                    //if diag message is 255(exit dialogue in client) return immediately without new message
+                    //and set choice to incredibly high number to make sure it doesn't retrigger any specific dialogue.
+                    if (mySession.MyCharacter.MyDialogue.choice == 255)
+                    {
+                        mySession.MyCharacter.MyDialogue.choice = 1000;
+                        return;
+                    }
+                }
+                catch (Exception)
+                {
+                    throw;
                 }
             }
-            //create dialogueType and set base option as boxoption
+            //Create new instance of the event manager
+            //EventManager eManager = new EventManager();
+            Entity npcEntity = new Entity(false);
+            Dialogue dialogue = mySession.MyCharacter.MyDialogue;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
-            //if the op code is a 35, set diagType to BoxOption
+            //if a diag option choice incoming set outgoing to diag box option
             if (clientPacket.Header.Opcode == 53)
             {
                 dialogueType = GameOpcode.DialogueBoxOption;
             }
-            //Otherwise if it's just a normal interaction set it to a regular dialogue
+            //else this is just a regular interaction with only dialogue
             else if (clientPacket.Header.Opcode == 4)
             {
                 dialogueType = GameOpcode.DialogueBox;
@@ -344,10 +371,10 @@ namespace ReturnHome.Server.EntityObject
             {
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
                 {
-                    mySession.MyCharacter.MyDialogue.npcName = npc.CharName;
+                    dialogue.npcName = npc.CharName;
                 }
             }
-            //Call the event manager to pass everything to Lua
+            //call the event manager to process dialogue from here. Passes to Lua scripts.
             EventManager.GetNPCDialogue(dialogueType, mySession);
         }
     }

@@ -51,7 +51,7 @@
         AddQuestLog = 0x007C, //124
         PlayerTunar = 0x0052, //82
         ConfirmBankTunar = 0x1253, //4691
-        DepositBankItem = 0x1254, //4692
+        BankItem = 0x1254, //4692
         DialogueBox = 0x46, //70
 
         EquipItem = 0x3F,

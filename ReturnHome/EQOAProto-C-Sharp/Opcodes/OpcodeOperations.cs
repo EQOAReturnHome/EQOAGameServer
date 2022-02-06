@@ -38,6 +38,7 @@ namespace ReturnHome.Opcodes
             { GameOpcode.DepositBankTunar, InteractActor },
             { GameOpcode.PlayerTunar, InteractActor },
             { GameOpcode.ConfirmBankTunar, InteractActor },
+            { GameOpcode.BankItem, InteractActor },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -143,18 +144,17 @@ namespace ReturnHome.Opcodes
             //Deposit and Withdraw Bank Tunar
             if (clientPacket.Header.Opcode == 4693)
             {
+                Console.WriteLine("In the bank tunar");
                 MySession.MyCharacter.BankTunar(MySession, clientPacket);
             }
 
-            //Deposit Bank
-            //
-
-
-
+            //Deposit and Withdraw Bank item
             if (clientPacket.Header.Opcode == 4692)
             {
-
+                Console.WriteLine("In the Item op code");
+                MySession.MyCharacter.BankItem(MySession, clientPacket);
             }
+
             //Dialogue and Quest Interaction
             if (clientPacket.Header.Opcode == 4 || clientPacket.Header.Opcode == 53)
             {

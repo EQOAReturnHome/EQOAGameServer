@@ -12,7 +12,7 @@ local ch = tostring(choice)
 function event_say()
    dialogueOptions = {}
    SetPlayerFlags(mySession, "highpass_coach", true)
-      SetPlayerFlags(mySession, "bobble_coach", true)
+   SetPlayerFlags(mySession, "bobble_coach", true)
    SetPlayerFlags(mySession, "neriak_coach", true)
    SetPlayerFlags(mySession, "tea_garden_coach", true)
 
