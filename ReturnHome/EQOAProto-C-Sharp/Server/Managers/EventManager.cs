@@ -23,7 +23,7 @@ namespace ReturnHome.Server.Managers
 
             //Find Lua script recursively through scripts directory by zone
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
-            string[] file = Directory.GetFiles("../../../Scripts/", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+            string[] file = Directory.GetFiles("Scripts/", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
 
             //Create new lua object
             Lua lua = new Lua();

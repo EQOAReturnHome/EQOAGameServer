@@ -13,36 +13,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Database\SQL\Character\**" />
-    <Compile Remove="Server\EntityObject\NewFolder\**" />
-    <Compile Remove="Server\NewFolder1\**" />
-    <Compile Remove="Server\NewFolder\**" />
-    <EmbeddedResource Remove="Database\SQL\Character\**" />
-    <EmbeddedResource Remove="Server\EntityObject\NewFolder\**" />
-    <EmbeddedResource Remove="Server\NewFolder1\**" />
-    <EmbeddedResource Remove="Server\NewFolder\**" />
-    <None Remove="Database\SQL\Character\**" />
-    <None Remove="Server\EntityObject\NewFolder\**" />
-    <None Remove="Server\NewFolder1\**" />
-  </ItemGroup>
-  <ItemGroup>
-  <EmbeddedResource Include="Scripts\*\*.lua" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="Scripts\bobble_by_water\coachman_boblon.lua" />
-    <EmbeddedResource Remove="Scripts\muniels_tea_garden\coachman_farn.lua" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Scripts\darvar_manor\Coachman_Darva.lua" />
-    <None Remove="Scripts\ft_seriak\Coachman_D%27larik.lua" />
-    <None Remove="Scripts\grobb\Coachman_Zuggug.lua" />
-    <None Remove="Scripts\highbourne\Coachman_Galdah.lua" />
-    <None Remove="Scripts\klick_anon\Coachman_Rizkar.lua" />
-    <None Remove="Scripts\oasis_of_marr\coachwoman_dernia.lua" />
-    <None Remove="Scripts\oggok\Coachman_Dilga.lua" />
-    <None Remove="Scripts\rivervale\Coachman_Huff.lua" />
-    <None Remove="Scripts\south_crossroads\Coachman_Niocla.lua" />
-    <None Remove="Scripts\surefall_glade\Coachman_Frender.lua" />
+    <EmbeddedResource Include="Scripts\*\*.lua" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
@@ -54,5 +25,17 @@
     <PackageReference Include="QuadTrees" Version="1.0.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Include="System.IO.Pipelines" Version="5.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(ProjectDir)\Scripts\**\*;$(ProjectDir)\Scripts\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Scripts\ports.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Scripts\dirTest.lua" />
+    <Content Include="Scripts\ports.lua" />
   </ItemGroup>
 </Project>
