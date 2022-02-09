@@ -1,27 +1,23 @@
--- coachman ronks
+﻿-- coachman rizkar
 
 local coaches = require('Scripts/ports')
 
 local playerCoaches = {
-   highpass_coach = "Get me a horse to Highpass.",
-   bobble_coach = "Get me a horse to Bobble By Water.",
-   tea_garden_coach = "Get me a horse to Muniel's Tea Garden.",
-   neriak_coach = "Get me a horse to the dark city of Neriak."
+   neriak_coach = "Get me a horse to Neriak.",
+   fayspires_coach = "Get me a horse to Fayspires.",
+   bobble_by_water_coach = "Get me a horse to Bobble By Water.",
 }
 
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "freeport_coach")) then
-      if (ch:find("Highpass")) then
-         TeleportPlayer(mySession,coaches.highpass.world,coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
-      elseif (ch:find("Tea")) then
-         TeleportPlayer(mySession,coaches.muniels_tea_garden.world,coaches.muniels_tea_garden.x,coaches.muniels_tea_garden.y,coaches.muniels_tea_garden.z,coaches.muniels_tea_garden.facing)
+   if(GetPlayerFlags(mySession, "klick_anon_coach")) then
+      if (ch:find("Neriak")) then
+         TeleportPlayer(mySession,coaches.neriak.world,coaches.neriak.x,coaches.neriak.y,coaches.neriak.z,coaches.neriak.facing)
+      elseif (ch:find("Fayspires")) then
+         TeleportPlayer(mySession,coaches.fayspires.world,coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
       elseif (ch:find("Bobble")) then
          TeleportPlayer(mySession,coaches.bobble_by_water.world,coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
-      elseif (ch:find("Neriak")) then
-        TeleportPlayer(mySession,coaches.neriak.world,coaches.neriak.x,coaches.neriak.y,coaches.neriak.z,coaches.neriak.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
@@ -34,7 +30,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "freeport_coach", true)
+         SetPlayerFlags(mySession, "klick_anon_coach", true)
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
@@ -46,6 +42,3 @@ SetPlayerFlags(mySession, "admin", true)
       end
    end
 end
-
-
-

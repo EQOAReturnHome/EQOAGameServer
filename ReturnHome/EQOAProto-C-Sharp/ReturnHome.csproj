@@ -21,6 +21,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="MySqlConnector" Version="0.69.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NLua" Version="1.6.0" />
     <PackageReference Include="QuadTrees" Version="1.0.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />

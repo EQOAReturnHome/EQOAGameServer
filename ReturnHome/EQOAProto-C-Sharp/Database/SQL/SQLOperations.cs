@@ -8,6 +8,7 @@ using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Actor;
+using System.Text.Json;
 
 namespace ReturnHome.Database.SQL
 {
@@ -15,7 +16,7 @@ namespace ReturnHome.Database.SQL
     class CharacterSQL : SQLBase
     {
 
-        public void SavePlayerData(Character player)
+        public void SavePlayerData(Character player, string playerFlags)
         {
             //Create new sql connection calling stored proc to update data
             using var SecondCmd = new MySqlCommand("UpdatePlayerData", con);
@@ -26,7 +27,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("charServerID", player.ServerID);
             SecondCmd.Parameters.AddWithValue("playerLevel", player.Level);
             //May need other default values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("newTotalXP", 0);
+            SecondCmd.Parameters.AddWithValue("newTotalXP", 3000);
             SecondCmd.Parameters.AddWithValue("newDebt", 0);
             SecondCmd.Parameters.AddWithValue("newBreath", 255);
             SecondCmd.Parameters.AddWithValue("newTunar", player.Tunar);
@@ -73,6 +74,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newBasePower", 500);
             SecondCmd.Parameters.AddWithValue("newHealot2", 20);
             SecondCmd.Parameters.AddWithValue("newPowerot2", 10);
+            SecondCmd.Parameters.AddWithValue("playerFlags", playerFlags);
 
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
@@ -285,7 +287,9 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(56),
                     //powerot2
                     rdr.GetInt32(57),
+                    rdr.GetString(58),
                     MySession);
+
 
                 //Add character attribute data to charaterData List
                 //Console.WriteLine(newCharacter.CharName);
@@ -565,6 +569,7 @@ namespace ReturnHome.Database.SQL
                         rdr.GetInt32(56),
                         //powerot2
                         rdr.GetInt32(57),
+                        rdr.GetString(58),
                         MySession);
                     break;
                 }

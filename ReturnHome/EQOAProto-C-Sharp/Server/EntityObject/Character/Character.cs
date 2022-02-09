@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Text.Json;
+using Newtonsoft.Json;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Player
-{
+{  
     public class Character : Entity
     {
         private static string Tunaria = "data\\tunaria.esf";
@@ -53,7 +54,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int totalXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP,
                          int world, float xCoord, float yCoord, float zCoord, float facing, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC,
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
-                         int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, Session MySession) : base(true)
+                         int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, string playerFlags, Session MySession) : base(true)
         {
             //playerFlags.Add("Freeport", true);
             Target = 0xFFFFFFFF;
@@ -110,8 +111,7 @@ namespace ReturnHome.Server.EntityObject.Player
             BaseWisdom = baseWisdom;
             BaseIntelligence = baseIntelligence;
             BaseCharisma = baseCharisma;
-            //CurrentHP2 = currentHP2;
-            //BaseHP = baseHP;
+            this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
             //CurrentPower2 = currentPower2;
             //BasePower = basePower;
             //HealOT2 = healOT2;
