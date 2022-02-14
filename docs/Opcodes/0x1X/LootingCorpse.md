@@ -1,0 +1,1 @@
+looting corpse
