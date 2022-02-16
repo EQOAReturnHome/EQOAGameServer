@@ -33,19 +33,23 @@ This is the Opcode wiki table of content's where all known reliable opcodes can 
 
 ### 0x4X:
 
-
+- [0x40 Unequip Item](0x4X/UnequipItem.md)
+- [0x46 Dialogue Box](0x4X/DialogueBox.md)
 
 ### 0x5X:
 
-
+- [0x52 Update Character Tunar](0x5X/UpdateCharacterTunar.md)
+- [0x57 Trade Window](0x5X/TradeWindow.md)
 
 ### 0x6X:
 
-
+- [0x6C Hotkey Menu](0x6X/HotkeyMenu.md)
 
 ### 0x7X:
 
-
+- [0x7C Add Quest To Log](0x7X/AddQuestToLog.md)
+- [0x7D Remove Quest From Log](0x7X/RemoveQuestFromLog.md)
+- [0x7E Add Pet To Group](0x7X/AddPetToGroup.md)
 
 ### 0x8X:
 
@@ -61,7 +65,9 @@ This is the Opcode wiki table of content's where all known reliable opcodes can 
 
 ### 0xBX:
 
-
+- [0xB1 Casting Combat](0xBX/CastingCombat.md)
+- [0xB4 Add Skill To Hotbar](0xBX/AddSkillToHotbar.md)
+- [0xB7 Merchant Window](0xBX/MerchantWindow.md)
 
 ### 0xCX:
 
@@ -115,19 +121,22 @@ This is the Opcode wiki table of content's where all known reliable opcodes can 
 
 ### 0x4X:
 
-
+- [0x41 Pet Commands](0x4X/PetCommands.md)
+- [0x4A Buying item from Merchant](0x4X/BuyingFromMerchant.md)
+- [0x4B Selling item to Merchant](0x4X/SellingToMerchant.md)
+- [0x4C Merchant Interaction](0x4X/InteractMerchant.md)
 
 ### 0x5X:
 
-
+- [0x56 Trade Window Request](0x5X/TradeWindowRequest.md)
 
 ### 0x6X:
 
-
+- [0x61 Interact with BlackSmith](0x6X/InteractBlackSmith.md)
 
 ### 0x7X:
 
-
+- [0x7D Remove Quest From Log](0x7X/RemoveQuestFromLog.md)
 
 ### 0x8X:
 

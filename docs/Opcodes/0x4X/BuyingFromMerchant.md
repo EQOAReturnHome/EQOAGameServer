@@ -1,0 +1,1 @@
+Buying from merchant
