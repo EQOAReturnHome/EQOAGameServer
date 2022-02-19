@@ -3,13 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Linq;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using NLua;
-
+using ReturnHome.Opcodes.Chat;
+using System.IO;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -173,10 +175,12 @@ namespace ReturnHome.Server.EntityObject
             Console.WriteLine(itemToTransfer);
 
             //Deposit Item
-            if(giveOrTake == 0)
+            if (giveOrTake == 0)
             {
 
-            }else if(giveOrTake == 1){
+            }
+            else if (giveOrTake == 1)
+            {
 
             }
 
@@ -242,6 +246,122 @@ namespace ReturnHome.Server.EntityObject
             SessionQueueMessages.PackMessage(mySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
             SessionQueueMessages.PackMessage(mySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
             return;
+        }
+
+        public void MerchantBuy(Session mySession, PacketMessage clientPacket)
+        {
+            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+            int offset = 0;
+            int itemSlot = IncMessage.Get7BitDoubleEncodedInt(ref offset);
+            int itemQty = IncMessage.Get7BitDoubleEncodedInt(ref offset);
+            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+
+            Console.WriteLine(itemSlot);
+            Console.WriteLine(itemQty);
+
+            Memory<byte> buffer;
+
+            if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
+            {
+                Item newItem = npc.Inventory[itemSlot];
+                if (itemQty > 0)
+                {
+                    newItem.StackLeft = itemQty;
+                }
+
+
+                mySession.MyCharacter.Inventory.Add(newItem);
+
+
+                using (MemoryStream memStream = new())
+                {
+
+                    memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddInvItem));
+
+                    newItem.DumpItem(memStream);
+
+                    long pos = memStream.Position;
+                    buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
+
+                    SessionQueueMessages.PackMessage(mySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
+                }
+            }
+
+        }
+
+        public void MerchantSell(Session mySession, PacketMessage clientPacket)
+        {
+
+            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+            int offset = 0;
+            int itemSlot = IncMessage.GetLEInt(ref offset);
+            int itemQty = IncMessage.Get7BitDoubleEncodedInt(ref offset);
+            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+
+            Console.WriteLine(itemSlot);
+
+            //Define memory span for player
+            Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
+            Span<byte> Message = temp.Span;
+
+            foreach (Item i in mySession.MyCharacter.Inventory)
+            {
+                Console.WriteLine(i.ItemName);
+                Console.WriteLine(i.InventoryNumber);
+            }
+
+            mySession.MyCharacter.Inventory.Remove(mySession.MyCharacter.Inventory[0]);
+            
+
+
+            offset = 0;
+
+            Message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
+            Message.Write((byte)itemSlot, ref offset);
+            Message.Write((byte)01, ref offset);
+            Message.Write7BitDoubleEncodedInt(itemQty, ref offset);
+
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+
+
+        }
+
+        public void TriggerMerchant(Session mySession, PacketMessage clientPacket)
+        {
+            //Create readonly span for the packet data
+            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+            //set fresh offset
+            int offset = 0;
+            //pull relevant bank information out of packet
+            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+            int unknownInt = 0;
+
+            Memory<byte> buffer;
+
+            if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
+            {
+                Entity merchantNPC = npc;
+
+                using (MemoryStream memStream = new())
+                {
+                    memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
+                    memStream.Write(BitConverter.GetBytes(targetNPC));
+                    memStream.Write(Utility_Funcs.DoublePack(unknownInt));
+                    memStream.Write(Utility_Funcs.DoublePack(unknownInt));
+                    memStream.Write(Utility_Funcs.DoublePack(merchantNPC.Inventory.Count));
+                    memStream.Write(BitConverter.GetBytes(merchantNPC.Inventory.Count));
+                    foreach (Item bi in merchantNPC.Inventory)
+                    {
+                        bi.DumpItem(memStream);
+                    }
+
+                    long pos = memStream.Position;
+                    buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
+
+                    SessionQueueMessages.PackMessage(mySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
+                    memStream.Flush();
+                }
+            }
         }
 
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
@@ -377,5 +497,118 @@ namespace ReturnHome.Server.EntityObject
             //call the event manager to process dialogue from here. Passes to Lua scripts.
             EventManager.GetNPCDialogue(dialogueType, mySession);
         }
+
+        public static void AddQuestLog(Session mySession, uint questNumber, string questText)
+        {
+            int offset = 0;
+
+            Memory<byte> temp = new Memory<byte>(new byte[11 + (questText.Length * 2)]);
+            Span<byte> Message = temp.Span;
+
+            Message.Write((ushort)GameOpcode.AddQuestLog, ref offset);
+            Message.Write(questNumber, ref offset);
+            Message.Write(questText.Length, ref offset);
+            Message.Write(Encoding.Unicode.GetBytes(questText), ref offset);
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
+        public static void DeleteQuest(Session mySession, byte questNumber)
+        {
+            int offset = 0;
+
+            Memory<byte> temp = new Memory<byte>(new byte[8]);
+            Span<byte> Message = temp.Span;
+
+            Message.Write((ushort)GameOpcode.DeleteQuest, ref offset);
+            Message.Write(new byte[4], ref offset);
+            Message.Write(questNumber, ref offset);
+
+
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
+        public static void GrantXP(Session mySession, int xpAmount)
+        {
+            int debt = 0;
+            int offset = 0;
+            int totXP = xpAmount;
+            int paidDebt = 0;
+            int cm = 0;
+            int CMXP = 0;
+            if (mySession.MyCharacter.totalDebt > 0)
+            {
+                debt = mySession.MyCharacter.totalDebt;
+
+                //If true, will erase remaining debt
+                if ((xpAmount / 2) >= mySession.MyCharacter.totalDebt)
+                {
+                    paidDebt = mySession.MyCharacter.totalDebt;
+                    xpAmount -= mySession.MyCharacter.totalDebt;
+                    mySession.MyCharacter.totalDebt = 0;
+                }
+
+                //Otherwise, chop xp amount in half to satisify some debt
+                else
+                {
+                    paidDebt = (xpAmount / 2);
+                    mySession.MyCharacter.totalDebt -= (xpAmount / 2);
+                    xpAmount -= (xpAmount / 2);
+                }
+            }
+
+            //check to see if player is having a percentage of XP going to CMs
+            if (cm > 0)
+            {
+                CMXP = (int)(cm / 100f) * xpAmount;
+                xpAmount -= CMXP;
+
+                //Only XP based towards cm's should remove from our total earned xp
+                totXP -= CMXP;
+            }
+
+            //Inform client of the gainz
+            if (xpAmount > 0)
+            {
+                if (debt > 0)
+                    ChatMessage.GenerateClientSpecificChat(mySession, $"You received {totXP} XP. {paidDebt} was paid towards your debt of {debt}.");
+
+                else
+                    ChatMessage.GenerateClientSpecificChat(mySession, $"You received {xpAmount} XP.");
+            }
+
+            //Need to send earned CM opcode with this if any
+            if (CMXP > 0)
+                ChatMessage.GenerateClientSpecificChat(mySession, $"You received {CMXP} Mastery XP.");
+
+            mySession.MyCharacter.TotalXPEarned += xpAmount;
+
+            while (mySession.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[mySession.MyCharacter.Level])
+            {
+                mySession.MyCharacter.Level++;
+            }
+
+            //Something similar as above for Training points
+
+            Memory<byte> temp = new Memory<byte>(new byte[Utility_Funcs.DoubleVariableLengthIntegerLength(mySession.MyCharacter.Level) + Utility_Funcs.DoubleVariableLengthIntegerLength(mySession.MyCharacter.TotalXPEarned) + 2]);
+            Span<byte> Message = temp.Span;
+
+            Message.Write((ushort)GameOpcode.GrantXP, ref offset);
+            Message.Write7BitDoubleEncodedInt(mySession.MyCharacter.Level, ref offset);
+            Message.Write7BitDoubleEncodedInt(mySession.MyCharacter.TotalXPEarned, ref offset);
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
+        public static bool CheckQuestItem(Session mySession, int itemID, int itemQty)
+        {
+            if (mySession.MyCharacter.Inventory.Any(p => p.ItemID == itemID && p.StackLeft >= itemQty))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
     }
 }

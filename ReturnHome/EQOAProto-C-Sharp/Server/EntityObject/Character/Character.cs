@@ -111,7 +111,9 @@ namespace ReturnHome.Server.EntityObject.Player
             BaseWisdom = baseWisdom;
             BaseIntelligence = baseIntelligence;
             BaseCharisma = baseCharisma;
-            this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
+            if(playerFlags != null){
+                this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
+            }
             //CurrentPower2 = currentPower2;
             //BasePower = basePower;
             //HealOT2 = healOT2;
@@ -160,11 +162,10 @@ namespace ReturnHome.Server.EntityObject.Player
         }
         public bool GetPlayerFlags(Session mySession, string flagKey)
         {
-            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
             {
                 return true;
-            }
-
+            }else if (!mySession.MyCharacter.playerFlags.ContainsKey(flagKey)) { return false; }
             return false;
         }
 
@@ -173,6 +174,9 @@ namespace ReturnHome.Server.EntityObject.Player
             if (!mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
             {
                 mySession.MyCharacter.playerFlags.Add(flagKey, flagValue);
+            }
+            else if(mySession.MyCharacter.playerFlags.ContainsKey(flagKey)){
+                mySession.MyCharacter.playerFlags[flagKey] = flagValue;
             }
         }
     }

@@ -27,13 +27,13 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("charServerID", player.ServerID);
             SecondCmd.Parameters.AddWithValue("playerLevel", player.Level);
             //May need other default values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("newTotalXP", 3000);
-            SecondCmd.Parameters.AddWithValue("newDebt", 0);
-            SecondCmd.Parameters.AddWithValue("newBreath", 255);
+            SecondCmd.Parameters.AddWithValue("newTotalXP", player.TotalXPEarned);
+            SecondCmd.Parameters.AddWithValue("newDebt", player.totalDebt);
+            SecondCmd.Parameters.AddWithValue("newBreath", player.Breath);
             SecondCmd.Parameters.AddWithValue("newTunar", player.Tunar);
             SecondCmd.Parameters.AddWithValue("newBankTunar", player.BankTunar);
             SecondCmd.Parameters.AddWithValue("newUnusedTP", player.UnusedTP);
-            SecondCmd.Parameters.AddWithValue("newTotalTP", 350);
+            SecondCmd.Parameters.AddWithValue("newTotalTP", player.MaxAssignableTP);
             SecondCmd.Parameters.AddWithValue("newX", player.x);
             SecondCmd.Parameters.AddWithValue("newY", player.y);
             SecondCmd.Parameters.AddWithValue("newZ", player.z);
@@ -46,20 +46,20 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newIntel", player.Intelligence);
             SecondCmd.Parameters.AddWithValue("newCharisma", player.Charisma);
             //May need other default or calculated values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("newCurrentHP", 1000);
-            SecondCmd.Parameters.AddWithValue("newMaxHP", 1000);
-            SecondCmd.Parameters.AddWithValue("newCurrentPower", 500);
-            SecondCmd.Parameters.AddWithValue("newMaxPower", 500);
-            SecondCmd.Parameters.AddWithValue("newHealot", 20);
-            SecondCmd.Parameters.AddWithValue("newPowerot", 10);
-            SecondCmd.Parameters.AddWithValue("newAC", 0);
-            SecondCmd.Parameters.AddWithValue("newPoisonr", 10);
-            SecondCmd.Parameters.AddWithValue("newDiseaser", 10);
-            SecondCmd.Parameters.AddWithValue("newFirer", 10);
-            SecondCmd.Parameters.AddWithValue("newColdr", 10);
-            SecondCmd.Parameters.AddWithValue("newLightningr", 10);
-            SecondCmd.Parameters.AddWithValue("newArcaner", 10);
-            SecondCmd.Parameters.AddWithValue("newFishing", 0);
+            SecondCmd.Parameters.AddWithValue("newCurrentHP", player.CurrentHP);
+            SecondCmd.Parameters.AddWithValue("newMaxHP", player.HPMax);
+            SecondCmd.Parameters.AddWithValue("newCurrentPower", player.CurrentPower);
+            SecondCmd.Parameters.AddWithValue("newMaxPower", player.PWRMax);
+            SecondCmd.Parameters.AddWithValue("newHealot", player.HealthOverTime);
+            SecondCmd.Parameters.AddWithValue("newPowerot", player.PowerOverTime);
+            SecondCmd.Parameters.AddWithValue("newAC", player.AC);
+            SecondCmd.Parameters.AddWithValue("newPoisonr", player.PoisonResist);
+            SecondCmd.Parameters.AddWithValue("newDiseaser", player.DiseaseResist);
+            SecondCmd.Parameters.AddWithValue("newFirer", player.FireResist);
+            SecondCmd.Parameters.AddWithValue("newColdr", player.ColdResist);
+            SecondCmd.Parameters.AddWithValue("newLightningr", player.LightningResist);
+            SecondCmd.Parameters.AddWithValue("newArcaner", player.ArcaneResist);
+            SecondCmd.Parameters.AddWithValue("newFishing", player.Fishing);
             SecondCmd.Parameters.AddWithValue("newBaseStrength", player.DefaultStrength);
             SecondCmd.Parameters.AddWithValue("newBaseStamina", player.DefaultStamina);
             SecondCmd.Parameters.AddWithValue("newBaseAgility", player.DefaultAgility);
@@ -68,12 +68,12 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newBaseIntel", player.DefaultIntelligence);
             SecondCmd.Parameters.AddWithValue("newBaseCharisma", player.DefaultCharisma);
             //See above comments regarding hard set values
-            SecondCmd.Parameters.AddWithValue("newCurrentHP2", 1000);
-            SecondCmd.Parameters.AddWithValue("newBaseHP", 1000);
-            SecondCmd.Parameters.AddWithValue("newCurrentPower2", 500);
-            SecondCmd.Parameters.AddWithValue("newBasePower", 500);
-            SecondCmd.Parameters.AddWithValue("newHealot2", 20);
-            SecondCmd.Parameters.AddWithValue("newPowerot2", 10);
+            SecondCmd.Parameters.AddWithValue("newCurrentHP2", player.CurrentHP);
+            SecondCmd.Parameters.AddWithValue("newBaseHP", player.HPMax);
+            SecondCmd.Parameters.AddWithValue("newCurrentPower2", player.CurrentPower);
+            SecondCmd.Parameters.AddWithValue("newBasePower", player.PWRMax);
+            SecondCmd.Parameters.AddWithValue("newHealot2", player.HealthOverTime);
+            SecondCmd.Parameters.AddWithValue("newPowerot2", player.PowerOverTime);
             SecondCmd.Parameters.AddWithValue("playerFlags", playerFlags);
 
             //Execute parameterized statement entering it into the DB
@@ -147,6 +147,123 @@ namespace ReturnHome.Database.SQL
 
             }
             rdr.Close();
+
+            //Second SQL command and reader
+            using var SecondCmd = new MySqlCommand("GetActorGear", con);
+            SecondCmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
+
+            string actorName;
+
+            //Use second reader to iterate through character gear and assign to character attributes
+            while (SecondRdr.Read())
+            {
+                //Hold charactervalue so we have names to compare against 
+                actorName = SecondRdr.GetString(0);
+
+                //Iterate through characterData list finding charnames that exist
+                Actor thisActor = npcData.Find(i => Equals(i.CharName, actorName));
+
+                Item ThisItem = new Item(
+                  //Stacksleft
+                  SecondRdr.GetInt32(1),
+                  //RemainingHP
+                  SecondRdr.GetInt32(2),
+                  //Charges
+                  SecondRdr.GetInt32(3),
+                  //Equipment Location
+                  SecondRdr.GetInt32(4),
+                  //Location (Bank, self, auction etc)
+                  SecondRdr.GetByte(5),
+                  //Location in inventory
+                  SecondRdr.GetInt32(6),
+                  //ItemID
+                  SecondRdr.GetInt32(7),
+                  //Item cost 
+                  SecondRdr.GetInt32(8),
+                  //ItemIcon
+                  SecondRdr.GetInt32(9),
+                  //Itempattern equipslot
+                  SecondRdr.GetInt32(10),
+                  //Attack Type 
+                  SecondRdr.GetInt32(11),
+                  //WeaponDamage
+                  SecondRdr.GetInt32(12),
+                  //MaxHP of item 
+                  SecondRdr.GetInt32(13),
+                  //Tradeable?
+                  SecondRdr.GetInt32(14),
+                  //Rentable
+                  SecondRdr.GetInt32(15),
+                  //Craft Item
+                  SecondRdr.GetInt32(16),
+                  //Lore item 
+                  SecondRdr.GetInt32(17),
+                  //Level requirement 
+                  SecondRdr.GetInt32(18),
+                  //Max stack of item 
+                  SecondRdr.GetInt32(19),
+                  //ItemName
+                  SecondRdr.GetString(20),
+                  //Item Description
+                  SecondRdr.GetString(21),
+                  //Duration
+                  SecondRdr.GetInt32(22),
+                  //useable classes
+                  SecondRdr.GetInt32(23),
+                  //useable races
+                  SecondRdr.GetInt32(24),
+                  //Proc Animation
+                  SecondRdr.GetInt32(25),
+                  //Strength
+                  SecondRdr.GetInt32(26),
+                  //Stamina
+                  SecondRdr.GetInt32(27),
+                  //Agility
+                  SecondRdr.GetInt32(28),
+                  //Dexterity
+                  SecondRdr.GetInt32(29),
+                  //Wisdom
+                  SecondRdr.GetInt32(30),
+                  //Intelligence
+                  SecondRdr.GetInt32(31),
+                  //Charisma
+                  SecondRdr.GetInt32(32),
+                  //HPMax
+                  SecondRdr.GetInt32(33),
+                  //POWMax
+                  SecondRdr.GetInt32(34),
+                  //Powerot
+                  SecondRdr.GetInt32(35),
+                  //Healot
+                  SecondRdr.GetInt32(36),
+                  //Ac
+                  SecondRdr.GetInt32(37),
+                  //PR 
+                  SecondRdr.GetInt32(38),
+                  //DR 
+                  SecondRdr.GetInt32(39),
+                  //FR 
+                  SecondRdr.GetInt32(40),
+                  //CR 
+                  SecondRdr.GetInt32(41),
+                  //LR 
+                  SecondRdr.GetInt32(42),
+                  //AR 
+                  SecondRdr.GetInt32(43),
+                  //Model
+                  SecondRdr.GetInt32(44),
+                  //Color
+                  SecondRdr.GetUInt32(45));
+
+                //If this is 1, it needs to go to inventory
+                if (ThisItem.Location == 1)
+                {
+                    thisActor.Inventory.Add(ThisItem);
+                }
+            }
+
+            SecondRdr.Close();
             //return the list of actors from DB
             return npcData;
         }
@@ -941,6 +1058,13 @@ namespace ReturnHome.Database.SQL
             }
             rdr.Close();
 
+            Console.WriteLine("Trying to write flags");
+            charCreation.playerFlags = new Dictionary<string, bool>()
+            {
+                { "NewPlayerControls", true }
+            };
+            string serializedPlayerFlags = (string)Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
+            Console.WriteLine(serializedPlayerFlags);
             //Calculate Unused TP still available to character upon entering world.
             charCreation.UnusedTP = charCreation.UnusedTP - UsedTP;
 
@@ -1020,7 +1144,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("BasePower", 500);
             SecondCmd.Parameters.AddWithValue("Healot2", 20);
             SecondCmd.Parameters.AddWithValue("Powerot2", 10);
-
+            SecondCmd.Parameters.AddWithValue("playerFlags", serializedPlayerFlags);
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
             SecondCmd.ExecuteNonQuery();

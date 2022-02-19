@@ -9,12 +9,12 @@ namespace ReturnHome.Server.EntityObject.Player
     public class Item
     {
         //Should these be public? How would we handle adding stats to character overall stats without 100 methods?
-        public int StackLeft { get; private set; }
+        public int StackLeft { get; set; }
         public int RemainingHP { get; private set; }
         public int Charges { get; private set; }
         public int EquipLocation { get; private set; }
         public byte Location { get; private set; } //inventory, bank auction etc
-        public int InventoryNumber { get; private set; } //Location in inventory, would location in List suffice for this?
+        public int InventoryNumber { get; set; } //Location in inventory, would location in List suffice for this?
         public int ItemID { get; private set; }
         public int ItemCost { get; private set; }
         public int Unk1 { get; private set; }
@@ -156,8 +156,7 @@ namespace ReturnHome.Server.EntityObject.Player
             memStream.Write(Utility_Funcs.DoublePack(StackLeft));
             memStream.Write(Utility_Funcs.DoublePack(RemainingHP));
             memStream.Write(Utility_Funcs.DoublePack(Charges));
-            memStream.Write(Utility_Funcs.DoublePack(EquipLocation));
-            memStream.WriteByte(Location);
+            memStream.Write(Utility_Funcs.DoublePack(-1));
             memStream.Write(BitConverter.GetBytes(InventoryNumber));
             memStream.Write(Utility_Funcs.DoublePack(ItemID));
             memStream.Write(Utility_Funcs.DoublePack(ItemCost));
@@ -331,6 +330,7 @@ namespace ReturnHome.Server.EntityObject.Player
             memStream.Write(Utility_Funcs.DoublePack(Counter));
 
             memStream.Position = position2;
+            Counter = 0;
         }
     }
 }

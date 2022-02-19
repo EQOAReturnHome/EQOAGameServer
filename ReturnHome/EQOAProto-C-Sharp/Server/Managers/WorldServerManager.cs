@@ -9,6 +9,7 @@ using ReturnHome.Server.EntityObject;
 using QuadTrees;
 
 using ReturnHome.Server.Network.Managers;
+using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Managers
 {
@@ -37,6 +38,7 @@ namespace ReturnHome.Server.Managers
             {
                 EntityManager.AddEntity(myActor);
                 MapManager.AddObjectToTree(myActor);
+
             }
             Console.WriteLine("Done.");
 

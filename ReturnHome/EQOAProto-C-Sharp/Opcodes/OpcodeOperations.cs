@@ -40,6 +40,9 @@ namespace ReturnHome.Opcodes
             { GameOpcode.PlayerTunar, InteractActor },
             { GameOpcode.ConfirmBankTunar, InteractActor },
             { GameOpcode.BankItem, InteractActor },
+            { GameOpcode.DeleteQuest, DeleteQuest },
+            { GameOpcode.MerchantBuy, InteractActor },
+            { GameOpcode.MerchantSell, InteractActor },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -99,6 +102,17 @@ namespace ReturnHome.Opcodes
             MySession.MyCharacter.chatMode = ClientPacket.Data.Span[0];
         }
 
+        public static void DeleteQuest(Session mySession, PacketMessage clientPacket)
+        {
+            int offset = 0;
+            ReadOnlySpan<byte> Message = clientPacket.Data.Span;
+
+            byte unknownSection = Message.GetByte(ref offset);
+            byte questNumber = Message.GetByte(ref offset);
+
+            Character.DeleteQuest(mySession, questNumber);
+        }
+
         public static void AddInvItem(Session MySession, Item item)
         {
         }
@@ -129,10 +143,23 @@ namespace ReturnHome.Opcodes
 
             ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
 
+            //Merchant Buy
+            if (clientPacket.Header.Opcode == 74)
+            {
+                MySession.MyCharacter.MerchantBuy(MySession, clientPacket);
+            }
+
+            //Merchant Sell
+            if(clientPacket.Header.Opcode == 75)
+            {
+                MySession.MyCharacter.MerchantSell(MySession, clientPacket);
+
+            }
+
             //Merchant popup window
             if (clientPacket.Header.Opcode == 76)
             {
-                Console.WriteLine("Merchant Interaction");
+                MySession.MyCharacter.TriggerMerchant(MySession, clientPacket);
             }
 
 

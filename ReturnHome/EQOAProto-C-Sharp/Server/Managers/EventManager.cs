@@ -42,7 +42,12 @@ namespace ReturnHome.Server.Managers
             lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
             lua["SendDialogue"] = mySession.MyCharacter.SendDialogue;
             lua["TeleportPlayer"] = MapManager.TeleportPlayer;
+            lua["AddQuestLog"] = Character.AddQuestLog;
+            lua["DeleteQuestLog"] = Character.DeleteQuest;
+            lua["CheckQuestItem"] = Character.CheckQuestItem;
             lua["mySession"] = mySession;
+            lua["GenerateChatMessage"] = Opcodes.Chat.ChatMessage.GenerateClientSpecificChat;
+            lua["GrantXP"] = Character.GrantXP;
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);
             //switch to find correct lua function based on op code from NPC Interact 0x04

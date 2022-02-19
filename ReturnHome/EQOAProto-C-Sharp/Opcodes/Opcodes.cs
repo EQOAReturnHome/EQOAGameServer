@@ -48,12 +48,14 @@
         TargetInformation = 0x0761, //Target information for player/Actor
         OptionBox = 0x34, //52
         AddInvItem = 0x3B, //59
+        RemoveInvItem = 0x3C, //60
         AddQuestLog = 0x007C, //124
         PlayerTunar = 0x0052, //82
         ConfirmBankTunar = 0x1253, //4691
         BankItem = 0x1254, //4692
         DialogueBox = 0x46, //70
-
+        GrantXP = 0x0020, //32
+        MerchantBox = 0xB7, //183
         EquipItem = 0x3F,
         UnequipItem = 0x40,
 
@@ -72,6 +74,9 @@
         DepositBankTunar = 0x1255, //4693
         MerchantDiag = 0x4C, //76
         DialogueBoxOption = 0x35, //53
+        DeleteQuest = 0x7D, //125
+        MerchantBuy = 0x4A, //74
+        MerchantSell = 0x4B, //75
     }
 
     public static class GameVersions

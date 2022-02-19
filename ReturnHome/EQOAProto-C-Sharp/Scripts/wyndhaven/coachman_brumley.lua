@@ -1,24 +1,24 @@
-﻿-- coachman frender
+﻿-- coachman brumley
 
 local coaches = require('Scripts/ports')
 
 local playerCoaches = {
-   darvar_manor_coach = "Get me a horse to Darvar Manor.",
+   murnf_coach = "Get me a horse to Murnf.",
    qeynos_coach = "Get me a horse to Qeynos.",
-   wyndhaven_coach = "Get me a horse to Wyndhaven."
+   surefall_glade_coach = "Get me a horse to Surefall Glade."
 }
 
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
 SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "surefall_coach")) then
-      if (ch:find("Darvar")) then
-         TeleportPlayer(mySession,coaches.darvar_manor.world,coaches.darvar_manor.x,coaches.darvar_manor.y,coaches.darvar_manor.z,coaches.darvar_manor.facing)
+   if(GetPlayerFlags(mySession, "wyndhaven_coach")) then
+      if (ch:find("Murnf")) then
+         TeleportPlayer(mySession,coaches.murnf.world,coaches.murnf.x,coaches.murnf.y,coaches.murnf.z,coaches.murnf.facing)
       elseif (ch:find("Qeynos")) then
          TeleportPlayer(mySession,coaches.qeynos.world,coaches.qeynos.x,coaches.qeynos.y,coaches.qeynos.z,coaches.qeynos.facing)
-      elseif (ch:find("Wyndhaven")) then
-         TeleportPlayer(mySession,coaches.wyndhaven.world,coaches.wyndhaven.x,coaches.wyndhaven.y,coaches.wyndhaven.z,coaches.wyndhaven.facing)
+      elseif (ch:find("Surefall")) then
+         TeleportPlayer(mySession,coaches.surefall_glade.world,coaches.surefall_glade.x,coaches.surefall_glade.y,coaches.surefall_glade.z,coaches.surefall_glade.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
@@ -31,7 +31,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "surefall_coach", true)
+         SetPlayerFlags(mySession, "wyndhaven_coach", true)
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
