@@ -77,6 +77,7 @@
         DeleteQuest = 0x7D, //125
         MerchantBuy = 0x4A, //74
         MerchantSell = 0x4B, //75
+        ArrangeItem = 0x3D, //61
     }
 
     public static class GameVersions

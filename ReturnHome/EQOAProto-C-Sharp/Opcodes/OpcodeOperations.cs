@@ -43,6 +43,7 @@ namespace ReturnHome.Opcodes
             { GameOpcode.DeleteQuest, DeleteQuest },
             { GameOpcode.MerchantBuy, InteractActor },
             { GameOpcode.MerchantSell, InteractActor },
+            { GameOpcode.ArrangeItem, InteractActor },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -143,6 +144,11 @@ namespace ReturnHome.Opcodes
 
             ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
 
+            if (clientPacket.Header.Opcode == 61)
+            {
+                MySession.MyCharacter.ArrangeItem(MySession, clientPacket);
+            }
+
             //Merchant Buy
             if (clientPacket.Header.Opcode == 74)
             {
@@ -150,7 +156,7 @@ namespace ReturnHome.Opcodes
             }
 
             //Merchant Sell
-            if(clientPacket.Header.Opcode == 75)
+            if (clientPacket.Header.Opcode == 75)
             {
                 MySession.MyCharacter.MerchantSell(MySession, clientPacket);
 
@@ -200,7 +206,7 @@ namespace ReturnHome.Opcodes
             CharacterSQL savePlayerData = new();
 
             //Call the mysql update query to save player data
-            savePlayerData.SavePlayerData(MySession.MyCharacter,(string)Newtonsoft.Json.JsonConvert.SerializeObject(MySession.MyCharacter.playerFlags));
+            savePlayerData.SavePlayerData(MySession.MyCharacter, (string)Newtonsoft.Json.JsonConvert.SerializeObject(MySession.MyCharacter.playerFlags));
             //Actually drop the player's session
             MySession.DropSession();
         }

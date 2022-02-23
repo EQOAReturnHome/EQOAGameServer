@@ -3,6 +3,7 @@ function event_say()
    local diagOptions = {}
    local questText = ""
    local npcDialogue = ""
+   Print("In the function")
    SetPlayerFlags(mySession, "EasternMagician0", true)
    if
    (mySession.MyCharacter.Class == 10 and mySession.MyCharacter.Race == 0 and mySession.MyCharacter.HumTypeNum == 0 and

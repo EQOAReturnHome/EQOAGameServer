@@ -146,6 +146,33 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
+        //Rearranges item inventory for player
+        public void ArrangeItem(Session mySession, PacketMessage clientPacket)
+        {
+            //set offset
+            int offset = 0;
+            //Read the incoming message and get the slots to be swapped
+            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+            uint itemSlot1 = IncMessage.GetLEUInt(ref offset);
+            uint itemSlot2 = IncMessage.GetLEUInt(ref offset);
+
+            Console.WriteLine(itemSlot1);
+            Console.WriteLine(itemSlot2);
+
+            offset = 0;
+
+            //Define Memory span
+            Memory<byte> temp = new byte[4];
+            Span<byte> Message = temp.Span;
+            //Write arrangeop code back to memory span
+            Message.Write((ushort)GameOpcode.ArrangeItem, ref offset);
+            //send slot swap back to player to confirm
+            Message.Write((byte)itemSlot1, ref offset);
+            Message.Write((byte)itemSlot2, ref offset);
+            //Send arrange op code back to player
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
         //Message to trigger bank message in game
         public void TriggerBank(Session mySession, PacketMessage clientPacket)
         {
@@ -269,6 +296,19 @@ namespace ReturnHome.Server.EntityObject
                     newItem.StackLeft = itemQty;
                 }
 
+                if(mySession.MyCharacter.Inventory.Count == 0)
+                {
+                    newItem.InventoryNumber = 0;
+                }
+                else
+                {
+                    Console.WriteLine($"Current slot numbers total {mySession.MyCharacter.Inventory.Count}.");
+                    newItem.InventoryNumber = mySession.MyCharacter.Inventory.Count;
+                }
+
+                Console.WriteLine($"{newItem.ItemName} has a slot number of {newItem.InventoryNumber}.");
+
+
 
                 mySession.MyCharacter.Inventory.Add(newItem);
 
@@ -279,7 +319,6 @@ namespace ReturnHome.Server.EntityObject
                     memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddInvItem));
 
                     newItem.DumpItem(memStream);
-
                     long pos = memStream.Position;
                     buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
 
@@ -299,19 +338,34 @@ namespace ReturnHome.Server.EntityObject
             uint targetNPC = IncMessage.GetLEUInt(ref offset);
 
             Console.WriteLine(itemSlot);
-
+            Console.WriteLine(itemQty);
             //Define memory span for player
             Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
             Span<byte> Message = temp.Span;
 
-            foreach (Item i in mySession.MyCharacter.Inventory)
+            Console.WriteLine($"Selling {mySession.MyCharacter.Inventory[itemSlot].ItemName} from {mySession.MyCharacter.Inventory[itemSlot].InventoryNumber}.");
+
+
+            if (itemQty == mySession.MyCharacter.Inventory[itemSlot].StackLeft)
             {
-                Console.WriteLine(i.ItemName);
-                Console.WriteLine(i.InventoryNumber);
+                mySession.MyCharacter.Inventory.Remove(mySession.MyCharacter.Inventory[itemSlot]);
+            }
+            else if(itemQty <= mySession.MyCharacter.Inventory[itemSlot].StackLeft)
+            {
+                mySession.MyCharacter.Inventory[itemSlot].StackLeft -= itemQty;
             }
 
-            mySession.MyCharacter.Inventory.Remove(mySession.MyCharacter.Inventory[0]);
-            
+            foreach(Item i in mySession.MyCharacter.Inventory)
+            {
+                if(i.InventoryNumber > itemSlot)
+                {
+                    i.InventoryNumber--;
+                    Console.WriteLine("Decrementing Item Inventory Slot.");
+                    Console.WriteLine(i.ItemName);
+                    Console.WriteLine(i.InventoryNumber);
+                }
+            }
+
 
 
             offset = 0;
@@ -334,7 +388,7 @@ namespace ReturnHome.Server.EntityObject
             int offset = 0;
             //pull relevant bank information out of packet
             uint targetNPC = IncMessage.GetLEUInt(ref offset);
-            int unknownInt = 0;
+            int unknownInt = 200;
 
             Memory<byte> buffer;
 
@@ -609,6 +663,8 @@ namespace ReturnHome.Server.EntityObject
                 return false;
             }
         }
+
+
 
     }
 }
