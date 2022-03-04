@@ -157,7 +157,7 @@ namespace ReturnHome.Server.EntityObject.Player
             memStream.Write(Utility_Funcs.DoublePack(RemainingHP));
             memStream.Write(Utility_Funcs.DoublePack(Charges));
             memStream.Write(Utility_Funcs.DoublePack(EquipLocation));
-            memStream.WriteByte(Location);
+            memStream.Write(Utility_Funcs.DoublePack(Location));
             memStream.Write(BitConverter.GetBytes(InventoryNumber));
             memStream.Write(Utility_Funcs.DoublePack(ItemID));
             memStream.Write(Utility_Funcs.DoublePack(ItemCost));

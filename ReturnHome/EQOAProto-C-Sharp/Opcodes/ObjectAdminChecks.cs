@@ -16,9 +16,6 @@ namespace ReturnHome.Opcodes.Chat
                 if (c == null)
                     return false;
 
-                int offset = 0;
-                Memory<byte> temp;
-                Span<byte> thisMessage;
                 message = $"Found character: {c.CharName}";
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
 
@@ -181,8 +178,8 @@ namespace ReturnHome.Opcodes.Chat
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
-                    default: 
-                        break;
+                    default:
+                        return false;
                 }
 
                 return true;

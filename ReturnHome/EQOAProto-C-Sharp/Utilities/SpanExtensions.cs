@@ -340,11 +340,12 @@ namespace ReturnHome.Utilities
         ///</summary>
         public static uint Get7BitEncodedInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
-            int r = -7, v = 0;
+            int r = -7, v = 0, that = 0;
             do
             {
-                int that = (span[offset] & 0x7F) << (r += 7);
+                that = (span[offset] & 0x7F) << (r += 7);
                 v |= that;
+                that = 0;
             }
             while (span[offset++] >= 0x80);
             return (uint)v;
@@ -357,14 +358,9 @@ namespace ReturnHome.Utilities
         ///</summary>
         public static int Get7BitDoubleEncodedInt(this ref ReadOnlySpan<byte> span, ref int offset)
         {
-            int r = -7, v = 0;
-            do
-            {
-                int that = (span[offset] & 0x7F) << (r += 7);
-                v |= that;
-            }
-            while (span[offset++] >= 0x80);
-            return 0 == v % 2 ? v / 2 : ((v - 1) / 2) * -1;
+            int temp = (int)span.Get7BitEncodedInt(ref offset);
+
+            return 0 == temp % 2 ? temp / 2 : ((temp - 1) / 2) * -1;
         }
 
         #endregion

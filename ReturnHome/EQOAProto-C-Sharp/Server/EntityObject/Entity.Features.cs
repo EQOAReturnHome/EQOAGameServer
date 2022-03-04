@@ -184,7 +184,7 @@ namespace ReturnHome.Server.EntityObject
                 }
 
                 else
-                    Logger.Err($"Error setting Primary {_primary} foe {_charName}");
+                    Logger.Err($"Error setting Primary {value} for {_charName}");
             }
         }
 
@@ -200,7 +200,7 @@ namespace ReturnHome.Server.EntityObject
                 }
 
                 else
-                    Logger.Err($"Error setting Secondary {_secondary} for {_charName}");
+                    Logger.Err($"Error setting Secondary {value} for {_charName}");
             }
         }
 
@@ -216,7 +216,7 @@ namespace ReturnHome.Server.EntityObject
                 }
 
                 else
-                    Logger.Err($"Error setting Shield {_shield} for {_charName}");
+                    Logger.Err($"Error setting Shield {value} for {_charName}");
             }
         }
 
