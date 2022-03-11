@@ -5,21 +5,22 @@ namespace ReturnHome.Server.Network
 {
     public class ClientPacketMessage : PacketMessage
     {
-        public bool Unpack(ReadOnlyMemory<byte> buffer, ref int offset)
+        public bool Unpack(ref BufferReader reader, ReadOnlyMemory<byte> buffer)
         {
-            Header.Unpack(buffer, ref offset);
+            Header.Unpack(ref reader);
 
             //Check if message type is client update
             if (Header.messageType == (byte)MessageType.ClientUpdate)
             {
-                Data = Compression.Run_length_decode(buffer.Span, ref offset, Header.Size);
+                Data = Compression.Run_length_decode(reader.Buffer.Slice(reader.Position), Header.Size);
+                reader.Position = (reader.Length - 4);
                 return true;
             }
 
             else
             {
-                Data = buffer.Slice(offset, Header.Size);
-                offset += Header.Size;
+                Data = buffer.Slice(reader.Position, Header.Size);
+                reader.Position += Header.Size;
                 return true;
             }
         }

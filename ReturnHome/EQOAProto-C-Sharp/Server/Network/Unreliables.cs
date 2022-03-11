@@ -1,8 +1,11 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System;
 using System.Runtime.InteropServices;
 
 using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
+using ReturnHome.Server.EntityObject.Player;
+using System.Runtime.CompilerServices;
 using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.Network
@@ -43,41 +46,33 @@ namespace ReturnHome.Server.Network
                 CoordinateConversions.Xor_data(MyPacket, Mysession.rdpCommIn.connectionData.client.GetBaseClientArray(), message.Header.Size);
 
             Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
-            ReadOnlySpan<byte> ClientPacket = MyPacket.Span;
+            BufferReader reader = new(MyPacket.Span);
             int offset = 0;
 
-            Mysession.MyCharacter.World = ClientPacket[offset++];
+            Mysession.MyCharacter.World = reader.Read<byte>();
 
-            uint X = ClientPacket.GetLEUInt24(ref offset);
-            uint Y = ClientPacket.GetLEUInt24(ref offset);
-            uint Z = ClientPacket.GetLEUInt24(ref offset);
+            float x = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
+            float y = CoordinateConversions.ConvertYToFloat(reader.ReadUint24());
+            float z = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
 
-            float x = CoordinateConversions.ConvertXZToFloat(X);
-            float y = CoordinateConversions.ConvertYToFloat(Y);
-            float z = CoordinateConversions.ConvertXZToFloat(Z);
-
-            int velx = ClientPacket.GetBEUShort(ref offset);
-            int vely = ClientPacket.GetBEUShort(ref offset);
-            int velz = ClientPacket.GetBEUShort(ref offset);
-
-            float Velx = 15.3f * 2 * velx / 0xffff - 15.3f;
-            float Vely = 15.3f * 2 * vely / 0xffff - 15.3f;
-            float Velz = 15.3f * 2 * velz / 0xffff - 15.3f;
+            float Velx = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
+            float Vely = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
+            float Velz = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
 
             //Skip 6 bytes...
             offset += 6;
-            byte Facing = ClientPacket[offset++];
+            byte Facing = reader.Read<byte>();
             //offset++;
 
             byte Turning = 0;//ClientPacket[offset++];
 
             //Skip 12 bytes...
             offset += 12;
-            byte Animation = ClientPacket.GetByte(ref offset);
+            byte Animation = reader.Read<byte>();
 
             offset++;
 
-            uint Target = ClientPacket.GetLEUInt(ref offset);
+            uint Target = reader.Read<uint>();
 
             //Update Base array for client update object, then update character object
             Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);

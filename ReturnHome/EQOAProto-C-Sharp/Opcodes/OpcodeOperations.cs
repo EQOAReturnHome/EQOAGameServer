@@ -65,12 +65,14 @@ namespace ReturnHome.Opcodes
         {
             int offset = 0;
 
+            BufferReader reader = new(ClientPacket.Data.Span);
+
             //This could be useful later if real names are created per race/sex
             ///Get Race Byte
-            byte Race = ClientPacket.Data.Span[0];
+            byte Race = reader.Read<byte>();
 
             ///Make sure Message number is expected, needs to be in order.
-            byte sex = ClientPacket.Data.Span[1];
+            byte sex = reader.Read<byte>();
 
 
             string Name = RandomName.GenerateName();
@@ -90,7 +92,6 @@ namespace ReturnHome.Opcodes
         {
             if (MySession.unkOpcode)
             {
-                int offset = 0;
                 string message = $"Unknown Opcode: {opcode.ToString("X")}";
 
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
@@ -105,11 +106,10 @@ namespace ReturnHome.Opcodes
 
         public static void DeleteQuest(Session mySession, PacketMessage clientPacket)
         {
-            int offset = 0;
-            ReadOnlySpan<byte> Message = clientPacket.Data.Span;
+            BufferReader reader = new(clientPacket.Data.Span);
 
-            byte unknownSection = Message.GetByte(ref offset);
-            byte questNumber = Message.GetByte(ref offset);
+            byte unknownSection = reader.Read<byte>();
+            byte questNumber = reader.Read<byte>();
 
             Character.DeleteQuest(mySession, questNumber);
         }
@@ -120,11 +120,11 @@ namespace ReturnHome.Opcodes
 
         public static void PlayerTarget(Session mySession, PacketMessage clientPacket)
         {
-            //Offset is 4 because first 4 bytes is targeting counter
-            int offset = 4;
-            ReadOnlySpan<byte> Message = clientPacket.Data.Span;
+            BufferReader reader = new(clientPacket.Data.Span);
 
-            uint targetID = Message.GetLEUInt(ref offset);
+            //First 4 bytes is targeting counter, just discarding for now
+            _ = reader.Read<uint>();
+            uint targetID = reader.Read<uint>();
 
             mySession.MyCharacter.Target = targetID;
             mySession.TargetUpdate();
@@ -139,60 +139,59 @@ namespace ReturnHome.Opcodes
 
         public static void InteractActor(Session MySession, PacketMessage clientPacket)
         {
-            int offset = 0;
             Console.WriteLine(clientPacket.Header.Opcode);
 
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
+            BufferReader reader = new(clientPacket.Data.Span);
 
-            if (clientPacket.Header.Opcode == 61)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.ArrangeItem)
             {
-                MySession.MyCharacter.ArrangeItem(MySession, clientPacket);
+                MySession.MyCharacter.ArrangeItem(MySession, reader);
             }
 
             //Merchant Buy
-            if (clientPacket.Header.Opcode == 74)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantBuy)
             {
-                MySession.MyCharacter.MerchantBuy(MySession, clientPacket);
+                MySession.MyCharacter.MerchantBuy(MySession, reader);
             }
 
             //Merchant Sell
-            if (clientPacket.Header.Opcode == 75)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantSell)
             {
-                MySession.MyCharacter.MerchantSell(MySession, clientPacket);
+                MySession.MyCharacter.MerchantSell(MySession, reader);
 
             }
 
             //Merchant popup window
-            if (clientPacket.Header.Opcode == 76)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantDiag)
             {
-                MySession.MyCharacter.TriggerMerchant(MySession, clientPacket);
+                MySession.MyCharacter.TriggerMerchant(MySession, reader);
             }
 
 
             //Bank popup window
-            if (clientPacket.Header.Opcode == 4685)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankUI)
             {
-                MySession.MyCharacter.TriggerBank(MySession, clientPacket);
+                MySession.MyCharacter.TriggerBank(MySession, reader);
             }
 
             //Deposit and Withdraw Bank Tunar
-            if (clientPacket.Header.Opcode == 4693)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.DepositBankTunar)
             {
                 Console.WriteLine("In the bank tunar");
-                MySession.MyCharacter.BankTunar(MySession, clientPacket);
+                MySession.MyCharacter.BankTunar(MySession, reader);
             }
 
             //Deposit and Withdraw Bank item
-            if (clientPacket.Header.Opcode == 4692)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankItem)
             {
                 Console.WriteLine("In the Item op code");
-                MySession.MyCharacter.BankItem(MySession, clientPacket);
+                MySession.MyCharacter.BankItem(MySession, reader);
             }
 
             //Dialogue and Quest Interaction
-            if (clientPacket.Header.Opcode == 4 || clientPacket.Header.Opcode == 53)
+            if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact || clientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
             {
-                MySession.MyCharacter.ProcessDialogue(MySession, clientPacket);
+                MySession.MyCharacter.ProcessDialogue(MySession, reader, clientPacket);
             }
 
 
@@ -213,14 +212,14 @@ namespace ReturnHome.Opcodes
 
         public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
         {
-            int offset = 0;
-            ReadOnlySpan<byte> Message = ClientPacket.Data.Span;
+            BufferReader reader = new(ClientPacket.Data.Span);
+
             //Retrieve CharacterID from client
-            int ServerID = Message.GetLEInt(ref offset);
-            int FaceOption = Message.GetLEInt(ref offset);
-            int HairStyle = Message.GetLEInt(ref offset);
-            int HairLength = Message.GetLEInt(ref offset);
-            int HairColor = Message.GetLEInt(ref offset);
+            int ServerID = reader.Read<int>();
+            int FaceOption = reader.Read<int>();
+            int HairStyle = reader.Read<int>();
+            int HairLength = reader.Read<int>();
+            int HairColor = reader.Read<int>();
 
             CharacterSQL cSQL = new();
             //Query Character
@@ -368,11 +367,11 @@ namespace ReturnHome.Opcodes
 
         public static void ProcessDelChar(Session MySession, PacketMessage ClientPacket)
         {
-            int offset = 0;
             CharacterSQL deletedCharacter = new CharacterSQL();
-            ReadOnlySpan<byte> temp = ClientPacket.Data.Span;
+
+            BufferReader reader = new(ClientPacket.Data.Span);
             //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
-            int clientServID = temp.Get7BitDoubleEncodedInt(ref offset);
+            int clientServID = reader.Read<int>();
 
             //Call SQL delete method to actually process the delete.
             deletedCharacter.DeleteCharacter(clientServID, MySession);
@@ -386,13 +385,13 @@ namespace ReturnHome.Opcodes
         {
             int offset = 0;
             CharacterSQL createCharacter = new CharacterSQL();
-            ReadOnlySpan<byte> temp = ClientPacket.Data.Span;
+            BufferReader reader = new(ClientPacket.Data.Span);
 
             //Get length of characters name expected in packet
-            int nameLength = temp.GetLEInt(ref offset);
+            int nameLength = reader.Read<int>();
 
             //Get Character Name
-            string CharName = temp.GetString(ref offset, nameLength);
+            string CharName = reader.ReadString(Encoding.UTF8, nameLength);
 
             //Before processing a full character creation check if the characters name already exists in the DB.
             //Later this will need to include a character/world combination if additional servers are spun up.
@@ -420,27 +419,27 @@ namespace ReturnHome.Opcodes
 
                 charCreation.CharName = CharName;
                 //Get starting level
-                charCreation.Level = temp.Get7BitDoubleEncodedInt(ref offset);
+                charCreation.Level = (int)reader.Read7BitEncodedInt64();
 
                 //Divide startLevel by 2 because client doubles it
                 //Get single byte attributes
-                charCreation.Race = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.StartingClass = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.Gender = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.HairColor = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.HairLength = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.HairStyle = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.FaceOption = temp.Get7BitDoubleEncodedInt(ref offset);
-                charCreation.HumTypeNum = temp.Get7BitDoubleEncodedInt(ref offset);
+                charCreation.Race = (int)reader.Read7BitEncodedInt64();
+                charCreation.StartingClass = (int)reader.Read7BitEncodedInt64();
+                charCreation.Gender = (int)reader.Read7BitEncodedInt64();
+                charCreation.HairColor = (int)reader.Read7BitEncodedInt64();
+                charCreation.HairLength = (int)reader.Read7BitEncodedInt64();
+                charCreation.HairStyle = (int)reader.Read7BitEncodedInt64();
+                charCreation.FaceOption = (int)reader.Read7BitEncodedInt64();
+                charCreation.HumTypeNum = (int)reader.Read7BitEncodedInt64();
 
                 //Get player attributes from packet and remove bytes after reading into variable
-                charCreation.AddStrength = temp.GetLEInt(ref offset);
-                charCreation.AddStamina = temp.GetLEInt(ref offset);
-                charCreation.AddAgility = temp.GetLEInt(ref offset);
-                charCreation.AddDexterity = temp.GetLEInt(ref offset);
-                charCreation.AddWisdom = temp.GetLEInt(ref offset);
-                charCreation.AddIntelligence = temp.GetLEInt(ref offset);
-                charCreation.AddCharisma = temp.GetLEInt(ref offset);
+                charCreation.AddStrength = reader.Read<int>();
+                charCreation.AddStamina = reader.Read<int>();
+                charCreation.AddAgility = reader.Read<int>();
+                charCreation.AddDexterity = reader.Read<int>();
+                charCreation.AddWisdom = reader.Read<int>();
+                charCreation.AddIntelligence = reader.Read<int>();
+                charCreation.AddCharisma = reader.Read<int>();
 
                 //Call SQL method for character creation
                 createCharacter.CreateCharacter(MySession, charCreation);
@@ -454,10 +453,10 @@ namespace ReturnHome.Opcodes
         public static void ProcessGameDisc(Session MySession, PacketMessage ClientPacket)
         {
             int offset = 0;
-            ReadOnlySpan<byte> temp = ClientPacket.Data.Span;
+            BufferReader reader = new(ClientPacket.Data.Span);
 
             ///Gets Gameversion sent by client
-            int GameVersion = temp.GetLEInt(ref offset);
+            int GameVersion = reader.Read<int>();
 
             switch (GameVersion)
             {
@@ -478,7 +477,7 @@ namespace ReturnHome.Opcodes
                     Logger.Err("Unable to identify Game Disc");
                     break;
             }
-            offset = 0;
+
             Memory<byte> temp2 = new byte[6];
             Span<byte> Message = temp2.Span;
             ///Need to send this back to client
@@ -492,21 +491,17 @@ namespace ReturnHome.Opcodes
         ///Authentication check
         public static void ProcessAuthenticate(Session MySession, PacketMessage ClientPacket)
         {
-            int offset = 0;
-            ReadOnlySpan<byte> temp = ClientPacket.Data.Span;
+            BufferReader reader = new(ClientPacket.Data.Span);
 
             Logger.Info("Processing Authentication");
             ///Opcode option? just skip for now
-            offset += 1;
-
-            ///Unknown also, supposedly can be 03 00 00 00 or  01 00 00 00
-            offset += 4;
+            reader.Position = 5;
 
             ///Game Code Length
-            int GameCodeLength = temp.GetLEInt(ref offset);
+            int GameCodeLength = reader.Read<int>();
 
             ///the actual gamecode
-            string GameCode = temp.GetString(ref offset, GameCodeLength);
+            string GameCode = reader.ReadString(Encoding.UTF8, GameCodeLength);
 
             if (GameCode == "EQOA")
             {
@@ -514,18 +509,18 @@ namespace ReturnHome.Opcodes
                 Logger.Info("Received EQOA Game Code, continuing...");
 
                 ///Account name Length
-                int AccountNameLength = temp.GetLEInt(ref offset);
+                int AccountNameLength = reader.Read<int>();
 
                 ///the actual gamecode
-                string AccountName = temp.GetString(ref offset, AccountNameLength);
+                string AccountName = reader.ReadString(Encoding.UTF8, AccountNameLength);
 
                 Logger.Info($"Received Account Name: {AccountName}");
 
                 ///Username ends with 01, no known use, skip for now
-                offset += 1;
+                reader.Position += 1;
 
-                ReadOnlyMemory<byte> Password = ClientPacket.Data.Slice(offset, 16);
-                offset += 32;
+                ReadOnlyMemory<byte> Password = reader.ReadArray<byte>(16);
+                reader.Position += 16;
 
                 ///Uncomment once ready
                 //MySession.AccountID = 3;

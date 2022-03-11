@@ -28,35 +28,42 @@ namespace ReturnHome.Server.Network
 
         public Dictionary<byte, ushort> ChannelAcks;
 
-        public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
+        public void Unpack(ref BufferReader reader, ReadOnlyMemory<byte> buffer)
         {
-            ReadOnlySpan<byte> buffer = temp.Span;
-            ClientEndPoint = buffer.GetLEUShort(ref offset);
-            TargetEndPoint = buffer.GetLEUShort(ref offset);
+            ClientEndPoint = reader.Read<ushort>();
+            TargetEndPoint = reader.Read<ushort>();
 
             //Check if it is a transfer packet
             if (!(TargetEndPoint == 0xFFFF))
+            {
                 //Not Transfer packet, Validate CRC Checksum for packet
                 //Should probably do something if it fails here, so we don't waste cycles processing a broken packet
-                CRCChecksum = buffer.Slice((buffer.Length - 4), 4).SequenceEqual(CRC.calculateCRC(buffer.Slice(0, buffer.Length - 4)));
+                int temp = reader.Position;
+                reader.Position = reader.Length - 4;
+
+                CRCChecksum = reader.Read<uint>() == CRC.calculateCRC(reader.Buffer.Slice(0, reader.Length - 4));
+
+                //Put Position back to original
+                reader.Position = temp;
+            }
 
             else
                 //Eventually do transfers here some how
                 return;
 
-            HeaderData = buffer.Get7BitEncodedInt(ref offset);
+            HeaderData = (uint)reader.Read7BitEncodedUInt64();
             BundleSize = (ushort)(HeaderData & 0x7FF);
             headerFlags = (PacketHeaderFlags)(HeaderData - BundleSize);
 
             //Verify packet has instance in header
             if (HasHeaderFlag(PacketHeaderFlags.HasInstance))
-                InstanceID = buffer.GetLEUInt(ref offset);
+                InstanceID = reader.Read<uint>();
 
             if (HasHeaderFlag(PacketHeaderFlags.ResetConnection))
                 //SessionID is duplicated with resetconnection header, indicates to drop session
                 //What do we do if this... isn't the case?
                 //Chalk it up to invalid packet and drop?
-                if (InstanceID == buffer.GetLEUInt(ref offset))
+                if (InstanceID ==reader.Read<uint>())
                 {
                     CancelSession = true;
                     return;
@@ -64,7 +71,7 @@ namespace ReturnHome.Server.Network
 
             //if Client is "remote", means it is not "master" anymore and an additional pack value to read which ties into character instanceID
             if (HasHeaderFlag(PacketHeaderFlags.IsRemote))
-                SessionID = (uint)buffer.Get7BitDoubleEncodedInt(ref offset);
+                SessionID = (uint)reader.Read7BitEncodedInt64();
 
             else
                 SessionID = 0;
@@ -76,27 +83,27 @@ namespace ReturnHome.Server.Network
             //Else?????
 
             //Read Bundle Type, needs abit of a work around....
-            bundleFlags = (PacketBundleFlags)buffer.GetByte(ref offset);
+            bundleFlags = (PacketBundleFlags)reader.Read<byte>();
 
             if (HasBundleFlag(PacketBundleFlags.ProcessAck))
             {
-                SessionAckID = buffer.GetLEUInt(ref offset);
+                SessionAckID = reader.Read<uint>();
                 SessionAck = true;
             }
 
-            ClientBundleNumber = buffer.GetLEUShort(ref offset);
+            ClientBundleNumber = reader.Read<ushort>();
 
             if (HasBundleFlag(PacketBundleFlags.RDPReport))
             {
-                ClientBundleAck = buffer.GetLEUShort(ref offset);
-                ClientMessageAck = buffer.GetLEUShort(ref offset);
+                ClientBundleAck = reader.Read<ushort>();
+                ClientMessageAck = reader.Read<ushort>();
                 RDPReport = true;
             }
 
             if (HasBundleFlag(PacketBundleFlags.UnknownSingleByte))
             {
-                if(buffer.GetByte(ref offset) == 0xFF)
-                    _ = buffer.GetByte(ref offset);
+                if(reader.Read<byte>() == 0xFF)
+                    _ = reader.Read<byte>();
             }
 
             if (HasBundleFlag(PacketBundleFlags.ProcessUnreliableAcks))
@@ -106,10 +113,10 @@ namespace ReturnHome.Server.Network
                 ChannelAcks = new();
                 do
                 {
-                    chk = buffer.GetByte(ref offset);
+                    chk = reader.Read<byte>();
                     if ((chk >= 0 && chk <= 0x17) || (chk >= 0x40 && chk <= 0x43))
                     {
-                        msgNum = buffer.GetLEUShort(ref offset);
+                        msgNum = reader.Read<ushort>();
                         ChannelAcks.Add(chk, msgNum);
                     }
 

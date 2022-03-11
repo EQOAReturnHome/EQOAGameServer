@@ -382,9 +382,10 @@ namespace ReturnHome.Server.Network
 		{
             foreach( ReadOnlyMemory<byte> message in messageList)
             {
+                
                 /*This should be temporary for testing purposes... may need to be wrapped in some debugger option
                  *Let's verify each mnessage is the correct length, throw an exception if not
-                 **/
+                 *
                 ReadOnlySpan<byte> temp = message.Span;
                 int ExpectedMessageLength;
                 int ActualMessageLength = 0;
@@ -444,7 +445,7 @@ namespace ReturnHome.Server.Network
                 }
 
                 _ = ActualMessageLength != ExpectedMessageLength ? throw new Exception($"Message Length is {ActualMessageLength} and expected is {ExpectedMessageLength}") : true;
-
+                */
                 packet.Write(message, ref _offset);
             }
 		}

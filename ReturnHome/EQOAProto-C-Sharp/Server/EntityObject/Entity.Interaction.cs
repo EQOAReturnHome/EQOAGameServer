@@ -147,19 +147,16 @@ namespace ReturnHome.Server.EntityObject
         }
 
         //Rearranges item inventory for player
-        public void ArrangeItem(Session mySession, PacketMessage clientPacket)
+        public void ArrangeItem(Session mySession, BufferReader reader)
         {
             //set offset
             int offset = 0;
             //Read the incoming message and get the slots to be swapped
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-            uint itemSlot1 = IncMessage.GetLEUInt(ref offset);
-            uint itemSlot2 = IncMessage.GetLEUInt(ref offset);
+            uint itemSlot1 = reader.Read<uint>();
+            uint itemSlot2 = reader.Read<uint>();
 
             Console.WriteLine(itemSlot1);
             Console.WriteLine(itemSlot2);
-
-            offset = 0;
 
             //Define Memory span
             Memory<byte> temp = new byte[4];
@@ -174,7 +171,7 @@ namespace ReturnHome.Server.EntityObject
         }
 
         //Message to trigger bank message in game
-        public void TriggerBank(Session mySession, PacketMessage clientPacket)
+        public void TriggerBank(Session mySession, BufferReader reader)
         {
             //reset offset
             int offset = 0;
@@ -189,14 +186,11 @@ namespace ReturnHome.Server.EntityObject
             return;
         }
 
-        public void BankItem(Session mySession, PacketMessage clientPacket)
+        public void BankItem(Session mySession, BufferReader reader)
         {
-            int offset = 0;
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-
-            uint targetNPC = IncMessage.GetLEUInt(ref offset);
-            uint giveOrTake = IncMessage[offset++];
-            uint itemToTransfer = IncMessage.GetLEUInt(ref offset);
+            uint targetNPC = reader.Read<uint>();
+            uint giveOrTake = reader.Read<byte>();
+            uint itemToTransfer = reader.Read<uint>();
             Console.WriteLine(targetNPC);
             Console.WriteLine(giveOrTake);
             Console.WriteLine(itemToTransfer);
@@ -210,22 +204,17 @@ namespace ReturnHome.Server.EntityObject
             {
 
             }
-
-
-
         }
 
         //Method for withdrawing and depositing bank tunar
-        public void BankTunar(Session mySession, PacketMessage clientPacket)
+        public void BankTunar(Session mySession, BufferReader reader)
         {
-            //Create readonly span for the packet data
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
             //set fresh offset
             int offset = 0;
             //pull relevant bank information out of packet
-            uint targetNPC = IncMessage.GetLEUInt(ref offset);
-            uint giveOrTake = IncMessage.Get7BitEncodedInt(ref offset);
-            int transferAmount = IncMessage.Get7BitDoubleEncodedInt(ref offset);
+            uint targetNPC = reader.Read<uint>();
+            uint giveOrTake = (uint)reader.Read7BitEncodedUInt64();
+            int transferAmount = (int)reader.Read7BitEncodedInt64(); ;
             //Set int amounts of player tunar transfer
             int newPlayerAmt = 0;
             int newBankAmt = 0;
@@ -275,13 +264,11 @@ namespace ReturnHome.Server.EntityObject
             return;
         }
 
-        public void MerchantBuy(Session mySession, PacketMessage clientPacket)
+        public void MerchantBuy(Session mySession, BufferReader reader)
         {
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-            int offset = 0;
-            int itemSlot = IncMessage.Get7BitDoubleEncodedInt(ref offset);
-            int itemQty = IncMessage.Get7BitDoubleEncodedInt(ref offset);
-            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+            int itemSlot = (int)reader.Read7BitEncodedInt64();
+            int itemQty = (int)reader.Read7BitEncodedInt64();
+            uint targetNPC = reader.Read<uint>();
 
             Console.WriteLine(itemSlot);
             Console.WriteLine(itemQty);
@@ -308,8 +295,6 @@ namespace ReturnHome.Server.EntityObject
 
                 Console.WriteLine($"{newItem.ItemName} has a slot number of {newItem.InventoryNumber}.");
 
-
-
                 mySession.MyCharacter.Inventory.Add(newItem);
 
 
@@ -325,17 +310,14 @@ namespace ReturnHome.Server.EntityObject
                     SessionQueueMessages.PackMessage(mySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
-
         }
 
-        public void MerchantSell(Session mySession, PacketMessage clientPacket)
+        public void MerchantSell(Session mySession, BufferReader reader)
         {
-
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
             int offset = 0;
-            int itemSlot = IncMessage.GetLEInt(ref offset);
-            int itemQty = IncMessage.Get7BitDoubleEncodedInt(ref offset);
-            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+            int itemSlot = reader.Read<int>();
+            int itemQty = (int)reader.Read7BitEncodedInt64();
+            uint targetNPC = reader.Read<uint>();
 
             Console.WriteLine(itemSlot);
             Console.WriteLine(itemQty);
@@ -366,28 +348,18 @@ namespace ReturnHome.Server.EntityObject
                 }
             }
 
-
-
-            offset = 0;
-
             Message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
             Message.Write((byte)itemSlot, ref offset);
             Message.Write((byte)01, ref offset);
             Message.Write7BitDoubleEncodedInt(itemQty, ref offset);
 
             SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-
-
         }
 
-        public void TriggerMerchant(Session mySession, PacketMessage clientPacket)
+        public void TriggerMerchant(Session mySession, BufferReader reader)
         {
-            //Create readonly span for the packet data
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-            //set fresh offset
-            int offset = 0;
             //pull relevant bank information out of packet
-            uint targetNPC = IncMessage.GetLEUInt(ref offset);
+            uint targetNPC = reader.Read<uint>();
             int unknownInt = 200;
 
             Memory<byte> buffer;
@@ -490,26 +462,26 @@ namespace ReturnHome.Server.EntityObject
             mySession.MyCharacter.MyDialogue.choice = 1000;
         }
 
-        public void ProcessDialogue(Session mySession, PacketMessage clientPacket)
+        public void ProcessDialogue(Session mySession, BufferReader reader, PacketMessage ClientPacket)
         {
             //set offset
             int offset = 0;
             uint interactTarget = 0;
             //Read the incoming message and get the objectID that was interacted with
-            ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+
+            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
             {
-                interactTarget = IncMessage.GetLEUInt(ref offset);
+                interactTarget = reader.Read<uint>();
             }
             //if option choice incoming
-            if (clientPacket.Header.Opcode == 53)
+            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
             {
                 //try to pull the option counter and players choice out of message
                 try
                 {
                     offset = 0;
-                    uint optionCounter = IncMessage.GetLEUInt(ref offset);
-                    mySession.MyCharacter.MyDialogue.choice = IncMessage.GetByte(ref offset);
+                    uint optionCounter = reader.Read<uint>();
+                    mySession.MyCharacter.MyDialogue.choice = reader.Read<byte>();
                     //if diag message is 255(exit dialogue in client) return immediately without new message
                     //and set choice to incredibly high number to make sure it doesn't retrigger any specific dialogue.
                     if (mySession.MyCharacter.MyDialogue.choice == 255)
@@ -529,19 +501,19 @@ namespace ReturnHome.Server.EntityObject
             Dialogue dialogue = mySession.MyCharacter.MyDialogue;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if a diag option choice incoming set outgoing to diag box option
-            if (clientPacket.Header.Opcode == 53)
+            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
             {
                 dialogueType = GameOpcode.DialogueBoxOption;
             }
             //else this is just a regular interaction with only dialogue
-            else if (clientPacket.Header.Opcode == 4)
+            else if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
             {
                 dialogueType = GameOpcode.DialogueBox;
             }
             //Reset offset for outgoing message
             offset = 0;
             //Gets NPC name from ObjectID
-            if (clientPacket.Header.Opcode == 4)
+            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
             {
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
                 {
