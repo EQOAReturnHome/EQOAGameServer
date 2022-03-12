@@ -58,6 +58,7 @@
         MerchantBox = 0xB7, //183
         EquipItem = 0x3F,
         UnequipItem = 0x40,
+        InventoryFull = 0xD7,
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -78,6 +79,8 @@
         MerchantBuy = 0x4A, //74
         MerchantSell = 0x4B, //75
         ArrangeItem = 0x3D, //61
+        BlacksmithRepair = 0x0061,
+
     }
 
     public static class GameVersions

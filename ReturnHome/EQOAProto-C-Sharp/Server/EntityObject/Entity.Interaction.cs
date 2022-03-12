@@ -12,6 +12,7 @@ using ReturnHome.Utilities;
 using NLua;
 using ReturnHome.Opcodes.Chat;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -156,8 +157,21 @@ namespace ReturnHome.Server.EntityObject
             uint itemSlot1 = IncMessage.GetLEUInt(ref offset);
             uint itemSlot2 = IncMessage.GetLEUInt(ref offset);
 
-            Console.WriteLine(itemSlot1);
-            Console.WriteLine(itemSlot2);
+            Console.WriteLine($"Before Swap {itemSlot1}");
+            Console.WriteLine($"Before Swap {itemSlot2}");
+            Console.WriteLine(mySession.MyCharacter.Inventory[(int)itemSlot1].ItemName);
+            Console.WriteLine(mySession.MyCharacter.Inventory[(int)itemSlot2].ItemName);
+
+            Item tempObject = mySession.MyCharacter.Inventory[(int)itemSlot2];
+            mySession.MyCharacter.Inventory[(int)itemSlot2] = mySession.MyCharacter.Inventory[(int)itemSlot1];
+            mySession.MyCharacter.Inventory[(int)itemSlot1] = tempObject;
+
+            Console.WriteLine($"After Swap {itemSlot1}");
+            Console.WriteLine($"After Swap {itemSlot2}");
+
+            Console.WriteLine(mySession.MyCharacter.Inventory[(int)itemSlot1].ItemName);
+            Console.WriteLine(mySession.MyCharacter.Inventory[(int)itemSlot2].ItemName);
+
 
             offset = 0;
 
@@ -167,8 +181,8 @@ namespace ReturnHome.Server.EntityObject
             //Write arrangeop code back to memory span
             Message.Write((ushort)GameOpcode.ArrangeItem, ref offset);
             //send slot swap back to player to confirm
-            Message.Write((byte)itemSlot1, ref offset);
             Message.Write((byte)itemSlot2, ref offset);
+            Message.Write((byte)itemSlot1, ref offset);
             //Send arrange op code back to player
             SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
@@ -254,25 +268,9 @@ namespace ReturnHome.Server.EntityObject
                 //assign new value to players bank tunar
                 mySession.MyCharacter.BankTunar = newBankAmt;
             }
-
-            //Define memory span for player
-            Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
-            Span<byte> messagePlayer = playerTemp.Span;
-            //Define memory span for ban
-            Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
-            Span<byte> messageBank = bankTemp.Span;
-            //reset span offset and write player amount to Message
-            offset = 0;
-            messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-            messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
-            //resete span offset and write bank amount to message
-            offset = 0;
-            messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
-            messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
-            //send both messages to client 
-            SessionQueueMessages.PackMessage(mySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
-            SessionQueueMessages.PackMessage(mySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
-            return;
+            //send both messages to client
+            UpdatePlayerTunar(mySession, newPlayerAmt);
+            UpdateBankTunar(mySession, newBankAmt);
         }
 
         public void MerchantBuy(Session mySession, PacketMessage clientPacket)
@@ -290,32 +288,25 @@ namespace ReturnHome.Server.EntityObject
 
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
+                //Get item from slot in merchants inventory
                 Item newItem = npc.Inventory[itemSlot];
+                //If the purchased quantity is greater than 0, update the stack size for the new item.
                 if (itemQty > 0)
                 {
                     newItem.StackLeft = itemQty;
                 }
 
-                if(mySession.MyCharacter.Inventory.Count == 0)
-                {
-                    newItem.InventoryNumber = 0;
-                }
-                else
-                {
-                    Console.WriteLine($"Current slot numbers total {mySession.MyCharacter.Inventory.Count}.");
-                    newItem.InventoryNumber = mySession.MyCharacter.Inventory.Count;
-                }
+                newItem.InventoryNumber = mySession.MyCharacter.Inventory.Count();
 
                 Console.WriteLine($"{newItem.ItemName} has a slot number of {newItem.InventoryNumber}.");
 
-
-
+                //Remove tunar equivalent to items price * quantity and update player's tunar.
+                UpdatePlayerTunar(mySession, mySession.MyCharacter.Tunar -= ((int)newItem.ItemCost) * itemQty);
+                //Add item to players inventory
                 mySession.MyCharacter.Inventory.Add(newItem);
-
 
                 using (MemoryStream memStream = new())
                 {
-
                     memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddInvItem));
 
                     newItem.DumpItem(memStream);
@@ -325,7 +316,6 @@ namespace ReturnHome.Server.EntityObject
                     SessionQueueMessages.PackMessage(mySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
-
         }
 
         public void MerchantSell(Session mySession, PacketMessage clientPacket)
@@ -339,50 +329,92 @@ namespace ReturnHome.Server.EntityObject
 
             Console.WriteLine(itemSlot);
             Console.WriteLine(itemQty);
-            //Define memory span for player
-            Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
+
+            //Console.WriteLine(JsonConvert.SerializeObject(mySession.MyCharacter.Inventory[itemSlot]));
+
+            RemoveInventoryItem(mySession, itemSlot, itemQty);
+
+        }
+
+        public static void InteractBlacksmith(Session MySession, PacketMessage message)
+        {
+            int offset = 0;
+            Memory<byte> temp = new byte[6];
             Span<byte> Message = temp.Span;
 
-            Console.WriteLine($"Selling {mySession.MyCharacter.Inventory[itemSlot].ItemName} from {mySession.MyCharacter.Inventory[itemSlot].InventoryNumber}.");
+            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.BlacksmithRepair), ref offset);
+            Message.Write(1, ref offset);
+            //For now send a standard speed
+            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+        }
 
+        public void UpdatePlayerTunar(Session mySession, int tunarAmt)
+        {
+            //Define memory span for player
+            Memory<byte> tempPlayer = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(tunarAmt)];
+            Span<byte> messagePlayer = tempPlayer.Span;
+
+            int offset = 0;
+            messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
+            messagePlayer.Write7BitDoubleEncodedInt(tunarAmt, ref offset);
+
+            SessionQueueMessages.PackMessage(mySession, tempPlayer, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
+        public void UpdateBankTunar(Session mySession, int tunarAmt)
+        {
+            //Define memory span for ban
+            Memory<byte> tempBank = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(tunarAmt)];
+            Span<byte> messageBank = tempBank.Span;
+            //reset span offset and write player amount to Message
+
+            int offset = 0;
+            messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
+            messageBank.Write7BitDoubleEncodedInt(tunarAmt, ref offset);
+
+            SessionQueueMessages.PackMessage(mySession, tempBank, MessageOpcodeTypes.ShortReliableMessage);
+        }
+
+        public void RemoveInventoryItem(Session mySession, int itemSlot, int itemQty)
+        {
 
             if (itemQty == mySession.MyCharacter.Inventory[itemSlot].StackLeft)
             {
                 mySession.MyCharacter.Inventory.Remove(mySession.MyCharacter.Inventory[itemSlot]);
             }
-            else if(itemQty <= mySession.MyCharacter.Inventory[itemSlot].StackLeft)
+            else if (itemQty <= mySession.MyCharacter.Inventory[itemSlot].StackLeft)
             {
                 mySession.MyCharacter.Inventory[itemSlot].StackLeft -= itemQty;
             }
 
-            foreach(Item i in mySession.MyCharacter.Inventory)
-            {
-                if(i.InventoryNumber > itemSlot)
-                {
-                    i.InventoryNumber--;
-                    Console.WriteLine("Decrementing Item Inventory Slot.");
-                    Console.WriteLine(i.ItemName);
-                    Console.WriteLine(i.InventoryNumber);
-                }
-            }
+            int offset = 0;
 
-
-
-            offset = 0;
+            //Define memory span for player
+            Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
+            Span<byte> Message = temp.Span;
 
             Message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
             Message.Write((byte)itemSlot, ref offset);
             Message.Write((byte)01, ref offset);
             Message.Write7BitDoubleEncodedInt(itemQty, ref offset);
 
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            Memory<byte> tempInteract = new byte[4];
+            Span<byte> MessageInteract = tempInteract.Span;
 
+            offset = 0;
+
+            MessageInteract.Write((ushort)GameOpcode.InteractItem, ref offset);
+            MessageInteract.Write((byte)itemSlot, ref offset);
+            MessageInteract.Write((byte)00, ref offset);
+
+            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            //SessionQueueMessages.PackMessage(mySession, tempInteract, MessageOpcodeTypes.ShortReliableMessage);
 
         }
 
         public void TriggerMerchant(Session mySession, PacketMessage clientPacket)
         {
-            //Create readonly span for the packet data
+            ///Create readonly span for the packet data
             ReadOnlySpan<byte> IncMessage = clientPacket.Data.Span;
             //set fresh offset
             int offset = 0;
@@ -398,6 +430,7 @@ namespace ReturnHome.Server.EntityObject
 
                 using (MemoryStream memStream = new())
                 {
+                    //memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
                     memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
                     memStream.Write(BitConverter.GetBytes(targetNPC));
                     memStream.Write(Utility_Funcs.DoublePack(unknownInt));

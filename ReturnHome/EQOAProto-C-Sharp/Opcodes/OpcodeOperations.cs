@@ -178,14 +178,12 @@ namespace ReturnHome.Opcodes
             //Deposit and Withdraw Bank Tunar
             if (clientPacket.Header.Opcode == 4693)
             {
-                Console.WriteLine("In the bank tunar");
                 MySession.MyCharacter.BankTunar(MySession, clientPacket);
             }
 
             //Deposit and Withdraw Bank item
             if (clientPacket.Header.Opcode == 4692)
             {
-                Console.WriteLine("In the Item op code");
                 MySession.MyCharacter.BankItem(MySession, clientPacket);
             }
 
