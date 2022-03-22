@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -9,12 +10,13 @@ using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Player
 {  
-    public class Character : Entity
+    public partial class Character : Entity
     {
         private static string Tunaria = "data\\tunaria.esf";
 
         //Our Lists for attributes of character
-        public List<Item> BankItems = new List<Item> { };
+        public ItemContainer Bank;
+        public ItemContainer Inventory;
         public List<Item> AuctionItems = new List<Item> { };
         public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
         public List<Hotkey> MyHotkeys = new List<Hotkey> { };
@@ -40,14 +42,13 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public int MaxAssignableTP;
         public int UnusedTP;
-        public int Tunar;
-        public int BankTunar;
 
         public int Teleportcounter { get; internal set; }
 
         public Character() : base(true)
         {
-
+            Inventory = new(0);
+            Bank = new(0, false);
         }
 
         //Need instantiation, but needs some review because it's so big... 
@@ -73,8 +74,8 @@ namespace ReturnHome.Server.EntityObject.Player
             TotalXPEarned = totalXP;
             totalDebt = debt;
             Breath = breath;
-            Tunar = tunar;
-            BankTunar = bankTunar;
+            Inventory = new(tunar);
+            Bank = new(bankTunar, false);
             UnusedTP = unusedTP;
             MaxAssignableTP = totalAssignableTP;
             World = world;
@@ -145,8 +146,8 @@ namespace ReturnHome.Server.EntityObject.Player
             memStream.Write(Utility_Funcs.DoublePack(TotalXPEarned));
             memStream.Write(Utility_Funcs.DoublePack(totalDebt));
             memStream.WriteByte((byte)Breath);
-            memStream.Write(Utility_Funcs.DoublePack(Tunar));
-            memStream.Write(Utility_Funcs.DoublePack(BankTunar));
+            memStream.Write(Utility_Funcs.DoublePack(Inventory.Tunar));
+            memStream.Write(Utility_Funcs.DoublePack(Bank.Tunar));
             memStream.Write(Utility_Funcs.DoublePack(UnusedTP));
             memStream.Write(Utility_Funcs.DoublePack(MaxAssignableTP));
             memStream.Write(Utility_Funcs.DoublePack(World));

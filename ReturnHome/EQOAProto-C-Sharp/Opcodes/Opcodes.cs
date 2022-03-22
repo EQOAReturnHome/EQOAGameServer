@@ -30,6 +30,8 @@
         //Server/Client shared opcodes
         DiscVersion = 0x00, //0
         RandomName = 0x12, //18
+        RemoveInvItem = 0x3C, //60
+        ArrangeItem = 0x3D, //61
 
         //Server Only Opcodes
         CharacterSelect = 0x2C, ///44
@@ -48,7 +50,6 @@
         TargetInformation = 0x0761, //Target information for player/Actor
         OptionBox = 0x34, //52
         AddInvItem = 0x3B, //59
-        RemoveInvItem = 0x3C, //60
         AddQuestLog = 0x007C, //124
         PlayerTunar = 0x0052, //82
         ConfirmBankTunar = 0x1253, //4691
@@ -58,6 +59,8 @@
         MerchantBox = 0xB7, //183
         EquipItem = 0x3F,
         UnequipItem = 0x40,
+        RemoveBankItem = 0x1250,
+        AddBankItem  = 0x1251,
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -77,7 +80,6 @@
         DeleteQuest = 0x7D, //125
         MerchantBuy = 0x4A, //74
         MerchantSell = 0x4B, //75
-        ArrangeItem = 0x3D, //61
     }
 
     public static class GameVersions

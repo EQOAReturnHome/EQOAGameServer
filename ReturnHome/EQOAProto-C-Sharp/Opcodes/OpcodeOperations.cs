@@ -44,6 +44,7 @@ namespace ReturnHome.Opcodes
             { GameOpcode.MerchantBuy, InteractActor },
             { GameOpcode.MerchantSell, InteractActor },
             { GameOpcode.ArrangeItem, InteractActor },
+            { GameOpcode.RemoveInvItem, DeleteItem },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -145,47 +146,68 @@ namespace ReturnHome.Opcodes
 
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.ArrangeItem)
             {
-                MySession.MyCharacter.ArrangeItem(MySession, reader);
+                byte itemSlot1 = (byte)reader.Read<uint>();
+                byte itemSlot2 = (byte)reader.Read<uint>();
+                MySession.MyCharacter.ArrangeItem(itemSlot1, itemSlot2);
             }
 
             //Merchant Buy
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantBuy)
             {
-                MySession.MyCharacter.MerchantBuy(MySession, reader);
+                byte itemSlot = (byte)reader.Read7BitEncodedInt64();
+                int itemQty = (int)reader.Read7BitEncodedInt64();
+                uint targetNPC = reader.Read<uint>();
+                MySession.MyCharacter.MerchantBuy(itemSlot, itemQty, targetNPC);
             }
 
             //Merchant Sell
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantSell)
             {
-                MySession.MyCharacter.MerchantSell(MySession, reader);
+                byte itemSlot = (byte)reader.Read<int>();
+                int itemQty = (int)reader.Read7BitEncodedInt64();
+                uint targetNPC = reader.Read<uint>();
+                //We just need to verify the player is talking to a merchant and within range here, just let it work for now
+                MySession.MyCharacter.SellItem(itemSlot, itemQty, targetNPC);
 
             }
 
             //Merchant popup window
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantDiag)
             {
-                MySession.MyCharacter.TriggerMerchant(MySession, reader);
+                uint targetNPC = reader.Read<uint>();
+                MySession.MyCharacter.TriggerMerchant(targetNPC);
             }
 
 
             //Bank popup window
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankUI)
             {
-                MySession.MyCharacter.TriggerBank(MySession, reader);
+                int offset = 0;
+                Memory<byte> temp = new byte[2];
+                Span<byte> Message = temp.Span;
+                Message.Write((ushort)GameOpcode.BankUI, ref offset);
+                SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
             }
 
             //Deposit and Withdraw Bank Tunar
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.DepositBankTunar)
             {
+                uint targetNPC = reader.Read<uint>();
+                uint giveOrTake = (uint)reader.Read7BitEncodedUInt64();
+                int transferAmount = (int)reader.Read7BitEncodedInt64();
                 Console.WriteLine("In the bank tunar");
-                MySession.MyCharacter.BankTunar(MySession, reader);
+                MySession.MyCharacter.BankTunar(targetNPC, giveOrTake, transferAmount);
             }
 
             //Deposit and Withdraw Bank item
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankItem)
             {
+                uint targetNPC = reader.Read<uint>();
+                byte giveOrTake = reader.Read<byte>();
+                byte itemToTransfer = (byte)reader.Read<uint>();
+                int qtyToTransfer = (int)reader.Read7BitEncodedInt64();
                 Console.WriteLine("In the Item op code");
-                MySession.MyCharacter.BankItem(MySession, reader);
+                MySession.MyCharacter.TransferItem(giveOrTake, itemToTransfer, qtyToTransfer);
             }
 
             //Dialogue and Quest Interaction
@@ -193,9 +215,16 @@ namespace ReturnHome.Opcodes
             {
                 MySession.MyCharacter.ProcessDialogue(MySession, reader, clientPacket);
             }
+        }
 
+        public static void DeleteItem(Session MySession, PacketMessage ClientPacket)
+        {
+            BufferReader reader = new(ClientPacket.Data.Span);
 
+            byte itemToDestroy = (byte)reader.Read<uint>();
+            int quantityToDestroy = (int)reader.Read<uint>();
 
+            MySession.MyCharacter.DestroyItem(itemToDestroy, quantityToDestroy);
         }
 
         public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
@@ -280,13 +309,13 @@ namespace ReturnHome.Opcodes
                 memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.Inventory.Count));
                 memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.Inventory.Count));
 
-                foreach (Item i in MySession.MyCharacter.Inventory)
+                foreach (KeyValuePair<byte, Item> entry in MySession.MyCharacter.Inventory.itemContainer)
                 {
-                    i.DumpItem(memStream);
+                    entry.Value.DumpItem(memStream);
                 }
 
                 //While we are here, lets "equip" our equipped gear
-                MySession.MyCharacter.EquipGear();
+                MySession.MyCharacter.EquipGear(MySession.MyCharacter);
 
                 foreach (WeaponHotbar wb in MySession.MyCharacter.WeaponHotbars)
                 {
@@ -294,11 +323,11 @@ namespace ReturnHome.Opcodes
                 }
 
                 //Get Bank Item count
-                memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.BankItems.Count));
-                memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.BankItems.Count));
-                foreach (Item bi in MySession.MyCharacter.BankItems)
+                memStream.Write(Utility_Funcs.DoublePack(MySession.MyCharacter.Bank.Count));
+                memStream.Write(BitConverter.GetBytes(MySession.MyCharacter.Bank.Count));
+                foreach (KeyValuePair<byte, Item> entry in MySession.MyCharacter.Bank.itemContainer)
                 {
-                    bi.DumpItem(memStream);
+                    entry.Value.DumpItem(memStream);
                 }
 
                 // end of bank? or could be something else for memory dump
@@ -619,7 +648,7 @@ namespace ReturnHome.Opcodes
                 Message.Write7BitDoubleEncodedInt(character.FaceOption, ref offset);
 
                 //Equip Gear
-                character.EquipGear();
+                character.EquipGear(character);
 
                 ///Add Robe
                 Message.Write(BitConverter.GetBytes(character.Robe), ref offset);

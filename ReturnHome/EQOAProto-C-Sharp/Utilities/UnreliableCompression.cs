@@ -55,9 +55,9 @@ namespace ReturnHome.Utilities
         }
 
         //Pass in Unreliable message and expected unreliable length
-        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, ref int offset, int length)
+        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, int length)
         {
-
+            int offset = 0;
             byte[] messageBuf = new byte[length];
 
             fixed (byte* tempBuf = &MemoryMarshal.GetReference(arg1))

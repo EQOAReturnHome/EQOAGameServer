@@ -1,12 +1,12 @@
 using System;
 using System.Numerics;
 
-namespace ReturnHome.Server.EntityObject.Actor
+namespace ReturnHome.Server.EntityObject.Actors
 {
   public class Actor : Entity
   {
         public long killtime = 0;
-
+        public ItemContainer Inventory;
         public Actor() : base(false)
         {
 
@@ -16,6 +16,7 @@ namespace ReturnHome.Server.EntityObject.Actor
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
             int gloves, int legs, int feet, int head, uint npcType) : base(false)
         {
+
             CharName = charName;
             x = xCoord;
             y = yCoord;
@@ -43,6 +44,9 @@ namespace ReturnHome.Server.EntityObject.Actor
             HPMax = 500;
             Target = 0xFFFFFFFF;
             NPCType = (ushort)npcType;
+
+            //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
+            Inventory = new(3000);
         }
   }
 }

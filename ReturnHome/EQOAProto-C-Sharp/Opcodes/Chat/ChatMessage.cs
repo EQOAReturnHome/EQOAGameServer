@@ -84,7 +84,18 @@ namespace ReturnHome.Opcodes.Chat
                 }
             }
 
-            if(message[0..2] == "!oid"){
+            if(message[0..2] == "!a")
+            {
+                MySession.MyCharacter.ArrangeItem(0, 1);
+            }
+
+            if (message[0..2] == "!d")
+            {
+                MySession.MyCharacter.DestroyItem(0, 1);
+            }
+
+            if (message[0..2] == "!oid")
+            {
                 MySession.TargetUpdate();
             }
 

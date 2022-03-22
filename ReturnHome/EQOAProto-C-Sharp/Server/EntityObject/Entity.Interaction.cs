@@ -12,6 +12,7 @@ using ReturnHome.Utilities;
 using NLua;
 using ReturnHome.Opcodes.Chat;
 using System.IO;
+using ReturnHome.Server.EntityObject.Actors;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -21,6 +22,7 @@ namespace ReturnHome.Server.EntityObject
         private uint _target;
         private uint _targetCounter = 1;
         private Entity _ourTarget;
+        public byte index = 0;
 
         public uint Target
         {
@@ -146,51 +148,8 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        //Rearranges item inventory for player
-        public void ArrangeItem(Session mySession, BufferReader reader)
+        public void BankItem(uint targetNPC, byte giveOrTake, uint itemToTransfer)
         {
-            //set offset
-            int offset = 0;
-            //Read the incoming message and get the slots to be swapped
-            uint itemSlot1 = reader.Read<uint>();
-            uint itemSlot2 = reader.Read<uint>();
-
-            Console.WriteLine(itemSlot1);
-            Console.WriteLine(itemSlot2);
-
-            //Define Memory span
-            Memory<byte> temp = new byte[4];
-            Span<byte> Message = temp.Span;
-            //Write arrangeop code back to memory span
-            Message.Write((ushort)GameOpcode.ArrangeItem, ref offset);
-            //send slot swap back to player to confirm
-            Message.Write((byte)itemSlot1, ref offset);
-            Message.Write((byte)itemSlot2, ref offset);
-            //Send arrange op code back to player
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-        }
-
-        //Message to trigger bank message in game
-        public void TriggerBank(Session mySession, BufferReader reader)
-        {
-            //reset offset
-            int offset = 0;
-            //Define Memory span
-            Memory<byte> temp = new byte[2];
-            Span<byte> Message = temp.Span;
-            //Write bank op code back to memory span
-            Message.Write((ushort)GameOpcode.BankUI, ref offset);
-            //Send bank op code back to player
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-            //Exit method early without processing any other conditions
-            return;
-        }
-
-        public void BankItem(Session mySession, BufferReader reader)
-        {
-            uint targetNPC = reader.Read<uint>();
-            uint giveOrTake = reader.Read<byte>();
-            uint itemToTransfer = reader.Read<uint>();
             Console.WriteLine(targetNPC);
             Console.WriteLine(giveOrTake);
             Console.WriteLine(itemToTransfer);
@@ -200,76 +159,17 @@ namespace ReturnHome.Server.EntityObject
             {
 
             }
+
             else if (giveOrTake == 1)
             {
 
             }
         }
 
-        //Method for withdrawing and depositing bank tunar
-        public void BankTunar(Session mySession, BufferReader reader)
+        //This is wrong... We are just referencing the npc item's state to a character here where the state will be shared to all users
+        //Need to some how make a new copy of it, not sure the easiest way to do that
+        public void MerchantBuy(byte itemSlot, int itemQty, uint targetNPC)
         {
-            //set fresh offset
-            int offset = 0;
-            //pull relevant bank information out of packet
-            uint targetNPC = reader.Read<uint>();
-            uint giveOrTake = (uint)reader.Read7BitEncodedUInt64();
-            int transferAmount = (int)reader.Read7BitEncodedInt64(); ;
-            //Set int amounts of player tunar transfer
-            int newPlayerAmt = 0;
-            int newBankAmt = 0;
-
-            //deposit transaction
-            if (giveOrTake == 0)
-            {
-                //set the new player amount to the current player tunar minus transfer
-                newPlayerAmt = mySession.MyCharacter.Tunar - transferAmount;
-                //assign new value to player tunar
-                mySession.MyCharacter.Tunar = newPlayerAmt;
-                //Do the opposite of the above to transfer into bank
-                newBankAmt = mySession.MyCharacter.BankTunar + transferAmount;
-                //assign new value to players bank tunar
-                mySession.MyCharacter.BankTunar = newBankAmt;
-            }
-            //withdraw transaction
-            else if (giveOrTake == 1)
-            {
-                //set the new payer amount to the currently player tunar plus transfer
-                newPlayerAmt = mySession.MyCharacter.Tunar + transferAmount;
-                //assign new value to player tunar
-                mySession.MyCharacter.Tunar = newPlayerAmt;
-                //do the oppsoite of the above to transfer to player
-                newBankAmt = mySession.MyCharacter.BankTunar - transferAmount;
-                //assign new value to players bank tunar
-                mySession.MyCharacter.BankTunar = newBankAmt;
-            }
-
-            //Define memory span for player
-            Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newPlayerAmt)];
-            Span<byte> messagePlayer = playerTemp.Span;
-            //Define memory span for ban
-            Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(newBankAmt)];
-            Span<byte> messageBank = bankTemp.Span;
-            //reset span offset and write player amount to Message
-            offset = 0;
-            messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-            messagePlayer.Write7BitDoubleEncodedInt(newPlayerAmt, ref offset);
-            //resete span offset and write bank amount to message
-            offset = 0;
-            messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
-            messageBank.Write7BitDoubleEncodedInt(newBankAmt, ref offset);
-            //send both messages to client 
-            SessionQueueMessages.PackMessage(mySession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
-            SessionQueueMessages.PackMessage(mySession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
-            return;
-        }
-
-        public void MerchantBuy(Session mySession, BufferReader reader)
-        {
-            int itemSlot = (int)reader.Read7BitEncodedInt64();
-            int itemQty = (int)reader.Read7BitEncodedInt64();
-            uint targetNPC = reader.Read<uint>();
-
             Console.WriteLine(itemSlot);
             Console.WriteLine(itemQty);
 
@@ -277,26 +177,18 @@ namespace ReturnHome.Server.EntityObject
 
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
-                Item newItem = npc.Inventory[itemSlot];
+                Console.WriteLine($"Buying from {npc.CharName}");
+                ((Actor)npc).Inventory.RetrieveItem(itemSlot, out Item newItem);
                 if (itemQty > 0)
                 {
                     newItem.StackLeft = itemQty;
                 }
 
-                if(mySession.MyCharacter.Inventory.Count == 0)
-                {
-                    newItem.InventoryNumber = 0;
-                }
-                else
-                {
-                    Console.WriteLine($"Current slot numbers total {mySession.MyCharacter.Inventory.Count}.");
-                    newItem.InventoryNumber = mySession.MyCharacter.Inventory.Count;
-                }
+                newItem.ServerKey = 0;
 
-                Console.WriteLine($"{newItem.ItemName} has a slot number of {newItem.InventoryNumber}.");
+                Console.WriteLine($"{newItem.ItemName} has a slot number of {newItem.ServerKey}.");
 
-                mySession.MyCharacter.Inventory.Add(newItem);
-
+                ((Character)this).Inventory.AddItem(newItem);
 
                 using (MemoryStream memStream = new())
                 {
@@ -307,59 +199,13 @@ namespace ReturnHome.Server.EntityObject
                     long pos = memStream.Position;
                     buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
 
-                    SessionQueueMessages.PackMessage(mySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
+                    SessionQueueMessages.PackMessage(((Character)this).characterSession, buffer, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
         }
 
-        public void MerchantSell(Session mySession, BufferReader reader)
+        public void TriggerMerchant(uint targetNPC)
         {
-            int offset = 0;
-            int itemSlot = reader.Read<int>();
-            int itemQty = (int)reader.Read7BitEncodedInt64();
-            uint targetNPC = reader.Read<uint>();
-
-            Console.WriteLine(itemSlot);
-            Console.WriteLine(itemQty);
-            //Define memory span for player
-            Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
-            Span<byte> Message = temp.Span;
-
-            Console.WriteLine($"Selling {mySession.MyCharacter.Inventory[itemSlot].ItemName} from {mySession.MyCharacter.Inventory[itemSlot].InventoryNumber}.");
-
-
-            if (itemQty == mySession.MyCharacter.Inventory[itemSlot].StackLeft)
-            {
-                mySession.MyCharacter.Inventory.Remove(mySession.MyCharacter.Inventory[itemSlot]);
-            }
-            else if(itemQty <= mySession.MyCharacter.Inventory[itemSlot].StackLeft)
-            {
-                mySession.MyCharacter.Inventory[itemSlot].StackLeft -= itemQty;
-            }
-
-            foreach(Item i in mySession.MyCharacter.Inventory)
-            {
-                if(i.InventoryNumber > itemSlot)
-                {
-                    i.InventoryNumber--;
-                    Console.WriteLine("Decrementing Item Inventory Slot.");
-                    Console.WriteLine(i.ItemName);
-                    Console.WriteLine(i.InventoryNumber);
-                }
-            }
-
-            Message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
-            Message.Write((byte)itemSlot, ref offset);
-            Message.Write((byte)01, ref offset);
-            Message.Write7BitDoubleEncodedInt(itemQty, ref offset);
-
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-        }
-
-        public void TriggerMerchant(Session mySession, BufferReader reader)
-        {
-            //pull relevant bank information out of packet
-            uint targetNPC = reader.Read<uint>();
             int unknownInt = 200;
 
             Memory<byte> buffer;
@@ -374,17 +220,15 @@ namespace ReturnHome.Server.EntityObject
                     memStream.Write(BitConverter.GetBytes(targetNPC));
                     memStream.Write(Utility_Funcs.DoublePack(unknownInt));
                     memStream.Write(Utility_Funcs.DoublePack(unknownInt));
-                    memStream.Write(Utility_Funcs.DoublePack(merchantNPC.Inventory.Count));
-                    memStream.Write(BitConverter.GetBytes(merchantNPC.Inventory.Count));
-                    foreach (Item bi in merchantNPC.Inventory)
-                    {
-                        bi.DumpItem(memStream);
-                    }
+                    memStream.Write(Utility_Funcs.DoublePack(((Actor)merchantNPC).Inventory.Count));
+                    memStream.Write(BitConverter.GetBytes(((Actor)merchantNPC).Inventory.Count));
+                    foreach (Item entry in ((Actor)merchantNPC).Inventory.itemContainer.Values)
+                        entry.DumpItem(memStream);
 
                     long pos = memStream.Position;
                     buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
 
-                    SessionQueueMessages.PackMessage(mySession, buffer, MessageOpcodeTypes.ShortReliableMessage);
+                    SessionQueueMessages.PackMessage(((Character)this).characterSession, buffer, MessageOpcodeTypes.ShortReliableMessage);
                     memStream.Flush();
                 }
             }
@@ -626,7 +470,7 @@ namespace ReturnHome.Server.EntityObject
 
         public static bool CheckQuestItem(Session mySession, int itemID, int itemQty)
         {
-            if (mySession.MyCharacter.Inventory.Any(p => p.ItemID == itemID && p.StackLeft >= itemQty))
+            if (mySession.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID && p.Value.StackLeft >= itemQty))
             {
                 return true;
             }

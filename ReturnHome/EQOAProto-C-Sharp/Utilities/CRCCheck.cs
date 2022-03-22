@@ -11,7 +11,7 @@ namespace ReturnHome.Utilities
          * @param value The incoming bytes we need to calculate a CRC for.
          * @return The final CRC value. Needs to be appended or sent last in the out stream write.
          */
-        public static byte[] calculateCRC(ReadOnlySpan<byte> value)
+        public static uint calculateCRC(ReadOnlySpan<byte> value)
         {
             uint crcValue = 0xffffffff;
 
@@ -21,14 +21,9 @@ namespace ReturnHome.Utilities
             }
 
             crcValue ^= 0x11f19ed3; // Toggle operation
-            byte[] result = new byte[4];
 
-            result[3] = (byte)(crcValue >> 24);
-            result[2] = (byte)(crcValue >> 16);
-            result[1] = (byte)(crcValue >> 8);
-            result[0] = (byte)(crcValue);
 
-            return result;
+            return crcValue;
         }
 
         private static uint[] crcTable = new uint[]{

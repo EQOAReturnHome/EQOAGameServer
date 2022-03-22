@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
@@ -184,7 +186,7 @@ namespace ReturnHome.Server.EntityObject
                 }
 
                 else
-                    Logger.Err($"Error setting Primary {_primary} foe {_charName}");
+                    Logger.Err($"Error setting Primary {_primary} for {_charName}");
             }
         }
 
@@ -420,10 +422,10 @@ namespace ReturnHome.Server.EntityObject
         #endregion
 
         //This provides us with the proper gear and gear type for visual display on character
-        public void EquipGear()
+        public void EquipGear(Character character)
         {
             ///Start processing MyItem
-            foreach (Item MyItem in Inventory)
+            foreach (Item MyItem in character.Inventory.itemContainer.Values)
             {
                 ///Use a switch to sift through MyItem and add them properly
                 switch (MyItem.EquipLocation)

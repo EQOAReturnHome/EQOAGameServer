@@ -7,7 +7,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
-using ReturnHome.Server.EntityObject.Actor;
+using ReturnHome.Server.EntityObject.Actors;
 using System.Text.Json;
 
 namespace ReturnHome.Database.SQL
@@ -30,8 +30,8 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newTotalXP", player.TotalXPEarned);
             SecondCmd.Parameters.AddWithValue("newDebt", player.totalDebt);
             SecondCmd.Parameters.AddWithValue("newBreath", player.Breath);
-            SecondCmd.Parameters.AddWithValue("newTunar", player.Tunar);
-            SecondCmd.Parameters.AddWithValue("newBankTunar", player.BankTunar);
+            SecondCmd.Parameters.AddWithValue("newTunar", player.Inventory.Tunar);
+            SecondCmd.Parameters.AddWithValue("newBankTunar", player.Bank.Tunar);
             SecondCmd.Parameters.AddWithValue("newUnusedTP", player.UnusedTP);
             SecondCmd.Parameters.AddWithValue("newTotalTP", player.MaxAssignableTP);
             SecondCmd.Parameters.AddWithValue("newX", player.x);
@@ -172,15 +172,15 @@ namespace ReturnHome.Database.SQL
                   //Charges
                   SecondRdr.GetInt32(3),
                   //Equipment Location
-                  SecondRdr.GetUInt32(4),
+                  SecondRdr.GetInt32(4),
                   //Location (Bank, self, auction etc)
                   SecondRdr.GetByte(5),
                   //Location in inventory
-                  SecondRdr.GetInt32(6),
+                  SecondRdr.GetByte(6),
                   //ItemID
                   SecondRdr.GetInt32(7),
                   //Item cost 
-                  SecondRdr.GetUInt32(8),
+                  SecondRdr.GetInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
@@ -259,7 +259,7 @@ namespace ReturnHome.Database.SQL
                 //If this is 1, it needs to go to inventory
                 if (ThisItem.Location == 1)
                 {
-                    thisActor.Inventory.Add(ThisItem);
+                    thisActor.Inventory.AddItem(ThisItem);
                 }
             }
 
@@ -287,124 +287,126 @@ namespace ReturnHome.Database.SQL
             //Read through results from query populating character data needed for character select
             while (rdr.Read())
             {
-                //Instantiate new character object, not to be confused with a newly created character
+                //Instantiate character object
                 Character newCharacter = new Character
                 (
-                    //charName
+                    //charName 1
                     rdr.GetString(0),
-                    //serverid
+                    //serverid 2
                     rdr.GetInt32(1),
-                    //modelid
+                    //modelid 3
                     rdr.GetInt32(2),
-                    //tclass
+                    //tclass 4
                     rdr.GetInt32(3),
-                    //race
+                    //race 5
                     rdr.GetInt32(4),
-                    //humType
+                    //humType 6
                     rdr.GetString(5),
-                    //level
+                    //level 7
                     rdr.GetInt32(6),
-                    //haircolor
+                    //haircolor 8
                     rdr.GetInt32(7),
-                    //hairlength
+                    //hairlength 9
                     rdr.GetInt32(8),
-                    //hairstyle
+                    //hairstyle 10
                     rdr.GetInt32(9),
-                    //faceoption
+                    //faceoption 11
                     rdr.GetInt32(10),
-                    //totalXP
+                    //totalXP 12
                     rdr.GetInt32(12),
-                    //debt
+                    //debt 13
                     rdr.GetInt32(13),
-                    //breath
+                    //breath 14
                     rdr.GetInt32(14),
-                    //tunar
+                    //tunar 15
                     rdr.GetInt32(15),
-                    //bankTunar
+                    //bankTunar 16
                     rdr.GetInt32(16),
-                    //unusedTP
+                    //unusedTP 17
                     rdr.GetInt32(17),
-                    //totalTP
+                    //totalTP 18
                     rdr.GetInt32(18),
-                    //world
+                    //world 19
                     rdr.GetInt32(19),
-                    //x
+                    //x 20
                     rdr.GetFloat(21),
-                    //y
+                    //y 21
                     rdr.GetFloat(21),
-                    //z
+                    //z 22
                     rdr.GetFloat(22),
-                    //facing
+                    //facing 23
                     rdr.GetFloat(23),
-                    //strength
+                    //strength 24
                     rdr.GetInt32(24),
-                    //stamina
+                    //stamina 25
                     rdr.GetInt32(25),
-                    //agility
+                    //agility 26
                     rdr.GetInt32(26),
-                    //dexterity
+                    //dexterity 27
                     rdr.GetInt32(27),
-                    //wisdom
+                    //wisdom 28
                     rdr.GetInt32(28),
-                    //intel
+                    //intel 29
                     rdr.GetInt32(29),
-                    //charisma
+                    //charisma 30
                     rdr.GetInt32(30),
-                    //currentHP
+                    //currentHP 31
                     rdr.GetInt32(31),
-                    //maxHP
+                    //maxHP 32
                     rdr.GetInt32(32),
-                    //currentPower
+                    //currentPower 33
                     rdr.GetInt32(33),
-                    //maxPower
+                    //maxPower 34
                     rdr.GetInt32(34),
-                    //healot
+                    //healot 35
                     rdr.GetInt32(35),
-                    //powerot
+                    //powerot 36
                     rdr.GetInt32(36),
-                    //ac
+                    //ac 37 
                     rdr.GetInt32(37),
-                    //poisonr
+                    //poisonr 38
                     rdr.GetInt32(38),
-                    //diseaser
+                    //diseaser 39
                     rdr.GetInt32(39),
-                    //firer
+                    //firer 40
                     rdr.GetInt32(40),
-                    //coldr
+                    //coldr 41
                     rdr.GetInt32(41),
-                    //lightningr
+                    //lightningr 42
                     rdr.GetInt32(42),
-                    //arcaner
+                    //arcaner 43
                     rdr.GetInt32(43),
-                    //fishing
+                    //fishing 44
                     rdr.GetInt32(44),
-                    //baseStr
+                    //baseStr 45
                     rdr.GetInt32(45),
-                    //baseSta
+                    //baseSta 46
                     rdr.GetInt32(46),
-                    //baseAgi
+                    //baseAgi 47
                     rdr.GetInt32(47),
-                    //baseDex
+                    //baseDex 48
                     rdr.GetInt32(48),
-                    //baseWisdom
+                    //baseWisdom 49
                     rdr.GetInt32(49),
-                    //baseIntel
+                    //baseIntel 50
                     rdr.GetInt32(50),
-                    //baseCha
+                    //baseCha 51
                     rdr.GetInt32(51),
-                    //currentHP2
+                    //currentHP2 52
                     rdr.GetInt32(52),
-                    //baseHp
+                    //baseHp 53
                     rdr.GetInt32(53),
-                    //currentPower2
+                    //currentPower2 54
                     rdr.GetInt32(54),
-                    //basePower
+                    //basePower 55
                     rdr.GetInt32(55),
-                    //healot2
+                    //healot2 55
                     rdr.GetInt32(56),
-                    //powerot2
+                    //powerot2 56
                     rdr.GetInt32(57),
+                    //flags 57
                     rdr.GetString(58),
+                    //58
                     MySession);
 
 
@@ -438,15 +440,15 @@ namespace ReturnHome.Database.SQL
                   //Charges
                   SecondRdr.GetInt32(3),
                   //Equipment Location
-                  SecondRdr.GetUInt32(4),
+                  SecondRdr.GetInt32(4),
                   //Location (Bank, self, auction etc)
                   SecondRdr.GetByte(5),
                   //Location in inventory
-                  SecondRdr.GetInt32(6),
+                  SecondRdr.GetByte(6),
                   //ItemID
                   SecondRdr.GetInt32(7),
                   //Item cost 
-                  SecondRdr.GetUInt32(8),
+                  SecondRdr.GetInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
@@ -523,22 +525,24 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetUInt32(45));
 
                 //If this is 1, it needs to go to inventory
+                //Only this one one is needed for character select data
                 if (ThisItem.Location == 1)
                 {
-                    thisChar.Inventory.Add(ThisItem);
+                    thisChar.Inventory.AddItem(ThisItem);
                 }
 
+                /*
                 //If this is 2, it needs to go to the Bank
                 else if (ThisItem.Location == 2)
                 {
-                    thisChar.BankItems.Add(ThisItem);
+                    thisChar.BankItems.Add(ThisItem.InventoryNumber, ThisItem);
                 }
 
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                else if (ThisItem.Location == 4)
+                else if (ThisItem.InventoryNumber == 4)
                 {
                     thisChar.AuctionItems.Add(ThisItem);
-                }
+                }*/
             }
 
             SecondRdr.Close();
@@ -715,15 +719,15 @@ namespace ReturnHome.Database.SQL
                       //Charges
                       SecondRdr.GetInt32(3),
                       //Equipment Location
-                      SecondRdr.GetUInt32(4),
+                      SecondRdr.GetInt32(4),
                       //Location (Bank, self, auction etc)
                       SecondRdr.GetByte(5),
                       //Location in inventory
-                      SecondRdr.GetInt32(6),
+                      SecondRdr.GetByte(6),
                       //ItemID
                       SecondRdr.GetInt32(7),
                       //Item cost 
-                      SecondRdr.GetUInt32(8),
+                      SecondRdr.GetInt32(8),
                       //ItemIcon
                       SecondRdr.GetInt32(9),
                       //Itempattern equipslot
@@ -802,13 +806,13 @@ namespace ReturnHome.Database.SQL
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
                     {
-                        selectedCharacter.Inventory.Add(ThisItem);
+                        selectedCharacter.Inventory.AddItem(ThisItem);
                     }
 
                     //If this is 2, it needs to go to the Bank
                     else if (ThisItem.Location == 2)
                     {
-                        selectedCharacter.BankItems.Add(ThisItem);
+                        selectedCharacter.Bank.AddItem(ThisItem);
                     }
 
                     //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
@@ -819,6 +823,8 @@ namespace ReturnHome.Database.SQL
                 }
             }
             SecondRdr.Close();
+
+            selectedCharacter.index = (byte)selectedCharacter.Inventory.Count;
 
             //return Character Data with characters and gear.
             return selectedCharacter;
@@ -1039,7 +1045,7 @@ namespace ReturnHome.Database.SQL
             //Iterate through default character values for class and race and assign to new character
             while (rdr.Read())
             {
-                charCreation.Tunar = rdr.GetInt32(5);
+                charCreation.Inventory.AddTunar(rdr.GetInt32(5));
                 charCreation.UnusedTP = rdr.GetInt32(7);
                 charCreation.MaxAssignableTP = rdr.GetInt32(8);
                 charCreation.x = rdr.GetFloat(9);
@@ -1099,8 +1105,8 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("TotalXP", 0);
             SecondCmd.Parameters.AddWithValue("Debt", 0);
             SecondCmd.Parameters.AddWithValue("Breath", 255);
-            SecondCmd.Parameters.AddWithValue("Tunar", charCreation.Tunar);
-            SecondCmd.Parameters.AddWithValue("BankTunar", charCreation.BankTunar);
+            SecondCmd.Parameters.AddWithValue("Tunar", charCreation.Inventory.Tunar);
+            SecondCmd.Parameters.AddWithValue("BankTunar", charCreation.Bank.Tunar);
             SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.UnusedTP);
             SecondCmd.Parameters.AddWithValue("TotalTP", 350);
             SecondCmd.Parameters.AddWithValue("World", charCreation.World);

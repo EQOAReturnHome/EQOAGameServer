@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using ReturnHome.Database.SQL;
-using ReturnHome.Server.EntityObject.Actor;
+using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.EntityObject;
 using QuadTrees;
 
