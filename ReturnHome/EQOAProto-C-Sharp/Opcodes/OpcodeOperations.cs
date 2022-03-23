@@ -140,8 +140,6 @@ namespace ReturnHome.Opcodes
 
         public static void InteractActor(Session MySession, PacketMessage clientPacket)
         {
-            Console.WriteLine(clientPacket.Header.Opcode);
-
             BufferReader reader = new(clientPacket.Data.Span);
 
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.ArrangeItem)

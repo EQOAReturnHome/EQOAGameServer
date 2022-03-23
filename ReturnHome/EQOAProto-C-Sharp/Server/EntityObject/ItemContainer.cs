@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using ReturnHome.Server.EntityObject.Player;
-using ReturnHome.Server.Network;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -12,7 +11,6 @@ namespace ReturnHome.Server.EntityObject
     {
         private ConcurrentDictionary<byte, Item> _itemContainer;
         private byte _counter = 0;
-        private Session _session;
         private int _tunar;
 
         //Indicates if inventory or bank
@@ -113,10 +111,10 @@ namespace ReturnHome.Server.EntityObject
             clientItem1 = 0;
             clientItem2 = 0;
             //If both item's exist...
-            if (_itemContainer.ContainsKey(itemSlot1) & _itemContainer.ContainsKey(itemSlot2))
+            if (_itemContainer.ContainsKey(itemSlot1) && _itemContainer.ContainsKey(itemSlot2))
             {
                 //Get both client index's
-                if (_itemContainer.TryGetValue(itemSlot1, out Item temp) & _itemContainer.TryGetValue(itemSlot2, out Item temp2))
+                if (_itemContainer.TryGetValue(itemSlot1, out Item temp) && _itemContainer.TryGetValue(itemSlot2, out Item temp2))
                 {
                     //Client1 old index
                     clientItem1 = temp.ClientIndex;

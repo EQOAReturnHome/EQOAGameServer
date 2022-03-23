@@ -835,7 +835,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharSpells", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ObjectID);
+            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
