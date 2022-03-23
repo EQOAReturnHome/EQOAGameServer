@@ -12,17 +12,15 @@ using ReturnHome.Utilities;
 using NLua;
 using ReturnHome.Opcodes.Chat;
 using System.IO;
-using ReturnHome.Server.EntityObject.Actors;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-
+        public ItemContainer Inventory;
         private uint _target;
         private uint _targetCounter = 1;
         private Entity _ourTarget;
-        public byte index = 0;
 
         public uint Target
         {
@@ -150,10 +148,6 @@ namespace ReturnHome.Server.EntityObject
 
         public void BankItem(uint targetNPC, byte giveOrTake, uint itemToTransfer)
         {
-            Console.WriteLine(targetNPC);
-            Console.WriteLine(giveOrTake);
-            Console.WriteLine(itemToTransfer);
-
             //Deposit Item
             if (giveOrTake == 0)
             {
@@ -170,25 +164,27 @@ namespace ReturnHome.Server.EntityObject
         //Need to some how make a new copy of it, not sure the easiest way to do that
         public void MerchantBuy(byte itemSlot, int itemQty, uint targetNPC)
         {
-            Console.WriteLine(itemSlot);
-            Console.WriteLine(itemQty);
-
             Memory<byte> buffer;
 
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
-                Console.WriteLine($"Buying from {npc.CharName}");
-                ((Actor)npc).Inventory.RetrieveItem(itemSlot, out Item newItem);
-                if (itemQty > 0)
-                {
-                    newItem.StackLeft = itemQty;
-                }
+                npc.Inventory.RetrieveItem(itemSlot, out Item item);
+                Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
 
-                newItem.ServerKey = 0;
+                //Adjust player tunar
+                int offset = 0;
+                Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Inventory.Tunar)];
+                Span<byte> messagePlayer = playerTemp.Span;
 
-                Console.WriteLine($"{newItem.ItemName} has a slot number of {newItem.ServerKey}.");
+                messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
+                messagePlayer.Write7BitDoubleEncodedInt(Inventory.Tunar, ref offset);
 
-                ((Character)this).Inventory.AddItem(newItem);
+                SessionQueueMessages.PackMessage(((Character)this).characterSession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+
+
+                Item newItem = item.AcquireItem(itemQty);
+
+                Inventory.AddItem(newItem);
 
                 using (MemoryStream memStream = new())
                 {
@@ -220,9 +216,9 @@ namespace ReturnHome.Server.EntityObject
                     memStream.Write(BitConverter.GetBytes(targetNPC));
                     memStream.Write(Utility_Funcs.DoublePack(unknownInt));
                     memStream.Write(Utility_Funcs.DoublePack(unknownInt));
-                    memStream.Write(Utility_Funcs.DoublePack(((Actor)merchantNPC).Inventory.Count));
-                    memStream.Write(BitConverter.GetBytes(((Actor)merchantNPC).Inventory.Count));
-                    foreach (Item entry in ((Actor)merchantNPC).Inventory.itemContainer.Values)
+                    memStream.Write(Utility_Funcs.DoublePack(merchantNPC.Inventory.Count));
+                    memStream.Write(BitConverter.GetBytes(merchantNPC.Inventory.Count));
+                    foreach (Item entry in merchantNPC.Inventory.itemContainer.Values)
                         entry.DumpItem(memStream);
 
                     long pos = memStream.Position;

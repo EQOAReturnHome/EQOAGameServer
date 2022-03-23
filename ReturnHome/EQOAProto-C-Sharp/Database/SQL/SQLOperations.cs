@@ -180,7 +180,7 @@ namespace ReturnHome.Database.SQL
                   //ItemID
                   SecondRdr.GetInt32(7),
                   //Item cost 
-                  SecondRdr.GetInt32(8),
+                  SecondRdr.GetUInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
@@ -448,7 +448,7 @@ namespace ReturnHome.Database.SQL
                   //ItemID
                   SecondRdr.GetInt32(7),
                   //Item cost 
-                  SecondRdr.GetInt32(8),
+                  SecondRdr.GetUInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
@@ -727,7 +727,7 @@ namespace ReturnHome.Database.SQL
                       //ItemID
                       SecondRdr.GetInt32(7),
                       //Item cost 
-                      SecondRdr.GetInt32(8),
+                      SecondRdr.GetUInt32(8),
                       //ItemIcon
                       SecondRdr.GetInt32(9),
                       //Itempattern equipslot
@@ -823,8 +823,6 @@ namespace ReturnHome.Database.SQL
                 }
             }
             SecondRdr.Close();
-
-            selectedCharacter.index = (byte)selectedCharacter.Inventory.Count;
 
             //return Character Data with characters and gear.
             return selectedCharacter;

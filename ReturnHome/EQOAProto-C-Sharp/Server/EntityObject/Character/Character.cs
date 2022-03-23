@@ -16,7 +16,6 @@ namespace ReturnHome.Server.EntityObject.Player
 
         //Our Lists for attributes of character
         public ItemContainer Bank;
-        public ItemContainer Inventory;
         public List<Item> AuctionItems = new List<Item> { };
         public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
         public List<Hotkey> MyHotkeys = new List<Hotkey> { };

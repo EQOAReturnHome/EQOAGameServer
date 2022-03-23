@@ -112,10 +112,9 @@ namespace ReturnHome.Server.EntityObject.Player
                 Inventory.AddTunar(transferAmount);
             }
 
-            //Define memory span for player
             Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Inventory.Tunar)];
             Span<byte> messagePlayer = playerTemp.Span;
-            //Define memory span for ban
+            
             Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Bank.Tunar)];
             Span<byte> messageBank = bankTemp.Span;
             //reset span offset and write player amount to Message
@@ -211,13 +210,25 @@ namespace ReturnHome.Server.EntityObject.Player
             {
                 if(Inventory.UpdateQuantity(itemSlot, itemQty, out Item item))
                 {
+                    Inventory.AddTunar((int)(item.Maxhp == 0 ? item.ItemCost * itemQty : item.ItemCost * (item.RemainingHP / item.Maxhp) * itemQty));
+
+                    //Adjust player tunar
+                    int offset = 0;
+                    Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Inventory.Tunar)];
+                    Span<byte> messagePlayer = playerTemp.Span;
+
+                    messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
+                    messagePlayer.Write7BitDoubleEncodedInt(Inventory.Tunar, ref offset);
+
+                    SessionQueueMessages.PackMessage(characterSession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+
                     if (item.StackLeft <= 0)
                     {
                         if (!Inventory.RemoveItem(itemSlot, out Item _, out byte _))
                             return;
                     }
 
-                    int offset = 0;
+                    offset = 0;
                     Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
                     Span<byte> message = temp.Span;
 

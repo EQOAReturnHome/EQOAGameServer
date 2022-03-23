@@ -6,7 +6,6 @@ namespace ReturnHome.Server.EntityObject.Actors
   public class Actor : Entity
   {
         public long killtime = 0;
-        public ItemContainer Inventory;
         public Actor() : base(false)
         {
 

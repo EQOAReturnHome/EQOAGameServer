@@ -68,7 +68,7 @@ namespace ReturnHome.Server.EntityObject
                 itemToBeAdded.ServerKey = _counter;
                 itemToBeAdded.Location = type;
                 itemToBeAdded.ClientIndex = (byte)(_itemContainer.Count - 1);
-                Console.WriteLine($"Adding {itemToBeAdded.ItemName} with ServerKey {_counter} and client index {itemToBeAdded.ClientIndex}");
+
                 _counter++;
                 return true;
             }
@@ -83,7 +83,7 @@ namespace ReturnHome.Server.EntityObject
             if (_itemContainer.TryRemove(index, out item))
             {
                 clientIndex = item.ClientIndex;
-                Console.WriteLine($"Deleting Item {item.ItemName} Client index {item.ClientIndex}");
+
                 //Adjust Client index's for items
                 AdjustClientIndex(clientIndex);
 
@@ -127,10 +127,6 @@ namespace ReturnHome.Server.EntityObject
 
                     return true;
                 }
-
-                //items don't exist
-                else
-                    return false;
             }
 
             return false;
@@ -153,7 +149,6 @@ namespace ReturnHome.Server.EntityObject
             //Means we deleted an item, and reorganize
             if (newIndex == 0xFF)
             {
-                Console.WriteLine($"Deleting item at client Index {clientIndexToAdjust}");
                 foreach (var item in _itemContainer.Values)
                 {
                     //Lower index value by 1
@@ -188,11 +183,6 @@ namespace ReturnHome.Server.EntityObject
                             item.ClientIndex--;
                     }
                 }
-            }
-
-            foreach (var item in _itemContainer.Values)
-            {
-                Console.WriteLine($"Location: {((Inventory == true) ? "Inventory" : "Bank")}Item: {item.ItemName} Client Index: {item.ClientIndex}");
             }
         }
     }
