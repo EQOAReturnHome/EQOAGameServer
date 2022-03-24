@@ -190,22 +190,26 @@ namespace ReturnHome.Opcodes
             //Deposit and Withdraw Bank Tunar
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.DepositBankTunar)
             {
+
                 uint targetNPC = reader.Read<uint>();
                 uint giveOrTake = (uint)reader.Read7BitEncodedUInt64();
                 int transferAmount = (int)reader.Read7BitEncodedInt64();
                 Console.WriteLine("In the bank tunar");
                 MySession.MyCharacter.BankTunar(targetNPC, giveOrTake, transferAmount);
+
             }
 
             //Deposit and Withdraw Bank item
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankItem)
             {
+
                 uint targetNPC = reader.Read<uint>();
                 byte giveOrTake = reader.Read<byte>();
                 byte itemToTransfer = (byte)reader.Read<uint>();
                 int qtyToTransfer = (int)reader.Read7BitEncodedInt64();
                 Console.WriteLine("In the Item op code");
                 MySession.MyCharacter.TransferItem(giveOrTake, itemToTransfer, qtyToTransfer);
+
             }
 
             //Dialogue and Quest Interaction

@@ -16,8 +16,9 @@ namespace ReturnHome.Server.EntityObject.Player
         public int EquipLocation { get; set; }
         public byte Location { get; set; } //inventory, bank auction etc
         public int ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
+
         public int ItemID { get; private set; }
-        public uint ItemCost { get; private set; }
+        public int ItemCost { get; private set; }
         public int Unk1 { get; private set; }
         public int ItemIcon { get; private set; }
         public int Unk2 { get; private set; }
@@ -75,6 +76,7 @@ namespace ReturnHome.Server.EntityObject.Player
         //Should we be able to instantiate a normal item and gear seperately? Seems the better choice
         //This is to instantiate 
         public Item(int thisStacksLeft, int thisCharges, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc)
+
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -98,6 +100,7 @@ namespace ReturnHome.Server.EntityObject.Player
         //Alot of this could be managed by scripting as there is a huge portion that is static
         //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
         public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisEquipslot, int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim, int Strength, int Stamina, int Agility, int Dexterity, int Wisdom, int Intelligence, int Charisma, int HpMax, int PowMax, int pot, int hot, int ac, int pr, int dr, int fr, int cr, int lr, int ar, int model, uint color)
+
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -161,6 +164,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public void DumpItem(MemoryStream memStream)
         {
             //Start adding attributes to list for this item
+            //Start adding attributes to list for this item
             memStream.Write(Utility_Funcs.DoublePack(StackLeft));
             memStream.Write(Utility_Funcs.DoublePack(RemainingHP));
             memStream.Write(Utility_Funcs.DoublePack(Charges));
@@ -168,7 +172,7 @@ namespace ReturnHome.Server.EntityObject.Player
             memStream.WriteByte(Location);
             memStream.Write(BitConverter.GetBytes(ServerKey));
             memStream.Write(Utility_Funcs.DoublePack(ItemID));
-            memStream.Write(Utility_Funcs.Pack(ItemCost));
+            memStream.Write(Utility_Funcs.DoublePack(ItemCost));
             memStream.Write(Utility_Funcs.DoublePack(Unk1));
             memStream.Write(Utility_Funcs.DoublePack(ItemIcon));
             memStream.Write(Utility_Funcs.DoublePack(Unk2));

@@ -12,6 +12,7 @@ using ReturnHome.Utilities;
 using NLua;
 using ReturnHome.Opcodes.Chat;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -146,20 +147,6 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public void BankItem(uint targetNPC, byte giveOrTake, uint itemToTransfer)
-        {
-            //Deposit Item
-            if (giveOrTake == 0)
-            {
-
-            }
-
-            else if (giveOrTake == 1)
-            {
-
-            }
-        }
-
         //This is wrong... We are just referencing the npc item's state to a character here where the state will be shared to all users
         //Need to some how make a new copy of it, not sure the easiest way to do that
         public void MerchantBuy(byte itemSlot, int itemQty, uint targetNPC)
@@ -185,10 +172,9 @@ namespace ReturnHome.Server.EntityObject
                 Item newItem = item.AcquireItem(itemQty);
 
                 Inventory.AddItem(newItem);
-
+              
                 using (MemoryStream memStream = new())
                 {
-
                     memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddInvItem));
 
                     newItem.DumpItem(memStream);
@@ -212,6 +198,7 @@ namespace ReturnHome.Server.EntityObject
 
                 using (MemoryStream memStream = new())
                 {
+                    //memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
                     memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
                     memStream.Write(BitConverter.GetBytes(targetNPC));
                     memStream.Write(Utility_Funcs.DoublePack(unknownInt));
