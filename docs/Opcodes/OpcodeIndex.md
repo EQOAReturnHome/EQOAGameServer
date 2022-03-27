@@ -6,7 +6,7 @@ This is the Opcode wiki table of content's where all known reliable opcodes can 
 
 ### 0x0X:
 
-- [0x00 Game Version](0x0X/GameVersion.md)
+- [0x00 Game Version](Server/0x0X/GameVersion.md)
 - [0x0D Memory Dump](0x0X/MemoryDump.md)
 
 ### 0x1X:
@@ -88,8 +88,8 @@ This is the Opcode wiki table of content's where all known reliable opcodes can 
 
 ### 0x0X:
 
-- [0x00 Game Version](0x0X/GameVersion.md)
-- [0x01 Username & Password](0x0X/User&Pass.md)
+- [0x00 Game Version](Client/0x0X/GameVersion.md)
+- [0x01 Username & Password](Client/0x0X/User&Pass.md)
 - [0x04 Interaction](0x0X/Interaction.md)
 - [0x09 Send Report](0x0X/SendReport.md)
 - [0x0A Prepare Item on Hotbar](0x0X/PrepareHotbarItem.md)

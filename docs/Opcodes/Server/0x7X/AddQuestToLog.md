@@ -1,0 +1,1 @@
+add quest to log
