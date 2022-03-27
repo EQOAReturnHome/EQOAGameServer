@@ -155,7 +155,6 @@ namespace ReturnHome.Server.EntityObject.Player
                     //Deposit into bank
                     Bank.AddItem(item);
 
-
                     using (MemoryStream memStream = new())
                     {
 

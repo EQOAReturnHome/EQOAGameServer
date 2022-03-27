@@ -83,7 +83,7 @@ namespace ReturnHome.Server.EntityObject
             sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
             if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
             if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(40, 1));
+            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(39, 1));
         }
 
         public void ObjectUpdateVelocityY()
@@ -101,7 +101,7 @@ namespace ReturnHome.Server.EntityObject
             sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
             if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
             if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            new byte[] { (byte)svz }.CopyTo(ObjectUpdate.Slice(42, 1));
+            new byte[] { (byte)svz }.CopyTo(ObjectUpdate.Slice(41, 1));
         }
 
         public void ObjectUpdateEastWest()
