@@ -1,7 +1,7 @@
 Message sent from client to server, this opcode is used after server select, same structure as [0x0904 Username & Password](Client/0x09XX/User&Pass.md)
 
-Holds 2 unknown values, the string EQOA, username and password encrypted with AES128
-Password is only held in the first 16 bytes of the Password row, remaining bytes were encrypted using 0x00'same
+Holds 2 unknown values, the string EQOA, username, 1, password encrypted with AES128
+Password is only held in the first 16 bytes of the Password row, remaining bytes were encrypted using 0x00's
 
 | Opcode                | 0x0001                                                             |
 | unknown               | 0x00000003                                                         |
