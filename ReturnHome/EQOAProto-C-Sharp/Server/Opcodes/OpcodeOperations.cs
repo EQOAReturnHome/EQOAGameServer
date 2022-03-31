@@ -9,12 +9,12 @@ using ReturnHome.Database.SQL;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network.Managers;
-using ReturnHome.Opcodes.Chat;
+using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject;
 using System.Text.Json;
 
-namespace ReturnHome.Opcodes
+namespace ReturnHome.Server.Opcodes
 {
     public static class ProcessOpcode
     {

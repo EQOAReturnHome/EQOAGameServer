@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using System.Runtime.CompilerServices;
 using ReturnHome.Server.Managers;

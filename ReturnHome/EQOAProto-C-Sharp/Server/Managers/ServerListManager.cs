@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Net;
 using System.Text;
 
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Linq;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Player;
 

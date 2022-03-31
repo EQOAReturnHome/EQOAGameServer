@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 
 using ReturnHome.Database.SQL;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;

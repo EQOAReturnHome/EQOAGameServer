@@ -10,7 +10,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Opcodes.Chat
+namespace ReturnHome.Server.Opcodes.Chat
 {
     public static class SayChat
     {

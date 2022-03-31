@@ -1,7 +1,7 @@
 ﻿using System;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.Network
 {

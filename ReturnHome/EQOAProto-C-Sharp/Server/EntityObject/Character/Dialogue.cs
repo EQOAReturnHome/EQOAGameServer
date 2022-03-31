@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Managers;
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.EntityObject.Player
 {

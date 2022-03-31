@@ -2,7 +2,7 @@
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 
-namespace ReturnHome.Opcodes.Chat
+namespace ReturnHome.Server.Opcodes.Chat
 {
     public static class ObjectAdminChecks
     {

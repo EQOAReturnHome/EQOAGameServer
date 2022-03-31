@@ -18,7 +18,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public int ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
 
         public int ItemID { get; private set; }
-        public int ItemCost { get; private set; }
+        public uint ItemCost { get; private set; }
         public int Unk1 { get; private set; }
         public int ItemIcon { get; private set; }
         public int Unk2 { get; private set; }
@@ -172,7 +172,7 @@ namespace ReturnHome.Server.EntityObject.Player
             memStream.WriteByte(Location);
             memStream.Write(BitConverter.GetBytes(ServerKey));
             memStream.Write(Utility_Funcs.DoublePack(ItemID));
-            memStream.Write(Utility_Funcs.DoublePack(ItemCost));
+            memStream.Write(Utility_Funcs.Pack(ItemCost));
             memStream.Write(Utility_Funcs.DoublePack(Unk1));
             memStream.Write(Utility_Funcs.DoublePack(ItemIcon));
             memStream.Write(Utility_Funcs.DoublePack(Unk2));

@@ -3,7 +3,7 @@ using QuadTrees.QTreePointF;
 using System.Drawing;
 using System.Numerics;
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.EntityObject

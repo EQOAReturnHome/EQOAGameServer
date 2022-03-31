@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Linq;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using NLua;
-using ReturnHome.Opcodes.Chat;
+using ReturnHome.Server.Opcodes.Chat;
 using System.IO;
 using Newtonsoft.Json;
 

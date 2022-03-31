@@ -3,7 +3,7 @@ using System.Timers;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server
 {

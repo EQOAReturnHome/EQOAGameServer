@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Actors;
@@ -180,7 +180,7 @@ namespace ReturnHome.Database.SQL
                   //ItemID
                   SecondRdr.GetInt32(7),
                   //Item cost 
-                  SecondRdr.GetInt32(8),
+                  SecondRdr.GetUInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
@@ -448,7 +448,7 @@ namespace ReturnHome.Database.SQL
                   //ItemID
                   SecondRdr.GetInt32(7),
                   //Item cost 
-                  SecondRdr.GetInt32(8),
+                  SecondRdr.GetUInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
@@ -537,7 +537,6 @@ namespace ReturnHome.Database.SQL
                 {
                     thisChar.BankItems.Add(ThisItem.InventoryNumber, ThisItem);
                 }
-
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
                 else if (ThisItem.InventoryNumber == 4)
                 {
@@ -727,7 +726,7 @@ namespace ReturnHome.Database.SQL
                       //ItemID
                       SecondRdr.GetInt32(7),
                       //Item cost 
-                      SecondRdr.GetInt32(8),
+                      SecondRdr.GetUInt32(8),
                       //ItemIcon
                       SecondRdr.GetInt32(9),
                       //Itempattern equipslot
@@ -1161,5 +1160,3 @@ namespace ReturnHome.Database.SQL
         }
     }
 }
-
-

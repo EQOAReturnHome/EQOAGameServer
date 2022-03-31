@@ -2,7 +2,7 @@
 using System;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes.Chat;
+using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
