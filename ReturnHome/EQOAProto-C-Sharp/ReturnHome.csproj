@@ -46,6 +46,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Scripts\forkwatch\" />
-    <Folder Include="Server\Opcodes\Messages\Server\" />
   </ItemGroup>
 </Project>

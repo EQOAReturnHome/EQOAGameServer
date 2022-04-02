@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
+using ReturnHome.Server.Opcodes.Messages.Client;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -23,20 +24,14 @@ namespace ReturnHome.Server.EntityObject.Player
             {
                 if (item.StackLeft <= 0)
                 {
-                    if (!Inventory.RemoveItem(itemToDestroy, out Item item2, out byte clientIndex2))
-                        return;
+                    if (Inventory.RemoveItem(itemToDestroy, out Item item2, out byte clientIndex2))
+                    {
+                        ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item2, clientIndex2);
+                    }
+                    return;
                 }
 
-                int offset = 0;
-                Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(quantityToDestroy)];
-                Span<byte> message = temp.Span;
-
-                message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
-                message[offset++] = item.ClientIndex;
-                message[offset++] = 1;
-                message.Write7BitDoubleEncodedInt(quantityToDestroy, ref offset);
-
-                SessionQueueMessages.PackMessage(characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, item.ClientIndex);
             }
         }
 
@@ -45,25 +40,7 @@ namespace ReturnHome.Server.EntityObject.Player
         {
             if (Inventory.ArrangeItems(itemSlot1, itemSlot2, out byte clientItem1, out byte clientItem2))
             {
-                //set offset
-                int offset = 0;
-
-                Console.WriteLine(clientItem1);
-                Console.WriteLine(clientItem2);
-
-                //Define Memory span
-                Memory<byte> temp = new byte[4];
-                Span<byte> Message = temp.Span;
-
-                //Write arrangeop code back to memory span
-                Message.Write((ushort)GameOpcode.ArrangeItem, ref offset);
-
-                //send slot swap back to player to confirm
-                Message.Write(clientItem1, ref offset);
-                Message.Write(clientItem2, ref offset);
-
-                //Send arrange op code back to player
-                SessionQueueMessages.PackMessage(characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                ServerInventoryItemArrange.InventoryItemArrange(characterSession, clientItem1, clientItem2);
             }
         }
 
@@ -112,23 +89,8 @@ namespace ReturnHome.Server.EntityObject.Player
                 Inventory.AddTunar(transferAmount);
             }
 
-            Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Inventory.Tunar)];
-            Span<byte> messagePlayer = playerTemp.Span;
-            
-            Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Bank.Tunar)];
-            Span<byte> messageBank = bankTemp.Span;
-            //reset span offset and write player amount to Message
-            offset = 0;
-            messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-            messagePlayer.Write7BitDoubleEncodedInt(Inventory.Tunar, ref offset);
-            //resete span offset and write bank amount to message
-            offset = 0;
-            messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
-            messageBank.Write7BitDoubleEncodedInt(Bank.Tunar, ref offset);
-            //send both messages to client 
-            SessionQueueMessages.PackMessage(characterSession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
-            SessionQueueMessages.PackMessage(characterSession, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
-            return;
+            ServerUpdateBankTunar.UpdateBankTunar(characterSession, Bank.Tunar);
+            ServerUpdatePlayerTunar.UpdatePlayerTunar(characterSession, Inventory.Tunar);
         }
 
         public void TransferItem(byte giveOrTake, byte itemToTransfer, int qtyToTransfer)
@@ -141,31 +103,12 @@ namespace ReturnHome.Server.EntityObject.Player
                 //Remove item from Inventory
                 if (Inventory.RemoveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
-                    int offset = 0;
-                    Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(item.StackLeft)];
-                    Span<byte> message = temp.Span;
-
-                    message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
-                    message[offset++] = clientIndex;
-                    message[offset++] = 1;
-                    message.Write7BitDoubleEncodedInt(item.StackLeft, ref offset);
-
-                    SessionQueueMessages.PackMessage(characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                    ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, clientIndex);
 
                     //Deposit into bank
                     Bank.AddItem(item);
 
-                    using (MemoryStream memStream = new())
-                    {
-
-                        memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddBankItem));
-
-                        item.DumpItem(memStream);
-                        long pos = memStream.Position;
-                        buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
-
-                        SessionQueueMessages.PackMessage(characterSession, buffer, MessageOpcodeTypes.ShortReliableMessage);
-                    }
+                    ServerAddBankItemQuantity.AddBankItemQuantity(characterSession, item);
                 }
             }
 
@@ -175,30 +118,12 @@ namespace ReturnHome.Server.EntityObject.Player
                 //Remove item from bank
                 if (Bank.RemoveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
-                    int offset = 0;
-                    Memory<byte> temp = new byte[3 + Utility_Funcs.DoubleVariableLengthIntegerLength(item.StackLeft)];
-                    Span<byte> message = temp.Span;
-
-                    message.Write((ushort)GameOpcode.RemoveBankItem, ref offset);
-                    message[offset++] = clientIndex;
-                    message.Write7BitDoubleEncodedInt(item.StackLeft, ref offset);
-
-                    SessionQueueMessages.PackMessage(characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                    ServerRemoveBankItemQuantity.RemoveBankItemQuantity(characterSession, item, clientIndex);
 
                     //Deposit into inventory
                     Inventory.AddItem(item);
 
-                    using (MemoryStream memStream = new())
-                    {
-
-                        memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddInvItem));
-
-                        item.DumpItem(memStream);
-                        long pos = memStream.Position;
-                        buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
-
-                        SessionQueueMessages.PackMessage(characterSession, buffer, MessageOpcodeTypes.ShortReliableMessage);
-                    }
+                    ServerAddInventoryItemQuantity.AddInventoryItemQuantity(characterSession, item);
                 }
             }
         }
@@ -211,32 +136,17 @@ namespace ReturnHome.Server.EntityObject.Player
                 {
                     Inventory.AddTunar((int)(item.Maxhp == 0 ? item.ItemCost * itemQty : item.ItemCost * (item.RemainingHP / item.Maxhp) * itemQty));
 
-                    //Adjust player tunar
-                    int offset = 0;
-                    Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Inventory.Tunar)];
-                    Span<byte> messagePlayer = playerTemp.Span;
-
-                    messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-                    messagePlayer.Write7BitDoubleEncodedInt(Inventory.Tunar, ref offset);
-
-                    SessionQueueMessages.PackMessage(characterSession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
+                    ServerUpdatePlayerTunar.UpdatePlayerTunar(characterSession, Inventory.Tunar);
 
                     if (item.StackLeft <= 0)
                     {
-                        if (!Inventory.RemoveItem(itemSlot, out Item _, out byte _))
-                            return;
+                        if (!Inventory.RemoveItem(itemSlot, out Item item2, out byte clientIndex))
+                            ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item2, clientIndex);
+
+                        return;
                     }
 
-                    offset = 0;
-                    Memory<byte> temp = new byte[4 + Utility_Funcs.DoubleVariableLengthIntegerLength(itemQty)];
-                    Span<byte> message = temp.Span;
-
-                    message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
-                    message[offset++] = item.ClientIndex; ;
-                    message[offset++] = 1;
-                    message.Write7BitDoubleEncodedInt(itemQty, ref offset);
-
-                    SessionQueueMessages.PackMessage(characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                    ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, item.ClientIndex);
                 }
             }
         }
