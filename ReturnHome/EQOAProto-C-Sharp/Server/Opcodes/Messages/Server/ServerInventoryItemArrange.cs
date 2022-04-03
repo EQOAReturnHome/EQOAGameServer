@@ -2,7 +2,7 @@ using System;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Server.Opcodes.Messages.Client
+namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     public static class ServerInventoryItemArrange
     {

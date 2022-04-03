@@ -43,7 +43,7 @@
         MemoryDump = 0x0D, //13
         Time = 0x13, //19
         IgnoreList = 0x1005, //4101
-        ActorSpeed = 0xF8, //248
+        PlayerSpeed = 0xF8, //248
         ClientMessage = 0x0A7A, //2682 - White text message
         DisconnectClient = 0x09B0, //2480
         ColoredChat = 0x0A7B, //2683 - Color text message

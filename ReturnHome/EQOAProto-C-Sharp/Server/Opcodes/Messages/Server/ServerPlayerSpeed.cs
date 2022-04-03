@@ -13,25 +13,25 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerPlayerSpeed
     {
-        public static void ActorSpeed(Session MySession)
+        public static void PlayerSpeed(Session MySession)
         {
             int offset = 0;
             Memory<byte> temp = new byte[6];
             Span<byte> Message = temp.Span;
 
-            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed), ref offset);
+            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.PlayerSpeed), ref offset);
             Message.Write(BitConverter.GetBytes(25.0f), ref offset);
             //For now send a standard speed
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
 
-        public static void ActorSpeed(Session MySession, float speed)
+        public static void PlayerSpeed(Session MySession, float speed)
         {
             int offset = 0;
             Memory<byte> temp = new byte[6];
             Span<byte> Message = temp.Span;
 
-            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.ActorSpeed), ref offset);
+            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.PlayerSpeed), ref offset);
             Message.Write(BitConverter.GetBytes(speed), ref offset);
             //For now send a standard speed
             SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);

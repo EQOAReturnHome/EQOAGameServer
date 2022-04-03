@@ -1,17 +1,19 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Linq;
+using System.IO;
+
 using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
-using NLua;
+using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.Opcodes.Chat;
-using System.IO;
+
+using NLua;
 using Newtonsoft.Json;
 
 namespace ReturnHome.Server.EntityObject
@@ -47,38 +49,15 @@ namespace ReturnHome.Server.EntityObject
 
         public void TargetInformation(uint Target)
         {
-            Entity ent;
-            Memory<byte> message;
             //If false, ignore? Might need some kind of escalation, why would we target something not known about?
             //If true, prep message
-            if (EntityManager.QueryForEntity(_target, out ent))
+            if (EntityManager.QueryForEntity(_target, out Entity ent))
             {
                 //This shouldn't happen, but to be safe? Eventually could be an expired object that was originally target?
                 if (ent == null)
                     return;
 
-                int offset = 0;
-
-                //This message type seems to always be this length from live packet captures?
-                message = new byte[0x0109];
-
-                Span<byte> temp = message.Span;
-                temp.Write((ushort)GameOpcode.TargetInformation, ref offset);
-                temp.Write((byte)3, ref offset); // 0/1 = red face 2/3 = neutral face 4/5 = blue face //Perform Calculations to check for 
-                temp.Write(GenerateConColor(), ref offset); // 0 = red con 1 = yellow con 2 = white con 3 = Dark Blue con 4 = Light Blue Con 5 = Green con 6 = Yellowish/white con? 7 = no con at all? But can still target? 14 = faded yellow con? 15 = faded orange con? 60 = yellowish/green con?
-
-                offset = 124;
-                temp.Write(_target, ref offset);
-
-                offset = 261;
-                temp.Write(_targetCounter++, ref offset);
-                SessionQueueMessages.PackMessage(((Character)this).characterSession, message, MessageOpcodeTypes.ShortReliableMessage);
-
-                message = new byte[2];
-                offset = 0;
-                temp = message.Span;
-                temp.Write((ushort)0x63, ref offset);
-                SessionQueueMessages.PackMessage(((Character)this).characterSession, message, MessageOpcodeTypes.ShortReliableMessage);
+                ServerPlayerTarget.PlayerTarget(((Character)this).characterSession, 3, GenerateConColor(), _target, _targetCounter++);
             }
         }
 
@@ -89,7 +68,6 @@ namespace ReturnHome.Server.EntityObject
             if (Vector3.Distance(Position, _ourTarget.Position) <= 10.0f)
                 return true;
             return false;
-
         }
 
         //Method use to determine Entities target con color. Specifically for Characters
@@ -159,109 +137,69 @@ namespace ReturnHome.Server.EntityObject
                 Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
 
                 //Adjust player tunar
-                int offset = 0;
-                Memory<byte> playerTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(Inventory.Tunar)];
-                Span<byte> messagePlayer = playerTemp.Span;
-
-                messagePlayer.Write((ushort)GameOpcode.PlayerTunar, ref offset);
-                messagePlayer.Write7BitDoubleEncodedInt(Inventory.Tunar, ref offset);
-
-                SessionQueueMessages.PackMessage(((Character)this).characterSession, playerTemp, MessageOpcodeTypes.ShortReliableMessage);
-
+                ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
 
                 Item newItem = item.AcquireItem(itemQty);
 
                 Inventory.AddItem(newItem);
-              
-                using (MemoryStream memStream = new())
-                {
-                    memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddInvItem));
 
-                    newItem.DumpItem(memStream);
-                    long pos = memStream.Position;
-                    buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
-
-                    SessionQueueMessages.PackMessage(((Character)this).characterSession, buffer, MessageOpcodeTypes.ShortReliableMessage);
-                }
+                ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
             }
         }
 
-        public void TriggerMerchant(uint targetNPC)
+        public void TriggerMerchantMenu(uint targetNPC)
         {
-            int unknownInt = 200;
-
-            Memory<byte> buffer;
-
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
-                Entity merchantNPC = npc;
-
-                using (MemoryStream memStream = new())
-                {
-                    //memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
-                    memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MerchantBox));
-                    memStream.Write(BitConverter.GetBytes(targetNPC));
-                    memStream.Write(Utility_Funcs.DoublePack(unknownInt));
-                    memStream.Write(Utility_Funcs.DoublePack(unknownInt));
-                    memStream.Write(Utility_Funcs.DoublePack(merchantNPC.Inventory.Count));
-                    memStream.Write(BitConverter.GetBytes(merchantNPC.Inventory.Count));
-                    foreach (Item entry in merchantNPC.Inventory.itemContainer.Values)
-                        entry.DumpItem(memStream);
-
-                    long pos = memStream.Position;
-                    buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
-
-                    SessionQueueMessages.PackMessage(((Character)this).characterSession, buffer, MessageOpcodeTypes.ShortReliableMessage);
-                    memStream.Flush();
-                }
+                ServerTriggerMerchantMenu.TriggerMerchantMenu(((Character)this).characterSession, npc);
             }
         }
 
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
-        public void SendDialogue(Session mySession, string dialogue, LuaTable diagOptions)
+        public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
         {
             //Clear player's previous dialogue options before adding new ones.
-            mySession.MyCharacter.MyDialogue.diagOptions.Clear();
+            session.MyCharacter.MyDialogue.diagOptions.Clear();
             //loop over luatable, assigning every value to an element of the players diagOptions list
             //lua table always returns a dict type object of <object,object>
             foreach (KeyValuePair<object, object> k in diagOptions)
             {
-                mySession.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
+                session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
             }
             //If it's not a yes/no choice then sort alphabetically.
             //This forces it to return choices the same every time.
-            if (!mySession.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
+            if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
             {
-                mySession.MyCharacter.MyDialogue.diagOptions.Sort();
+                session.MyCharacter.MyDialogue.diagOptions.Sort();
             }
             int offset = 0;
             //Length of choices
             uint choicesLength = 0;
             //set choice counter for player
-            uint choiceCounter = mySession.MyCharacter.MyDialogue.counter;
+            uint choiceCounter = session.MyCharacter.MyDialogue.counter;
             byte textOptions = 0;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if dialogue options exist set choice counter update
-            if (mySession.MyCharacter.MyDialogue.diagOptions != null)
+            if (session.MyCharacter.MyDialogue.diagOptions != null)
             {
-                choiceCounter = (uint)mySession.MyCharacter.MyDialogue.diagOptions.Count;
+                choiceCounter = (uint)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //Length of choices
-                foreach (string choice in mySession.MyCharacter.MyDialogue.diagOptions)
+                foreach (string choice in session.MyCharacter.MyDialogue.diagOptions)
                 {
                     choicesLength += (uint)choice.Length;
                 }
                 //count the number of textOptions
-                textOptions = (byte)mySession.MyCharacter.MyDialogue.diagOptions.Count;
+                textOptions = (byte)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //set dialogue type to option
                 dialogueType = GameOpcode.OptionBox;
             }
             //if there are no diagOptions send onlly diag box.
-            if (mySession.MyCharacter.MyDialogue.diagOptions.Count <= 0)
+            if (session.MyCharacter.MyDialogue.diagOptions.Count <= 0)
             {
                 dialogueType = GameOpcode.DialogueBox;
             }
             //set player dialogue to the incoming dialogue
-            mySession.MyCharacter.MyDialogue.dialogue = dialogue;
+            session.MyCharacter.MyDialogue.dialogue = dialogue;
             //create variable memory span for sending out dialogue
             Memory<byte> temp = new Memory<byte>(new byte[11 + (dialogue.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
             Span<byte> Message = temp.Span;
@@ -275,21 +213,21 @@ namespace ReturnHome.Server.EntityObject
             {
                 Message.Write(textOptions, ref offset);
 
-                if (mySession.MyCharacter.MyDialogue.diagOptions != null)
+                if (session.MyCharacter.MyDialogue.diagOptions != null)
                 {
-                    for (int i = 0; i < mySession.MyCharacter.MyDialogue.diagOptions.Count; i++)
+                    for (int i = 0; i < session.MyCharacter.MyDialogue.diagOptions.Count; i++)
                     {
-                        Message.Write(mySession.MyCharacter.MyDialogue.diagOptions[i].Length, ref offset);
-                        Message.Write(Encoding.Unicode.GetBytes(mySession.MyCharacter.MyDialogue.diagOptions[i]), ref offset);
+                        Message.Write(session.MyCharacter.MyDialogue.diagOptions[i].Length, ref offset);
+                        Message.Write(Encoding.Unicode.GetBytes(session.MyCharacter.MyDialogue.diagOptions[i]), ref offset);
                     }
                 }
             }
             //Send Message
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-            mySession.MyCharacter.MyDialogue.choice = 1000;
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.MyCharacter.MyDialogue.choice = 1000;
         }
 
-        public void ProcessDialogue(Session mySession, BufferReader reader, PacketMessage ClientPacket)
+        public void ProcessDialogue(Session session, BufferReader reader, PacketMessage ClientPacket)
         {
             //set offset
             int offset = 0;
@@ -308,12 +246,12 @@ namespace ReturnHome.Server.EntityObject
                 {
                     offset = 0;
                     uint optionCounter = reader.Read<uint>();
-                    mySession.MyCharacter.MyDialogue.choice = reader.Read<byte>();
+                    session.MyCharacter.MyDialogue.choice = reader.Read<byte>();
                     //if diag message is 255(exit dialogue in client) return immediately without new message
                     //and set choice to incredibly high number to make sure it doesn't retrigger any specific dialogue.
-                    if (mySession.MyCharacter.MyDialogue.choice == 255)
+                    if (session.MyCharacter.MyDialogue.choice == 255)
                     {
-                        mySession.MyCharacter.MyDialogue.choice = 1000;
+                        session.MyCharacter.MyDialogue.choice = 1000;
                         return;
                     }
                 }
@@ -325,7 +263,7 @@ namespace ReturnHome.Server.EntityObject
             //Create new instance of the event manager
             //EventManager eManager = new EventManager();
             Entity npcEntity = new Entity(false);
-            Dialogue dialogue = mySession.MyCharacter.MyDialogue;
+            Dialogue dialogue = session.MyCharacter.MyDialogue;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if a diag option choice incoming set outgoing to diag box option
             if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
@@ -348,39 +286,10 @@ namespace ReturnHome.Server.EntityObject
                 }
             }
             //call the event manager to process dialogue from here. Passes to Lua scripts.
-            EventManager.GetNPCDialogue(dialogueType, mySession);
+            EventManager.GetNPCDialogue(dialogueType, session);
         }
 
-        public static void AddQuestLog(Session mySession, uint questNumber, string questText)
-        {
-            int offset = 0;
-
-            Memory<byte> temp = new Memory<byte>(new byte[11 + (questText.Length * 2)]);
-            Span<byte> Message = temp.Span;
-
-            Message.Write((ushort)GameOpcode.AddQuestLog, ref offset);
-            Message.Write(questNumber, ref offset);
-            Message.Write(questText.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(questText), ref offset);
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-        }
-
-        public static void DeleteQuest(Session mySession, byte questNumber)
-        {
-            int offset = 0;
-
-            Memory<byte> temp = new Memory<byte>(new byte[8]);
-            Span<byte> Message = temp.Span;
-
-            Message.Write((ushort)GameOpcode.DeleteQuest, ref offset);
-            Message.Write(new byte[4], ref offset);
-            Message.Write(questNumber, ref offset);
-
-
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
-        }
-
-        public static void GrantXP(Session mySession, int xpAmount)
+        public static void GrantXP(Session session, int xpAmount)
         {
             int debt = 0;
             int offset = 0;
@@ -388,23 +297,23 @@ namespace ReturnHome.Server.EntityObject
             int paidDebt = 0;
             int cm = 0;
             int CMXP = 0;
-            if (mySession.MyCharacter.totalDebt > 0)
+            if (session.MyCharacter.totalDebt > 0)
             {
-                debt = mySession.MyCharacter.totalDebt;
+                debt = session.MyCharacter.totalDebt;
 
                 //If true, will erase remaining debt
-                if ((xpAmount / 2) >= mySession.MyCharacter.totalDebt)
+                if ((xpAmount / 2) >= session.MyCharacter.totalDebt)
                 {
-                    paidDebt = mySession.MyCharacter.totalDebt;
-                    xpAmount -= mySession.MyCharacter.totalDebt;
-                    mySession.MyCharacter.totalDebt = 0;
+                    paidDebt = session.MyCharacter.totalDebt;
+                    xpAmount -= session.MyCharacter.totalDebt;
+                    session.MyCharacter.totalDebt = 0;
                 }
 
                 //Otherwise, chop xp amount in half to satisify some debt
                 else
                 {
                     paidDebt = (xpAmount / 2);
-                    mySession.MyCharacter.totalDebt -= (xpAmount / 2);
+                    session.MyCharacter.totalDebt -= (xpAmount / 2);
                     xpAmount -= (xpAmount / 2);
                 }
             }
@@ -423,37 +332,30 @@ namespace ReturnHome.Server.EntityObject
             if (xpAmount > 0)
             {
                 if (debt > 0)
-                    ChatMessage.GenerateClientSpecificChat(mySession, $"You received {totXP} XP. {paidDebt} was paid towards your debt of {debt}.");
+                    ChatMessage.GenerateClientSpecificChat(session, $"You received {totXP} XP. {paidDebt} was paid towards your debt of {debt}.");
 
                 else
-                    ChatMessage.GenerateClientSpecificChat(mySession, $"You received {xpAmount} XP.");
+                    ChatMessage.GenerateClientSpecificChat(session, $"You received {xpAmount} XP.");
             }
 
             //Need to send earned CM opcode with this if any
             if (CMXP > 0)
-                ChatMessage.GenerateClientSpecificChat(mySession, $"You received {CMXP} Mastery XP.");
+                ChatMessage.GenerateClientSpecificChat(session, $"You received {CMXP} Mastery XP.");
 
-            mySession.MyCharacter.TotalXPEarned += xpAmount;
+            session.MyCharacter.TotalXPEarned += xpAmount;
 
-            while (mySession.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[mySession.MyCharacter.Level])
+            while (session.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
             {
-                mySession.MyCharacter.Level++;
+                session.MyCharacter.Level++;
             }
 
             //Something similar as above for Training points
-
-            Memory<byte> temp = new Memory<byte>(new byte[Utility_Funcs.DoubleVariableLengthIntegerLength(mySession.MyCharacter.Level) + Utility_Funcs.DoubleVariableLengthIntegerLength(mySession.MyCharacter.TotalXPEarned) + 2]);
-            Span<byte> Message = temp.Span;
-
-            Message.Write((ushort)GameOpcode.GrantXP, ref offset);
-            Message.Write7BitDoubleEncodedInt(mySession.MyCharacter.Level, ref offset);
-            Message.Write7BitDoubleEncodedInt(mySession.MyCharacter.TotalXPEarned, ref offset);
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            ServerUpdatePlayerXPandLevel.UpdatePlayerXPandLevel(session, session.MyCharacter.Level, session.MyCharacter.TotalXPEarned);
         }
 
-        public static bool CheckQuestItem(Session mySession, int itemID, int itemQty)
+        public static bool CheckQuestItem(Session session, int itemID, int itemQty)
         {
-            if (mySession.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID && p.Value.StackLeft >= itemQty))
+            if (session.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID && p.Value.StackLeft >= itemQty))
             {
                 return true;
             }

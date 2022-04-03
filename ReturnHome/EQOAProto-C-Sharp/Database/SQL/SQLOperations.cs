@@ -9,6 +9,7 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Actors;
 using System.Text.Json;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Database.SQL
 {
@@ -268,7 +269,7 @@ namespace ReturnHome.Database.SQL
             return npcData;
         }
         //Class to pull characters from DB via serverid
-        public List<Character> AccountCharacters(Session MySession)
+        public List<Character> AccountCharacters(Session session)
         {
             //Holds list of characters for whole class
             List<Character> characterData = new List<Character>();
@@ -278,7 +279,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetAccountCharacters", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("pAccountID", MySession.AccountID);
+            cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             //string to hold local charcter Name
@@ -407,7 +408,7 @@ namespace ReturnHome.Database.SQL
                     //flags 57
                     rdr.GetString(58),
                     //58
-                    MySession);
+                    session);
 
 
                 //Add character attribute data to charaterData List
@@ -420,7 +421,7 @@ namespace ReturnHome.Database.SQL
             //Second SQL command and reader
             using var SecondCmd = new MySqlCommand("GetCharacterGear", con);
             SecondCmd.CommandType = CommandType.StoredProcedure;
-            SecondCmd.Parameters.AddWithValue("pAccountID", MySession.AccountID);
+            SecondCmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
 
             //Use second reader to iterate through character gear and assign to character attributes
@@ -551,7 +552,7 @@ namespace ReturnHome.Database.SQL
             return characterData;
         }
 
-        public Character AcquireCharacter(Session MySession, int serverID)
+        public Character AcquireCharacter(Session session, int serverID)
         {
             //Holds list of characters for whole class
             Character selectedCharacter = null;
@@ -561,7 +562,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetAccountCharacters", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("pAccountID", MySession.AccountID);
+            cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             //string to hold local charcter Name
@@ -690,7 +691,7 @@ namespace ReturnHome.Database.SQL
                         //powerot2
                         rdr.GetInt32(57),
                         rdr.GetString(58),
-                        MySession);
+                        session);
                     break;
                 }
             }
@@ -701,7 +702,7 @@ namespace ReturnHome.Database.SQL
             //Second SQL command and reader
             using var SecondCmd = new MySqlCommand("GetCharacterGear", con);
             SecondCmd.CommandType = CommandType.StoredProcedure;
-            SecondCmd.Parameters.AddWithValue("pAccountID", MySession.AccountID);
+            SecondCmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
 
             //Use second reader to iterate through character gear and assign to character attributes
@@ -827,14 +828,14 @@ namespace ReturnHome.Database.SQL
             return selectedCharacter;
         }
 
-        public void GetPlayerSpells(Session MySession)
+        public void GetPlayerSpells(Session session)
         {
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharSpells", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ServerID);
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ServerID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -883,20 +884,20 @@ namespace ReturnHome.Database.SQL
                 );
 
                 //Add these spells to player book
-                MySession.MyCharacter.MySpells.Add(thisSpell);
+                session.MyCharacter.MySpells.Add(thisSpell);
             }
 
             rdr.Close();
         }
 
-        public void GetPlayerHotkeys(Session MySession)
+        public void GetPlayerHotkeys(Session session)
         {
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharHotkeys", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ObjectID);
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ObjectID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -925,19 +926,19 @@ namespace ReturnHome.Database.SQL
                 );
 
                 //Add these spells to player book
-                MySession.MyCharacter.MyHotkeys.Add(thisHotkey);
+                session.MyCharacter.MyHotkeys.Add(thisHotkey);
             }
             rdr.Close();
         }
 
-        public void GetPlayerWeaponHotbar(Session MySession)
+        public void GetPlayerWeaponHotbar(Session session)
         {
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharWeaponHotbar", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", MySession.MyCharacter.ObjectID);
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ObjectID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -954,19 +955,19 @@ namespace ReturnHome.Database.SQL
                 );
 
                 //Add these weapon hotbars
-                MySession.MyCharacter.WeaponHotbars.Add(thisHotbar);
+                session.MyCharacter.WeaponHotbars.Add(thisHotbar);
             }
             rdr.Close();
 
             //If less then 4 weapon hotbars, need constructor dummies untill 4 total
-            for (int i = MySession.MyCharacter.WeaponHotbars.Count(); i < 4; i++)
+            for (int i = session.MyCharacter.WeaponHotbars.Count(); i < 4; i++)
             {
-                MySession.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
+                session.MyCharacter.WeaponHotbars.Add(new WeaponHotbar());
             }
         }
 
         //Method to delete character from player's account
-        public void DeleteCharacter(int serverid, Session MySession)
+        public void DeleteCharacter(int serverid, Session session)
         {
             //Creates var to store a MySQlcommand with the query and connection parameters.
             using var cmd = new MySqlCommand("DeleteCharacter", con);
@@ -980,12 +981,12 @@ namespace ReturnHome.Database.SQL
             Logger.Info($"Deleted Character with ServerID: {serverid}");
 
             //Create a new list of characters after deletion
-            List<Character> MyCharacterList = AccountCharacters(MySession);
+            List<Character> MyCharacterList = AccountCharacters(session);
 
             //Don't close connection because we recreate character list and resend it, it handles closing connection
 
             //Send Fresh Character Listing
-            ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
+            ServerCreateCharacterList.CreateCharacterList(MyCharacterList, session);
         }
 
         //Method to check if characters name exist in the DB
@@ -1014,7 +1015,7 @@ namespace ReturnHome.Database.SQL
         }
 
         //Method to create new character for player's account
-        public void CreateCharacter(Session MySession, Character charCreation)
+        public void CreateCharacter(Session session, Character charCreation)
         {
             //Local variables to get string values to store in the DB from dictionary keys received from client
             string humType = CharacterUtilities.HumTypeDict[charCreation.HumTypeNum];
@@ -1086,8 +1087,8 @@ namespace ReturnHome.Database.SQL
 
             //Add all character attributes for new character creation to parameterized values
             SecondCmd.Parameters.AddWithValue("@charName", charCreation.CharName);
-            //Needs to be MySession.AccountID once CharacterSelect shows characters off true AccountID.
-            SecondCmd.Parameters.AddWithValue("AccountID", MySession.AccountID);
+            //Needs to be session.AccountID once CharacterSelect shows characters off true AccountID.
+            SecondCmd.Parameters.AddWithValue("AccountID", session.AccountID);
             SecondCmd.Parameters.AddWithValue("ModelID", charCreation.ModelID);
             SecondCmd.Parameters.AddWithValue("TClass", charCreation.StartingClass);
             SecondCmd.Parameters.AddWithValue("Race", charCreation.Race);
@@ -1153,10 +1154,10 @@ namespace ReturnHome.Database.SQL
             SecondCmd.ExecuteNonQuery();
 
             //Don't close connection because we have character list generated next
-            List<Character> MyCharacterList = AccountCharacters(MySession);
+            List<Character> MyCharacterList = AccountCharacters(session);
 
             //Send Fresh Character Listing
-            ProcessOpcode.CreateCharacterList(MyCharacterList, MySession);
+            ServerCreateCharacterList.CreateCharacterList(MyCharacterList, session);
         }
     }
 }

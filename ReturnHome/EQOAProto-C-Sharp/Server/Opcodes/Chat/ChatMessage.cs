@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Text;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Chat
@@ -122,7 +123,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                 try
                 {
                     speed = float.Parse(message.Substring(3, message.Length - 3));
-                    ProcessOpcode.ActorSpeed(MySession, speed);
+                    ServerPlayerSpeed.PlayerSpeed(MySession, speed);
                 }
 
                 catch

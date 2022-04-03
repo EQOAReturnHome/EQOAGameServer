@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
-using ReturnHome.Server.Opcodes.Messages.Client;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -149,6 +149,16 @@ namespace ReturnHome.Server.EntityObject.Player
                     ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, item.ClientIndex);
                 }
             }
+        }
+
+        public static void AddQuestLog(Session session, uint questNumber, string questText)
+        {
+            ServerAddQuestLog.AddQuestLog(session, questNumber, questText);
+        }
+
+        public static void DeleteQuest(Session session, byte questNumber)
+        {
+            ServerDeleteQuest.DeleteQuest(session, questNumber);
         }
     }
 }

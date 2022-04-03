@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 
 using ReturnHome.Utilities;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Chat;
-using System.Text.Json;
 using ReturnHome.Server.Opcodes.Messages.Client;
 
 namespace ReturnHome.Server.Opcodes

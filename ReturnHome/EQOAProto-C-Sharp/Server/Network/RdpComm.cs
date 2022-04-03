@@ -9,6 +9,7 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Utilities;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Network
 {
@@ -170,7 +171,7 @@ namespace ReturnHome.Server.Network
                 List<Character> MyCharacterList = charList.AccountCharacters(_session);
 
 				//May need to be fixed up
-                ProcessOpcode.CreateCharacterList(MyCharacterList, _session);      
+                ServerCreateCharacterList.CreateCharacterList(MyCharacterList, _session);      
             }
 
             ///Triggers creating master session

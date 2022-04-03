@@ -48,7 +48,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantDiag)
             {
                 uint targetNPC = reader.Read<uint>();
-                MySession.MyCharacter.TriggerMerchant(targetNPC);
+                MySession.MyCharacter.TriggerMerchantMenu(targetNPC);
             }
 
 

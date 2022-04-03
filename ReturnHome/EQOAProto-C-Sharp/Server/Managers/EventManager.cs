@@ -11,6 +11,7 @@ using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using NLua;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Managers
 {
@@ -41,7 +42,7 @@ namespace ReturnHome.Server.Managers
             lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
             lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
             lua["SendDialogue"] = mySession.MyCharacter.SendDialogue;
-            lua["TeleportPlayer"] = MapManager.TeleportPlayer;
+            lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
             lua["AddQuestLog"] = Character.AddQuestLog;
             lua["DeleteQuestLog"] = Character.DeleteQuest;
             lua["CheckQuestItem"] = Character.CheckQuestItem;

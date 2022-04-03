@@ -3,7 +3,7 @@ using System.IO;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 
-namespace ReturnHome.Server.Opcodes.Messages.Client
+namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     public static class ServerAddInventoryItemQuantity
     {
