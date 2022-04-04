@@ -9,13 +9,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
 		public static void RemoveBankItemQuantity(Session session, Item item, byte clientIndex)
         {
-            int offset = 0;
             Memory<byte> temp = new byte[3 + Utility_Funcs.DoubleVariableLengthIntegerLength(item.StackLeft)];
-            Span<byte> message = temp.Span;
+            Span<byte> Message = temp.Span;
 
-            message.Write((ushort)GameOpcode.RemoveBankItem, ref offset);
-            message[offset++] = clientIndex;
-            message.Write7BitDoubleEncodedInt(item.StackLeft, ref offset);
+            BufferWriter writer = new BufferWriter(Message);
+
+            writer.Write((ushort)GameOpcode.RemoveBankItem);
+            writer.Write((byte)clientIndex);
+            writer.Write7BitEncodedInt64(item.StackLeft);
 
             SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
         }

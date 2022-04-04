@@ -8,14 +8,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void DeleteQuest(Session mySession, byte questNumber)
         {
-            int offset = 0;
-
-            Memory<byte> temp = new Memory<byte>(new byte[8]);
+            Memory<byte> temp = new byte[8];
             Span<byte> Message = temp.Span;
 
-            Message.Write((ushort)GameOpcode.DeleteQuest, ref offset);
-            Message.Write(new byte[4], ref offset);
-            Message.Write(questNumber, ref offset);
+            BufferWriter writer = new BufferWriter(Message);
+
+            writer.Write((ushort)GameOpcode.DeleteQuest);
+            writer.Write(0);
+            writer.Write(questNumber);
 
 
             SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);

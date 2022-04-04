@@ -22,126 +22,124 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ModelID);
             }
 
-            int offset = 0;
             Memory<byte> temp = new byte[bufferSize];
             Span<byte> Message = temp.Span;
 
+            BufferWriter writer = new BufferWriter(Message);
+
             //Holds list of characters pulled from the DB for the AccountID
-            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.CharacterSelect), ref offset);
+            writer.Write((ushort)GameOpcode.CharacterSelect);
 
             ///Gets our character count and uses technique to double it
-            Message.Write7BitDoubleEncodedInt(MyCharacterList.Count, ref offset);
+            writer.Write7BitEncodedInt64(MyCharacterList.Count);
 
             //Iterates through each charcter in the list and converts attribute values to packet values
             foreach (Character character in MyCharacterList)
             {
-                ///Add the Character name length
-                Message.Write(BitConverter.GetBytes((uint)character.CharName.Length), ref offset);
-
                 ///Add character name
-                Message.Write(Encoding.ASCII.GetBytes(character.CharName), ref offset);
+                writer.WriteString(Encoding.UTF8, character.CharName);
 
                 ///Add Server ID
-                Message.Write7BitDoubleEncodedInt(character.ServerID, ref offset);
+                writer.Write7BitEncodedInt64(character.ServerID);
 
                 ///Add Model
-                Message.Write7BitDoubleEncodedInt(character.ModelID, ref offset);
+                writer.Write7BitEncodedInt64(character.ModelID);
 
                 ///Add Class
-                Message.Write7BitDoubleEncodedInt(character.Class, ref offset);
+                writer.Write7BitEncodedInt64(character.Class);
 
                 ///Add Race
-                Message.Write7BitDoubleEncodedInt(character.Race, ref offset);
+                writer.Write7BitEncodedInt64(character.Race);
 
                 ///Add Level
-                Message.Write7BitDoubleEncodedInt(character.Level, ref offset);
+                writer.Write7BitEncodedInt64(character.Level);
 
                 ///Add Hair color
-                Message.Write7BitDoubleEncodedInt(character.HairColor, ref offset);
+                writer.Write7BitEncodedInt64(character.HairColor);
 
                 ///Add Hair Length
-                Message.Write7BitDoubleEncodedInt(character.HairLength, ref offset);
+                writer.Write7BitEncodedInt64(character.HairLength);
 
                 ///Add Hair Style
-                Message.Write7BitDoubleEncodedInt(character.HairStyle, ref offset);
+                writer.Write7BitEncodedInt64(character.HairStyle);
 
                 ///Add Face option
-                Message.Write7BitDoubleEncodedInt(character.FaceOption, ref offset);
+                writer.Write7BitEncodedInt64(character.FaceOption);
 
                 //Equip Gear
                 character.EquipGear(character);
 
                 ///Add Robe
-                Message.Write(BitConverter.GetBytes(character.Robe), ref offset);
+                writer.Write(character.Robe);
 
                 ///Add Primary
-                Message.Write(BitConverter.GetBytes(character.Primary), ref offset);
+                writer.Write(character.Primary);
 
                 ///Add Secondary
-                Message.Write(BitConverter.GetBytes(character.Secondary), ref offset);
+                writer.Write(character.Secondary);
 
                 ///Add Shield
-                Message.Write(BitConverter.GetBytes(character.Shield), ref offset);
+                writer.Write(character.Shield);
 
                 ///Add Character animation here, dumby for now
-                Message.Write(BitConverter.GetBytes((ushort)0x0004), ref offset);
+                writer.Write((ushort)0x0004);
 
                 ///unknown value?
-                Message.Write(new byte[] { 0x00 }, ref offset);
+                writer.Write((byte)0);
 
                 ///Chest Model
-                Message.Write(new byte[] { character.Chest }, ref offset);
+                writer.Write(character.Chest);
 
                 ///uBracer Model
-                Message.Write(new byte[] { character.Bracer }, ref offset);
+                writer.Write(character.Bracer);
 
                 ///Glove Model
-                Message.Write(new byte[] { character.Gloves }, ref offset);
+                writer.Write(character.Gloves);
 
                 ///Leg Model
-                Message.Write(new byte[] { character.Legs }, ref offset);
+                writer.Write(character.Legs);
 
                 ///Boot Model
-                Message.Write(new byte[] { character.Boots }, ref offset);
+                writer.Write(character.Boots);
 
                 ///Helm Model
-                Message.Write(new byte[] { character.Helm }, ref offset);
+                writer.Write(character.Helm);
 
                 ///unknown value?
-                Message.Write(BitConverter.GetBytes((uint)0), ref offset);
+                writer.Write(0);
 
                 ///unknown value?
-                Message.Write(BitConverter.GetBytes((ushort)0), ref offset);
+                writer.Write((ushort)0);
 
                 ///unknown value?
-                Message.Write(BitConverter.GetBytes(0xFFFFFFFF), ref offset);
+                writer.Write(0xFFFFFFFF);
 
                 ///unknown value?
-                Message.Write(BitConverter.GetBytes(0xFFFFFFFF), ref offset);
+                writer.Write(0xFFFFFFFF);
 
                 ///unknown value?
-                Message.Write(BitConverter.GetBytes(0xFFFFFFFF), ref offset);
+                writer.Write(0xFFFFFFFF);
 
                 ///Chest color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.ChestColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.ChestColor));
 
                 ///Bracer color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BracerColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.BracerColor));
 
                 ///Glove color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.GloveColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.GloveColor));
 
                 ///Leg color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.LegColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.LegColor));
 
                 ///Boot color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.BootsColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.BootsColor));
 
                 ///Helm color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.HelmColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.HelmColor));
 
                 ///Robe color
-                Message.Write(BitConverter.GetBytes(ByteSwaps.SwapBytes(character.RobeColor)), ref offset);
+                writer.Write(ByteSwaps.SwapBytes(character.RobeColor));
             }
 
             ///Character list is complete

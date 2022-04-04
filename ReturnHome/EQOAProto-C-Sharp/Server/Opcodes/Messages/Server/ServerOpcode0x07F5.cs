@@ -8,13 +8,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void Opcode0x07F5(Session session)
         {
-            int offset = 0;
-            Memory<byte> temp2 = new byte[6];
-            Span<byte> Message2 = temp2.Span;
-            Message2.Write(BitConverter.GetBytes((ushort)GameOpcode.Camera2), ref offset);
-            Message2.Write(new byte[] { 0x1B, 0x00, 0x00, 0x00 }, ref offset);
+            Memory<byte> temp = new byte[6];
+            Span<byte> Message = temp.Span;
+
+            BufferWriter writer = new BufferWriter(Message);
+
+            writer.Write((ushort)GameOpcode.Camera2);
+            writer.Write(0x1B);
             ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(session, temp2, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
     }
 }

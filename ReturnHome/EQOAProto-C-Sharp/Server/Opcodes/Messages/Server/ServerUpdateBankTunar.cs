@@ -8,14 +8,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
 		public static void UpdateBankTunar(Session session, int tunar)
         {
-            int offset = 0;
-            Memory<byte> bankTemp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(tunar)];
-            Span<byte> messageBank = bankTemp.Span;
+            Memory<byte> temp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(tunar)];
+            Span<byte> Message = temp.Span;
 
-            messageBank.Write((ushort)GameOpcode.ConfirmBankTunar, ref offset);
-            messageBank.Write7BitDoubleEncodedInt(tunar, ref offset);
+            BufferWriter writer = new BufferWriter(Message);
 
-            SessionQueueMessages.PackMessage(session, bankTemp, MessageOpcodeTypes.ShortReliableMessage);
+            writer.Write((ushort)GameOpcode.ConfirmBankTunar);
+            writer.Write7BitEncodedInt64(tunar);
+
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
     }
 }

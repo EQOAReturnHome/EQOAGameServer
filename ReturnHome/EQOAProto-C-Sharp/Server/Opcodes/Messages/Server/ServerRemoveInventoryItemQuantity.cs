@@ -13,14 +13,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
          */
 		public static void RemoveInventoryItemQuantity(Session session, Item item, byte clientIndex)
         {
-            int offset = 0;
             Memory<byte> temp = new byte[3 + Utility_Funcs.DoubleVariableLengthIntegerLength(item.StackLeft)];
-            Span<byte> message = temp.Span;
+            Span<byte> Message = temp.Span;
 
-            message.Write((ushort)GameOpcode.RemoveInvItem, ref offset);
-            message[offset++] = clientIndex;
-            message[offset++] = 1;
-            message.Write7BitDoubleEncodedInt(item.StackLeft, ref offset);
+            BufferWriter writer = new BufferWriter(Message);
+
+            writer.Write((ushort)GameOpcode.RemoveInvItem);
+            writer.Write(clientIndex);
+            writer.Write((byte)1);
+            writer.Write7BitEncodedInt64(item.StackLeft);
 
             SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
         }

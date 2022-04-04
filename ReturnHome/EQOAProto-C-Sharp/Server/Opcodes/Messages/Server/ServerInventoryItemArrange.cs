@@ -8,18 +8,18 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
 		public static void InventoryItemArrange(Session session, byte clientItem1, byte clientItem2)
         {
-            int offset = 0;
-
             //Define Memory span
             Memory<byte> temp = new byte[4];
             Span<byte> Message = temp.Span;
 
+            BufferWriter writer = new BufferWriter(Message);
+
             //Write arrangeop code back to memory span
-            Message.Write((ushort)GameOpcode.ArrangeItem, ref offset);
+            writer.Write((ushort)GameOpcode.ArrangeItem);
 
             //send slot swap back to player to confirm
-            Message.Write(clientItem1, ref offset);
-            Message.Write(clientItem2, ref offset);
+            writer.Write(clientItem1);
+            writer.Write(clientItem2);
 
             //Send arrange op code back to player
             SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);

@@ -9,15 +9,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void AddQuestLog(Session mySession, uint questNumber, string questText)
         {
-            int offset = 0;
-
             Memory<byte> temp = new Memory<byte>(new byte[11 + (questText.Length * 2)]);
             Span<byte> Message = temp.Span;
 
-            Message.Write((ushort)GameOpcode.AddQuestLog, ref offset);
-            Message.Write(questNumber, ref offset);
-            Message.Write(questText.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(questText), ref offset);
+            BufferWriter writer = new BufferWriter(Message);
+
+            writer.Write((ushort)GameOpcode.AddQuestLog);
+            writer.Write(questNumber);
+            writer.WriteString(Encoding.Unicode, questText);
+
             SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
     }

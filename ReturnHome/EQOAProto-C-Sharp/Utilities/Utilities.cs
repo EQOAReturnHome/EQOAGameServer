@@ -20,48 +20,20 @@ namespace ReturnHome.Utilities
             uint value = (uint)val;
             value *= 2;
 
-            if (value >= 0 && value <= 127)
-                return 1;
-
-            else if (value >= 128 && value <= 16383)
-                return 2;
-
-            else if (value >= 16384 && value <= 2097151)
-                return 3;
-
-            else if (value >= 2097152 && value <= 268435455)
-                return 4;
-
-            else if (value >= 268435456 && value <= 4294967295)
-                return 5;
-
-            else
-                //Throw an error and return 0?
-                return 0;
+            return VariableLengthIntegerLength(value);
         }
 
-        public static byte VariableLengthIntegerLength(uint val)
+        public static byte VariableLengthIntegerLength(uint param_2)
         {
-            uint value = (uint)val;
+            byte result = 0;
 
-            if (value >= 0 && value <= 127)
-                return 1;
+            do
+            {
+                param_2 = param_2 >> 7;
+                ++result;
+            } while (param_2 != 0);
 
-            else if (value >= 128 && value <= 16383)
-                return 2;
-
-            else if (value >= 16384 && value <= 2097151)
-                return 3;
-
-            else if (value >= 2097152 && value <= 268435455)
-                return 4;
-
-            else if (value >= 268435456 && value <= 4294967295)
-                return 5;
-
-            else
-                //Throw an error and return 0?
-                return 0;
+            return result;
         }
 
         //This method unpacks VLI data

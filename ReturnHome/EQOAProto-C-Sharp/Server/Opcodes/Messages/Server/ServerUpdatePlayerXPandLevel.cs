@@ -8,13 +8,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void UpdatePlayerXPandLevel(Session session, int Level, int totalXPEarned)
         {
-            int offset = 0;
             Memory<byte> temp = new Memory<byte>(new byte[Utility_Funcs.DoubleVariableLengthIntegerLength(Level) + Utility_Funcs.DoubleVariableLengthIntegerLength(totalXPEarned) + 2]);
             Span<byte> Message = temp.Span;
 
-            Message.Write((ushort)GameOpcode.GrantXP, ref offset);
-            Message.Write7BitDoubleEncodedInt(Level, ref offset);
-            Message.Write7BitDoubleEncodedInt(totalXPEarned, ref offset);
+            BufferWriter writer = new BufferWriter(Message);
+
+            writer.Write((ushort)GameOpcode.GrantXP);
+            writer.Write7BitEncodedInt64(Level);
+            writer.Write7BitEncodedInt64(totalXPEarned);
+
             SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
     }

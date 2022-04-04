@@ -8,16 +8,17 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void DiscVersion(Session session, int GameVersion)
         {
-            int offset = 0;
+            Memory<byte> temp = new byte[6];
+            Span<byte> Message = temp.Span;
 
-            Memory<byte> temp2 = new byte[6];
-            Span<byte> Message = temp2.Span;
+            BufferWriter writer = new BufferWriter(Message);
+
             ///Need to send this back to client
-            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.DiscVersion), ref offset);
-            Message.Write(BitConverter.GetBytes((uint)GameVersion), ref offset);
+            writer.Write((ushort)GameOpcode.DiscVersion);
+            writer.Write(GameVersion);
 
             ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(session, temp2, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
         }
     }
 }
