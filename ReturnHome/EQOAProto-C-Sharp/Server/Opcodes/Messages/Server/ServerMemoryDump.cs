@@ -12,7 +12,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void MemoryDump(Session session)
         {
-            Memory<byte> buffer;
+            Memory<byte> temp = new byte[40000];
+            Span<byte> Message = temp.Span;
+
+            BufferWriter writer = new BufferWriter(Message);
 
             //Perform SQl stuff
             CharacterSQL charDump = new CharacterSQL();
@@ -22,87 +25,69 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             charDump.GetPlayerWeaponHotbar(session);
             charDump.GetPlayerSpells(session);
 
-            using (MemoryStream memStream = new())
-            {
-                //Toss opcode in
-                memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.MemoryDump));
+            //Toss opcode in
+            writer.Write((ushort)GameOpcode.MemoryDump);
 
-                session.MyCharacter.DumpCharacter(memStream);
-                memStream.Write(Utility_Funcs.DoublePack(session.MyCharacter.MyHotkeys.Count));
+            session.MyCharacter.DumpCharacter(ref writer);
+            writer.Write7BitEncodedInt64(session.MyCharacter.MyHotkeys.Count);
 
-                //cycle over all our hotkeys and append them
-                foreach (Hotkey h in session.MyCharacter.MyHotkeys)
-                {
-                    h.PullHotkey(memStream);
-                }
+            //cycle over all our hotkeys and append them
+            foreach (Hotkey h in session.MyCharacter.MyHotkeys)
+                h.PullHotkey(ref writer);
 
-                //Unknown at this time 4 byte null
-                memStream.Write(new byte[4]);
+            //Unknown at this time 4 byte null
+            writer.Write(0);
 
-                //Unknown at this time 4 byte null
-                memStream.Write(new byte[4]);
+            //Unknown at this time 4 byte null
+            writer.Write(0);
 
-                //Quest Count
-                memStream.Write(BitConverter.GetBytes(session.MyCharacter.MyQuests.Count));
+            //Quest Count
+            writer.Write(session.MyCharacter.MyQuests.Count);
 
-                //Iterate over quest data and append (Should be 0 for now...)
-                foreach (Quest q in session.MyCharacter.MyQuests)
-                {
-                    q.DumpQuest(memStream);
-                }
+            //Iterate over quest data and append (Should be 0 for now...)
+            foreach (Quest q in session.MyCharacter.MyQuests)
+                q.DumpQuest(ref writer);
 
-                //Get Inventory Item count
-                memStream.Write(Utility_Funcs.DoublePack(session.MyCharacter.Inventory.Count));
-                memStream.Write(BitConverter.GetBytes(session.MyCharacter.Inventory.Count));
+            //Get Inventory Item count
+            writer.Write7BitEncodedInt64(session.MyCharacter.Inventory.Count);
+            writer.Write(session.MyCharacter.Inventory.Count);
 
-                foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Inventory.itemContainer)
-                {
-                    entry.Value.DumpItem(memStream);
-                }
+            foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Inventory.itemContainer)
+                entry.Value.DumpItem(ref writer);
 
-                //While we are here, lets "equip" our equipped gear
-                session.MyCharacter.EquipGear(session.MyCharacter);
+            //While we are here, lets "equip" our equipped gear
+            session.MyCharacter.EquipGear(session.MyCharacter);
 
-                foreach (WeaponHotbar wb in session.MyCharacter.WeaponHotbars)
-                {
-                    wb.DumpWeaponHotbar(memStream);
-                }
+            foreach (WeaponHotbar wb in session.MyCharacter.WeaponHotbars)
+                wb.DumpWeaponHotbar(ref writer);
 
-                //Get Bank Item count
-                memStream.Write(Utility_Funcs.DoublePack(session.MyCharacter.Bank.Count));
-                memStream.Write(BitConverter.GetBytes(session.MyCharacter.Bank.Count));
-                foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Bank.itemContainer)
-                {
-                    entry.Value.DumpItem(memStream);
-                }
+            //Get Bank Item count
+            writer.Write7BitEncodedInt64(session.MyCharacter.Bank.Count);
+            writer.Write(session.MyCharacter.Bank.Count);
+            foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Bank.itemContainer)
+                entry.Value.DumpItem(ref writer);
 
-                // end of bank? or could be something else for memory dump
-                memStream.WriteByte(0);
+            // end of bank? or could be something else for memory dump
+            writer.Write((byte)0);
 
-                //Buying auctions
-                memStream.WriteByte((byte)session.MyCharacter.MyBuyingAuctions.Count);
-                foreach (Auction ba in session.MyCharacter.MyBuyingAuctions)
-                {
-                    ba.DumpAuction(memStream);
-                }
+            //Buying auctions
+            writer.Write((byte)session.MyCharacter.MyBuyingAuctions.Count);
+            foreach (Auction ba in session.MyCharacter.MyBuyingAuctions)
+                ba.DumpAuction(ref writer);
 
-                //Selling auctions
-                memStream.WriteByte((byte)session.MyCharacter.MySellingAuctions.Count);
-                foreach (Auction sa in session.MyCharacter.MySellingAuctions)
-                {
-                    sa.DumpAuction(memStream);
-                }
+            //Selling auctions
+            writer.Write((byte)session.MyCharacter.MySellingAuctions.Count);
+            foreach (Auction sa in session.MyCharacter.MySellingAuctions)
+                sa.DumpAuction(ref writer);
 
-                //Spell count and Spells
-                memStream.Write(Utility_Funcs.DoublePack(session.MyCharacter.MySpells.Count));
-                foreach (Spell s in session.MyCharacter.MySpells)
-                {
-                    s.DumpSpell(memStream);
-                }
+            //Spell count and Spells
+            writer.Write7BitEncodedInt64(session.MyCharacter.MySpells.Count);
+            foreach (Spell s in session.MyCharacter.MySpells)
+                s.DumpSpell(ref writer);
 
-                //Not entirely known what this is at this time
-                //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
-                memStream.Write(new byte[] {                  0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+            //Not entirely known what this is at this time
+            //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
+            writer.Write(new byte[] {                  0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00,
@@ -113,19 +98,11 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                                                             0x01, 0x96, 0x01, 0x78, 0x96, 0x01, 0x00, 0x00, 0x00, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa,
                                                             0x01, 0x00, 0x00, 0x00, 0xe8, 0x07, 0x00, 0x5a, 0x00, 0x00, 0x04, 0x00, 0x0c, 0x4f, 0x00,
                                                             0x00, 0x00, 0x00, 0x00, 0x00, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa, 0x01, 0x00, 0x00, 0x00});
-                long pos = memStream.Position;
-                buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
-            }
 
-            int offset = 0;
-            Memory<byte> temp = new byte[18];
-            Span<byte> Message = temp.Span;
 
-            //Get our timestamp opcode in queue
-            Message.Write((ushort)GameOpcode.Time, ref offset);
-            Message.Write(DNP3Creation.CreateDNP3TimeStamp(), ref offset);
+            ServerTime.Time(session);
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            Memory<byte> buffer = temp.Slice(0, writer.Position);
 
             SessionQueueMessages.PackMessage(session, buffer, MessageOpcodeTypes.ShortReliableMessage);
 

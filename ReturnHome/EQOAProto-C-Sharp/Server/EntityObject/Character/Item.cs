@@ -161,188 +161,186 @@ namespace ReturnHome.Server.EntityObject.Player
             return item;
         }
 
-        public void DumpItem(MemoryStream memStream)
+        public void DumpItem(ref BufferWriter writer)
         {
             //Start adding attributes to list for this item
-            //Start adding attributes to list for this item
-            memStream.Write(Utility_Funcs.DoublePack(StackLeft));
-            memStream.Write(Utility_Funcs.DoublePack(RemainingHP));
-            memStream.Write(Utility_Funcs.DoublePack(Charges));
-            memStream.Write(Utility_Funcs.DoublePack(EquipLocation));
-            memStream.WriteByte(Location);
-            memStream.Write(BitConverter.GetBytes(ServerKey));
-            memStream.Write(Utility_Funcs.DoublePack(ItemID));
-            memStream.Write(Utility_Funcs.Pack(ItemCost));
-            memStream.Write(Utility_Funcs.DoublePack(Unk1));
-            memStream.Write(Utility_Funcs.DoublePack(ItemIcon));
-            memStream.Write(Utility_Funcs.DoublePack(Unk2));
-            memStream.Write(Utility_Funcs.DoublePack(Equipslot));
-            memStream.Write(Utility_Funcs.DoublePack(Unk3));
-            memStream.Write(Utility_Funcs.DoublePack(Trade));
-            memStream.Write(Utility_Funcs.DoublePack(Rent));
-            memStream.Write(Utility_Funcs.DoublePack(Unk4));
-            memStream.Write(Utility_Funcs.DoublePack(Attacktype));
-            memStream.Write(Utility_Funcs.DoublePack(Weapondamage));
-            memStream.Write(Utility_Funcs.DoublePack(Unk5));
-            memStream.Write(Utility_Funcs.DoublePack(Levelreq));
-            memStream.Write(Utility_Funcs.DoublePack(Maxstack));
-            memStream.Write(Utility_Funcs.DoublePack(Maxhp));
-            memStream.Write(Utility_Funcs.DoublePack(Duration));
-            memStream.Write(Utility_Funcs.DoublePack(Classuse));
-            memStream.Write(Utility_Funcs.DoublePack(Raceuse));
-            memStream.Write(Utility_Funcs.DoublePack(Procanim));
-            memStream.Write(Utility_Funcs.DoublePack(Lore));
-            memStream.Write(Utility_Funcs.DoublePack(Unk6));
-            memStream.Write(Utility_Funcs.DoublePack(Craft));
-            memStream.Write(BitConverter.GetBytes(ItemName.Length));
-            memStream.Write(Encoding.Unicode.GetBytes(ItemName));
-            memStream.Write(BitConverter.GetBytes(ItemDesc.Length));
-            memStream.Write(Encoding.Unicode.GetBytes(ItemDesc));
-            PullStats(memStream);
+            writer.Write7BitEncodedInt64(StackLeft);
+            writer.Write7BitEncodedInt64(RemainingHP);
+            writer.Write7BitEncodedInt64(Charges);
+            writer.Write7BitEncodedInt64(EquipLocation);
+            writer.Write(Location);
+            writer.Write(ServerKey);
+            writer.Write7BitEncodedInt64(ItemID);
+            writer.Write7BitEncodedUInt64(ItemCost);
+            writer.Write7BitEncodedInt64(Unk1);
+            writer.Write7BitEncodedInt64(ItemIcon);
+            writer.Write7BitEncodedInt64(Unk2);
+            writer.Write7BitEncodedInt64(Equipslot);
+            writer.Write7BitEncodedInt64(Unk3);
+            writer.Write7BitEncodedInt64(Trade);
+            writer.Write7BitEncodedInt64(Rent);
+            writer.Write7BitEncodedInt64(Unk4);
+            writer.Write7BitEncodedInt64(Attacktype);
+            writer.Write7BitEncodedInt64(Weapondamage);
+            writer.Write7BitEncodedInt64(Unk5);
+            writer.Write7BitEncodedInt64(Levelreq);
+            writer.Write7BitEncodedInt64(Maxstack);
+            writer.Write7BitEncodedInt64(Maxhp);
+            writer.Write7BitEncodedInt64(Duration);
+            writer.Write7BitEncodedInt64(Classuse);
+            writer.Write7BitEncodedInt64(Raceuse);
+            writer.Write7BitEncodedInt64(Procanim);
+            writer.Write7BitEncodedInt64(Lore);
+            writer.Write7BitEncodedInt64(Unk6);
+            writer.Write7BitEncodedInt64(Craft);
+            writer.WriteString(Encoding.Unicode, ItemName);
+            writer.WriteString(Encoding.Unicode, ItemDesc);
+            PullStats(ref writer);
         }
 
-        private void PullStats(MemoryStream memStream)
+        private void PullStats(ref BufferWriter writer)
         {
 
             //Gather stats if any exist
             //Increment counter if if statement true, then add identifier int for stat and then DoublePack and add stat value
-            long position = memStream.Position;
+            int position = writer.Position;
             //Place 0 place holder here
-            memStream.WriteByte(0);
+            writer.Write((byte)0);
 
             if (Str > 0)
             {
                 Counter++;
-                memStream.WriteByte(0);
-                memStream.Write(Utility_Funcs.DoublePack(Str));
+                writer.Write((byte)0);
+                writer.Write7BitEncodedInt64(Str);
             }
 
             if (Sta > 0)
             {
                 Counter++;
-                memStream.WriteByte(2);
-                memStream.Write(Utility_Funcs.DoublePack(Sta));
+                writer.Write((byte)2);
+                writer.Write7BitEncodedInt64(Sta);
             }
 
             if (Agi > 0)
             {
                 Counter++;
-                memStream.WriteByte(4);
-                memStream.Write(Utility_Funcs.DoublePack(Agi));
+                writer.Write((byte)4);
+                writer.Write7BitEncodedInt64(Agi);
             }
 
             if (Dex > 0)
             {
                 Counter++;
-                memStream.WriteByte(6);
-                memStream.Write(Utility_Funcs.DoublePack(Dex));
+                writer.Write((byte)6);
+                writer.Write7BitEncodedInt64(Dex);
             }
 
             if (Wis > 0)
             {
                 Counter++;
-                memStream.WriteByte(8);
-                memStream.Write(Utility_Funcs.DoublePack(Wis));
+                writer.Write((byte)8);
+                writer.Write7BitEncodedInt64(Wis);
             }
 
             if (Int > 0)
             {
                 Counter++;
-                memStream.WriteByte(10);
-                memStream.Write(Utility_Funcs.DoublePack(Int));
+                writer.Write((byte)10);
+                writer.Write7BitEncodedInt64(Int);
             }
 
             if (Cha > 0)
             {
                 Counter++;
-                memStream.WriteByte(12);
-                memStream.Write(Utility_Funcs.DoublePack(Cha));
+                writer.Write((byte)12);
+                writer.Write7BitEncodedInt64(Cha);
             }
 
             if (HPMax > 0)
             {
                 Counter++;
-                memStream.WriteByte(16);
-                memStream.Write(Utility_Funcs.DoublePack(HPMax));
+                writer.Write((byte)16);
+                writer.Write7BitEncodedInt64(HPMax);
             }
 
             if (POWMax > 0)
             {
                 Counter++;
-                memStream.WriteByte(20);
-                memStream.Write(Utility_Funcs.DoublePack(POWMax));
+                writer.Write((byte)20);
+                writer.Write7BitEncodedInt64(POWMax);
             }
 
             if (PoT > 0)
             {
                 Counter++;
-                memStream.WriteByte(24);
-                memStream.Write(Utility_Funcs.DoublePack(PoT));
+                writer.Write((byte)24);
+                writer.Write7BitEncodedInt64(PoT);
             }
 
             if (HoT > 0)
             {
                 Counter++;
-                memStream.WriteByte(26);
-                memStream.Write(Utility_Funcs.DoublePack(HoT));
+                writer.Write((byte)26);
+                writer.Write7BitEncodedInt64(HoT);
             }
 
             if (AC > 0)
             {
                 Counter++;
-                memStream.WriteByte(28);
-                memStream.Write(Utility_Funcs.DoublePack(AC));
+                writer.Write((byte)28);
+                writer.Write7BitEncodedInt64(AC);
             }
 
             if (PR > 0)
             {
                 Counter++;
-                memStream.WriteByte(44);
-                memStream.Write(Utility_Funcs.DoublePack(PR));
+                writer.Write((byte)44);
+                writer.Write7BitEncodedInt64(PR);
             }
 
             if (DR > 0)
             {
                 Counter++;
-                memStream.WriteByte(46);
-                memStream.Write(Utility_Funcs.DoublePack(DR));
+                writer.Write((byte)46);
+                writer.Write7BitEncodedInt64(DR);
             }
 
             if (FR > 0)
             {
                 Counter++;
-                memStream.WriteByte(48);
-                memStream.Write(Utility_Funcs.DoublePack(FR));
+                writer.Write((byte)48);
+                writer.Write7BitEncodedInt64(FR);
             }
 
             if (CR > 0)
             {
                 Counter++;
-                memStream.WriteByte(50);
-                memStream.Write(Utility_Funcs.DoublePack(CR));
+                writer.Write((byte)50);
+                writer.Write7BitEncodedInt64(CR);
             }
 
             if (LR > 0)
             {
                 Counter++;
-                memStream.WriteByte(52);
-                memStream.Write(Utility_Funcs.DoublePack(LR));
+                writer.Write((byte)52);
+                writer.Write7BitEncodedInt64(LR);
             }
 
             if (AR > 0)
             {
                 Counter++;
-                memStream.WriteByte(54);
-                memStream.Write(Utility_Funcs.DoublePack(AR));
+                writer.Write((byte)54);
+                writer.Write7BitEncodedInt64(AR);
             }
 
             if (Counter == 0)
                 return;
-            long position2 = memStream.Position;
-            memStream.Position = position;
-            memStream.Write(Utility_Funcs.DoublePack(Counter));
 
-            memStream.Position = position2;
+            int position2 = writer.Position;
+            writer.Position = position;
+            writer.Write7BitEncodedInt64(Counter);
+
+            writer.Position = position2;
             Counter = 0;
         }
     }

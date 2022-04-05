@@ -130,35 +130,33 @@ namespace ReturnHome.Server.EntityObject.Player
             MySession.MyCharacter = this;
         }
 
-        public void DumpCharacter(MemoryStream memStream)
+        public void DumpCharacter(ref BufferWriter writer)
         {
             //Start pulling data together
-            memStream.WriteByte(0);
-            memStream.Write(BitConverter.GetBytes(Tunaria.Length));
-            memStream.Write(Encoding.UTF8.GetBytes(Tunaria));
-            memStream.Write(Utility_Funcs.DoublePack(ModelID));
-            memStream.Write(BitConverter.GetBytes(CharName.Length));
-            memStream.Write(Encoding.UTF8.GetBytes(CharName));
-            memStream.Write(Utility_Funcs.DoublePack(Class));
-            memStream.Write(Utility_Funcs.DoublePack(Race));
-            memStream.Write(Utility_Funcs.DoublePack(Level));
-            memStream.Write(Utility_Funcs.DoublePack(TotalXPEarned));
-            memStream.Write(Utility_Funcs.DoublePack(totalDebt));
-            memStream.WriteByte((byte)Breath);
-            memStream.Write(Utility_Funcs.DoublePack(Inventory.Tunar));
-            memStream.Write(Utility_Funcs.DoublePack(Bank.Tunar));
-            memStream.Write(Utility_Funcs.DoublePack(UnusedTP));
-            memStream.Write(Utility_Funcs.DoublePack(MaxAssignableTP));
-            memStream.Write(Utility_Funcs.DoublePack(World));
-            memStream.Write(BitConverter.GetBytes(x));
-            memStream.Write(BitConverter.GetBytes(y));
-            memStream.Write(BitConverter.GetBytes(z));
-            memStream.Write(BitConverter.GetBytes(FacingF));
+            writer.Write((byte)0);
+            writer.WriteString(Encoding.UTF8, Tunaria);
+            writer.Write7BitEncodedInt64(ModelID);
+            writer.WriteString(Encoding.UTF8, CharName);
+            writer.Write7BitEncodedInt64(Class);
+            writer.Write7BitEncodedInt64(Race);
+            writer.Write7BitEncodedInt64(Level);
+            writer.Write7BitEncodedInt64(TotalXPEarned);
+            writer.Write7BitEncodedInt64(totalDebt);
+            writer.Write((byte)Breath);
+            writer.Write7BitEncodedInt64(Inventory.Tunar);
+            writer.Write7BitEncodedInt64(Bank.Tunar);
+            writer.Write7BitEncodedInt64(UnusedTP);
+            writer.Write7BitEncodedInt64(MaxAssignableTP);
+            writer.Write7BitEncodedInt64(World);
+            writer.Write(x);
+            writer.Write(y);
+            writer.Write(z);
+            writer.Write(FacingF);
 
             //Two unknown values must be packed on the end, can be updated later to
             //include database values when we figure out what it does.
-            memStream.Write(BitConverter.GetBytes(0.0f));
-            memStream.Write(BitConverter.GetBytes(0.0f));
+            writer.Write(0.0f);
+            writer.Write(0.0f);
         }
         public bool GetPlayerFlags(Session mySession, string flagKey)
         {

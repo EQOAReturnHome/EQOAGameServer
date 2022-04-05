@@ -35,74 +35,63 @@ namespace ReturnHome.Server.EntityObject.Player
             SMessage = thisSMessage;
         }
 
-        public void PullHotkey(MemoryStream memStream)
+        public void PullHotkey(ref BufferWriter writer)
         {
             //Packdata in list here and return it to calling method
             //Get directions integer value and perform technique
-            memStream.Write(Utility_Funcs.DoublePack(HotKeyFuncs.OutHoingHotkeyDict[Direction])); 
+            writer.Write7BitEncodedInt64(HotKeyFuncs.OutHoingHotkeyDict[Direction]); 
 
             //North HK
-            memStream.WriteByte(0);
-            ConvertHotKey(memStream, NLabel, NMessage);
+            writer.Write((byte)0);
+            ConvertHotKey(ref writer, NLabel, NMessage);
 
             //West HK
-            memStream.WriteByte(2);
-            ConvertHotKey(memStream, WLabel, WMessage);
+            writer.Write((byte)2);
+            ConvertHotKey(ref writer, WLabel, WMessage);
 
             //East HK
-            memStream.WriteByte(4);
-            ConvertHotKey(memStream, ELabel, EMessage);
+            writer.Write((byte)4);
+            ConvertHotKey(ref writer, ELabel, EMessage);
 
             //South HK
-            memStream.WriteByte(6);
-            ConvertHotKey(memStream, SLabel, SMessage);
+            writer.Write((byte)6);
+            ConvertHotKey(ref writer, SLabel, SMessage);
         }
 
-        private void ConvertHotKey(MemoryStream memStream, string label, string message)
+        private void ConvertHotKey(ref BufferWriter writer, string label, string message)
         {
             //If message
             if(label != null)
             {
                 //Add string length, 4 bytes then string as utf-16-le
-                memStream.Write(BitConverter.GetBytes(label.Length));
-                memStream.Write(Encoding.Unicode.GetBytes(label));
+                writer.WriteString(Encoding.Unicode, label);
 
                 //If label
                 if (message != null)
-                {
                     //Add string length, 4 bytes then string as utf-16-le
-                    memStream.Write(BitConverter.GetBytes(message.Length));
-                    memStream.Write(Encoding.Unicode.GetBytes(message));
-                }
+                    writer.WriteString(Encoding.Unicode, message);
 
                 //no label
                 else
-                {
                     //Length of 0, 4 bytes
-                    memStream.Write(BitConverter.GetBytes(0));
-                }
+                    writer.Write((byte)0);
             }
 
             //No message
             else
             {
                 //Length of 0, 4 bytes
-                memStream.Write(BitConverter.GetBytes(0));
+                writer.Write((byte)0);
 
                 //If label
                 if (message != null)
-                {
                     //Add string length, 4 bytes then string as utf-16-le
-                    memStream.Write(BitConverter.GetBytes(message.Length));
-                    memStream.Write(Encoding.Unicode.GetBytes(message));
-                }
+                    writer.WriteString(Encoding.Unicode, message);
 
                 //no label
                 else
-                {
                     //Length of 0, 4 bytes
-                    memStream.Write(BitConverter.GetBytes(0));
-                }
+                    writer.Write((byte)0);
             }
         }
     }

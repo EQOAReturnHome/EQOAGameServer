@@ -1,7 +1,7 @@
 using System;
-using System.IO;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
@@ -9,18 +9,18 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
 		public static void AddBankItemQuantity(Session session, Item item)
         {
-			Memory<byte> buffer;
-            using (MemoryStream memStream = new())
-            {
+			Memory<byte> temp = new byte[500];
+            Span<byte> Message = temp.Span;
 
-                memStream.Write(BitConverter.GetBytes((ushort)GameOpcode.AddBankItem));
+            BufferWriter writer = new BufferWriter(Message);
 
-                item.DumpItem(memStream);
-                long pos = memStream.Position;
-                buffer = new Memory<byte>(memStream.GetBuffer(), 0, (int)pos);
+            writer.Write((ushort)GameOpcode.AddBankItem);
 
-                SessionQueueMessages.PackMessage(session, buffer, MessageOpcodeTypes.ShortReliableMessage);
-            }
+            item.DumpItem(writer);
+
+            Memory<byte> buffer = temp.Slice(0, writer.Position); 
+
+            SessionQueueMessages.PackMessage(session, buffer, MessageOpcodeTypes.ShortReliableMessage);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ReturnHome.Server.Network;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -12,7 +13,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
         }
 
-        public void DumpQuest(MemoryStream memStream)
+        public void DumpQuest(ref BufferWriter writer)
         {
 
         }

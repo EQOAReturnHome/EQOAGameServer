@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ReturnHome.Utilities
 {
-    ref struct BufferWriter
+    public ref struct BufferWriter
     {
         private Span<byte> _buffer;
         private int _position;
@@ -65,6 +65,18 @@ namespace ReturnHome.Utilities
             {
                 return false;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void Write(Span<byte> val)
+        {
+            int size = val.Length;
+
+            if (Position + size > Remaining)
+                throw new InvalidOperationException($"{nameof(size)} exceeds the count of bytes remaining to be wrote to the {nameof(BufferWriter)}");
+
+            val.CopyTo(_buffer[Position..]);
+            Advance(size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

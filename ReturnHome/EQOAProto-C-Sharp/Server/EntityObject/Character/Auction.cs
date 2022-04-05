@@ -1,4 +1,5 @@
 using System.IO;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -9,7 +10,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
         }
 
-        public void DumpAuction(MemoryStream memStream)
+        public void DumpAuction(ref BufferWriter writer)
         {
 
         }

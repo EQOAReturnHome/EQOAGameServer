@@ -58,33 +58,30 @@ namespace ReturnHome.Server.EntityObject.Player
         }
 
         
-        public void DumpSpell(MemoryStream memStream)
+        public void DumpSpell(ref BufferWriter writer)
         {
             //Start gathering the data
-            memStream.Write(Utility_Funcs.DoublePack(SpellID));
-            memStream.Write(Utility_Funcs.DoublePack(AddedOrder));
-            memStream.Write(Utility_Funcs.DoublePack(OnHotBar));
-            memStream.Write(Utility_Funcs.DoublePack(WhereOnHotBar));
-            memStream.Write(Utility_Funcs.DoublePack(Unk1));
-            memStream.Write(Utility_Funcs.DoublePack(ShowHide));
-            memStream.Write(Utility_Funcs.DoublePack(AbilityLevel));
-            memStream.Write(Utility_Funcs.DoublePack(Unk2));
-            memStream.Write(Utility_Funcs.DoublePack(Unk3));
+            writer.Write7BitEncodedInt64(SpellID);
+            writer.Write7BitEncodedInt64(AddedOrder);
+            writer.Write7BitEncodedInt64(OnHotBar);
+            writer.Write7BitEncodedInt64(WhereOnHotBar);
+            writer.Write7BitEncodedInt64(Unk1);
+            writer.Write7BitEncodedInt64(ShowHide);
+            writer.Write7BitEncodedInt64(AbilityLevel);
+            writer.Write7BitEncodedInt64(Unk2);
+            writer.Write7BitEncodedInt64(Unk3);
 
-            //Only take the last 2 bytes, technically a half float but not much support yet in c# that I have seen
-            memStream.Write(BitConverter.GetBytes(SpellRange)[2..4]);
-            memStream.Write(Utility_Funcs.DoublePack(CastTime));
-            memStream.Write(Utility_Funcs.DoublePack(Power));
-            memStream.Write(Utility_Funcs.DoublePack(IconColor));
-            memStream.Write(Utility_Funcs.DoublePack(Icon));
-            memStream.Write(Utility_Funcs.DoublePack(Scope));
-            memStream.Write(Utility_Funcs.DoublePack(Recast));
-            memStream.Write(Utility_Funcs.DoublePack(EqpRequirement));
-            memStream.Write(BitConverter.GetBytes(SpellName.Length));
-            memStream.Write(Encoding.Unicode.GetBytes(SpellName));
-            memStream.Write(BitConverter.GetBytes(SpellDesc.Length));
-            memStream.Write(Encoding.Unicode.GetBytes(SpellDesc));
-            memStream.WriteByte(0);
+            writer.Write((Half)SpellRange);
+            writer.Write7BitEncodedInt64(CastTime);
+            writer.Write7BitEncodedInt64(Power);
+            writer.Write7BitEncodedInt64(IconColor);
+            writer.Write7BitEncodedInt64(Icon);
+            writer.Write7BitEncodedInt64(Scope);
+            writer.Write7BitEncodedInt64(Recast);
+            writer.Write7BitEncodedInt64(EqpRequirement);
+            writer.WriteString(Encoding.Unicode, SpellName);
+            writer.WriteString(Encoding.Unicode, SpellDesc);
+            writer.Write((byte)0);
         }
     }
 }
