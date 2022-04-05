@@ -16,7 +16,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             writer.Write((ushort)GameOpcode.AddBankItem);
 
-            item.DumpItem(writer);
+            item.DumpItem(ref writer);
 
             Memory<byte> buffer = temp.Slice(0, writer.Position); 
 

@@ -24,7 +24,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write7BitEncodedInt64(npc.Inventory.Count);
             writer.Write(npc.Inventory.Count);
             foreach (Item entry in npc.Inventory.itemContainer.Values)
-                entry.DumpItem(writer);
+                entry.DumpItem(ref writer);
 
             Memory<byte> buffer = temp.Slice(0, writer.Position);
 
