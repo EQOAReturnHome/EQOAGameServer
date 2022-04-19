@@ -19,7 +19,6 @@ namespace ReturnHome.Utilities
             Span<byte> tempSpan = tempMem.Span;
 
             //Cycle through every byte of update message
-            //skip first 5 bytes
             for (int i = 0; i < length; i++)
             {
                 //Check if null byte

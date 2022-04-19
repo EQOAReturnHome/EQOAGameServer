@@ -47,16 +47,13 @@ namespace ReturnHome.Server.Opcodes.Chat
 
         public static void GenerateClientSpecificChat(Session MySession, string message)
         {
-            int offset = 0;
-
             Memory<byte> temp = new Memory<byte>(new byte[6 + (message.Length * 2)]);
-            Span<byte> Message = temp.Span;
-            Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-            Message.Write(message.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
+            BufferWriter writer = new(temp.Span);
+            writer.Write(GameOpcode.ClientMessage);
+            writer.WriteString(Encoding.Unicode, message);
 
             //Send Message
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ReliableMessage);
         }
 
         /// <summary>

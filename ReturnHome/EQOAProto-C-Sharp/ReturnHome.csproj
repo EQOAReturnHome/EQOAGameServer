@@ -5,6 +5,7 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\Beebster\Documents\Source\Repos\EQOA_Proto_C-sharp\Backup1\</UpgradeBackupLocation>
     <OldToolsVersion>Current</OldToolsVersion>
+    <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

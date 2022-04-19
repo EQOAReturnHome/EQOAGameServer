@@ -17,6 +17,7 @@ namespace ReturnHome.Server.Opcodes.Chat
 
         public static float Radius = 200.0f;
 
+        //TODO: Consider reworking player query to send the say message?
         ///This method queries for nearby objects to player, then iterates over list, looking if any are players and distributing the message
         public static void ProcessSay(Session MySession, string message)
         {
@@ -25,13 +26,10 @@ namespace ReturnHome.Server.Opcodes.Chat
             //Query for nearby objects
             List<Entity> entityList = MapManager.QueryNearbyObjects(MySession.MyCharacter, Radius);
 
-            int offset = 0;
-
             Memory<byte> temp = new Memory<byte>(new byte[6 + (message.Length * 2)]);
-            Span<byte> Message = temp.Span;
-            Message.Write((ushort)GameOpcode.ClientMessage, ref offset);
-            Message.Write(message.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(message), ref offset);
+            BufferWriter writer = new(temp.Span);
+            writer.Write((ushort)GameOpcode.ClientMessage);
+            writer.WriteString(Encoding.Unicode, message);
 
             //Loop over entity list, if any are players, distribute the message
             foreach (Entity e in entityList)
@@ -41,11 +39,6 @@ namespace ReturnHome.Server.Opcodes.Chat
                     SessionQueueMessages.PackMessage(((Character)e).characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
                 }
             }
-        }
-
-        public static void ProcessSay(Session MySession, string message, byte temp)
-        {
-
         }
     }
 }

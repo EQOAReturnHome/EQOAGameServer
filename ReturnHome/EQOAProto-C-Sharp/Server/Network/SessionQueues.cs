@@ -1,6 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-using ReturnHome.Server.Opcodes;
+﻿using ReturnHome.Server.Opcodes;
 using ReturnHome.Utilities;
 using System;
 using System.Collections.Concurrent;
@@ -10,9 +8,9 @@ namespace ReturnHome.Server.Network
 {
     public class SessionQueue
     {
-        private ConcurrentQueue<MessageStruct> OutGoingReliableMessageQueue = new();
-        private ConcurrentQueue<MessageStruct> OutGoingUnreliableMessageQueue = new();
-        private ConcurrentDictionary<ushort, MessageStruct> ResendMessageQueue = new();
+        private ConcurrentQueue<Message> OutGoingReliableMessageQueue = new();
+        private ConcurrentQueue<Message> OutGoingUnreliableMessageQueue = new();
+        private ConcurrentDictionary<ushort, Message> ResendMessageQueue = new();
 		
 		private Session _session;
 
@@ -21,12 +19,12 @@ namespace ReturnHome.Server.Network
 			_session = session;
 		}
 		
-        public void Add(MessageStruct thisMessage)
+        public void Add(Message thisMessage)
         {
-            byte messageType = thisMessage.Message.Span[0];
+            byte messageType = thisMessage.Span[0];
 
             //If it is a reliable message type
-            if (messageType == MessageOpcodeTypes.ShortReliableMessage || messageType == MessageOpcodeTypes.PingMessage || messageType == MessageOpcodeTypes.MultiShortReliableMessage)
+            if (messageType == MessageOpcodeTypes.ReliableMessage || messageType == MessageOpcodeTypes.PingMessage || messageType == MessageOpcodeTypes.ReliableMessage)
             {
                 OutGoingReliableMessageQueue.Enqueue(thisMessage);
             }
@@ -79,21 +77,21 @@ namespace ReturnHome.Server.Network
             while (messageLength < _session.rdpCommOut.maxSize)
             {
                 //Process reliable messages
-                if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp2))
+                if (OutGoingReliableMessageQueue.TryPeek(out Message temp2))
                 {
-                    if ((messageLength + temp2.Message.Length) < _session.rdpCommOut.maxSize)
+                    if ((messageLength + temp2.size) < _session.rdpCommOut.maxSize)
                     {
-                        if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                        if (OutGoingReliableMessageQueue.TryDequeue(out Message reliableMessage))
                         {
                             //Place message into outgoing message
-                            messageList.Add(reliableMessage.Message);
-                            messageLength += reliableMessage.Message.Length;
+                            messageList.Add(reliableMessage.message);
+                            messageLength += reliableMessage.size;
 
                             //Reset Timestamp, this works well in our favour of reliables needing to be resent here
                             reliableMessage.updateTime();
 
                             //Place into resend queue
-                            if (ResendMessageQueue.TryAdd(reliableMessage.Messagenumber, reliableMessage))
+                            if (ResendMessageQueue.TryAdd(reliableMessage.sequence, reliableMessage))
                             {
                                 PacketBodyFlags.RdpMessage = true;
 
@@ -103,14 +101,14 @@ namespace ReturnHome.Server.Network
                             else
                             {
                                 //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
-                                if (ResendMessageQueue.TryUpdate(reliableMessage.Messagenumber, reliableMessage, reliableMessage))
+                                if (ResendMessageQueue.TryUpdate(reliableMessage.sequence, reliableMessage, reliableMessage))
                                 {
                                     PacketBodyFlags.RdpMessage = true;
                                     continue;
                                 }
 
                                 else
-                                    Logger.Err($"Error occured adding or updating Message #{reliableMessage.Messagenumber} for session {_session.rdpCommIn.clientID.ToString("X")}");
+                                    Logger.Err($"Error occured adding or updating Message #{reliableMessage.sequence} for session {_session.rdpCommIn.clientID.ToString("X")}");
                                     //Log an error here?
                             }
                         }
@@ -121,15 +119,15 @@ namespace ReturnHome.Server.Network
                 }
 
                 //process unreliable messages
-                if (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
+                if (OutGoingUnreliableMessageQueue.TryPeek(out Message temp))
                 {
-                    if ((messageLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
+                    if ((messageLength + temp.size) < _session.rdpCommOut.maxSize)
                     {
-                        if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                        if (OutGoingUnreliableMessageQueue.TryDequeue(out Message reliableMessage))
                         {
                             //Place message into outgoing message
-                            messageList.Add(reliableMessage.Message);
-                            messageLength += reliableMessage.Message.Length;
+                            messageList.Add(reliableMessage.message);
+                            messageLength += reliableMessage.size;
                             continue;
                         }
                     }
@@ -159,12 +157,10 @@ namespace ReturnHome.Server.Network
         {
             while(_session.rdpCommIn.connectionData.clientLastReceivedMessage > _session.rdpCommIn.connectionData.clientLastReceivedMessageFinal)
             {
-                if(_session.sessionQueue.ResendMessageQueue.TryRemove(++_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal, out MessageStruct message))
-                {
-                    //Successfully removed message, should these get placed into a backup dictionary?
+                if(_session.sessionQueue.ResendMessageQueue.TryRemove(++_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal, out Message message))
+                    //TODO: Successfully removed message, should these get placed into a backup dictionary?
                     //Not 100% on proof yet, but pretty sure client can backstep and request a message #
                     continue;
-                }
 
                 else
                 {

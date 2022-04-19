@@ -22,7 +22,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Position += 8;
             writer.Write(session.MyCharacter.Teleportcounter++); //counter
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ReliableMessage);
         }
     }
 }

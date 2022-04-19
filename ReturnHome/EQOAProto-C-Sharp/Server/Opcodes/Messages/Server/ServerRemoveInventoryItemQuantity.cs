@@ -18,12 +18,12 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             BufferWriter writer = new BufferWriter(Message);
 
-            writer.Write((ushort)GameOpcode.RemoveInvItem);
+            writer.Write(GameOpcode.RemoveInvItem);
             writer.Write(clientIndex);
             writer.Write((byte)1);
             writer.Write7BitEncodedInt64(item.StackLeft);
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ReliableMessage);
         }
     }
 }

@@ -55,10 +55,9 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             //Bank popup window
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankUI)
             {
-                int offset = 0;
                 Memory<byte> temp = new byte[2];
-                Span<byte> Message = temp.Span;
-                Message.Write((ushort)GameOpcode.BankUI, ref offset);
+                BufferWriter writer = new(temp.Span);
+                writer.Write((ushort)GameOpcode.BankUI);
                 SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
             }
 

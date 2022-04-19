@@ -15,6 +15,7 @@ namespace ReturnHome.Utilities
             return (ulong)(unixTime.TotalSeconds);
         }
 
+        //TODO: Include into BufferWriter
         public static byte DoubleVariableLengthIntegerLength(int val)
         {
             uint value = (uint)val;

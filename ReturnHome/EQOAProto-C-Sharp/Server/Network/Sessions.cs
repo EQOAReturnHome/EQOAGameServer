@@ -17,7 +17,7 @@ namespace ReturnHome.Server.Network
 		public RdpCommIn rdpCommIn { get; private set; } 
 		public RdpCommOut rdpCommOut { get; private set; }
         public SessionQueue sessionQueue { get; private set; }
-        public ServerListener listener { get; private set; }
+        //public ServerListener listener { get; private set; }
 		
 		
         private short _pingCount = 0;
@@ -33,8 +33,6 @@ namespace ReturnHome.Server.Network
         public IPEndPoint MyIPEndPoint { get; private set; }
 		
 		//End
-		
-        public PacketCreator packetCreator = new();
 
         ///SessionList Objects, probably need bundle information here too?
         public ushort ActorUpdatMessageCount = 1;
@@ -85,7 +83,7 @@ namespace ReturnHome.Server.Network
 
         public void UnreliablePing()
         {
-            sessionQueue.Add(new MessageStruct(new ReadOnlyMemory<byte>(new byte[] { 0xFC, 0x02, 0xD0, 0x07 })));
+            sessionQueue.Add(new Message(new ReadOnlyMemory<byte>(new byte[] { 0xFC, 0x02, 0xD0, 0x07 })));
             _pingCount++;
         }
 

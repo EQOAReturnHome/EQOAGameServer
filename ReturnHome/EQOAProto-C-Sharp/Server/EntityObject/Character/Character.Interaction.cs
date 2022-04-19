@@ -55,8 +55,6 @@ namespace ReturnHome.Server.EntityObject.Player
         //Method for withdrawing and depositing bank tunar
         public void BankTunar(uint targetNPC, uint giveOrTake, int transferAmount)
         {
-            int offset = 0;
-
             //deposit transaction
             if (giveOrTake == 0)
             {
@@ -95,8 +93,6 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public void TransferItem(byte giveOrTake, byte itemToTransfer, int qtyToTransfer)
         {
-            Memory<byte> buffer;
-
             //Deposit Item
             if (giveOrTake == 0)
             {

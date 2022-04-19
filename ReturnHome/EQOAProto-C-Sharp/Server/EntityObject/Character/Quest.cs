@@ -7,7 +7,7 @@ namespace ReturnHome.Server.EntityObject.Player
 {
     public class Quest
     {
-        private string ourMessage = "";
+        //private string ourMessage = "";
         public Quest()
         {
 

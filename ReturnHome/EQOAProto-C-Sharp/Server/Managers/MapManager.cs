@@ -10,8 +10,6 @@ using QuadTrees;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Utilities;
-using ReturnHome.Server.Network;
-using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.Managers
 {

@@ -18,23 +18,23 @@ namespace ReturnHome.Server.Network
     /// </summary>
     public class RdpCommIn
     {
-		public readonly SessionConnectionData connectionData;
-		
-		private readonly ConcurrentDictionary<ushort, ReadOnlyMemory<byte>> _outOfOrderMessages = new();
-		
-		private readonly Session _session;
-		private readonly SessionQueue _sessionQueue;
-		
-		public ushort clientID { get; private set; }
+        public readonly SessionConnectionData connectionData;
+
+        private readonly ConcurrentDictionary<ushort, ReadOnlyMemory<byte>> _outOfOrderMessages = new();
+
+        private readonly Session _session;
+        private readonly SessionQueue _sessionQueue;
+
+        public ushort clientID { get; private set; }
         public ushort serverID { get; private set; }
-		public long TimeoutTick { get; set; }
-		
+        public long TimeoutTick { get; set; }
+
         public RdpCommIn(Session session, ushort ClientID, ushort ServerID)
         {
-			_session = session;
+            _session = session;
             _sessionQueue = new(_session);
-			clientID = ClientID;
-			serverID = ServerID;
+            clientID = ClientID;
+            serverID = ServerID;
             connectionData = new(_session);
 
             // New network auth session timeouts will always be high.
@@ -45,7 +45,7 @@ namespace ReturnHome.Server.Network
             else
                 TimeoutTick = DateTime.UtcNow.AddSeconds(45).Ticks;
         }
-		
+
         public void ProcessPacket(ClientPacket packet)
         {
             if (_session.inGame)
@@ -58,10 +58,10 @@ namespace ReturnHome.Server.Network
                 //If this bundle number is 0x0000, we are just recycling through the counter, so don't return
                 if (!(packet.Header.ClientBundleNumber == 0x0000))
                     return;
-            
-			
-			connectionData.lastReceivedPacketSequence = packet.Header.ClientBundleNumber;
-			
+
+
+            connectionData.lastReceivedPacketSequence = packet.Header.ClientBundleNumber;
+
             if (packet.Header.RDPReport)
                 ProcessRdpReport(packet);
 
@@ -75,11 +75,11 @@ namespace ReturnHome.Server.Network
         public void ProcessMessageBundle(ClientPacket packet)
         {
             //Check to see if packet contains next message #, if it doesn't... add them to out of order?
-			//Will need to check against unreliables first
-			if (packet.Messages.ContainsKey((ushort)(connectionData.lastReceivedMessageSequence + 1)))
-			{
-				while(true)
-				{
+            //Will need to check against unreliables first
+            if (packet.Messages.ContainsKey((ushort)(connectionData.lastReceivedMessageSequence + 1)))
+            {
+                while (true)
+                {
                     if (packet.Messages.TryRemove((ushort)(connectionData.lastReceivedMessageSequence + 1), out PacketMessage message))
                     {
                         connectionData.lastReceivedMessageSequence++;
@@ -120,15 +120,15 @@ namespace ReturnHome.Server.Network
                     if (packet.Messages.Count == 0)
                         break;
                 }
-			}
-						//Add all of these messages to out of order list
-			else
-			{
-				foreach(var i in packet.Messages)
-					_outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
-			}
+            }
+            //Add all of these messages to out of order list
+            else
+            {
+                foreach (var i in packet.Messages)
+                    _outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
+            }
 
-			if(packet.Header.ChannelAcks != null)
+            if (packet.Header.ChannelAcks != null)
             {
                 Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;
                 foreach (KeyValuePair<byte, ushort> ack in packet.Header.ChannelAcks)
@@ -160,6 +160,7 @@ namespace ReturnHome.Server.Network
                 Logger.Info($"Received an old ack, Expected: {connectionData.lastReceivedMessageSequence} Received: {packet.Header.ClientMessageAck}");
                 return;
             }
+
             //Check reliable resend queue
             _sessionQueue.RemoveReliables();
 
@@ -170,8 +171,8 @@ namespace ReturnHome.Server.Network
                 Logger.Info($"{_session.rdpCommIn.clientID.ToString("X")}: Generating Character Select");
                 List<Character> MyCharacterList = charList.AccountCharacters(_session);
 
-				//May need to be fixed up
-                ServerCreateCharacterList.CreateCharacterList(MyCharacterList, _session);      
+                //May need to be fixed up
+                ServerCreateCharacterList.CreateCharacterList(MyCharacterList, _session);
             }
 
             ///Triggers creating master session
@@ -188,15 +189,15 @@ namespace ReturnHome.Server.Network
             }
         }
 
-        
+
         private void ProcessSessionAck(ClientPacket packet)
         {
             if (_session.InstanceID == packet.Header.SessionAckID)
                 //Session has been ack'd and no longer new
                 _session.Instance = false;
 
-                //Doesn't seem to really matter,we could use this as a check and balance and deny the session if this check fails?
-                return;
+            //Doesn't seem to really matter,we could use this as a check and balance and deny the session if this check fails?
+            return;
         }
     }
 
@@ -204,58 +205,54 @@ namespace ReturnHome.Server.Network
     {
         private readonly Session _session;
         public readonly ServerListener _listener;
-        private int _offset;
+        private List<ReadOnlyMemory<byte>> _messageList = new();
         private int _value = 0;
-		public int totalLength;
+        public int totalLength;
         public int MessageLength;
-		private int _headerLength;
-		public int maxSize = 1200;
-		private Memory<byte> temp;
+        private int _headerLength;
+        public int maxSize = 1200;
+        private Memory<byte> temp;
 
         public RdpCommOut(Session session, ServerListener listener)
         {
             _session = session;
-			_offset = 0;
-			totalLength = 0;
+            totalLength = 0;
             MessageLength = 0;
-			_headerLength = 0;
+            _headerLength = 0;
             _listener = listener;
         }
-		
+
         public void PrepPackets()
         {
             if (_session.sessionQueue.CheckQueue() || _session.PacketBodyFlags.RdpReport || _session.PacketBodyFlags.clientUpdateAck)
             {
-                List<ReadOnlyMemory<byte>> messageList = new(); ;
-
                 //Take this instance for processing, probablky need to introduce some locking mechanism on this
                 SegmentBodyFlags segmentFlags = _session.PacketBodyFlags;
 
                 //Replace with a new instance for next packet
                 _session.PacketBodyFlags = new();
 
-                MessageLength = _session.sessionQueue.GatherMessages(segmentFlags, messageList);
+                MessageLength = _session.sessionQueue.GatherMessages(segmentFlags, _messageList);
                 totalLength += MessageLength;
-                Logger.Info($"Session: {_session.SessionID} Adding {MessageLength} to PacketLength. Total: {totalLength}");
 
                 //Calculate expected expected outgoing packet length
                 // 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
                 GetHeaderLength(segmentFlags);
-				temp = new Memory<byte>(new byte[totalLength]);
-                Span<byte> packet = temp.Span;
+                temp = new Memory<byte>(new byte[totalLength]);
+                BufferWriter packet = new(temp.Span);
 
-				//Jump offset past endpoints and bundle header information
-				if (_value > 0x3000)// || _session.CancelConnection)
-					_offset += 7;
-			
-				else
-					_offset += 6;
-				
+                //Jump offset past endpoints and bundle header information
+                if (_value > 0x3000)// || _session.CancelConnection)
+                    packet.Position += 7;
+
+                else
+                    packet.Position += 6;
+
                 ///Add Session Information
-                AddSession(packet);
+                AddSession(ref packet);
 
                 //Add bundle type first
-                AddBundleType(packet, segmentFlags);
+                AddBundleType(ref packet, segmentFlags);
 
                 ///Add session ack here if it has not been done yet
                 ///Lets client know we acknowledge session
@@ -266,36 +263,25 @@ namespace ReturnHome.Server.Network
                     segmentFlags.SessionAck = false;
 
                     ///To ack session, we just repeat session information as an ack
-                    AddSessionAck(packet);
+                    AddSessionAck(ref packet);
                 }
 
-                int test = 0;
-                test += 2;
-                if (segmentFlags.RdpReport)
-                    test += 4;
+                AddRDPReport(ref packet, segmentFlags);
 
-                if (segmentFlags.clientUpdateAck)
-                    test += 4;
-                foreach (ReadOnlyMemory<byte> mes in messageList)
-                    test += mes.Length;
+                AddMessages(ref packet, _messageList);
 
-                //crc
-                test += 4;
-                _ = (test + _offset) > totalLength ? throw new Exception($"Issue with length. test: {test} offset: {_offset} totalLength: {totalLength}, RDPReport: {_session.PacketBodyFlags.RdpReport} UpdateAck: {segmentFlags.clientUpdateAck}") : true;
-                AddRDPReport(packet, segmentFlags);
-				
-				AddMessages(packet, messageList);
-				
-				//Add session header data
-				AddSessionHeader(packet);
+                packet.Position = 0;
+
+                //Add session header data
+                AddSessionHeader(packet);
 
                 //Adjust offset to last 4 bytes
-                _offset = packet.Length - 4;
+                packet.Position = packet.Length - 4;
 
-                _ = packet[packet.Length - 4] != 0 ? throw new Exception("Error occured with PAcket Length") : true;
+                //_ = packet.Length - 4 != 0 ? throw new Exception("Error occured with PAcket Length") : true;
 
                 //Add CRC
-                packet.Write(CRC.calculateCRC(packet[0..(packet.Length - 4)]), ref _offset);
+                packet.Write(CRC.calculateCRC(packet.Span[0..(packet.Length - 4)]));
 
                 SocketAsyncEventArgs args = new();
                 args.RemoteEndPoint = _session.MyIPEndPoint;
@@ -304,7 +290,7 @@ namespace ReturnHome.Server.Network
                 //Send Packet
                 _listener.socket.SendToAsync(args);
 
-                _offset = 0;
+                _messageList.Clear();
                 _headerLength = 0;
                 totalLength = 0;
                 _value = 0;
@@ -315,32 +301,25 @@ namespace ReturnHome.Server.Network
         {
             //Client/Server endpoints
             totalLength += 4;
-            Logger.Info($"Session: {_session.SessionID} Adding 4 to PacketLength. Total: {totalLength}");
             _headerLength += 4;
 
             if (_session.Instance) //When server initiates instance with the client, it will use this
-            {
                 _value |= 0x80000;
-            }
 
             if (_session.didServerInitiate) // Purely a guess.... Something is 0x4000 in this and seems to correspond the initator of the session
             {
                 //This needs to be more dynamic, technically the sessionID length can vary when packed but 3 is super common
                 totalLength += 3;
-                Logger.Info($"Session: {_session.SessionID} Adding 3 to PacketLength. Total: {totalLength}");
                 _headerLength += 3;
                 _value |= 0x04000;
             }
 
             else // Server is not master, seems to always have this when not in control
-            {
                 _value |= 0x01000;
-            }
 
             if (_session.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
             {
                 totalLength += 4;
-                Logger.Info($"Session: {_session.SessionID} Adding 4 to PacketLength. Total: {totalLength}");
                 _headerLength += 4;
                 _value |= 0x02000;
             }
@@ -348,135 +327,58 @@ namespace ReturnHome.Server.Network
             //If _value is over 0x3000, means the header info should be 3 bytes. is _value is 0, header will be the packet length using variable length integer.... So will have to rethink this a little bit eventually
             byte temp = _value > 0x3000 ? (byte)3 : (byte)2;
             totalLength += temp;
-            Logger.Info($"Session: {_session.SessionID} Adding {temp} to PacketLength. Total: {totalLength}");
             _headerLength += temp;
 
             //Bundle Type & Bundle #
             totalLength += 3;
-            Logger.Info($"Session: {_session.SessionID} Adding 3 to PacketLength. Total: {totalLength}");
 
             if (segmentFlags.SessionAck)
-            {
                 totalLength += 4;
-                Logger.Info($"Session: {_session.SessionID} Adding 4 to PacketLength. Total: {totalLength}");
-            }
 
             if (segmentFlags.RdpReport)
-            {
                 totalLength += 4;
-                Logger.Info($"Session: {_session.SessionID} Adding 4 rdp to PacketLength. Total: {totalLength}");
-            }
 
             if (segmentFlags.clientUpdateAck)
-            {
                 totalLength += 4;
-                Logger.Info($"Session: {_session.SessionID} Adding 4 client to PacketLength. Total: {totalLength}");
-            }
 
             //Add 4 more for CRC upfront
             //If we ever implement server transfers, may need to rethink this as those do not use crc
             totalLength += 4;
-            Logger.Info($"Session: {_session.SessionID} Adding 4 crc to PacketLength. Total: {totalLength}");
         }
 
-		private void AddMessages(Span<byte> packet, List<ReadOnlyMemory<byte>> messageList)
-		{
-            foreach( ReadOnlyMemory<byte> message in messageList)
-            {
-                
-                /*This should be temporary for testing purposes... may need to be wrapped in some debugger option
-                 *Let's verify each mnessage is the correct length, throw an exception if not
-                 *
-                ReadOnlySpan<byte> temp = message.Span;
-                int ExpectedMessageLength;
-                int ActualMessageLength = 0;
-
-                int offset = 0;
-                byte messageType = temp[offset++];
-                if(temp[offset] == 0xFF)
-                {
-                    offset++;
-                    ExpectedMessageLength = temp.GetLEUShort(ref offset);
-
-                }
-
-                else
-                {
-                    ExpectedMessageLength = temp.GetByte(ref offset);
-                }
-
-                if((messageType == 0xFB) || (messageType == 0xF9) || (messageType == 0xFA))
-                {
-                    offset += 2;
-                    for (int i = offset; i < temp.Length; i++)
-                        ActualMessageLength++;
-                }
-
-                else if(messageType <= 0x43)
-                {
-                    offset += 3;
-                    //Little more complicated to calculate
-                    for( int i = offset; i < (temp.Length - 1); i++)
-                    {
-                        int realBytes = 0;
-
-                        if((temp[i] & 0x80) == 0x80)
-                        {
-                            realBytes += temp[i++] % 0x80;
-                            ActualMessageLength += realBytes;
-                            ActualMessageLength += temp[i];
-                            i += realBytes;
-                        }
-
-                        else
-                        {
-                            realBytes += temp[i++] >> 4;
-                            ActualMessageLength += realBytes;
-                            ActualMessageLength += temp[i] % 0x10;
-                            i += realBytes;
-                        }
-                    }
-
-                }
-
-                else
-                {
-                    for (int i = offset; i < temp.Length; i++)
-                        ActualMessageLength++;
-                }
-
-                _ = ActualMessageLength != ExpectedMessageLength ? throw new Exception($"Message Length is {ActualMessageLength} and expected is {ExpectedMessageLength}") : true;
-                */
-                packet.Write(message, ref _offset);
-            }
-		}
+        private void AddMessages(ref BufferWriter packet, List<ReadOnlyMemory<byte>> messageList)
+        {
+            foreach (ReadOnlyMemory<byte> message in messageList)
+                packet.Write(message.Span);
+        }
 
         ///Identifies if full RDPReport is needed or just the current bundle #
-        private void AddRDPReport(Span<byte> packet, SegmentBodyFlags segmentFlags)
+        private void AddRDPReport(ref BufferWriter packet, SegmentBodyFlags segmentFlags)
         {
-            packet.Write(_session.rdpCommIn.connectionData.lastSentPacketSequence++, ref _offset);
+            packet.Write(_session.rdpCommIn.connectionData.lastSentPacketSequence++);
             ///If RDP Report == True, Current bundle #, Last Bundle received # and Last message received #
             if (segmentFlags.RdpReport)
             {
                 Logger.Info("Full RDP Report");
-
-                packet.Write(_session.rdpCommIn.connectionData.lastReceivedPacketSequence, ref _offset);
-                packet.Write(_session.rdpCommIn.connectionData.lastReceivedMessageSequence, ref _offset);
+                if (_session.rdpCommIn.connectionData.lastReceivedPacketSequence == 0)
+                    throw new Exception("wtf");
+                packet.Write(_session.rdpCommIn.connectionData.lastReceivedPacketSequence);
+                packet.Write(_session.rdpCommIn.connectionData.lastReceivedMessageSequence);
                 /// Add them to packet in "reverse order" stated above
             }
 
-            //If ingame, include 4029 ack's
+            //include 4029 ack's as needed
             if (segmentFlags.clientUpdateAck)
             {
-                packet.Write((byte)0x40, ref _offset);
-                packet.Write(_session.rdpCommIn.connectionData.client.BaseXorMessage, ref _offset);
-                packet.Write((byte)0xF8, ref _offset);
+                packet.Write((byte)0x40);
+                packet.Write(_session.rdpCommIn.connectionData.client.BaseXorMessage);
+                packet.Write((byte)0xF8);
             }
         }
 
         ///Add our bundle type
         ///Consideration for in world or "certain packet" # is needed during conversion. For now something basic will work
-        private void AddBundleType(Span<byte> packet, SegmentBodyFlags segmentFlags)
+        private void AddBundleType(ref BufferWriter packet, SegmentBodyFlags segmentFlags)
         {
             byte segBody = 0;
 
@@ -498,39 +400,34 @@ namespace ReturnHome.Server.Network
                 segBody |= 0x40;
             }
 
-            packet.Write(segBody, ref _offset);
+            packet.Write(segBody);
         }
 
         ///Add a session ack to send to client
-        private void AddSession(Span<byte> packet)
+        private void AddSession(ref BufferWriter packet)
         {
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Adding Session Data");
             if (_session.hasInstance)
-            {
-                packet.Write(_session.InstanceID, ref _offset);
-            }
-			
+                packet.Write(_session.InstanceID);
+
             if (_session.didServerInitiate)
-            {
-				packet.Write7BitEncodedInt(_session.SessionID, ref _offset);
-            }
-        }
-		
-		private void AddSessionAck(Span<byte> packet)
-        {
-            packet.Write(_session.InstanceID, ref _offset);
+                packet.Write7BitEncodedUInt64(_session.SessionID);
         }
 
-        private void AddSessionHeader(Span<byte> packet)
+        private void AddSessionAck(ref BufferWriter packet)
         {
-			_offset = 0;
+            packet.Write(_session.InstanceID);
+        }
+
+        private void AddSessionHeader(BufferWriter packet)
+        {
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Adding Session Header");
 
-            packet.Write(_session.rdpCommIn.serverID, ref _offset);
-            packet.Write(_session.rdpCommIn.clientID, ref _offset);
+            packet.Write(_session.rdpCommIn.serverID);
+            packet.Write(_session.rdpCommIn.clientID);
 
-			//Subtract CRC length from total count also
-			packet.Write7BitEncodedInt((uint)(_value + (totalLength - _headerLength - 4)), ref _offset);
+            //Subtract CRC length from total count also
+            packet.Write7BitEncodedUInt64((uint)(_value + (totalLength - _headerLength - 4)));
         }
     }
 }

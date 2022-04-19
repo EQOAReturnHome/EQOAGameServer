@@ -9,7 +9,7 @@ namespace ReturnHome.Server.Network
     public class SessionConnectionData
     {
         private Session _session;
-        public ushort _lastReceivedMessageSequence { get; set; } = 0;
+        private ushort _lastReceivedMessageSequence { get; set; } = 0;
         public ushort lastReceivedPacketSequence { get; set; }
         public ushort lastSentMessageSequence { get; set; }
         public ushort lastSentPacketSequence { get; set; }
@@ -46,7 +46,6 @@ namespace ReturnHome.Server.Network
         public SessionConnectionData(Session session)
         {
             _session = session;
-            lastReceivedMessageSequence = 0;
             lastReceivedPacketSequence = 0;
 
             //Client last soft ack of message's received.

@@ -1,22 +1,9 @@
 ﻿namespace ReturnHome.Server.Opcodes
 {
-    /// <summary>
-    /// Our opcode class
-    /// These bytes should remain read only
-    /// 
-    /// </summary>
-    public static class MessageOpcodeTypes
+    public enum PacketHeader : ushort
     {
-        public const ushort serverTransfer = 0xFFFF;
-        public const ushort NewConnection = 0xFFFE;
-        public const ushort LongUnreliableMessage = 0xFFFC;
-        public const byte ShortUnreliableMessage = 0xFC;
-        public const ushort LongReliableMessage = 0xFFFB;
-        public const byte ShortReliableMessage = 0xFB;
-        public const ushort MultiLongReliableMessage = 0xFFFA;
-        public const byte MultiShortReliableMessage = 0xFA;
-        public const byte PingMessage = 0xF9;
-        public const byte UnknownMessage = 0xF8;
+        serverTransfer = 0xFFFF,
+        NewConnection = 0xFFFE
     }
 
     public static class UnreliableTypes

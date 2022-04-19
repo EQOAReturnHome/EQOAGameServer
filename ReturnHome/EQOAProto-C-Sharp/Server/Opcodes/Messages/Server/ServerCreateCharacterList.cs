@@ -22,13 +22,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ModelID);
             }
 
-            Memory<byte> temp = new byte[bufferSize];
-            Span<byte> Message = temp.Span;
+            Message message = new Message(bufferSize, MessageType.ReliableMessage, GameOpcode.CharacterSelect);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
+            //skip over header of message
+            writer.Position = message.headerSize;
 
             //Holds list of characters pulled from the DB for the AccountID
-            writer.Write((ushort)GameOpcode.CharacterSelect);
+            writer.Write(message.Opcode);
 
             ///Gets our character count and uses technique to double it
             writer.Write7BitEncodedInt64(MyCharacterList.Count);
@@ -106,7 +107,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 writer.Write(character.Helm);
 
                 ///unknown value?
-                writer.Write(0);
+                writer.Write(0); 
 
                 ///unknown value?
                 writer.Write((ushort)0);
@@ -139,12 +140,12 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 writer.Write(ByteSwaps.SwapBytes(character.HelmColor));
 
                 ///Robe color
-                writer.Write(ByteSwaps.SwapBytes(character.RobeColor));
+                writer.Write(ByteSwaps.SwapBytes(character.RobeColor)); //78
             }
 
             ///Character list is complete
             ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(session, message, writer);
         }
     }
 }

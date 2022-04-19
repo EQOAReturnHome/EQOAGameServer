@@ -129,8 +129,6 @@ namespace ReturnHome.Server.EntityObject
         //Need to some how make a new copy of it, not sure the easiest way to do that
         public void MerchantBuy(byte itemSlot, int itemQty, uint targetNPC)
         {
-            Memory<byte> buffer;
-
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
                 npc.Inventory.RetrieveItem(itemSlot, out Item item);
@@ -150,9 +148,7 @@ namespace ReturnHome.Server.EntityObject
         public void TriggerMerchantMenu(uint targetNPC)
         {
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
-            {
                 ServerTriggerMerchantMenu.TriggerMerchantMenu(((Character)this).characterSession, npc);
-            }
         }
 
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
@@ -160,19 +156,17 @@ namespace ReturnHome.Server.EntityObject
         {
             //Clear player's previous dialogue options before adding new ones.
             session.MyCharacter.MyDialogue.diagOptions.Clear();
+
             //loop over luatable, assigning every value to an element of the players diagOptions list
             //lua table always returns a dict type object of <object,object>
             foreach (KeyValuePair<object, object> k in diagOptions)
-            {
                 session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
-            }
+
             //If it's not a yes/no choice then sort alphabetically.
             //This forces it to return choices the same every time.
             if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
-            {
                 session.MyCharacter.MyDialogue.diagOptions.Sort();
-            }
-            int offset = 0;
+
             //Length of choices
             uint choicesLength = 0;
             //set choice counter for player
@@ -185,9 +179,8 @@ namespace ReturnHome.Server.EntityObject
                 choiceCounter = (uint)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //Length of choices
                 foreach (string choice in session.MyCharacter.MyDialogue.diagOptions)
-                {
                     choicesLength += (uint)choice.Length;
-                }
+
                 //count the number of textOptions
                 textOptions = (byte)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //set dialogue type to option
@@ -195,56 +188,47 @@ namespace ReturnHome.Server.EntityObject
             }
             //if there are no diagOptions send onlly diag box.
             if (session.MyCharacter.MyDialogue.diagOptions.Count <= 0)
-            {
                 dialogueType = GameOpcode.DialogueBox;
-            }
+
             //set player dialogue to the incoming dialogue
             session.MyCharacter.MyDialogue.dialogue = dialogue;
             //create variable memory span for sending out dialogue
-            Memory<byte> temp = new Memory<byte>(new byte[11 + (dialogue.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)]);
-            Span<byte> Message = temp.Span;
+            Memory<byte> temp = new Memory<byte>(new byte[BufferWriter.CalculateSize((int)(11 + (dialogue.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)), MessageOpcodeTypes.ReliableMessage)]);
+            BufferWriter writer = new(temp.Span);
             //Write diag type, counter, dialogue length, and actual text to memssage
-            Message.Write((ushort)dialogueType, ref offset);
-            Message.Write(choiceCounter, ref offset);
-            Message.Write(dialogue.Length, ref offset);
-            Message.Write(Encoding.Unicode.GetBytes(dialogue), ref offset);
+            writer.Write((ushort)dialogueType);
+            writer.Write(choiceCounter);
+            writer.WriteString(Encoding.Unicode, dialogue);
             //if it's an option box iterate through options and write options to message
             if (dialogueType == GameOpcode.OptionBox)
             {
-                Message.Write(textOptions, ref offset);
+                writer.Write(textOptions);
 
                 if (session.MyCharacter.MyDialogue.diagOptions != null)
                 {
                     for (int i = 0; i < session.MyCharacter.MyDialogue.diagOptions.Count; i++)
-                    {
-                        Message.Write(session.MyCharacter.MyDialogue.diagOptions[i].Length, ref offset);
-                        Message.Write(Encoding.Unicode.GetBytes(session.MyCharacter.MyDialogue.diagOptions[i]), ref offset);
-                    }
+                        writer.WriteString(Encoding.Unicode, session.MyCharacter.MyDialogue.diagOptions[i]);
                 }
             }
             //Send Message
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ReliableMessage);
             session.MyCharacter.MyDialogue.choice = 1000;
         }
 
         public void ProcessDialogue(Session session, BufferReader reader, PacketMessage ClientPacket)
         {
-            //set offset
-            int offset = 0;
             uint interactTarget = 0;
             //Read the incoming message and get the objectID that was interacted with
 
             if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
-            {
                 interactTarget = reader.Read<uint>();
-            }
+
             //if option choice incoming
             if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
             {
                 //try to pull the option counter and players choice out of message
                 try
                 {
-                    offset = 0;
                     uint optionCounter = reader.Read<uint>();
                     session.MyCharacter.MyDialogue.choice = reader.Read<byte>();
                     //if diag message is 255(exit dialogue in client) return immediately without new message
@@ -267,23 +251,17 @@ namespace ReturnHome.Server.EntityObject
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if a diag option choice incoming set outgoing to diag box option
             if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
-            {
                 dialogueType = GameOpcode.DialogueBoxOption;
-            }
+
             //else this is just a regular interaction with only dialogue
             else if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
-            {
                 dialogueType = GameOpcode.DialogueBox;
-            }
-            //Reset offset for outgoing message
-            offset = 0;
+
             //Gets NPC name from ObjectID
             if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
             {
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
-                {
                     dialogue.npcName = npc.CharName;
-                }
             }
             //call the event manager to process dialogue from here. Passes to Lua scripts.
             EventManager.GetNPCDialogue(dialogueType, session);
@@ -292,7 +270,6 @@ namespace ReturnHome.Server.EntityObject
         public static void GrantXP(Session session, int xpAmount)
         {
             int debt = 0;
-            int offset = 0;
             int totXP = xpAmount;
             int paidDebt = 0;
             int cm = 0;
@@ -345,9 +322,7 @@ namespace ReturnHome.Server.EntityObject
             session.MyCharacter.TotalXPEarned += xpAmount;
 
             while (session.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
-            {
                 session.MyCharacter.Level++;
-            }
 
             //Something similar as above for Training points
             ServerUpdatePlayerXPandLevel.UpdatePlayerXPandLevel(session, session.MyCharacter.Level, session.MyCharacter.TotalXPEarned);

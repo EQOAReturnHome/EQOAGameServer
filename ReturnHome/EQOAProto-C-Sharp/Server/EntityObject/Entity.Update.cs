@@ -339,56 +339,5 @@ namespace ReturnHome.Server.EntityObject
         {
             Encoding.UTF8.GetBytes("trsq").CopyTo(ObjectUpdate.Slice(196, 4));
         }
-
-        public Memory<byte> SerializeObjectUpdate(Character character)
-        {
-            //Vector3 tempPosition = getPosition();
-            int offset = 0;
-            Memory<byte> characterSerialize = new Memory<byte>(new byte[0xC9]);
-            Span<byte> temp = characterSerialize.Span;
-
-            //Seems to indicate if channel is changing
-            temp.Write((byte)1, ref offset);
-
-            temp.Write((byte)HairColor, ref offset);
-            temp.Write((byte)HairLength, ref offset);
-            temp.Write((byte)HairStyle, ref offset);
-            temp.Write((byte)FaceOption, ref offset);
-            temp.Write((byte)Robe, ref offset);
-            //unk
-            temp.Write(5, ref offset);
-            //unk
-            temp.Write((byte)0, ref offset);
-            temp.Write(Encoding.UTF8.GetBytes(CharName), ref offset);
-            temp.Write(new byte[24 - CharName.Length], ref offset);
-
-            temp.Write((byte)character.Level, ref offset);
-            //movement
-            temp.Write(Movement, ref offset);
-            //conflag
-            temp.Write((byte)2, ref offset);
-            //nameplate
-            temp.Write((byte)0, ref offset);
-            temp.Write((byte)character.Race, ref offset);
-            temp.Write((byte)character.Class, ref offset);
-            //npctype?
-            temp.Write((short)0, ref offset);
-            temp.Write(0xFFFFFFFF, ref offset);
-            //unk
-            temp.Write((byte)0, ref offset);
-            //unk
-            temp.Write((byte)0x1F, ref offset);
-            //If target has invis/poison?
-            temp.Write((byte)0, ref offset);
-            //unk
-            temp.Write((byte)0, ref offset);
-            //unk
-            temp.Write((byte)1, ref offset);
-            //unk
-            temp.Write((byte)0, ref offset);
-            temp.Write(Encoding.UTF8.GetBytes("tsrq"), ref offset);
-
-            return characterSerialize;
-        }
     }
 }

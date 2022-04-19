@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Utilities
 {
@@ -22,7 +23,7 @@ namespace ReturnHome.Utilities
         /// Gets the underlying <see cref="ReadOnlySpan{T}" />.
         /// </summary>
         /// <remarks><typeparamref name="T" /> is <see langword="byte" /></remarks>
-        public readonly ReadOnlySpan<byte> Buffer => _buffer;
+        public readonly ReadOnlySpan<byte> Span => _buffer;
 
         /// <summary>
         /// Gets Length of the <see cref="BufferWriter" />.
@@ -68,11 +69,11 @@ namespace ReturnHome.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void Write(Span<byte> val)
+        public unsafe void Write(ReadOnlySpan<byte> val)
         {
             int size = val.Length;
 
-            if (Position + size > Remaining)
+            if (size > Remaining)
                 throw new InvalidOperationException($"{nameof(size)} exceeds the count of bytes remaining to be wrote to the {nameof(BufferWriter)}");
 
             val.CopyTo(_buffer[Position..]);
@@ -84,7 +85,7 @@ namespace ReturnHome.Utilities
         {
             int size = sizeof(T);
 
-            if (Position + size > Remaining)
+            if (size > Remaining)
                 throw new InvalidOperationException($"{nameof(size)} exceeds the count of bytes remaining to be wrote to the {nameof(BufferWriter)}");
 
             MemoryMarshal.Write<T>(_buffer[Position..], ref val);
@@ -120,7 +121,7 @@ namespace ReturnHome.Utilities
             if (size + 4 > Remaining)
                 throw new InvalidOperationException($"size of {typeof(string)} exceeds the count of bytes remaining to be wrote to the {nameof(BufferWriter)}");
 
-            Write<int>(size);
+            Write(size);
 
             if (Encoding.Unicode == encoding)
                 size <<= 1;
@@ -131,7 +132,7 @@ namespace ReturnHome.Utilities
             else
                 Encoding.UTF8.GetBytes(str).CopyTo(_buffer[Position..]);
 
-            Advance(size + 4);
+            Advance(size);
         }
 
         /// <summary>
