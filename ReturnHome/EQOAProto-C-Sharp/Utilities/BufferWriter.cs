@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Utilities
 {
@@ -23,7 +22,7 @@ namespace ReturnHome.Utilities
         /// Gets the underlying <see cref="ReadOnlySpan{T}" />.
         /// </summary>
         /// <remarks><typeparamref name="T" /> is <see langword="byte" /></remarks>
-        public readonly ReadOnlySpan<byte> Span => _buffer;
+        public Span<byte> Span => _buffer;
 
         /// <summary>
         /// Gets Length of the <see cref="BufferWriter" />.
@@ -54,21 +53,6 @@ namespace ReturnHome.Utilities
         public int Remaining => _buffer.Length - _position;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool TryWrite<T>(T val) where T : unmanaged
-        {
-            try
-            {
-                Write(val);
-                return true;
-            }
-
-            catch
-            {
-                return false;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(ReadOnlySpan<byte> val)
         {
             int size = val.Length;
@@ -88,23 +72,8 @@ namespace ReturnHome.Utilities
             if (size > Remaining)
                 throw new InvalidOperationException($"{nameof(size)} exceeds the count of bytes remaining to be wrote to the {nameof(BufferWriter)}");
 
-            MemoryMarshal.Write<T>(_buffer[Position..], ref val);
+            MemoryMarshal.Write(_buffer[Position..], ref val);
             Advance(size);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool TryWriteString(Encoding encoding, string str)
-        {
-            try
-            {
-                WriteString(encoding, str);
-                return true;
-            }
-
-            catch
-            {
-                return false;
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,6 +102,22 @@ namespace ReturnHome.Utilities
                 Encoding.UTF8.GetBytes(str).CopyTo(_buffer[Position..]);
 
             Advance(size);
+        }
+
+        /// <summary>
+        /// Writes Message size to the <see cref="BufferWriter" />.
+        /// </summary>
+        /// <param name="count" />
+        public void WriteSize(int size)
+        {
+            if(size > 255)
+            {
+                Write((byte)0xFF);
+                Write((ushort)size);
+            }
+
+            else
+                Write((byte)size);
         }
 
         /// <summary>

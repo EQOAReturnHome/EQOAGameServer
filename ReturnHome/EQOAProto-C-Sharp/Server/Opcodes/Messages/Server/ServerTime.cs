@@ -1,5 +1,4 @@
-﻿using System;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
@@ -8,16 +7,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void Time(Session session)
         {
-            Memory<byte> temp = new byte[18];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.Time);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
+            writer.Write(message.Opcode);
             //Get our timestamp opcode in queue
-            writer.Write((ushort)GameOpcode.Time);
             writer.Write(DNP3Creation.CreateDNP3TimeStamp());
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

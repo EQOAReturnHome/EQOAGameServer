@@ -139,16 +139,15 @@ namespace ReturnHome.Server.Opcodes.Chat
                         c.CurrentHP = int.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
+
                     default: 
                         break;
-
                 }
 
                 return true;
             }
 
             return false;
-
         }
     }
 }

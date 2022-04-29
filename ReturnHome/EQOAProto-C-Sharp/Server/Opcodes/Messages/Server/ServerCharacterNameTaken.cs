@@ -1,5 +1,4 @@
-﻿using System;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
@@ -8,16 +7,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void CharacterNameTaken(Session session)
         {
-            Memory<byte> temp = new byte[2];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.NameTaken);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
+            writer.Write(message.Opcode);
 
-            writer.Write((ushort)GameOpcode.NameTaken);
-
+            message.Size = writer.Position;
             //Log character name taken and send out RDP message to pop up that name is taken.
             //Console.WriteLine("Character Name Already Taken");                //Send Message
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.sessionQueue.Add(message);
         }
     }
 }

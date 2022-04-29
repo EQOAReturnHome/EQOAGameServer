@@ -6,7 +6,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientDeleteCharacter
     {
-        public static void DeleteCharacter(Session MySession, PacketMessage ClientPacket)
+        public static void DeleteCharacter(Session session, PacketMessage ClientPacket)
         {
             CharacterSQL deletedCharacter = new CharacterSQL();
 
@@ -15,7 +15,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             int clientServID = reader.Read<int>();
 
             //Call SQL delete method to actually process the delete.
-            deletedCharacter.DeleteCharacter(clientServID, MySession);
+            deletedCharacter.DeleteCharacter(clientServID, session);
 
             //Close SQL connection
             deletedCharacter.CloseConnection();

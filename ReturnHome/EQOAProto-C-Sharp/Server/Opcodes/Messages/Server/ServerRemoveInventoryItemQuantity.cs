@@ -1,4 +1,3 @@
-using System;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
@@ -13,17 +12,16 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
          */
 		public static void RemoveInventoryItemQuantity(Session session, Item item, byte clientIndex)
         {
-            Memory<byte> temp = new byte[3 + Utility_Funcs.DoubleVariableLengthIntegerLength(item.StackLeft)];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.RemoveInvItem);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write(GameOpcode.RemoveInvItem);
+            writer.Write(message.Opcode);
             writer.Write(clientIndex);
             writer.Write((byte)1);
             writer.Write7BitEncodedInt64(item.StackLeft);
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

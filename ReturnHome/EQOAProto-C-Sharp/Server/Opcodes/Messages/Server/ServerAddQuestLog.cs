@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
@@ -7,18 +6,17 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerAddQuestLog
     {
-        public static void AddQuestLog(Session mySession, uint questNumber, string questText)
+        public static void AddQuestLog(Session session, uint questNumber, string questText)
         {
-            Memory<byte> temp = new Memory<byte>(new byte[11 + (questText.Length * 2)]);
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.AddQuestLog);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.AddQuestLog);
+            writer.Write(message.Opcode);
             writer.Write(questNumber);
             writer.WriteString(Encoding.Unicode, questText);
 
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

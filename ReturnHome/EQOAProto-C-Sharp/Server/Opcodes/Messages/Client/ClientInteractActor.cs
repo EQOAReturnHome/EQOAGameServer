@@ -13,7 +13,7 @@ Bankers are 0x02. So most likely 0x82 for unattackable and banker
 Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
 */
 
-        public static void InteractActor(Session MySession, PacketMessage clientPacket)
+        public static void InteractActor(Session session, PacketMessage clientPacket)
         {
             BufferReader reader = new(clientPacket.Data.Span);
 
@@ -21,7 +21,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             {
                 byte itemSlot1 = (byte)reader.Read<uint>();
                 byte itemSlot2 = (byte)reader.Read<uint>();
-                MySession.MyCharacter.ArrangeItem(itemSlot1, itemSlot2);
+                session.MyCharacter.ArrangeItem(itemSlot1, itemSlot2);
             }
 
             //Merchant Buy
@@ -30,7 +30,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
                 byte itemSlot = (byte)reader.Read7BitEncodedInt64();
                 int itemQty = (int)reader.Read7BitEncodedInt64();
                 uint targetNPC = reader.Read<uint>();
-                MySession.MyCharacter.MerchantBuy(itemSlot, itemQty, targetNPC);
+                session.MyCharacter.MerchantBuy(itemSlot, itemQty, targetNPC);
             }
 
             //Merchant Sell
@@ -40,7 +40,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
                 int itemQty = (int)reader.Read7BitEncodedInt64();
                 uint targetNPC = reader.Read<uint>();
                 //We just need to verify the player is talking to a merchant and within range here, just let it work for now
-                MySession.MyCharacter.SellItem(itemSlot, itemQty, targetNPC);
+                session.MyCharacter.SellItem(itemSlot, itemQty, targetNPC);
 
             }
 
@@ -48,17 +48,19 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantDiag)
             {
                 uint targetNPC = reader.Read<uint>();
-                MySession.MyCharacter.TriggerMerchantMenu(targetNPC);
+                session.MyCharacter.TriggerMerchantMenu(targetNPC);
             }
 
 
             //Bank popup window
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankUI)
             {
-                Memory<byte> temp = new byte[2];
-                BufferWriter writer = new(temp.Span);
-                writer.Write((ushort)GameOpcode.BankUI);
-                SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.BankUI);
+                BufferWriter writer = new BufferWriter(message.Span);
+
+                writer.Write(message.Opcode);
+                message.Size = writer.Position;
+                session.sessionQueue.Add(message);
             }
 
             //Deposit and Withdraw Bank Tunar
@@ -69,7 +71,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
                 uint giveOrTake = (uint)reader.Read7BitEncodedUInt64();
                 int transferAmount = (int)reader.Read7BitEncodedInt64();
                 Console.WriteLine("In the bank tunar");
-                MySession.MyCharacter.BankTunar(targetNPC, giveOrTake, transferAmount);
+                session.MyCharacter.BankTunar(targetNPC, giveOrTake, transferAmount);
 
             }
 
@@ -82,14 +84,14 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
                 byte itemToTransfer = (byte)reader.Read<uint>();
                 int qtyToTransfer = (int)reader.Read7BitEncodedInt64();
                 Console.WriteLine("In the Item op code");
-                MySession.MyCharacter.TransferItem(giveOrTake, itemToTransfer, qtyToTransfer);
+                session.MyCharacter.TransferItem(giveOrTake, itemToTransfer, qtyToTransfer);
 
             }
 
             //Dialogue and Quest Interaction
             if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact || clientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
             {
-                MySession.MyCharacter.ProcessDialogue(MySession, reader, clientPacket);
+                session.MyCharacter.ProcessDialogue(session, reader, clientPacket);
             }
         }
     }

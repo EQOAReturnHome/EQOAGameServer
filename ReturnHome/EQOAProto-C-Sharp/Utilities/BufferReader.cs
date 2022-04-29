@@ -159,6 +159,7 @@ namespace ReturnHome.Utilities
 
             return (uint)(_buffer[_position++] << 16 | _buffer[_position++] << 8 | _buffer[_position++]);
         }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadString(Encoding encoding, int size)
         {

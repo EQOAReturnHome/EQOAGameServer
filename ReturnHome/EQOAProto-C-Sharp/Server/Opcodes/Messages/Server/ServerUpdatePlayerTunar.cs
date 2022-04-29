@@ -1,4 +1,3 @@
-using System;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
@@ -8,15 +7,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
 		public static void UpdatePlayerTunar(Session session, int tunar)
         {
-            Memory<byte> temp = new byte[2 + Utility_Funcs.DoubleVariableLengthIntegerLength(tunar)];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.PlayerTunar);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.PlayerTunar);
+            writer.Write(message.Opcode);
             writer.Write7BitEncodedInt64(tunar);
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

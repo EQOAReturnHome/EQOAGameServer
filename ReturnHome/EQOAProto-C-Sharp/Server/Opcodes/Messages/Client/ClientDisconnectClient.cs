@@ -5,16 +5,16 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientDisconnectClient
     {
-        public static void DisconnectClient(Session MySession, PacketMessage ClientPacket)
+        public static void DisconnectClient(Session session, PacketMessage ClientPacket)
         {
-            MySession.PendingTermination = true;
+            session.PendingTermination = true;
             //Create new handle for mysql connection
             CharacterSQL savePlayerData = new();
 
             //Call the mysql update query to save player data
-            savePlayerData.SavePlayerData(MySession.MyCharacter, (string)Newtonsoft.Json.JsonConvert.SerializeObject(MySession.MyCharacter.playerFlags));
+            savePlayerData.SavePlayerData(session.MyCharacter, (string)Newtonsoft.Json.JsonConvert.SerializeObject(session.MyCharacter.playerFlags));
             //Actually drop the player's session
-            MySession.DropSession();
+            session.DropSession();
         }
     }
 }

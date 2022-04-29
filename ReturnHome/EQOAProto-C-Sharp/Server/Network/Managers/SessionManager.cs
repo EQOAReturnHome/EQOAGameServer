@@ -51,7 +51,7 @@ namespace ReturnHome.Server.Network.Managers
                     Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
                     ClientSession.PacketBodyFlags.SessionAck = true;
                     //Success, keep processing data
-                    ClientSession.ProcessPacket(packet);
+                    ClientSession.rdpCommIn.ProcessPacket(packet);
                 }
 			}
 
@@ -63,7 +63,7 @@ namespace ReturnHome.Server.Network.Managers
 					//Checks if IP/Port matches expected session to incoming packet
 					//This might not be needed?
                     if (ClientSession.MyIPEndPoint.Equals(ClientIPEndPoint))
-                        ClientSession.ProcessPacket(packet);
+                        ClientSession.rdpCommIn.ProcessPacket(packet);
 
                     else
                     {

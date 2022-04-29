@@ -1,4 +1,3 @@
-using System;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
@@ -9,16 +8,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
 		public static void RemoveBankItemQuantity(Session session, Item item, byte clientIndex)
         {
-            Memory<byte> temp = new byte[3 + Utility_Funcs.DoubleVariableLengthIntegerLength(item.StackLeft)];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.RemoveBankItem);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.RemoveBankItem);
-            writer.Write((byte)clientIndex);
+            writer.Write(message.Opcode);
+            writer.Write(clientIndex);
             writer.Write7BitEncodedInt64(item.StackLeft);
 
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

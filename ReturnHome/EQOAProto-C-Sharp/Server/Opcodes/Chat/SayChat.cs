@@ -19,24 +19,27 @@ namespace ReturnHome.Server.Opcodes.Chat
 
         //TODO: Consider reworking player query to send the say message?
         ///This method queries for nearby objects to player, then iterates over list, looking if any are players and distributing the message
-        public static void ProcessSay(Session MySession, string message)
+        public static void ProcessSay(Session MySession, string chatMessage)
         {
-            message = $"{MySession.MyCharacter.CharName}: " + message;
+            chatMessage = $"{MySession.MyCharacter.CharName}: " + chatMessage;
 
             //Query for nearby objects
             List<Entity> entityList = MapManager.QueryNearbyObjects(MySession.MyCharacter, Radius);
 
-            Memory<byte> temp = new Memory<byte>(new byte[6 + (message.Length * 2)]);
-            BufferWriter writer = new(temp.Span);
-            writer.Write((ushort)GameOpcode.ClientMessage);
-            writer.WriteString(Encoding.Unicode, message);
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.CharacterSelect);
+            BufferWriter writer = new BufferWriter(message.Span);
 
+            writer.Write(message.Opcode);
+            writer.Write((ushort)GameOpcode.ClientMessage);
+            writer.WriteString(Encoding.Unicode, chatMessage);
+
+            message.Size = writer.Position;
             //Loop over entity list, if any are players, distribute the message
             foreach (Entity e in entityList)
             {
                 if (e.isPlayer)
                 {
-                    SessionQueueMessages.PackMessage(((Character)e).characterSession, temp, MessageOpcodeTypes.ShortReliableMessage);
+                    ((Character)e).characterSession.sessionQueue.Add(message);
                 }
             }
         }

@@ -9,7 +9,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
     class ClientAuthenticate
     {
         ///Authentication check
-        public static void Authenticate(Session MySession, PacketMessage ClientPacket)
+        public static void Authenticate(Session session, PacketMessage ClientPacket)
         {
             BufferReader reader = new(ClientPacket.Data.Span);
 
@@ -43,15 +43,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                 reader.Position += 16;
 
                 ///Uncomment once ready
-                //MySession.AccountID = 3;
-                MySession.AccountID = Convert.ToInt32(ConfigurationManager.AppSettings["StaticAccount"]);
+                //session.AccountID = 3;
+                session.AccountID = Convert.ToInt32(ConfigurationManager.AppSettings["StaticAccount"]);
 
 
                 ///Theoretically we want to verify account # is not 0 here, if it is, drop it.
-                if (MySession.AccountID == -1)
+                if (session.AccountID == -1)
                 {
                     //Verifications failed, drop session?
-                    MySession.DropSession();
+                    session.DropSession();
                     return;
                 }
             }

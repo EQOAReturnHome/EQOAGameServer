@@ -45,7 +45,7 @@ namespace ReturnHome.Server.Network
                 return true;
             }
 
-            catch (Exception ex)
+            catch
             {
                 //Log exception
 

@@ -193,10 +193,10 @@ namespace ReturnHome.Server.EntityObject
             //set player dialogue to the incoming dialogue
             session.MyCharacter.MyDialogue.dialogue = dialogue;
             //create variable memory span for sending out dialogue
-            Memory<byte> temp = new Memory<byte>(new byte[BufferWriter.CalculateSize((int)(11 + (dialogue.Length * 2) + (choiceCounter * 4) + 1 + (choicesLength * 2)), MessageOpcodeTypes.ReliableMessage)]);
-            BufferWriter writer = new(temp.Span);
-            //Write diag type, counter, dialogue length, and actual text to memssage
-            writer.Write((ushort)dialogueType);
+            Message message = Message.Create(MessageType.ReliableMessage, dialogueType);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
             writer.Write(choiceCounter);
             writer.WriteString(Encoding.Unicode, dialogue);
             //if it's an option box iterate through options and write options to message
@@ -210,8 +210,10 @@ namespace ReturnHome.Server.EntityObject
                         writer.WriteString(Encoding.Unicode, session.MyCharacter.MyDialogue.diagOptions[i]);
                 }
             }
+
+            message.Size = writer.Position;
             //Send Message
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ReliableMessage);
+            session.sessionQueue.Add(message);
             session.MyCharacter.MyDialogue.choice = 1000;
         }
 

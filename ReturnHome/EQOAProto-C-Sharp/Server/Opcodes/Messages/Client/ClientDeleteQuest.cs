@@ -6,14 +6,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientDeleteQuest
     {
-        public static void DeleteQuest(Session mySession, PacketMessage clientPacket)
+        public static void DeleteQuest(Session session, PacketMessage clientPacket)
         {
             BufferReader reader = new(clientPacket.Data.Span);
 
             byte unknownSection = reader.Read<byte>();
             byte questNumber = reader.Read<byte>();
 
-            Character.DeleteQuest(mySession, questNumber);
+            Character.DeleteQuest(session, questNumber);
         }
     }
 }

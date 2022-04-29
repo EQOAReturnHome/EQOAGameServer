@@ -1,5 +1,4 @@
-﻿using System;
-using ReturnHome.Server.EntityObject;
+﻿using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
@@ -12,12 +11,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
         {
             int unknownInt = 200;
 
-            Memory<byte> temp = new byte[5000];
-            Span<byte> Message = temp.Span;
+            Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.MerchantBox);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.MerchantBox);
+            writer.Write(message.Opcode);
             writer.Write(npc.ObjectID);
             writer.Write7BitEncodedInt64(unknownInt);
             writer.Write7BitEncodedInt64(unknownInt);
@@ -26,9 +23,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             foreach (Item entry in npc.Inventory.itemContainer.Values)
                 entry.DumpItem(ref writer);
 
-            Memory<byte> buffer = temp.Slice(0, writer.Position);
-
-            SessionQueueMessages.PackMessage(session, buffer, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

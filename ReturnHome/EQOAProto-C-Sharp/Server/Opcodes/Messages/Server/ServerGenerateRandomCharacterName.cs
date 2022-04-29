@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
@@ -7,23 +6,20 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerGenerateRandomCharacterName
     {
-        public static void GenerateRandomCharacterName(Session MySession)
+        public static void GenerateRandomCharacterName(Session session)
         {
             string Name = RandomName.GenerateName();
 
-            //Maybe a check here to verify name isn't taken in database before sending to client?
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.RandomName);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            Memory<byte> temp = new Memory<byte>(new byte[2 + 4 + (Name.Length * 2)]);
-            Span<byte> Message = temp.Span;
-
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.RandomName);
+            writer.Write(message.Opcode);
             writer.Write(Name.Length);
             writer.WriteString(Encoding.UTF8, Name);
 
+            message.Size = writer.Position;
             //Send Message
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.sessionQueue.Add(message);
         }
     }
 }

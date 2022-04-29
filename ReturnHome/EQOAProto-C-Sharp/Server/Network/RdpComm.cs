@@ -10,6 +10,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using System.Buffers;
 
 namespace ReturnHome.Server.Network
 {
@@ -203,22 +204,17 @@ namespace ReturnHome.Server.Network
 
     public class RdpCommOut
     {
+        private static MemoryPool<byte> _memoryPool;
         private readonly Session _session;
         public readonly ServerListener _listener;
         private List<ReadOnlyMemory<byte>> _messageList = new();
+        private int _size = 0;
         private int _value = 0;
-        public int totalLength;
-        public int MessageLength;
-        private int _headerLength;
-        public int maxSize = 1200;
-        private Memory<byte> temp;
+        public static int maxSize = 0x530;
 
         public RdpCommOut(Session session, ServerListener listener)
         {
             _session = session;
-            totalLength = 0;
-            MessageLength = 0;
-            _headerLength = 0;
             _listener = listener;
         }
 
@@ -227,81 +223,74 @@ namespace ReturnHome.Server.Network
             if (_session.sessionQueue.CheckQueue() || _session.PacketBodyFlags.RdpReport || _session.PacketBodyFlags.clientUpdateAck)
             {
                 //Take this instance for processing, probablky need to introduce some locking mechanism on this
-                SegmentBodyFlags segmentFlags = _session.PacketBodyFlags;
+                SegmentBodyFlags segmentBodyFlags = _session.PacketBodyFlags;
 
                 //Replace with a new instance for next packet
                 _session.PacketBodyFlags = new();
 
-                MessageLength = _session.sessionQueue.GatherMessages(segmentFlags, _messageList);
-                totalLength += MessageLength;
 
-                //Calculate expected expected outgoing packet length
+                Memory<byte> packet = _memoryPool.Rent(0x0530).Memory;
+                BufferWriter writer = new(packet.Span);
                 // 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
-                GetHeaderLength(segmentFlags);
-                temp = new Memory<byte>(new byte[totalLength]);
-                BufferWriter packet = new(temp.Span);
+                writer.Position = GetHeaderLength(segmentBodyFlags);
 
-                //Jump offset past endpoints and bundle header information
-                if (_value > 0x3000)// || _session.CancelConnection)
-                    packet.Position += 7;
-
-                else
-                    packet.Position += 6;
+                _session.sessionQueue.WriteMessages(ref writer, segmentBodyFlags);
 
                 ///Add Session Information
-                AddSession(ref packet);
+                AddSession(ref writer);
 
                 //Add bundle type first
-                AddBundleType(ref packet, segmentFlags);
+                AddBundleType(ref writer, segmentBodyFlags);
 
                 ///Add session ack here if it has not been done yet
                 ///Lets client know we acknowledge session
                 ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
-                if (segmentFlags.SessionAck)
+                if (segmentBodyFlags.SessionAck)
                 {
                     //Change this to false then process
-                    segmentFlags.SessionAck = false;
+                    segmentBodyFlags.SessionAck = false;
 
                     ///To ack session, we just repeat session information as an ack
-                    AddSessionAck(ref packet);
+                    AddSessionAck(ref writer);
                 }
 
-                AddRDPReport(ref packet, segmentFlags);
+                AddRDPReport(ref writer, segmentBodyFlags);
 
-                AddMessages(ref packet, _messageList);
+                AddMessages(ref writer, _messageList);
 
-                packet.Position = 0;
+                //Set packet size here, also use this for jumping around packet creation
+                _size = writer.Position;
+
+                writer.Position = 0;
 
                 //Add session header data
-                AddSessionHeader(packet);
+                AddSessionHeader(writer);
 
                 //Adjust offset to last 4 bytes
-                packet.Position = packet.Length - 4;
+                writer.Position = _size;
 
                 //_ = packet.Length - 4 != 0 ? throw new Exception("Error occured with PAcket Length") : true;
 
                 //Add CRC
-                packet.Write(CRC.calculateCRC(packet.Span[0..(packet.Length - 4)]));
+                writer.Write(CRC.calculateCRC(writer.Span[0..(writer.Position)]));
 
                 SocketAsyncEventArgs args = new();
                 args.RemoteEndPoint = _session.MyIPEndPoint;
-                args.SetBuffer(temp);
+                args.SetBuffer(packet.Slice(0, writer.Position));
 
                 //Send Packet
                 _listener.socket.SendToAsync(args);
 
                 _messageList.Clear();
-                _headerLength = 0;
-                totalLength = 0;
                 _value = 0;
+                _size = 0;
             }
         }
 
-        private void GetHeaderLength(SegmentBodyFlags segmentFlags)
+        private int GetHeaderLength(SegmentBodyFlags segmentBodyFlags)
         {
-            //Client/Server endpoints
-            totalLength += 4;
-            _headerLength += 4;
+            //endpoints
+            int headerLength = 4;
 
             if (_session.Instance) //When server initiates instance with the client, it will use this
                 _value |= 0x80000;
@@ -309,8 +298,7 @@ namespace ReturnHome.Server.Network
             if (_session.didServerInitiate) // Purely a guess.... Something is 0x4000 in this and seems to correspond the initator of the session
             {
                 //This needs to be more dynamic, technically the sessionID length can vary when packed but 3 is super common
-                totalLength += 3;
-                _headerLength += 3;
+                headerLength += 3;
                 _value |= 0x04000;
             }
 
@@ -319,31 +307,24 @@ namespace ReturnHome.Server.Network
 
             if (_session.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
             {
-                totalLength += 4;
-                _headerLength += 4;
+                headerLength += 4;
                 _value |= 0x02000;
             }
 
             //If _value is over 0x3000, means the header info should be 3 bytes. is _value is 0, header will be the packet length using variable length integer.... So will have to rethink this a little bit eventually
             byte temp = _value > 0x3000 ? (byte)3 : (byte)2;
-            totalLength += temp;
-            _headerLength += temp;
+            headerLength += temp + 3;
 
-            //Bundle Type & Bundle #
-            totalLength += 3;
+            if (segmentBodyFlags.SessionAck)
+                headerLength += 4;
 
-            if (segmentFlags.SessionAck)
-                totalLength += 4;
+            if (segmentBodyFlags.RdpReport)
+                headerLength += 4;
 
-            if (segmentFlags.RdpReport)
-                totalLength += 4;
+            if (segmentBodyFlags.clientUpdateAck)
+                headerLength += 4;
 
-            if (segmentFlags.clientUpdateAck)
-                totalLength += 4;
-
-            //Add 4 more for CRC upfront
-            //If we ever implement server transfers, may need to rethink this as those do not use crc
-            totalLength += 4;
+            return headerLength;
         }
 
         private void AddMessages(ref BufferWriter packet, List<ReadOnlyMemory<byte>> messageList)
@@ -364,7 +345,6 @@ namespace ReturnHome.Server.Network
                     throw new Exception("wtf");
                 packet.Write(_session.rdpCommIn.connectionData.lastReceivedPacketSequence);
                 packet.Write(_session.rdpCommIn.connectionData.lastReceivedMessageSequence);
-                /// Add them to packet in "reverse order" stated above
             }
 
             //include 4029 ack's as needed
@@ -378,24 +358,24 @@ namespace ReturnHome.Server.Network
 
         ///Add our bundle type
         ///Consideration for in world or "certain packet" # is needed during conversion. For now something basic will work
-        private void AddBundleType(ref BufferWriter packet, SegmentBodyFlags segmentFlags)
+        private void AddBundleType(ref BufferWriter packet, SegmentBodyFlags segmentBodyFlags)
         {
             byte segBody = 0;
 
             //Always has this
             segBody |= 0x20;
 
-            if (segmentFlags.RdpReport)
+            if (segmentBodyFlags.RdpReport)
             {
                 segBody |= 0x03;
             }
 
-            if (segmentFlags.clientUpdateAck)
+            if (segmentBodyFlags.clientUpdateAck)
             {
                 segBody |= 0x10;
             }
 
-            if (segmentFlags.SessionAck)
+            if (segmentBodyFlags.SessionAck)
             {
                 segBody |= 0x40;
             }
@@ -427,7 +407,7 @@ namespace ReturnHome.Server.Network
             packet.Write(_session.rdpCommIn.clientID);
 
             //Subtract CRC length from total count also
-            packet.Write7BitEncodedUInt64((uint)(_value + (totalLength - _headerLength - 4)));
+            packet.Write7BitEncodedUInt64((uint)(_value + _size));
         }
     }
 }

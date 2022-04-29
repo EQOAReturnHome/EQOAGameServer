@@ -5,7 +5,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientPlayerTarget
     {
-        public static void PlayerTarget(Session mySession, PacketMessage clientPacket)
+        public static void PlayerTarget(Session session, PacketMessage clientPacket)
         {
             BufferReader reader = new(clientPacket.Data.Span);
 
@@ -13,8 +13,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             _ = reader.Read<uint>();
             uint targetID = reader.Read<uint>();
 
-            mySession.MyCharacter.Target = targetID;
-            mySession.TargetUpdate();
+            session.MyCharacter.Target = targetID;
+            session.TargetUpdate();
         }
     }
 }

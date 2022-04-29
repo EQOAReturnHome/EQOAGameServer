@@ -8,7 +8,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientProcessCharacterChanges
     {
-        public static void ProcessCharacterChanges(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessCharacterChanges(Session session, PacketMessage ClientPacket)
         {
             BufferReader reader = new(ClientPacket.Data.Span);
 
@@ -21,15 +21,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 
             CharacterSQL cSQL = new();
             //Query Character
-            Character MyCharacter = cSQL.AcquireCharacter(MySession, ServerID);
+            Character MyCharacter = cSQL.AcquireCharacter(session, ServerID);
             cSQL.CloseConnection();
             try
             {
-                SessionManager.CreateMemoryDumpSession(MySession, MyCharacter);
+                SessionManager.CreateMemoryDumpSession(session, MyCharacter);
             }
             catch
             {
-                Logger.Err($"Unable to create Memory Dump Session for {MySession.SessionID} : {MyCharacter.CharName}");
+                Logger.Err($"Unable to create Memory Dump Session for {session.SessionID} : {MyCharacter.CharName}");
             }
         }
     }

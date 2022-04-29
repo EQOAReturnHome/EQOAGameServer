@@ -1,5 +1,4 @@
-﻿using System;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
@@ -8,17 +7,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void DiscVersion(Session session, int GameVersion)
         {
-            Memory<byte> temp = new byte[6];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.DiscVersion);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            ///Need to send this back to client
-            writer.Write((ushort)GameOpcode.DiscVersion);
+            writer.Write(message.Opcode);
             writer.Write(GameVersion);
 
+            message.Size = writer.Position;
             ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.sessionQueue.Add(message);
         }
     }
 }

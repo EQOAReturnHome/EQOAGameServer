@@ -45,15 +45,18 @@ namespace ReturnHome.Server.Opcodes.Chat
             }
         }
 
-        public static void GenerateClientSpecificChat(Session MySession, string message)
+        public static void GenerateClientSpecificChat(Session session, string chatMessage)
         {
-            Memory<byte> temp = new Memory<byte>(new byte[6 + (message.Length * 2)]);
-            BufferWriter writer = new(temp.Span);
-            writer.Write(GameOpcode.ClientMessage);
-            writer.WriteString(Encoding.Unicode, message);
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ClientMessage);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            writer.WriteString(Encoding.Unicode, chatMessage);
+
+            message.Size = writer.Position;
 
             //Send Message
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ReliableMessage);
+            session.sessionQueue.Add(message);
         }
 
         /// <summary>

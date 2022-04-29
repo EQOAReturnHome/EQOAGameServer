@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
@@ -11,27 +10,12 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void CreateCharacterList(List<Character> MyCharacterList, Session session)
         {
-            //gather expected buffer size... start with 3, opcode and character count should always be 3
-            int bufferSize = 3;
-            for (int i = 0; i < MyCharacterList.Count; i++)
-            {
-                //Everycharacter has this as a "standard" amount of bytes
-                bufferSize += 82;
-                bufferSize += MyCharacterList[i].CharName.Length;
-                bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ServerID);
-                bufferSize += Utility_Funcs.DoubleVariableLengthIntegerLength(MyCharacterList[i].ModelID);
-            }
-
-            Message message = new Message(bufferSize, MessageType.ReliableMessage, GameOpcode.CharacterSelect);
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.CharacterSelect);
             BufferWriter writer = new BufferWriter(message.Span);
 
-            //skip over header of message
-            writer.Position = message.headerSize;
-
-            //Holds list of characters pulled from the DB for the AccountID
             writer.Write(message.Opcode);
 
-            ///Gets our character count and uses technique to double it
+            ///Gets our character count and uses technique to "double" it
             writer.Write7BitEncodedInt64(MyCharacterList.Count);
 
             //Iterates through each charcter in the list and converts attribute values to packet values
@@ -143,9 +127,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 writer.Write(ByteSwaps.SwapBytes(character.RobeColor)); //78
             }
 
+            message.Size = writer.Position;
             ///Character list is complete
             ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(session, message, writer);
+            session.sessionQueue.Add(message);
         }
     }
 }

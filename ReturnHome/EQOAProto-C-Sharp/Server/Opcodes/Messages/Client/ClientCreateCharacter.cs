@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
@@ -30,7 +29,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                 //Close SQL connection
                 createCharacter.CloseConnection();
                 ServerCharacterNameTaken.CharacterNameTaken(session);
-
             }
 
             //If name not found continue to actually create character

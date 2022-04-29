@@ -6,7 +6,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientGenerateRandomCharacterName
     {
-        public static void GenerateRandomCharacterName(Session MySession, PacketMessage ClientPacket)
+        public static void GenerateRandomCharacterName(Session session, PacketMessage ClientPacket)
         {
             BufferReader reader = new(ClientPacket.Data.Span);
 
@@ -17,7 +17,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             ///Make sure Message number is expected, needs to be in order.
             byte sex = reader.Read<byte>();
 
-            ServerGenerateRandomCharacterName.GenerateRandomCharacterName(MySession);
+            ServerGenerateRandomCharacterName.GenerateRandomCharacterName(session);
         }
     }
 }

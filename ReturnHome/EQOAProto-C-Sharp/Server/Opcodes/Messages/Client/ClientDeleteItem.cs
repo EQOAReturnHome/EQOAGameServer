@@ -5,14 +5,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientDeleteItem
     {
-        public static void DeleteItem(Session MySession, PacketMessage ClientPacket)
+        public static void DeleteItem(Session session, PacketMessage ClientPacket)
         {
             BufferReader reader = new(ClientPacket.Data.Span);
 
             byte itemToDestroy = (byte)reader.Read<uint>();
             int quantityToDestroy = (int)reader.Read<uint>();
 
-            MySession.MyCharacter.DestroyItem(itemToDestroy, quantityToDestroy);
+            session.MyCharacter.DestroyItem(itemToDestroy, quantityToDestroy);
         }
     }
 }

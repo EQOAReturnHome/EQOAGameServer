@@ -1,24 +1,21 @@
-﻿using System;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerDeleteQuest
     {
-        public static void DeleteQuest(Session mySession, byte questNumber)
+        public static void DeleteQuest(Session session, byte questNumber)
         {
-            Memory<byte> temp = new byte[8];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.DeleteQuest);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.DeleteQuest);
+            writer.Write(message.Opcode);
             writer.Write(0);
             writer.Write(questNumber);
 
-
-            SessionQueueMessages.PackMessage(mySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
@@ -8,16 +7,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void PlayerIgnoreList(Session session)
         {
-            Memory<byte> temp = new byte[3];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.IgnoreList);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.IgnoreList);
+            writer.Write(message.Opcode);
             writer.Write((byte)0);
 
+            message.Size = writer.Position;
             //For now send no ignored people
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.sessionQueue.Add(message);
         }
     }
 }

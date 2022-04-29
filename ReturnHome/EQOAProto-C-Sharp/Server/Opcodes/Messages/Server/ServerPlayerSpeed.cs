@@ -1,37 +1,34 @@
-﻿using System;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerPlayerSpeed
     {
-        public static void PlayerSpeed(Session MySession)
+        public static void PlayerSpeed(Session session)
         {
-            Memory<byte> temp = new byte[6];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.PlayerSpeed);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.PlayerSpeed);
+            writer.Write(message.Opcode);
             writer.Write(25.0f);
 
+            message.Size = writer.Position;
             //For now send a standard speed
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.sessionQueue.Add(message);
         }
 
-        public static void PlayerSpeed(Session MySession, float speed)
+        public static void PlayerSpeed(Session session, float speed)
         {
-            Memory<byte> temp = new byte[6];
-            Span<byte> Message = temp.Span;
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.PlayerSpeed);
+            BufferWriter writer = new BufferWriter(message.Span);
 
-            BufferWriter writer = new BufferWriter(Message);
-
-            writer.Write((ushort)GameOpcode.PlayerSpeed);
+            writer.Write(message.Opcode);
             writer.Write(speed);
 
+            message.Size = writer.Position;
             //For now send a standard speed
-            SessionQueueMessages.PackMessage(MySession, temp, MessageOpcodeTypes.ShortReliableMessage);
+            session.sessionQueue.Add(message);
         }
     }
 }

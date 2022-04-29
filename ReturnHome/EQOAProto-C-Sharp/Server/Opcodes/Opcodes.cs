@@ -22,6 +22,7 @@
 
         //Server Only Opcodes
         CharacterSelect = 0x2C, ///44
+        BestEffortPing = 0x07D0,
         Camera1 = 0x07D1, ///2001
         Camera2 = 0x07F5, ///2037
         GameServers = 0x07B3, ///1971
@@ -48,6 +49,7 @@
         UnequipItem = 0x40,
         RemoveBankItem = 0x1250,
         AddBankItem = 0x1251,
+        Teleport = 0x07F6,
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client

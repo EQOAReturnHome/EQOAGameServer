@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
@@ -12,10 +10,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void MemoryDump(Session session)
         {
-            Memory<byte> temp = new byte[40000];
-            Span<byte> Message = temp.Span;
-
-            BufferWriter writer = new BufferWriter(Message);
+            Message message = Message.Create(MessageType.SegmentReliableMessage, GameOpcode.MemoryDump);
+            BufferWriter writer = new BufferWriter(message.Span);
 
             //Perform SQl stuff
             CharacterSQL charDump = new CharacterSQL();
@@ -26,7 +22,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             charDump.GetPlayerSpells(session);
 
             //Toss opcode in
-            writer.Write((ushort)GameOpcode.MemoryDump);
+            writer.Write(message.Opcode);
 
             session.MyCharacter.DumpCharacter(ref writer);
             writer.Write7BitEncodedInt64(session.MyCharacter.MyHotkeys.Count);
@@ -102,9 +98,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             ServerTime.Time(session);
 
-            Memory<byte> buffer = temp.Slice(0, writer.Position);
-
-            SessionQueueMessages.PackMessage(session, buffer, MessageOpcodeTypes.ShortReliableMessage);
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
 
             //At this point, character should be loading in game, so we would want to get them added to the Player List and receiving any updates
             //session.inGame = true;

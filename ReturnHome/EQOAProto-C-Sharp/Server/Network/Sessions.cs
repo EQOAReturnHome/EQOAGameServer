@@ -6,6 +6,7 @@ using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.Network
 {
@@ -71,23 +72,18 @@ namespace ReturnHome.Server.Network
 			sessionQueue = new(this);
         }
 
-        public void ProcessPacket(ClientPacket packet)
-        {
-			//Eventually we would want to verify the sessions state in the game before continuing to process?
-			//Would be effectively dropping the packet if this check fails
-            //if (!CheckState(packet))
-                //return;
-
-            rdpCommIn.ProcessPacket(packet);
-        }
-
         public void UnreliablePing()
         {
-            sessionQueue.Add(new Message(new ReadOnlyMemory<byte>(new byte[] { 0xFC, 0x02, 0xD0, 0x07 })));
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.BestEffortPing);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            message.Size = writer.Position;
+            sessionQueue.Add(message);
             _pingCount++;
         }
 
-        //This should get built into somewhere else, eventually
+        //TODO This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
             string message = $"Coordinates: X-{MyCharacter.x} Y-{MyCharacter.y} Z-{MyCharacter.z}";
@@ -95,6 +91,7 @@ namespace ReturnHome.Server.Network
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 
+        //TODO Put this somewhere else
         public void TargetUpdate()
         {
             string message = $"Targeting ObjectID: {MyCharacter.Target}";
@@ -151,8 +148,7 @@ namespace ReturnHome.Server.Network
         public void DropSession()
         {
             if (!PendingTermination) return;
-            //Eventually this would kick the player out of the world and save data/free resources
-            // Remove character from Character List
+
             MapManager.RemoveObjectFromTree(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             EntityManager.RemoveEntity(MyCharacter);
