@@ -2,9 +2,8 @@ using System;
 using System.Text;
 
 using ReturnHome.Utilities;
-using ReturnHome.Server.EntityObject.Player;
-using System.Numerics;
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -12,49 +11,33 @@ namespace ReturnHome.Server.EntityObject
     {
         private static float _speedAdjust = 6.25f;
 
-        public void ObjectUpdateObjectID()
-        {
-            BitConverter.GetBytes(ObjectID).CopyTo(ObjectUpdate.Slice(0, 4));
-        }
+        public void ObjectUpdateObjectID() => MemoryMarshal.Write(ObjectUpdate.Span[0..], ref _objectID);
 
-        public void ObjectUpdateEntity(byte temp = 0x82)
-        {
-            new byte[] { temp }.CopyTo(ObjectUpdate.Slice(4, 1));
-        }
+        public void ObjectUpdateEntity(byte temp = 0x82) => ObjectUpdate.Span[4] = temp;
 
         public void ObjectUpdatePosition()
         {
-            int offset = 5;
             Span<byte> temp = ObjectUpdate.Span;
-            temp.Write3Bytes((uint)(Position.X * 128.0f), ref offset);
-            temp.Write3Bytes((uint)(Position.Y * 128.0f), ref offset);
-            temp.Write3Bytes((uint)(Position.Z * 128.0f), ref offset);
+            float x = Position.X * 128.0f;
+            float y = Position.Y * 128.0f;
+            float z = Position.Z * 128.0f;
+            MemoryMarshal.Write(temp[5..], ref x);
+            MemoryMarshal.Write(temp[8..], ref y);
+            MemoryMarshal.Write(temp[11..], ref z);
+
+            //Critical to make sure that writing the int's don't override the facing value
+            temp[14] = Facing;
         }
 
-        public void ObjectUpdateFacing()
-        {
-            ObjectUpdate.Span[14] = Facing;
-        }
+        public void ObjectUpdateFacing() => ObjectUpdate.Span[14] = Facing;
 
-        public void ObjectUpdateFirstPerson()
-        {
-            ObjectUpdate.Span[15] = FirstPerson;
-        }
+        public void ObjectUpdateFirstPerson() => ObjectUpdate.Span[15] = FirstPerson;
 
-        public void ObjectUpdateWorld()
-        {
-            ObjectUpdate.Span[16] = (byte)World;
-        }
+        public void ObjectUpdateWorld() => ObjectUpdate.Span[16] = (byte)World;
 
-        public void ObjectUpdateKillTime()
-        {
-            BitConverter.GetBytes(KillTime).CopyTo(ObjectUpdate.Slice(17, 8));
-        }
+        public void ObjectUpdateKillTime() => MemoryMarshal.Write(ObjectUpdate.Span[17..], ref _killTime);
 
-        public void ObjectUpdateHPFlag()
-        {
-            ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)0;
-        }
+        public void ObjectUpdateHPFlag() => ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)0;
 
         public void ObjectUpdateHPBar()
         {
@@ -63,27 +46,18 @@ namespace ReturnHome.Server.EntityObject
             ObjectUpdate.Span[26] = (byte)((255 * CurrentHP) / HPMax);
         }
 
-        public void ObjectUpdateModelID()
-        {
-            BitConverter.GetBytes(ModelID).CopyTo(ObjectUpdate.Slice(27, 4));
-        }
+        public void ObjectUpdateModelID() => MemoryMarshal.Write(ObjectUpdate.Span[27..], ref _modelID);
 
-        public void ObjectUpdateModelIDUpgraded()
-        {
-            BitConverter.GetBytes(ModelID).CopyTo(ObjectUpdate.Slice(31, 4));
-        }
+        public void ObjectUpdateModelIDUpgraded() => MemoryMarshal.Write(ObjectUpdate.Span[31..], ref _modelID);
 
-        public void ObjectUpdateModelSize()
-        {
-            BitConverter.GetBytes(ModelSize).CopyTo(ObjectUpdate.Slice(35, 4));
-        }
+        public void ObjectUpdateModelSize() => MemoryMarshal.Write(ObjectUpdate.Span[35..], ref _modelSize);
 
         public void ObjectUpdateVelocityX()
         {
             sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
             if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
             if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(39, 1));
+            MemoryMarshal.Write(ObjectUpdate.Span[39..], ref svx);
         }
 
         public void ObjectUpdateVelocityY()
@@ -101,201 +75,100 @@ namespace ReturnHome.Server.EntityObject
             sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
             if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
             if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            new byte[] { (byte)svz }.CopyTo(ObjectUpdate.Slice(41, 1));
+            MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svz);
         }
 
-        public void ObjectUpdateEastWest()
-        {
-            ObjectUpdate.Span[44] = EastToWest;
-        }
+        public void ObjectUpdateEastWest() => ObjectUpdate.Span[44] = EastToWest;
 
-        public void ObjectUpdateLateralMovement()
-        {
-            ObjectUpdate.Span[45] = LateralMovement;
-        }
+        public void ObjectUpdateLateralMovement() => ObjectUpdate.Span[45] = LateralMovement;
 
-        public void ObjectUpdateNorthSouth()
-        {
-            ObjectUpdate.Span[46] = NorthToSouth;
-        }
-        public void ObjectUpdateTurning()
-        {
-            ObjectUpdate.Span[47] = Turning;
-        }
+        public void ObjectUpdateNorthSouth() => ObjectUpdate.Span[46] = NorthToSouth;
 
-        public void ObjectUpdateSpinDown()
-        {
-            ObjectUpdate.Span[48] = SpinDown;
-        }
+        public void ObjectUpdateTurning() => ObjectUpdate.Span[47] = Turning;
 
-        public void ObjectUpdateCoordY()
-        {
-            BitConverter.GetBytes(y).CopyTo(ObjectUpdate.Slice(49, 4));
-        }
+        public void ObjectUpdateSpinDown() => ObjectUpdate.Span[48] = SpinDown;
 
-        public void ObjectUpdateFacingF()
-        {
-            BitConverter.GetBytes(FacingF).CopyTo(ObjectUpdate.Slice(53, 4));
-        }
+        public void ObjectUpdateCoordY() => MemoryMarshal.Write(ObjectUpdate.Span[49..], ref y);
 
-        public void ObjectUpdateAnimation()
-        {
-            ObjectUpdate.Span[57] = Animation;
-        }
+        public void ObjectUpdateFacingF() => MemoryMarshal.Write(ObjectUpdate.Span[53..], ref _facingF);
 
-        public void ObjectUpdateTarget()
-        {
-            BitConverter.GetBytes(Target).CopyTo(ObjectUpdate.Slice(58, 4));
-        }
+        public void ObjectUpdateAnimation() => ObjectUpdate.Span[57] = Animation;
+
+        public void ObjectUpdateTarget() => MemoryMarshal.Write(ObjectUpdate.Span[58..], ref _target);
 
         public void ObjectUpdateUnknown()
         {
-            BitConverter.GetBytes((ushort)0x0105).CopyTo(ObjectUpdate.Slice(62, 2));
+            ushort temp = 0x0105;
+            MemoryMarshal.Write(ObjectUpdate.Span[62..], ref temp);
         }
 
-        public void ObjectUpdatePrimary()
-        {
-            BitConverter.GetBytes(Primary).CopyTo(ObjectUpdate.Slice(66, 4));
-        }
+        public void ObjectUpdatePrimary() => MemoryMarshal.Write(ObjectUpdate.Span[66..], ref _primary);
 
-        public void ObjectUpdateSecondary()
-        {
-            BitConverter.GetBytes(Secondary).CopyTo(ObjectUpdate.Slice(70, 4));
-        }
+        public void ObjectUpdateSecondary() => MemoryMarshal.Write(ObjectUpdate.Span[70..], ref _secondary);
 
-        public void ObjectUpdateShield()
-        {
-            BitConverter.GetBytes(Shield).CopyTo(ObjectUpdate.Slice(74, 4));
-        }
+        public void ObjectUpdateShield() => MemoryMarshal.Write(ObjectUpdate.Span[74..], ref _shield);
 
-        public void ObjectUpdatePrimaryUpgraded()
-        {
-            BitConverter.GetBytes(Primary).CopyTo(ObjectUpdate.Slice(78, 4));
-        }
+        public void ObjectUpdatePrimaryUpgraded() => MemoryMarshal.Write(ObjectUpdate.Span[78..], ref _primary);
 
-        public void ObjectUpdateSecondaryUpgraded()
-        {
-            BitConverter.GetBytes(Secondary).CopyTo(ObjectUpdate.Slice(82, 4));
-        }
+        public void ObjectUpdateSecondaryUpgraded() => MemoryMarshal.Write(ObjectUpdate.Span[82..], ref _secondary);
 
-        public void ObjectUpdateShieldUpgraded()
-        {
-            BitConverter.GetBytes(Shield).CopyTo(ObjectUpdate.Slice(86, 4));
-        }
+        public void ObjectUpdateShieldUpgraded() => MemoryMarshal.Write(ObjectUpdate.Span[86..], ref _shield);
 
-        public void ObjectUpdateChest()
-        {
-            ObjectUpdate.Span[92] = Chest;
-        }
+        public void ObjectUpdateChest() => ObjectUpdate.Span[92] = Chest;
 
-        public void ObjectUpdateBracer()
-        {
-            ObjectUpdate.Span[93] = Bracer;
-        }
+        public void ObjectUpdateBracer() => ObjectUpdate.Span[93] = Bracer;
 
-        public void ObjectUpdateGloves()
-        {
-            ObjectUpdate.Span[94] = Gloves;
-        }
+        public void ObjectUpdateGloves() => ObjectUpdate.Span[94] = Gloves;
 
-        public void ObjectUpdateLegs()
-        {
-            ObjectUpdate.Span[95] = Legs;
-        }
+        public void ObjectUpdateLegs() => ObjectUpdate.Span[95] = Legs;
 
-        public void ObjectUpdateBoots()
-        {
-            ObjectUpdate.Span[96] = Boots;
-        }
+        public void ObjectUpdateBoots() => ObjectUpdate.Span[96] = Boots;
 
-        public void ObjectUpdateHelm()
-        {
-            ObjectUpdate.Span[97] = Helm;
-        }
+        public void ObjectUpdateHelm() => ObjectUpdate.Span[97] = Helm;
 
         public void ObjectUpdateVanillaColors()
         {
-            byte[] temp = new byte[] { 0xFF, 0xFF }; 
+            ushort temp = 0xFFFF; 
             for(int i = 0; i < 6; i++)
-            {
-                temp.CopyTo(ObjectUpdate.Slice(98 + (i * 2), 2));
-            }
+                MemoryMarshal.Write(ObjectUpdate.Span[(98 + ( i * 2))..], ref temp);
         }
 
-        public void ObjectUpdateChestColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(110, 4).Span, ChestColor);
-        }
+        public void ObjectUpdateChestColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(110, 4).Span, ChestColor);
 
-        public void ObjectUpdateBracerColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(115, 4).Span, BracerColor);
-        }
+        public void ObjectUpdateBracerColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(115, 4).Span, BracerColor);
 
-        public void ObjectUpdateGloveColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(120, 4).Span, GloveColor);
-        }
+        public void ObjectUpdateGloveColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(120, 4).Span, GloveColor);
 
-        public void ObjectUpdateLegColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(125, 4).Span, LegColor);
-        }
+        public void ObjectUpdateLegColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(125, 4).Span, LegColor);
 
-        public void ObjectUpdateBootsColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(130, 4).Span, BootsColor);
-        }
+        public void ObjectUpdateBootsColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(130, 4).Span, BootsColor);
 
-        public void ObjectUpdateHelmColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(135, 4).Span, HelmColor);
-        }
+        public void ObjectUpdateHelmColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(135, 4).Span, HelmColor);
 
-        public void ObjectUpdateRobeColor()
-        {
-            BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(140, 4).Span, RobeColor);
-        }
+        public void ObjectUpdateRobeColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(140, 4).Span, RobeColor);
 
-        public void ObjectUpdateHairColor()
-        {
-            ObjectUpdate.Span[144] = (byte)HairColor;
-        }
+        public void ObjectUpdateHairColor() => ObjectUpdate.Span[144] = (byte)HairColor;
 
-        public void ObjectUpdateHairLength()
-        {
-            ObjectUpdate.Span[145] = (byte)HairLength;
-        }
+        public void ObjectUpdateHairLength() => ObjectUpdate.Span[145] = (byte)HairLength;
 
-        public void ObjectUpdateHairStyle()
-        {
-            ObjectUpdate.Span[146] = (byte)HairStyle;
-        }
+        public void ObjectUpdateHairStyle() => ObjectUpdate.Span[146] = (byte)HairStyle;
 
-        public void ObjectUpdateFaceOption()
-        {
-            ObjectUpdate.Span[147] = (byte)FaceOption;
-        }
+        public void ObjectUpdateFaceOption() => ObjectUpdate.Span[147] = (byte)FaceOption;
 
-        public void ObjectUpdateRobe()
-        {
-            ObjectUpdate.Span[148] = (byte)Robe;
-        }
+        public void ObjectUpdateRobe() => ObjectUpdate.Span[148] = (byte)Robe;
 
         public void ObjectUpdateName()
         {
-            Encoding.UTF8.GetBytes(CharName).CopyTo(ObjectUpdate.Slice(154, CharName.Length));
+            Span<byte> span3 = ObjectUpdate.Span;
+            span3[152..177].Fill(0);
+            ReadOnlySpan<char> span2 = _charName.AsSpan();
+            for (int i = 0; i < span2.Length; ++i)
+                span3[152+i] = (byte)span2[i];
         }
 
-        public void ObjectUpdateLevel()
-        {
-            ObjectUpdate.Span[178] = (byte)Level;
-        }
+        public void ObjectUpdateLevel() => ObjectUpdate.Span[178] = (byte)Level;
 
-        public void ObjectUpdateMovement()
-        {
-            ObjectUpdate.Span[179] = Movement;
-        }
+        public void ObjectUpdateMovement() => ObjectUpdate.Span[179] = Movement;
 
         public void ObjectUpdateNameColor(byte color = 255)
         {
@@ -305,39 +178,18 @@ namespace ReturnHome.Server.EntityObject
                 ObjectUpdate.Span[180] = color == 255 ? (byte)0 : color;
         }
 
-        public void ObjectUpdateNamePlate(byte color = 255)
-        {
-            ObjectUpdate.Span[181] = color == 255 ? (byte)0 : color;
-        }
+        public void ObjectUpdateNamePlate(byte color = 255) => ObjectUpdate.Span[181] = color == 255 ? (byte)0 : color;
 
-        public void ObjectUpdateRace()
-        {
-            ObjectUpdate.Span[182] = (byte)Race;
-        }
+        public void ObjectUpdateRace() => ObjectUpdate.Span[182] = (byte)Race;
 
-        public void ObjectUpdateClass()
-        {
-            ObjectUpdate.Span[183] = (byte)Class;
-        }
+        public void ObjectUpdateClass() => ObjectUpdate.Span[183] = (byte)Class;
 
-        public void ObjectUpdateNPCType()
-        {
-            BitConverter.GetBytes(_npcType).CopyTo(ObjectUpdate.Slice(184, 2));
-        }
+        public void ObjectUpdateNPCType() => MemoryMarshal.Write(ObjectUpdate.Span[184..], ref _npcType);
 
-        public void ObjectUpdatePattern()
-        {
-            BitConverter.GetBytes(0xFFFFFFFF).CopyTo(ObjectUpdate.Slice(186, 4));
-        }
+        public void ObjectUpdatePattern() => BitConverter.GetBytes(0xFFFFFFFF).CopyTo(ObjectUpdate.Slice(186, 4));
 
-        public void ObjectUpdateStatus(byte status = 0)
-        {
-            ObjectUpdate.Span[192] = status;
-        }
+        public void ObjectUpdateStatus(byte status = 0) => ObjectUpdate.Span[192] = status;
 
-        public void ObjectUpdateEnd()
-        {
-            Encoding.UTF8.GetBytes("trsq").CopyTo(ObjectUpdate.Slice(196, 4));
-        }
+        public void ObjectUpdateEnd() => Encoding.UTF8.GetBytes("trsq").CopyTo(ObjectUpdate.Slice(196, 4));
     }
 }
