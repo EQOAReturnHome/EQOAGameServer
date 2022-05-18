@@ -87,7 +87,7 @@ namespace ReturnHome.Utilities
             if (size < 0)
                 throw new ArgumentOutOfRangeException(nameof(size));
 
-            if (size + 4 > Remaining)
+            if (size > Remaining)
                 throw new InvalidOperationException($"size of {typeof(string)} exceeds the count of bytes remaining to be wrote to the {nameof(BufferWriter)}");
 
             Write(size);

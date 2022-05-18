@@ -135,7 +135,7 @@ namespace ReturnHome.Server.EntityObject.Player
             //Start pulling data together
             writer.Write((byte)0);
             writer.WriteString(Encoding.UTF8, Tunaria);
-            writer.Write7BitEncodedInt64(ModelID);
+            writer.Write7BitEncodedInt64(ServerID);
             writer.WriteString(Encoding.UTF8, CharName);
             writer.Write7BitEncodedInt64(Class);
             writer.Write7BitEncodedInt64(Race);

@@ -13,6 +13,23 @@ namespace ReturnHome.Utilities
 
             return (ulong)(unixTime.TotalSeconds);
         }
+
+        public static byte VariableUIntLength(ulong param_2)
+        {
+            byte result = 0;
+
+            do
+            {
+                param_2 = param_2 >> 7;
+                ++result;
+            } while (param_2 != 0);
+            return result;
+        }
+
+        public static byte VariableIntLength(long param_2)
+        {
+            return VariableUIntLength((ulong)(param_2 * 2));
+        }
     }
 
     public class ByteSwaps

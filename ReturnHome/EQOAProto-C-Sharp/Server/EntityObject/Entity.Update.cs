@@ -1,7 +1,6 @@
 using System;
 using System.Text;
 
-using ReturnHome.Utilities;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 
@@ -160,7 +159,7 @@ namespace ReturnHome.Server.EntityObject
         public void ObjectUpdateName()
         {
             Span<byte> span3 = ObjectUpdate.Span;
-            span3[152..177].Fill(0);
+            span3[154..177].Fill(0);
             ReadOnlySpan<char> span2 = _charName.AsSpan();
             for (int i = 0; i < span2.Length; ++i)
                 span3[152+i] = (byte)span2[i];

@@ -10,7 +10,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void MemoryDump(Session session)
         {
-            Message message = Message.Create(MessageType.SegmentReliableMessage, GameOpcode.MemoryDump);
+            Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.MemoryDump);
             BufferWriter writer = new BufferWriter(message.Span);
 
             //Perform SQl stuff

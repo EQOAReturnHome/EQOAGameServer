@@ -59,7 +59,8 @@ namespace ReturnHome.Server.Network
                 temp.Span[0] = _isActive & (baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                 CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, baseXOR.Slice(1, 0xC8), 0xC8);
                 CurrentXORResults.Add(messageCounter, temp);
-                _session.sessionQueue.Add(new Message((MessageType)ObjectChannel, temp));
+                _session.sessionQueue.Add(new Message((MessageType)ObjectChannel, messageCounter, baseMessageCounter == 0 ? (byte)0 : (byte)(messageCounter - baseMessageCounter), temp));
+                messageCounter++;
             }
         }
 

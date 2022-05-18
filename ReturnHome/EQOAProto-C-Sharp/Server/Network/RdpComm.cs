@@ -204,11 +204,12 @@ namespace ReturnHome.Server.Network
 
     public class RdpCommOut
     {
-        private static MemoryPool<byte> _memoryPool;
+        private static MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
         private readonly Session _session;
         public readonly ServerListener _listener;
         private List<ReadOnlyMemory<byte>> _messageList = new();
         private int _size = 0;
+        private int _crcPosition = 0;
         private int _value = 0;
         public static int maxSize = 0x530;
 
@@ -228,13 +229,21 @@ namespace ReturnHome.Server.Network
                 //Replace with a new instance for next packet
                 _session.PacketBodyFlags = new();
 
-
                 Memory<byte> packet = _memoryPool.Rent(0x0530).Memory;
                 BufferWriter writer = new(packet.Span);
                 // 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
                 writer.Position = GetHeaderLength(segmentBodyFlags);
 
                 _session.sessionQueue.WriteMessages(ref writer, segmentBodyFlags);
+
+                //Reset writer to write session data
+                //Actual size...
+                _size = writer.Position - _size;
+                _crcPosition = writer.Position;
+                writer.Position = 0;
+
+                //Add session header data
+                AddSessionHeader(ref writer);
 
                 ///Add Session Information
                 AddSession(ref writer);
@@ -256,23 +265,12 @@ namespace ReturnHome.Server.Network
 
                 AddRDPReport(ref writer, segmentBodyFlags);
 
-                AddMessages(ref writer, _messageList);
-
-                //Set packet size here, also use this for jumping around packet creation
-                _size = writer.Position;
-
-                writer.Position = 0;
-
-                //Add session header data
-                AddSessionHeader(writer);
-
-                //Adjust offset to last 4 bytes
-                writer.Position = _size;
+                writer.Position = _crcPosition;
 
                 //_ = packet.Length - 4 != 0 ? throw new Exception("Error occured with PAcket Length") : true;
 
                 //Add CRC
-                writer.Write(CRC.calculateCRC(writer.Span[0..(writer.Position)]));
+                writer.Write(CRC.calculateCRC(writer.Span[0..writer.Position]));
 
                 SocketAsyncEventArgs args = new();
                 args.RemoteEndPoint = _session.MyIPEndPoint;
@@ -283,7 +281,9 @@ namespace ReturnHome.Server.Network
 
                 _messageList.Clear();
                 _value = 0;
+                _crcPosition = 0;
                 _size = 0;
+                _session.Instance = false;
             }
         }
 
@@ -312,8 +312,11 @@ namespace ReturnHome.Server.Network
             }
 
             //If _value is over 0x3000, means the header info should be 3 bytes. is _value is 0, header will be the packet length using variable length integer.... So will have to rethink this a little bit eventually
-            byte temp = _value > 0x3000 ? (byte)3 : (byte)2;
+            byte temp = Utility_Funcs.VariableUIntLength((ulong)_value);
             headerLength += temp + 3;
+
+            //Utilize this to get size for header info
+            _size = headerLength - 3;
 
             if (segmentBodyFlags.SessionAck)
                 headerLength += 4;
@@ -399,7 +402,7 @@ namespace ReturnHome.Server.Network
             packet.Write(_session.InstanceID);
         }
 
-        private void AddSessionHeader(BufferWriter packet)
+        private void AddSessionHeader(ref BufferWriter packet)
         {
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Adding Session Header");
 
