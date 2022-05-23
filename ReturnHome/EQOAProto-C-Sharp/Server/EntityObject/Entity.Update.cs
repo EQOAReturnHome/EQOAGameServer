@@ -17,15 +17,13 @@ namespace ReturnHome.Server.EntityObject
         public void ObjectUpdatePosition()
         {
             Span<byte> temp = ObjectUpdate.Span;
-            float x = Position.X * 128.0f;
-            float y = Position.Y * 128.0f;
-            float z = Position.Z * 128.0f;
-            MemoryMarshal.Write(temp[5..], ref x);
-            MemoryMarshal.Write(temp[8..], ref y);
-            MemoryMarshal.Write(temp[11..], ref z);
+
+            BinaryPrimitives.WriteInt32BigEndian(temp[10..], (int)(Position.Z * 128.0f));
+            BinaryPrimitives.WriteInt32BigEndian(temp[7..], (int)(Position.Y * 128.0f));
+            BinaryPrimitives.WriteInt32BigEndian(temp[4..],(int)(Position.X * 128.0f));
 
             //Critical to make sure that writing the int's don't override the facing value
-            temp[14] = Facing;
+            temp[4] = 0x82;
         }
 
         public void ObjectUpdateFacing() => ObjectUpdate.Span[14] = Facing;
@@ -162,7 +160,7 @@ namespace ReturnHome.Server.EntityObject
             span3[154..177].Fill(0);
             ReadOnlySpan<char> span2 = _charName.AsSpan();
             for (int i = 0; i < span2.Length; ++i)
-                span3[152+i] = (byte)span2[i];
+                span3[154+i] = (byte)span2[i];
         }
 
         public void ObjectUpdateLevel() => ObjectUpdate.Span[178] = (byte)Level;

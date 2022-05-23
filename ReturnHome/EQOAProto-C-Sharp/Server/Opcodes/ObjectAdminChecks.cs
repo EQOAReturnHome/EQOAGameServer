@@ -1,6 +1,7 @@
 ﻿using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Opcodes.Chat
 {
