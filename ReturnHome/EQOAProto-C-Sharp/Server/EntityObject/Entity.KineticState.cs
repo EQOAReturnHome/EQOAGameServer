@@ -5,17 +5,18 @@ using System.Numerics;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Zone;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity : IPointFQuadStorable
     {
-        public int World;
+        private int _world;
 
         public float x;
         public float y;
         public float z;
-
+        public Map map;
         private float _velocityX = 0.0f;
         private float _velocityY = 0.0f;
         private float _velocityZ = 0.0f;
@@ -48,6 +49,19 @@ namespace ReturnHome.Server.EntityObject
         }
 
         #region Property zone
+
+        public int World
+        {
+            get { return _world; }
+            set
+            {
+                if(true)
+                {
+                    _world = value;
+                    ObjectUpdateWorld();
+                }
+            }
+        }
 
         public float VelocityX
         {

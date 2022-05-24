@@ -86,7 +86,7 @@ namespace ReturnHome.Server.Network
         //TODO This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
-            string message = $"Coordinates: X-{MyCharacter.x} Y-{MyCharacter.y} Z-{MyCharacter.z}";
+            string message = $"Coordinates: X: {MyCharacter.x} Y: {MyCharacter.y} Z: {MyCharacter.z} F: {MyCharacter.FacingF}";
 
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
@@ -145,7 +145,8 @@ namespace ReturnHome.Server.Network
             rdpCommOut.PrepPackets();
         }
 
-        public void DropSession()
+        //Optional override for dropping the session, currently simplifies for removing a character when they log out
+        public void DropSession(bool Override = false)
         {
             if (!PendingTermination) return;
 

@@ -34,7 +34,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newTunar", player.Inventory.Tunar);
             SecondCmd.Parameters.AddWithValue("newBankTunar", player.Bank.Tunar);
             SecondCmd.Parameters.AddWithValue("newUnusedTP", player.UnusedTP);
-            SecondCmd.Parameters.AddWithValue("newTotalTP", player.MaxAssignableTP);
+            SecondCmd.Parameters.AddWithValue("newTotalTP", 350);
             SecondCmd.Parameters.AddWithValue("newX", player.x);
             SecondCmd.Parameters.AddWithValue("newY", player.y);
             SecondCmd.Parameters.AddWithValue("newZ", player.z);

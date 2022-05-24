@@ -24,7 +24,7 @@ namespace ReturnHome.Server.Opcodes.Chat
             chatMessage = $"{MySession.MyCharacter.CharName}: " + chatMessage;
 
             //Query for nearby objects
-            List<Entity> entityList = MapManager.QueryNearbyObjects(MySession.MyCharacter, Radius);
+            List<Entity> entityList = MapManager.QueryObjects(MySession.MyCharacter, Radius);
 
             Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.CharacterSelect);
             BufferWriter writer = new BufferWriter(message.Span);

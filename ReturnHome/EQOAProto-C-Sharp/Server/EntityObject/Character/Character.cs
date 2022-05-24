@@ -28,6 +28,9 @@ namespace ReturnHome.Server.EntityObject.Player
 
 
 
+        //Temp, teleport/coach counter
+        public int Teleportcounter = 0;
+        public int ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
         public int ServerID;
@@ -78,6 +81,7 @@ namespace ReturnHome.Server.EntityObject.Player
             UnusedTP = unusedTP;
             MaxAssignableTP = totalAssignableTP;
             World = world;
+            ExpectedWorld = world;
             x = xCoord;
             y = yCoord;
             z = zCoord;

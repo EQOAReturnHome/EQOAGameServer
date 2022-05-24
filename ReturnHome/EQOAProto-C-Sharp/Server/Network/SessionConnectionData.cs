@@ -29,7 +29,7 @@ namespace ReturnHome.Server.Network
                 }
             }
         }
-        public ClientObjectUpdate client {get; set;}
+        public ClientObjectUpdate client { get; set; }
 
         //Create an array of all 24 object updates
         //Need a way to ensure no more then 24 objects can be allocated, array may be best?
@@ -55,8 +55,8 @@ namespace ReturnHome.Server.Network
             //and if client ack is higher, server will cycle through resend list and remove.
             clientLastReceivedMessageFinal = 0;
 
-			lastSentMessageSequence = 1;
-			lastSentPacketSequence = 1;
+            lastSentMessageSequence = 1;
+            lastSentPacketSequence = 1;
 
             //Create the object to track incoming client updates
             client = new();
@@ -70,34 +70,40 @@ namespace ReturnHome.Server.Network
 
         public void AddChannelObjects(List<Entity> charList)
         {
+            Span<ServerObjectUpdate> temp = serverObjects.Span;
             charList.Remove(_session.MyCharacter);
             if (charList.Count == 0)
+            {
+                for (int i = 1; i < serverObjects.Length; i++)
+                {
+                    temp[i].IsActive = false;
+                }
                 return;
+            }
 
             charList = charList.GetRange(0, charList.Count > 23 ? 23 : charList.Count);
 
-            Span<ServerObjectUpdate> temp = serverObjects.Span;
             //Iterate over List from QuadTree against Channels
             for (int i = 1; i < serverObjects.Length; i++)
             {
                 //Character is already in a channel
-                if (charList.Contains(temp[i].entity))
+                if (charList.Contains(temp[i].entity) & temp[i].IsActive)
                 {
                     charList.Remove(temp[i].entity);
                     continue;
                 }
 
                 else
-                    //Calls the disable methopd for the channel
-                    temp[i].DeactivateChannel();
+                    //Calls the disable method for the channel
+                    temp[i].IsActive = false;
             }
 
             if (charList.Count == 0)
                 return;
 
-            for(int i = 1; i < serverObjects.Length; i++)
+            for (int i = 1; i < serverObjects.Length; i++)
             {
-                if(temp[i].entity == null)
+                if (!temp[i].IsActive)
                 {
                     temp[i].AddObject(charList[0]);
                     charList.RemoveAt(0);
@@ -105,6 +111,16 @@ namespace ReturnHome.Server.Network
                         return;
                 }
                 continue;
+            }
+        }
+
+        public void DisableChannels()
+        {
+            Span<ServerObjectUpdate> temp = serverObjects.Span;
+
+            for (int i = 0; i < serverObjects.Length; i++)
+            {
+                temp[i].IsActive = false;
             }
         }
     }
