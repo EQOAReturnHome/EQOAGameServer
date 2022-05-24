@@ -5,6 +5,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Opcodes.Messages.Client;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.Opcodes
 {
@@ -37,6 +38,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.MerchantSell, ClientInteractActor.InteractActor },
             { GameOpcode.ArrangeItem, ClientInteractActor.InteractActor },
             { GameOpcode.RemoveInvItem, ClientDeleteItem.DeleteItem },
+            { GameOpcode.EnableChannel, EnableChannel },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)
@@ -76,6 +78,20 @@ namespace ReturnHome.Server.Opcodes
                 ///Do stuff here?
                 ///Handles packing message into outgoing packet
                 //SessionQueueMessages.PackMessage(MySession, Message, MessageOpcodeTypes.ShortReliableMessage);
+            }
+        }
+
+        public static void EnableChannel(Session MySession, PacketMessage message)
+        {
+            //Activate client channel
+            MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);
+
+            //If player changed worlds, is currently not existing in a quad tree, let's place into correct quadTree
+            if (MySession.MyCharacter.World != MySession.MyCharacter.ExpectedWorld)
+            {
+                //Update Character world
+                MySession.MyCharacter.World = MySession.MyCharacter.ExpectedWorld;
+                MapManager.Add(MySession.MyCharacter);
             }
         }
     }

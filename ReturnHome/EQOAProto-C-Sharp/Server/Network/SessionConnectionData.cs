@@ -46,7 +46,6 @@ namespace ReturnHome.Server.Network
         public SessionConnectionData(Session session)
         {
             _session = session;
-            lastReceivedMessageSequence = 0;
             lastReceivedPacketSequence = 0;
 
             //Client last soft ack of message's received.
