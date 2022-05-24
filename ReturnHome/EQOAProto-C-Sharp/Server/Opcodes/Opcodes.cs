@@ -69,7 +69,6 @@
         DeleteQuest = 0x7D, //125
         MerchantBuy = 0x4A, //74
         MerchantSell = 0x4B, //75
-        InteractItem = 0x3E,
         EnableChannel = 0x49
     }
 

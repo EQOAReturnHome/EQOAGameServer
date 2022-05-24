@@ -28,8 +28,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
 
 
-        //Temp, teleport/coach counter
-        public int Teleportcounter = 0;
+
         public int ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
@@ -45,7 +44,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public int MaxAssignableTP;
         public int UnusedTP;
 
-        public int Teleportcounter { get; internal set; }
+        public int Teleportcounter { get; internal set; } = 0;
 
         public Character() : base(true)
         {

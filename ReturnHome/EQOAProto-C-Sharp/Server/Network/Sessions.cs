@@ -74,7 +74,7 @@ namespace ReturnHome.Server.Network
 
         public void UnreliablePing()
         {
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.BestEffortPing);
+            Message message = Message.Create(MessageType.UnreliableMessage, GameOpcode.BestEffortPing);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);
@@ -150,7 +150,7 @@ namespace ReturnHome.Server.Network
         {
             if (!PendingTermination) return;
 
-            MapManager.RemoveObjectFromTree(MyCharacter);
+            MapManager.RemoveObject(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             EntityManager.RemoveEntity(MyCharacter);
             SessionManager.SessionHash.TryRemove(this);

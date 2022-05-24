@@ -35,6 +35,7 @@ namespace ReturnHome.Server.Network
             get { return _messageCounter; }
             set
             {
+                Console.WriteLine($"Setting {value}, Current {_messageCounter}");
                 if (value > _messageCounter)
                     _messageCounter = value;
 
@@ -101,25 +102,15 @@ namespace ReturnHome.Server.Network
                     return;
                 }
 
-            //See if character and current message has changed
-            if (!CompareObjects(baseXOR.Slice(1, 0xC8), entity.ObjectUpdate))
-            {
-                Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-                temp.Span[0] = _isActive & (baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
-                CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, baseXOR.Slice(1, 0xC8), 0xC8);
-                CurrentXORResults.Add(messageCounter, temp);
-                _session.sessionQueue.Add(new Message((MessageType)ObjectChannel, messageCounter, baseMessageCounter == 0 ? (byte)0 : (byte)(messageCounter - baseMessageCounter), temp));
-                messageCounter++;
-            }
-        }
                 //See if character and current message has changed
                 if (!CompareObjects(_baseXOR.Slice(1, 0xC8), entity.ObjectUpdate))
                 {
                     Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-                    temp.Span[0] = (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0; ;
+                    temp.Span[0] = _isActive & (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                     CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, _baseXOR.Slice(1, 0xC8), 0xC8);
-                    _currentXORResults.Add(_messageCounter, temp);
-                    SessionQueueMessages.PackMessage(_session, temp, _objectChannel);
+                    _currentXORResults.Add(MessageCounter, temp);
+                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
+                    MessageCounter++;
                 }
             }
         }
@@ -132,8 +123,9 @@ namespace ReturnHome.Server.Network
             //Since we are deactivating the channel, all we need to do is modify the first byte
             temp.Span[0] = (_baseXOR.Span[0] == 1) ? (byte)1 : (byte)0;
 
-            _currentXORResults.Add(_messageCounter, temp);
-            SessionQueueMessages.PackMessage(_session, temp, _objectChannel);
+            _currentXORResults.Add(MessageCounter, temp);
+            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
+            MessageCounter++;
         }
 
         public void UpdateBaseXor(ushort msgCounter)

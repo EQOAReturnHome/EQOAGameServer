@@ -104,12 +104,10 @@ namespace ReturnHome.Server.Network
                         _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
                         segmentBodyFlags.RdpMessage = true;
 
-                        //Finished segmenting original message, set this to null to move on
-                        _segmentMessage = null;
-
                         //Release original message
                         Message.Return(_segmentMessage);
                         _segmentMessage = null;
+                        _segmentPosition = 0;
                         continue;
                     }
 
@@ -144,7 +142,7 @@ namespace ReturnHome.Server.Network
                     {
                         if (_outGoingReliableMessageQueue.TryDequeue(out Message reliableMessage))
                         {
-                            if (reliableMessage.Messagetype == MessageType.ReliableMessage || reliableMessage.Messagetype == MessageType.PingMessage)
+                            if (reliableMessage.Messagetype == MessageType.ReliableMessage || reliableMessage.Messagetype == MessageType.PingMessage || (reliableMessage.Messagetype == MessageType.SegmentReliableMessage && reliableMessage.Size < 0x0484))
                             {
                                 reliableMessage.AddSequence(_session.rdpCommIn.connectionData.lastSentMessageSequence++);
 

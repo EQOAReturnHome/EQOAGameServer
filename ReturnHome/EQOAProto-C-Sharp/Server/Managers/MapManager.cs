@@ -13,7 +13,7 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Zone;
 using ReturnHome.Server.Network;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.Managers
 {
@@ -25,9 +25,6 @@ namespace ReturnHome.Server.Managers
         //Initializes all the map qudtree's
         public static void Initialize()
         {
-            //Should this queue players to be added simulataneously, instead of individual add's? Probably.
-
-            treeQueue.Add(entity);
             //make game map Dictionary
             _gameDict = new ConcurrentDictionary<int, Map>();
             _gameDict.TryAdd(0, new Map("Tunaria"));
@@ -43,14 +40,6 @@ namespace ReturnHome.Server.Managers
         //Adds entity to world buffers, to be loaded in on next tick
         public static void Add(Entity e)
         {
-            //iterate over treeQueue and add players to the quad tree one by one
-            for (int i = 0; i < treeQueue.Count; i++)
-            {
-                qtree.Add(treeQueue[i]);
-            }
-
-            //clear the tree queue so it doesn't continuosly try to add the same objects to the tree
-            treeQueue.Clear();
           if(_gameDict.TryGetValue(e.World, out Map m))
             m.AddObject(e);
 
@@ -92,44 +81,6 @@ namespace ReturnHome.Server.Managers
                 m.Value.AddBulkObjects();
                 m.Value.RemoveBulkObjects();
                 m.Value.QueryObjectsForDistribution();
-            }
-        }
-
-        //Method to teleport players, will check if new location != old location, and adjust appropriately in the quad tree
-        //Make the assumption it is never a group teleport unless specified so
-        public static void Teleport(Session session, byte world, float x, float y, float z, float facing, bool groupTeleport = false)
-        {
-            if (groupTeleport)
-            {
-                //Eventually we would check if the player is in a  group, and verify their distance from players to see if they teleport with them
-                if (false)
-                {
-
-                }
-            }
-
-            //Teleport player
-            Memory<byte> temp = new byte[31];
-            Span<byte> thisMessage = temp.Span;
-            int offset = 0;
-            thisMessage.Write((ushort)0x07F6, ref offset);
-            thisMessage.Write(world, ref offset);
-            thisMessage.Write(x, ref offset);
-            thisMessage.Write(y, ref offset);
-            thisMessage.Write(z, ref offset);
-            thisMessage.Write(facing, ref offset);
-            offset += 8;
-            thisMessage.Write(session.MyCharacter.Teleportcounter++, ref offset);
-            SessionQueueMessages.PackMessage(session, temp, MessageOpcodeTypes.ShortReliableMessage);
-
-            //Reset player channels
-            session.rdpCommIn.connectionData.DisableChannels();
-
-            //Check if player is changing maps, if so remove them from the current map
-            if (session.MyCharacter.World != world)
-            {
-                session.MyCharacter.ExpectedWorld = world;
-                RemoveObject(session.MyCharacter);
             }
         }
     }

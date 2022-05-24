@@ -39,7 +39,6 @@ namespace ReturnHome.Server.Managers
             {
                 EntityManager.AddEntity(myActor);
                 MapManager.Add(myActor);
-                MapManager.AddObjectToTree(myActor);
 
             }
             Console.WriteLine("Done.");
