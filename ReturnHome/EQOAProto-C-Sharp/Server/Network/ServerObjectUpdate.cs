@@ -35,7 +35,6 @@ namespace ReturnHome.Server.Network
             get { return _messageCounter; }
             set
             {
-                Console.WriteLine($"Setting {value}, Current {_messageCounter}");
                 if (value > _messageCounter)
                     _messageCounter = value;
 

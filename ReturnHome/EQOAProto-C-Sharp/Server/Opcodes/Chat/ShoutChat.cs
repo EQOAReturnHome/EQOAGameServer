@@ -42,15 +42,13 @@ namespace ReturnHome.Server.Opcodes.Chat
             writer.WriteString(Encoding.Unicode, sharedMessage);
 
             //This needs to be dynamic eventually, allow the color to inject a color for the text? Or maybe needs an overload for this to be for specific players to receive
-            writer.Write(new byte[] { 0x3F, 0xFF, 0x3F, 0x00 });
+            writer.Write(new byte[] { 0x3F, 0xFF, 0x3F, 0x00});
 
-            foreach (Entity e in entityList)
+            message.Size = writer.Position;
+            foreach (Character e in entityList)
             {
-                if (e.isPlayer)
-                {
-                    //Good to leave as is for now... will just adapt over if shout is changed to more of a local chat instead of global
-                    session.sessionQueue.Add(message);
-                }
+                //Good to leave as is for now... will just adapt over if shout is changed to more of a local chat instead of global
+                e.characterSession.sessionQueue.Add(message);
             }
         }
 

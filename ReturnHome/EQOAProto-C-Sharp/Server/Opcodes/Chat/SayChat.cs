@@ -26,11 +26,10 @@ namespace ReturnHome.Server.Opcodes.Chat
             //Query for nearby objects
             List<Entity> entityList = MapManager.QueryObjects(MySession.MyCharacter, Radius);
 
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.CharacterSelect);
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ClientMessage);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);
-            writer.Write((ushort)GameOpcode.ClientMessage);
             writer.WriteString(Encoding.Unicode, chatMessage);
 
             message.Size = writer.Position;

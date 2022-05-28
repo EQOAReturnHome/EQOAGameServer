@@ -26,12 +26,12 @@ namespace ReturnHome.Server.EntityObject.Player
                 {
                     if (Inventory.RemoveItem(itemToDestroy, out Item item2, out byte clientIndex2))
                     {
-                        ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item2, clientIndex2);
+                        ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, quantityToDestroy, clientIndex2);
                     }
                     return;
                 }
 
-                ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, item.ClientIndex);
+                ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, quantityToDestroy, item.ClientIndex);
             }
         }
 
@@ -99,7 +99,7 @@ namespace ReturnHome.Server.EntityObject.Player
                 //Remove item from Inventory
                 if (Inventory.RemoveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
-                    ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, clientIndex);
+                    ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, qtyToTransfer, clientIndex);
 
                     //Deposit into bank
                     Bank.AddItem(item);
@@ -124,25 +124,27 @@ namespace ReturnHome.Server.EntityObject.Player
             }
         }
 
+        //TODO: Flawed logic involved with stackable items and rearranging inventory
         public void SellItem(byte itemSlot, int itemQty, uint targetNPC)
         {
             if(Inventory.Exists(itemSlot))
             {
                 if(Inventory.UpdateQuantity(itemSlot, itemQty, out Item item))
                 {
+                    //TODO: Flawed Tunar logic? Seem to be getting less then we spent back
                     Inventory.AddTunar((int)(item.Maxhp == 0 ? item.ItemCost * itemQty : item.ItemCost * (item.RemainingHP / item.Maxhp) * itemQty));
 
                     ServerUpdatePlayerTunar.UpdatePlayerTunar(characterSession, Inventory.Tunar);
 
                     if (item.StackLeft <= 0)
                     {
-                        if (!Inventory.RemoveItem(itemSlot, out Item item2, out byte clientIndex))
-                            ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item2, clientIndex);
+                        if (Inventory.RemoveItem(itemSlot, out Item item2, out byte clientIndex))
+                            ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, itemQty, clientIndex);
 
                         return;
                     }
 
-                    ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, item, item.ClientIndex);
+                    ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, itemQty, item.ClientIndex);
                 }
             }
         }
