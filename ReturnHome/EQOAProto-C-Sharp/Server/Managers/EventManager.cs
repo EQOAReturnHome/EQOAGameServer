@@ -24,7 +24,11 @@ namespace ReturnHome.Server.Managers
 
             //Find Lua script recursively through scripts directory by zone
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
-            string[] file = Directory.GetFiles("Scripts/", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+            string[] file = Directory.GetFiles("Scripts\\", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+
+            //TODO: work around for a npc with no scripts etc? Investigate more eventually
+            if (file.Length < 1 || file == null)
+                return;
 
             //Create new lua object
             Lua lua = new Lua();
@@ -49,8 +53,10 @@ namespace ReturnHome.Server.Managers
             lua["mySession"] = mySession;
             lua["GenerateChatMessage"] = Opcodes.Chat.ChatMessage.GenerateClientSpecificChat;
             lua["GrantXP"] = Character.GrantXP;
+
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);
+
             //switch to find correct lua function based on op code from NPC Interact 0x04
             if (opcode == GameOpcode.DialogueBox || opcode == GameOpcode.DialogueBoxOption)
             {
