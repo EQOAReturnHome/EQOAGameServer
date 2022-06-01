@@ -47,7 +47,6 @@ namespace ReturnHome.Server.Network
 
             Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
             BufferReader reader = new(MyPacket.Span);
-            int offset = 0;
 
             Mysession.MyCharacter.World = reader.Read<byte>();
 
@@ -60,17 +59,17 @@ namespace ReturnHome.Server.Network
             float Velz = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
 
             //Skip 6 bytes...
-            offset += 6;
+            reader.Position += 6;
             byte Facing = reader.Read<byte>();
             //offset++;
 
             byte Turning = 0;//ClientPacket[offset++];
 
             //Skip 12 bytes...
-            offset += 12;
+            reader.Position += 12;
             byte Animation = reader.Read<byte>();
 
-            offset++;
+            reader.Position++;
 
             uint Target = reader.Read<uint>();
 
@@ -96,9 +95,7 @@ namespace ReturnHome.Server.Network
             }
 
             else
-            {
                 MapManager.UpdatePosition(Mysession.MyCharacter);
-            }
 
             //Tells us we need to tell client we ack this message
             Mysession.PacketBodyFlags.clientUpdateAck = true;

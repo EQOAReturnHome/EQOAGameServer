@@ -26,7 +26,7 @@ namespace ReturnHome.Server.EntityObject
             BinaryPrimitives.WriteInt32BigEndian(temp[4..],(int)(Position.X * 128.0f));
 
             //Critical to make sure that writing the int's don't override the facing value
-            temp[4] = 0x82;
+            ObjectUpdateEntity();
         }
 
         public void ObjectUpdateFacing() => ObjectUpdate.Span[14] = Facing;
@@ -57,7 +57,7 @@ namespace ReturnHome.Server.EntityObject
             sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
             if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
             if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[39..], ref svx);
+            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);
         }
 
         public void ObjectUpdateVelocityY()
@@ -75,7 +75,7 @@ namespace ReturnHome.Server.EntityObject
             sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
             if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
             if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svz);
+            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);
         }
 
         public void ObjectUpdateEastWest() => ObjectUpdate.Span[44] = EastToWest;
