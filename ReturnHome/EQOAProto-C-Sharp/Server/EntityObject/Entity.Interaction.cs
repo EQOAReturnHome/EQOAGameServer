@@ -323,11 +323,14 @@ namespace ReturnHome.Server.EntityObject
 
             session.MyCharacter.TotalXPEarned += xpAmount;
 
-            while (session.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
-                session.MyCharacter.Level++;
-
             //Something similar as above for Training points
             ServerUpdatePlayerXPandLevel.UpdatePlayerXPandLevel(session, session.MyCharacter.Level, session.MyCharacter.TotalXPEarned);
+
+            while (session.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
+            {
+                session.MyCharacter.Level++;
+                ChatMessage.GenerateClientSpecificChat(session, $"You have reached level {session.MyCharacter.Level}");
+            }
         }
 
         public static bool CheckQuestItem(Session session, int itemID, int itemQty)
