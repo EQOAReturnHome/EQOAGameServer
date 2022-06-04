@@ -28,7 +28,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("charServerID", player.ServerID);
             SecondCmd.Parameters.AddWithValue("playerLevel", player.Level);
             //May need other default values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("newTotalXP", player.TotalXPEarned);
+            SecondCmd.Parameters.AddWithValue("newTotalXP", player.XPEarnedInThisLevel);
             SecondCmd.Parameters.AddWithValue("newDebt", player.totalDebt);
             SecondCmd.Parameters.AddWithValue("newBreath", player.Breath);
             SecondCmd.Parameters.AddWithValue("newTunar", player.Inventory.Tunar);

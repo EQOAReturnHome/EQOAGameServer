@@ -34,7 +34,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public Session characterSession;
         public int ServerID;
 
-        public int TotalXPEarned;
+        public int XPEarnedInThisLevel;
         public int totalDebt;
 
         public int Breath;
@@ -53,7 +53,7 @@ namespace ReturnHome.Server.EntityObject.Player
         }
 
         //Need instantiation, but needs some review because it's so big... 
-        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int totalXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP,
+        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int earnedXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP,
                          int world, float xCoord, float yCoord, float zCoord, float facing, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC,
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
                          int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, string playerFlags, Session MySession) : base(true)
@@ -72,7 +72,7 @@ namespace ReturnHome.Server.EntityObject.Player
             HairLength = hairLength;
             HairStyle = hairStyle;
             FaceOption = faceOption;
-            TotalXPEarned = totalXP;
+            XPEarnedInThisLevel = earnedXP;
             totalDebt = debt;
             Breath = breath;
             Inventory = new(tunar);
@@ -143,7 +143,7 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write7BitEncodedInt64(Class);
             writer.Write7BitEncodedInt64(Race);
             writer.Write7BitEncodedInt64(Level);
-            writer.Write7BitEncodedInt64(TotalXPEarned);
+            writer.Write7BitEncodedInt64(XPEarnedInThisLevel);
             writer.Write7BitEncodedInt64(totalDebt);
             writer.Write((byte)Breath);
             writer.Write7BitEncodedInt64(Inventory.Tunar);

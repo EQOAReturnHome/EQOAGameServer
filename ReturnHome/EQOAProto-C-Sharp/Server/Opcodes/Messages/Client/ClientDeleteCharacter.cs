@@ -12,7 +12,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 
             BufferReader reader = new(ClientPacket.Data.Span);
             //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
-            int clientServID = reader.Read<int>();
+            int clientServID = (int)reader.Read7BitEncodedInt64();
 
             //Call SQL delete method to actually process the delete.
             deletedCharacter.DeleteCharacter(clientServID, session);

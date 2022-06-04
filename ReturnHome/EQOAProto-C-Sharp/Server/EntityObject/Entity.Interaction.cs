@@ -321,16 +321,21 @@ namespace ReturnHome.Server.EntityObject
             if (CMXP > 0)
                 ChatMessage.GenerateClientSpecificChat(session, $"You received {CMXP} Mastery XP.");
 
-            session.MyCharacter.TotalXPEarned += xpAmount;
+            session.MyCharacter.XPEarnedInThisLevel += xpAmount;
 
-            //Something similar as above for Training points
-            ServerUpdatePlayerXPandLevel.UpdatePlayerXPandLevel(session, session.MyCharacter.Level, session.MyCharacter.TotalXPEarned);
-
-            while (session.MyCharacter.TotalXPEarned > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
+            while (session.MyCharacter.XPEarnedInThisLevel > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
             {
+                //Some logic to take away prior level's experience and place player's xp into new bracket
+                session.MyCharacter.XPEarnedInThisLevel -= CharacterUtilities.CharXPDict[session.MyCharacter.Level];
+
+                //Increase player level
                 session.MyCharacter.Level++;
+
                 ChatMessage.GenerateClientSpecificChat(session, $"You have reached level {session.MyCharacter.Level}");
             }
+            //Something similar as above for Training points
+            ServerUpdatePlayerXPandLevel.UpdatePlayerXPandLevel(session, session.MyCharacter.Level, session.MyCharacter.XPEarnedInThisLevel);
+
         }
 
         public static bool CheckQuestItem(Session session, int itemID, int itemQty)
