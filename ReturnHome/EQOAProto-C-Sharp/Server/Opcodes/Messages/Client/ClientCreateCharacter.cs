@@ -12,7 +12,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
         //Method to create new character when new character opcode is received
         public static void CreateCharacter(Session session, PacketMessage ClientPacket)
         {
-            int offset = 0;
             CharacterSQL createCharacter = new CharacterSQL();
             BufferReader reader = new(ClientPacket.Data.Span);
 

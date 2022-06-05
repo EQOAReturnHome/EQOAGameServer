@@ -33,8 +33,8 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newBreath", player.Breath);
             SecondCmd.Parameters.AddWithValue("newTunar", player.Inventory.Tunar);
             SecondCmd.Parameters.AddWithValue("newBankTunar", player.Bank.Tunar);
-            SecondCmd.Parameters.AddWithValue("newUnusedTP", player.UnusedTP);
-            SecondCmd.Parameters.AddWithValue("newTotalTP", 350);
+            SecondCmd.Parameters.AddWithValue("newUnusedTP", player.PlayerTrainingPoints.RemainingTrainingPoints);
+            SecondCmd.Parameters.AddWithValue("newTotalTP", player.PlayerTrainingPoints.TotalTrainingPoints);
             SecondCmd.Parameters.AddWithValue("newWorld", player.World);
             SecondCmd.Parameters.AddWithValue("newX", player.x);
             SecondCmd.Parameters.AddWithValue("newY", player.y);
@@ -1045,8 +1045,6 @@ namespace ReturnHome.Database.SQL
             while (rdr.Read())
             {
                 charCreation.Inventory.AddTunar(rdr.GetInt32(5));
-                charCreation.UnusedTP = rdr.GetInt32(7);
-                charCreation.MaxAssignableTP = rdr.GetInt32(8);
                 charCreation.x = rdr.GetFloat(9);
                 charCreation.y = rdr.GetFloat(10);
                 charCreation.z = rdr.GetFloat(11);
@@ -1070,8 +1068,9 @@ namespace ReturnHome.Database.SQL
             };
             string serializedPlayerFlags = (string)Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
             Console.WriteLine(serializedPlayerFlags);
+
             //Calculate Unused TP still available to character upon entering world.
-            charCreation.UnusedTP = charCreation.UnusedTP - UsedTP;
+            charCreation.PlayerTrainingPoints = new(20, 20 - UsedTP);
 
             //Add total strength from default plus added TP to each category. Not sure this is correct, may need to still add the TP from client
             charCreation.Strength = charCreation.DefaultStrength + charCreation.AddStrength;
@@ -1106,8 +1105,8 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("Breath", 255);
             SecondCmd.Parameters.AddWithValue("Tunar", charCreation.Inventory.Tunar);
             SecondCmd.Parameters.AddWithValue("BankTunar", charCreation.Bank.Tunar);
-            SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.UnusedTP);
-            SecondCmd.Parameters.AddWithValue("TotalTP", 350);
+            SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.PlayerTrainingPoints.RemainingTrainingPoints);
+            SecondCmd.Parameters.AddWithValue("TotalTP", charCreation.PlayerTrainingPoints.TotalTrainingPoints);
             SecondCmd.Parameters.AddWithValue("World", charCreation.World);
             SecondCmd.Parameters.AddWithValue("X", charCreation.x);
             SecondCmd.Parameters.AddWithValue("Y", charCreation.y);

@@ -50,6 +50,7 @@
         RemoveBankItem = 0x1250,
         AddBankItem = 0x1251,
         Teleport = 0x07F6,
+        UpdateTrainingPoints = 0x001D,
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client

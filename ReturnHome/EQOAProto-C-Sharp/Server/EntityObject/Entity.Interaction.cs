@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Linq;
-using System.IO;
 
 using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
@@ -159,13 +158,16 @@ namespace ReturnHome.Server.EntityObject
 
             //loop over luatable, assigning every value to an element of the players diagOptions list
             //lua table always returns a dict type object of <object,object>
-            foreach (KeyValuePair<object, object> k in diagOptions)
-                session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
+            if (diagOptions != null)
+            {
+                foreach (KeyValuePair<object, object> k in diagOptions)
+                    session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
 
-            //If it's not a yes/no choice then sort alphabetically.
-            //This forces it to return choices the same every time.
-            if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
-                session.MyCharacter.MyDialogue.diagOptions.Sort();
+                //If it's not a yes/no choice then sort alphabetically.
+                //This forces it to return choices the same every time.
+                if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
+                    session.MyCharacter.MyDialogue.diagOptions.Sort();
+            }
 
             //Length of choices
             uint choicesLength = 0;
@@ -186,6 +188,7 @@ namespace ReturnHome.Server.EntityObject
                 //set dialogue type to option
                 dialogueType = GameOpcode.OptionBox;
             }
+
             //if there are no diagOptions send onlly diag box.
             if (session.MyCharacter.MyDialogue.diagOptions.Count <= 0)
                 dialogueType = GameOpcode.DialogueBox;
@@ -269,21 +272,29 @@ namespace ReturnHome.Server.EntityObject
             EventManager.GetNPCDialogue(dialogueType, session);
         }
 
+        private int _debt = 0;
+        private int _totXP = 0;
+        private int _paidDebt = 0;
+        private int _cm = 0;
+        private int _cmXP = 0;
+        private int _newTrainingPoints = 0;
+
         public static void GrantXP(Session session, int xpAmount)
         {
-            int debt = 0;
-            int totXP = xpAmount;
-            int paidDebt = 0;
-            int cm = 0;
-            int CMXP = 0;
+            session.MyCharacter._debt = 0;
+            session.MyCharacter._totXP = xpAmount;
+            session.MyCharacter._paidDebt = 0;
+            session.MyCharacter._cm = 0;
+            session.MyCharacter._cmXP = 0;
+
             if (session.MyCharacter.totalDebt > 0)
             {
-                debt = session.MyCharacter.totalDebt;
+                session.MyCharacter._debt = session.MyCharacter.totalDebt;
 
                 //If true, will erase remaining debt
-                if ((xpAmount / 2) >= session.MyCharacter.totalDebt)
+                if ((xpAmount >> 1) >= session.MyCharacter.totalDebt)
                 {
-                    paidDebt = session.MyCharacter.totalDebt;
+                    session.MyCharacter._paidDebt = session.MyCharacter.totalDebt;
                     xpAmount -= session.MyCharacter.totalDebt;
                     session.MyCharacter.totalDebt = 0;
                 }
@@ -291,48 +302,74 @@ namespace ReturnHome.Server.EntityObject
                 //Otherwise, chop xp amount in half to satisify some debt
                 else
                 {
-                    paidDebt = (xpAmount / 2);
-                    session.MyCharacter.totalDebt -= (xpAmount / 2);
-                    xpAmount -= (xpAmount / 2);
+                    session.MyCharacter._paidDebt = xpAmount >> 1;
+                    session.MyCharacter.totalDebt -= xpAmount >> 1;
+                    xpAmount -= xpAmount >> 1;
                 }
             }
 
             //check to see if player is having a percentage of XP going to CMs
-            if (cm > 0)
+            if (session.MyCharacter._cm > 0)
             {
-                CMXP = (int)(cm / 100f) * xpAmount;
-                xpAmount -= CMXP;
+                session.MyCharacter._cmXP = (int)(session.MyCharacter._cm / 100f) * xpAmount;
+                xpAmount -= session.MyCharacter._cmXP;
 
                 //Only XP based towards cm's should remove from our total earned xp
-                totXP -= CMXP;
+                session.MyCharacter._totXP -= session.MyCharacter._cmXP;
             }
 
             //Inform client of the gainz
             if (xpAmount > 0)
             {
-                if (debt > 0)
-                    ChatMessage.GenerateClientSpecificChat(session, $"You received {totXP} XP. {paidDebt} was paid towards your debt of {debt}.");
+                if (session.MyCharacter._debt > 0)
+                    ChatMessage.GenerateClientSpecificChat(session, $"You received {session.MyCharacter._totXP} XP. {session.MyCharacter._paidDebt} was paid towards your debt of {session.MyCharacter._debt}.");
 
                 else
                     ChatMessage.GenerateClientSpecificChat(session, $"You received {xpAmount} XP.");
             }
 
             //Need to send earned CM opcode with this if any
-            if (CMXP > 0)
-                ChatMessage.GenerateClientSpecificChat(session, $"You received {CMXP} Mastery XP.");
+            if (session.MyCharacter._cmXP > 0)
+                ChatMessage.GenerateClientSpecificChat(session, $"You received {session.MyCharacter._cmXP} Mastery XP.");
 
             session.MyCharacter.XPEarnedInThisLevel += xpAmount;
+            session.MyCharacter.TotalXP += xpAmount;
 
-            while (session.MyCharacter.XPEarnedInThisLevel > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
+            if (session.MyCharacter.Level < 60)
             {
-                //Some logic to take away prior level's experience and place player's xp into new bracket
-                session.MyCharacter.XPEarnedInThisLevel -= CharacterUtilities.CharXPDict[session.MyCharacter.Level];
+                while (session.MyCharacter.XPEarnedInThisLevel > CharacterUtilities.CharXPDict[session.MyCharacter.Level])
+                {
+                    //Some logic to take away prior level's experience and place player's xp into new bracket
+                    session.MyCharacter.XPEarnedInThisLevel -= CharacterUtilities.CharXPDict[session.MyCharacter.Level];
 
-                //Increase player level
-                session.MyCharacter.Level++;
+                    //Increase player level
+                    session.MyCharacter.Level++;
 
-                ChatMessage.GenerateClientSpecificChat(session, $"You have reached level {session.MyCharacter.Level}");
+                    ChatMessage.GenerateClientSpecificChat(session, $"You have reached level {session.MyCharacter.Level}");
+                    if (session.MyCharacter.Level >= 60)
+                        break;
+                }
+
+                //check for Training points to be added
+                while (session.MyCharacter.TotalXP >= TrainingPoints.TrainingPointDict[session.MyCharacter.PlayerTrainingPoints.TotalTrainingPoints + 1 + session.MyCharacter._newTrainingPoints])
+                {
+                    session.MyCharacter._newTrainingPoints += 1;
+                    if (session.MyCharacter.PlayerTrainingPoints.TotalTrainingPoints + 1 + session.MyCharacter._newTrainingPoints > 482)
+                        break;
+                }
+
+                if (session.MyCharacter._newTrainingPoints > 0)
+                {
+                    session.MyCharacter.PlayerTrainingPoints.EarnTrainingPoints(session.MyCharacter._newTrainingPoints);
+                    session.MyCharacter.SendDialogue(session, "You have received more training points!", null);
+
+                    //Since we are adding training points, we have to indicate a negative value to the client so it will add it to the total. it's weird...
+                    ServerAdjustTrainingPoints.AdjustTrainingPoints(session, session.MyCharacter._newTrainingPoints * -1);
+                    session.MyCharacter._newTrainingPoints = 0;
+                }
             }
+
+            //TODO: Need to findout Level 60 top xp range to halt xp gain on this opcode at some point, we could also force 100% CM's at 60 too?
             //Something similar as above for Training points
             ServerUpdatePlayerXPandLevel.UpdatePlayerXPandLevel(session, session.MyCharacter.Level, session.MyCharacter.XPEarnedInThisLevel);
 

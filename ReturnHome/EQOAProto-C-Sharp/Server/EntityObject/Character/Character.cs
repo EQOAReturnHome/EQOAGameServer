@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -26,8 +24,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public Dialogue MyDialogue = new Dialogue();
         public Dictionary<string, bool> playerFlags = new Dictionary<string, bool>();
 
-
-
+        public TrainingPoints PlayerTrainingPoints;
 
         public int ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
@@ -35,14 +32,12 @@ namespace ReturnHome.Server.EntityObject.Player
         public int ServerID;
 
         public int XPEarnedInThisLevel;
+        public long TotalXP = 0;
         public int totalDebt;
 
         public int Breath;
 
         public int Fishing;
-
-        public int MaxAssignableTP;
-        public int UnusedTP;
 
         public int Teleportcounter { get; internal set; } = 0;
 
@@ -53,7 +48,7 @@ namespace ReturnHome.Server.EntityObject.Player
         }
 
         //Need instantiation, but needs some review because it's so big... 
-        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int earnedXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP,
+        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
                          int world, float xCoord, float yCoord, float zCoord, float facing, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC,
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
                          int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, string playerFlags, Session MySession) : base(true)
@@ -73,12 +68,17 @@ namespace ReturnHome.Server.EntityObject.Player
             HairStyle = hairStyle;
             FaceOption = faceOption;
             XPEarnedInThisLevel = earnedXP;
+
+            //Calculate Total XP
+            for (int i = 1; i < Level; i++)
+                TotalXP += CharacterUtilities.CharXPDict[i];
+            TotalXP += XPEarnedInThisLevel;
+
             totalDebt = debt;
             Breath = breath;
             Inventory = new(tunar);
             Bank = new(bankTunar, false);
-            UnusedTP = unusedTP;
-            MaxAssignableTP = totalAssignableTP;
+            PlayerTrainingPoints = new(TotalTrainingPoints, UnusedTrainingPoints);
             World = world;
             ExpectedWorld = world;
             x = xCoord;
@@ -148,8 +148,8 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write((byte)Breath);
             writer.Write7BitEncodedInt64(Inventory.Tunar);
             writer.Write7BitEncodedInt64(Bank.Tunar);
-            writer.Write7BitEncodedInt64(UnusedTP);
-            writer.Write7BitEncodedInt64(MaxAssignableTP);
+            writer.Write7BitEncodedInt64(PlayerTrainingPoints.RemainingTrainingPoints);
+            writer.Write7BitEncodedInt64(PlayerTrainingPoints.TotalTrainingPoints);
             writer.Write7BitEncodedInt64(World);
             writer.Write(x);
             writer.Write(y);
@@ -164,21 +164,22 @@ namespace ReturnHome.Server.EntityObject.Player
         public bool GetPlayerFlags(Session mySession, string flagKey)
         {
             if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
-            {
                 return true;
-            }else if (!mySession.MyCharacter.playerFlags.ContainsKey(flagKey)) { return false; }
+
             return false;
         }
 
         public void SetPlayerFlag(Session mySession, string flagKey, bool flagValue)
         {
+            //TODO: Fix for characters without flags? bypassing for now
+            if (mySession.MyCharacter.playerFlags == null)
+                return;
+
             if (!mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
-            {
                 mySession.MyCharacter.playerFlags.Add(flagKey, flagValue);
-            }
-            else if(mySession.MyCharacter.playerFlags.ContainsKey(flagKey)){
+
+            else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
                 mySession.MyCharacter.playerFlags[flagKey] = flagValue;
-            }
         }
     }
 }
