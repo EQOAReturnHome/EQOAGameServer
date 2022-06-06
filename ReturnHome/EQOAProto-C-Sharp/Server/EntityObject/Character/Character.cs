@@ -35,6 +35,9 @@ namespace ReturnHome.Server.EntityObject.Player
         public long TotalXP = 0;
         public int totalDebt;
 
+        //Default this should be 350, once player is 45+ should be changed to 400
+        private int _maxTrainingPoints = 350;
+
         public int Breath;
 
         public int Fishing;
@@ -122,6 +125,10 @@ namespace ReturnHome.Server.EntityObject.Player
             //HealOT2 = healOT2;
             //PowerOT2 = powerOT2;
             characterSession = MySession;
+
+            //If Character level >= 45, change Max Training Points to 400
+            if (Level >= 45)
+                _maxTrainingPoints = 400;
         }
 
         public void UpdateFeatures(Session MySession, int hairColor, int hairLength, int hairStyle, int faceOption)
@@ -149,7 +156,7 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write7BitEncodedInt64(Inventory.Tunar);
             writer.Write7BitEncodedInt64(Bank.Tunar);
             writer.Write7BitEncodedInt64(PlayerTrainingPoints.RemainingTrainingPoints);
-            writer.Write7BitEncodedInt64(PlayerTrainingPoints.TotalTrainingPoints);
+            writer.Write7BitEncodedInt64(_maxTrainingPoints);
             writer.Write7BitEncodedInt64(World);
             writer.Write(x);
             writer.Write(y);

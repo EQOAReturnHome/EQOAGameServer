@@ -251,7 +251,7 @@ namespace ReturnHome.Server.EntityObject
             }
             //Create new instance of the event manager
             //EventManager eManager = new EventManager();
-            Entity npcEntity = new Entity(false);
+            //Entity npcEntity = new Entity(false);
             Dialogue dialogue = session.MyCharacter.MyDialogue;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if a diag option choice incoming set outgoing to diag box option

@@ -39,6 +39,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.ArrangeItem, ClientInteractActor.InteractActor },
             { GameOpcode.RemoveInvItem, ClientDeleteItem.DeleteItem },
             { GameOpcode.EnableChannel, EnableChannel },
+            { GameOpcode.UpdateTrainingPoints, ClientProcessTrainingPoints.ProcessTrainingPoints },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

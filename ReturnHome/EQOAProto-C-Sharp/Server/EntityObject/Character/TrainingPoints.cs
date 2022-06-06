@@ -42,22 +42,22 @@ namespace ReturnHome.Server.EntityObject.Player
             TotalTrainingPoints += TotalEarned;
         }
 
-        public int SpendTrainingPoints(int SpentTrainingPoints)
+        public bool SpendTrainingPoints(int SpentTrainingPoints)
         {
             //Probably should escalate if a Character is negative training points, would be a glitch.
             if (_hitMaxTrainingPoints || RemainingTrainingPoints <= 0 || SpentTrainingPoints == 0)
-                return 0;
+                return false;
 
             if (SpentTrainingPoints <= RemainingTrainingPoints)
             {
                 _spentTrainingPoints += SpentTrainingPoints;
-                return SpentTrainingPoints;
+                return true;
             }
 
             else
                 Console.WriteLine("Character traying to spent more training points then remaining");
 
-            return 0;
+            return false;
         }
 
         //Starts at 21 due to first 20 TP's are free
