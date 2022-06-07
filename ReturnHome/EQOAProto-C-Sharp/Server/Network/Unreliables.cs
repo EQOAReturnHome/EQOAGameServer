@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using System.Runtime.CompilerServices;
 using ReturnHome.Server.Managers;
@@ -33,7 +33,7 @@ namespace ReturnHome.Server.Network
                 if (Mysession.rdpCommIn.connectionData.client.BaseXorMessage > (message.Header.MessageNumber - message.Header.XorByte))
                 {
                     //ensure client got ack by resending it
-                    Mysession.clientUpdateAck = true;
+                    Mysession.PacketBodyFlags.clientUpdateAck = true;
                     return;
                 }
             }
@@ -46,51 +46,40 @@ namespace ReturnHome.Server.Network
                 CoordinateConversions.Xor_data(MyPacket, Mysession.rdpCommIn.connectionData.client.GetBaseClientArray(), message.Header.Size);
 
             Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
-            ReadOnlySpan<byte> ClientPacket = MyPacket.Span;
-            int offset = 0;
+            BufferReader reader = new(MyPacket.Span);
 
-            Mysession.MyCharacter.World = ClientPacket[offset++];
+            Mysession.MyCharacter.World = reader.Read<byte>();
 
-            float x = CoordinateConversions.ConvertXZToFloat(ClientPacket.GetLEUInt24(ref offset));
-            float y = CoordinateConversions.ConvertYToFloat(ClientPacket.GetLEUInt24(ref offset));
-            float z = CoordinateConversions.ConvertXZToFloat(ClientPacket.GetLEUInt24(ref offset));
+            float x = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
+            float y = CoordinateConversions.ConvertYToFloat(reader.ReadUint24());
+            float z = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
 
-            float Velx = 15.3f * 2 * ClientPacket.GetBEUShort(ref offset) / 0xffff - 15.3f;
-            float Vely = 15.3f * 2 * ClientPacket.GetBEUShort(ref offset) / 0xffff - 15.3f;
-            float Velz = 15.3f * 2 * ClientPacket.GetBEUShort(ref offset) / 0xffff - 15.3f;
+            float Velx = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
+            float Vely = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
+            float Velz = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
 
             //Skip 6 bytes...
-            offset += 6;
-            byte Facing = ClientPacket[offset++];
+            reader.Position += 6;
+            byte Facing = reader.Read<byte>();
             //offset++;
 
             byte Turning = 0;//ClientPacket[offset++];
 
             //Skip 12 bytes...
-            offset += 12;
-            byte Animation = ClientPacket.GetByte(ref offset);
+            reader.Position += 12;
+            byte Animation = reader.Read<byte>();
 
-            //Test... See if this effects playable objects or if it is only for npc's
-            if (Animation == 0)
-            {
-                if (Facing > Mysession.MyCharacter.Facing)
-                    Animation = 4;
+            reader.Position++;
 
-                if (Facing < Mysession.MyCharacter.Facing)
-                    Animation = 5;
-            }
-
-            offset++;
-
-            uint Target = ClientPacket.GetLEUInt(ref offset);
+            uint Target = reader.Read<uint>();
 
             //Update Base array for client update object, then update character object
             Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);
-            Mysession.MyCharacter.UpdateWayPoint(x, y, z);
-            Mysession.MyCharacter.UpdateAnimation(Animation);
+            Mysession.MyCharacter.UpdatePosition(x, y, z);
+            Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
             Mysession.MyCharacter.UpdateVelocity(Velx, 0, Velz);
-            Mysession.MyCharacter.UpdateTarget(Target);
+            //Mysession.MyCharacter.Target = Target;
             Mysession.objectUpdate = true;
 
             //Would likely need some checks here eventually? Shouldn't blindly trust client
@@ -99,19 +88,17 @@ namespace ReturnHome.Server.Network
             {
                 PlayerManager.AddPlayer(Mysession.MyCharacter);
                 EntityManager.AddEntity(Mysession.MyCharacter);
-                MapManager.AddObjectToTree(Mysession.MyCharacter);
+                MapManager.Add(Mysession.MyCharacter);
                 
                 
                 Mysession.inGame = true;
             }
 
             else
-            {
                 MapManager.UpdatePosition(Mysession.MyCharacter);
-            }
 
             //Tells us we need to tell client we ack this message
-            Mysession.clientUpdateAck = true;
+            Mysession.PacketBodyFlags.clientUpdateAck = true;
         }
     }
 }

@@ -16,36 +16,38 @@ namespace ReturnHome.Server.Network
         public bool Split { get; set; } // If client sends 0xFA types, may be needed to combine message splits
         public byte XorByte { get; set; }
 
-        public void Unpack(ReadOnlyMemory<byte> temp, ref int offset)
+        public void Unpack(ref BufferReader reader)
         {
-            ReadOnlySpan<byte> buffer = temp.Span;
             //Read first byte, if it is FF, read an additional byte (Indicates >255byte message
-            messageType = buffer.GetByte(ref offset);
+            messageType = reader.Read<byte>();
 
-            byte bigCheck = buffer.GetByte(ref offset);
+            byte sizeCheck = reader.Read<byte>();
 
-            if (bigCheck == 0xFF)
-                Size = buffer.GetLEUShort(ref offset);
+            if (sizeCheck == 0xFF)
+                Size = reader.Read<ushort>();
 
             else
-                Size = bigCheck;
+                Size = sizeCheck;
 
-            if((byte)MessageType.UnreliableMessage != messageType)
-                MessageNumber = buffer.GetLEUShort(ref offset);
+            if ((byte)MessageType.UnreliableMessage != messageType)
+                MessageNumber = reader.Read<ushort>();
 
             if ((byte)MessageType.PingMessage == messageType)
                 return;
 
             //unreliables and Reliables have opcodes. No  other opcode type/channel does
-            if ((byte)MessageType.UnreliableMessage == messageType || (byte)MessageType.ReliableMessage == messageType)
+            else if ((byte)MessageType.UnreliableMessage == messageType || (byte)MessageType.ReliableMessage == messageType)
             {
-                Opcode = buffer.GetLEUShort(ref offset);
+                Opcode = reader.Read<ushort>();
                 //Subtract 2 from size after reading opcode
                 Size -= 2;
             }
 
-            if (messageType == (byte)MessageType.ClientUpdate)
-                XorByte = buffer.GetByte(ref offset);
+            else if (messageType == (byte)MessageType.ClientUpdate)
+                XorByte = reader.Read<byte>();
+
+            else
+                throw new Exception("Error occured on processing data");
 
         }
     }

@@ -2,10 +2,11 @@
 using System;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes.Chat;
+using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.Network
 {
@@ -17,7 +18,7 @@ namespace ReturnHome.Server.Network
 		public RdpCommIn rdpCommIn { get; private set; } 
 		public RdpCommOut rdpCommOut { get; private set; }
         public SessionQueue sessionQueue { get; private set; }
-        public ServerListener listener { get; private set; }
+        //public ServerListener listener { get; private set; }
 		
 		
         private short _pingCount = 0;
@@ -33,8 +34,6 @@ namespace ReturnHome.Server.Network
         public IPEndPoint MyIPEndPoint { get; private set; }
 		
 		//End
-		
-        public PacketCreator packetCreator = new();
 
         ///SessionList Objects, probably need bundle information here too?
         public ushort ActorUpdatMessageCount = 1;
@@ -46,12 +45,8 @@ namespace ReturnHome.Server.Network
         public bool BundleTypeTransition = false;
 
         public bool serverSelect;
-
+        public SegmentBodyFlags PacketBodyFlags = new();
         public bool characterInWorld = false;
-        public bool RdpReport = false;
-        public bool RdpMessage = false;
-        public bool SessionAck = false;
-        public bool clientUpdateAck = false;
         public bool inGame = false;
         public bool objectUpdate = false;
         public bool unkOpcode = true;
@@ -77,30 +72,26 @@ namespace ReturnHome.Server.Network
 			sessionQueue = new(this);
         }
 
-        public void ProcessPacket(ClientPacket packet)
-        {
-			//Eventually we would want to verify the sessions state in the game before continuing to process?
-			//Would be effectively dropping the packet if this check fails
-            //if (!CheckState(packet))
-                //return;
-
-            rdpCommIn.ProcessPacket(packet);
-        }
-
         public void UnreliablePing()
         {
-            sessionQueue.Add(new MessageStruct(new ReadOnlyMemory<byte>(new byte[] { 0xFC, 0x02, 0xD0, 0x07 })));
+            Message message = Message.Create(MessageType.UnreliableMessage, GameOpcode.BestEffortPing);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            message.Size = writer.Position;
+            sessionQueue.Add(message);
             _pingCount++;
         }
 
-        //This should get built into somewhere else, eventually
+        //TODO This should get built into somewhere else, eventually
         public void CoordinateUpdate()
         {
-            string message = $"Coordinates: X-{MyCharacter.x} Y-{MyCharacter.y} Z-{MyCharacter.z}";
+            string message = $"Coordinates: X: {MyCharacter.x} Y: {MyCharacter.y} Z: {MyCharacter.z} F: {MyCharacter.FacingF}";
 
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 
+        //TODO Put this somewhere else
         public void TargetUpdate()
         {
             string message = $"Targeting ObjectID: {MyCharacter.Target}";
@@ -110,13 +101,6 @@ namespace ReturnHome.Server.Network
         public void ResetPing()
         {
             _pingCount = 0;
-        }
-
-        ///Resets our bool's for next message
-        public void Reset()
-        {
-            RdpReport = false;
-            RdpMessage = false;
         }
 
         //Override the GetHashcodeMethod so that Hashset works properly as our SessionHolder
@@ -129,11 +113,6 @@ namespace ReturnHome.Server.Network
                 hash = (hash ^ InstanceID.GetHashCode()) * 16777619;
                 return hash;
             }
-        }
-
-        public void UpdateClientObject()
-        {
-            MyCharacter?.UpdatePosition();
         }
 
         /// <summary>
@@ -166,12 +145,12 @@ namespace ReturnHome.Server.Network
             rdpCommOut.PrepPackets();
         }
 
-        public void DropSession()
+        //Optional override for dropping the session, currently simplifies for removing a character when they log out
+        public void DropSession(bool Override = false)
         {
             if (!PendingTermination) return;
-            //Eventually this would kick the player out of the world and save data/free resources
-            // Remove character from Character List
-            MapManager.RemoveObjectFromTree(MyCharacter);
+
+            MapManager.RemoveObject(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             EntityManager.RemoveEntity(MyCharacter);
             SessionManager.SessionHash.TryRemove(this);

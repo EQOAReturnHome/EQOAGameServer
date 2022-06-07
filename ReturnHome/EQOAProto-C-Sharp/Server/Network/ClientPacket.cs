@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network
 {
@@ -7,11 +7,12 @@ namespace ReturnHome.Server.Network
     {
         public bool ProcessPacket(ReadOnlyMemory<byte> buffer)
         {
-			int offset = 0;
+            BufferReader reader = new BufferReader(buffer.Span);
+
             //Track memory offset as packet is processed
             try
             {
-                Header.Unpack(buffer, ref offset);
+                Header.Unpack(ref reader, buffer);
 
                 //Need a way to identify an additional bundle from client and to process this
 
@@ -32,19 +33,19 @@ namespace ReturnHome.Server.Network
 
                     //If the buffer size is equal to bytes read + 4 (CRC)
                     //just return true as packets been fully broke down
-                    if (buffer.Length == offset + 4)
+                    if (reader.Length == reader.Position + 4)
                         //Packet should just be an ack or session cancel
                         return true;
 
                     //Read messages, if this fails... drop the packet
-                    if (!ReadMessages(buffer, ref offset))
+                    if (!ReadMessages(reader, buffer))
                         return false;
                 }
 
                 return true;
             }
 
-            catch (Exception ex)
+            catch
             {
                 //Log exception
 
@@ -52,18 +53,18 @@ namespace ReturnHome.Server.Network
             }
         }
 
-        private bool ReadMessages(ReadOnlyMemory<byte> buffer, ref int offset)
+        private bool ReadMessages(BufferReader reader, ReadOnlyMemory<byte> buffer)
         {
             //If message type is present, break out messages
             if (Header.ProcessMessage)
             {
                 //Subtract 4 from buffer length to account for removing CRC
-                while (offset < (buffer.Length - 4))
+                while (reader.Position < (reader.Length - 4))
                 {
                     try
                     {
                         var message = new ClientPacketMessage();
-                        if (!message.Unpack(buffer, ref offset))
+                        if (!message.Unpack(ref reader, buffer))
                             return false;
                         if (message.Header.messageType == (byte)MessageType.ClientUpdate)
                             clientUpdate = message;

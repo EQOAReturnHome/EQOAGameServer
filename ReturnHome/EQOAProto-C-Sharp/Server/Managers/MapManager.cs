@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,96 +11,77 @@ using QuadTrees;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Utilities;
+using ReturnHome.Server.Zone;
+using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes;
 
 namespace ReturnHome.Server.Managers
 {
     public static class MapManager
     {
-        private static QuadTreePointF<Entity> qtree = new QuadTreePointF<Entity>(new RectangleF(3000.0f, 3000.0f, 24000.0f, 30000.0f));
-        private static List<Entity> treeQueue = new List<Entity>();
-        private static List<Entity> treeRemoveQueue = new List<Entity>();
+        private static ConcurrentDictionary<int, Map> _gameDict;
+        //private static ObjectID class
 
-        public static void AddObjectToTree(Entity entity)
+        //Initializes all the map qudtree's
+        public static void Initialize()
         {
-            //Should this queue players to be added simulataneously, instead of individual add's? Probably.
-            
-            treeQueue.Add(entity);
+            //make game map Dictionary
+            _gameDict = new ConcurrentDictionary<int, Map>();
+            _gameDict.TryAdd(0, new Map("Tunaria"));
+            _gameDict.TryAdd(1, new Map("Rathe Mountains"));
+            _gameDict.TryAdd(2, new Map("Odus"));
+            _gameDict.TryAdd(3, new Map("Lava Storm"));
+            _gameDict.TryAdd(4, new Map("Plane of Sky"));
+            _gameDict.TryAdd(5, new Map("Secrets"));
+            foreach (var m in _gameDict)
+                m.Value.Initialize();
+        }
+        
+        //Adds entity to world buffers, to be loaded in on next tick
+        public static void Add(Entity e)
+        {
+          if(_gameDict.TryGetValue(e.World, out Map m))
+            m.AddObject(e);
+
+          else
+            Logger.Err($"Error grabbing world: {e.World}");
         }
 
-        public static void BulkAddObjects()
+        public static void UpdatePosition(Entity e)
         {
-            //iterate over treeQueue and add players to the quad tree one by one
-           for(int i = 0; i < treeQueue.Count; i++)
+            if (_gameDict.TryGetValue(e.World, out Map m))
+                m.UpdatePosition(e);
+
+            else
+                Logger.Err($"Error Updating Object position, World: {e.World} Object: {e.CharName}");
+        }
+
+        public static void RemoveObject(Entity e)
+        {
+          if(_gameDict.TryGetValue(e.World, out Map m))
+            m.RemoveObject(e);
+
+          else
+            Logger.Err($"Error grabbing world: {e.World}");
+        }
+
+        public static List<Entity> QueryObjects(Entity e, float Radius)
+        {
+            if (_gameDict.TryGetValue(e.World, out Map m))
+                return m.Query(e, Radius);
+
+            return default;
+        }
+
+        //Will force each map to do a bulk drop in, then distribute objects if needed
+        public static void UpdateMaps()
+        {
+            foreach (var m in _gameDict)
             {
-                qtree.Add(treeQueue[i]);
-            }
-           
-            //clear the tree queue so it doesn't continuosly try to add the same objects to the tree
-            treeQueue.Clear();
-        }
-
-        public static void QueryObjectsForDistribution()
-        {
-            List<Entity> entityList = new();
-            List<Character> charList = PlayerManager.RequestPlayerList();
-
-            foreach (Character entity in charList)
-            {
-                qtree.GetObjects(new RectangleF(entity.x - 50.0f, entity.z - 50.0f, 100.0f, 100.0f), entityList);
-
-                //Sort Character List
-                entityList = entityList.OrderBy(x => Vector2.Distance(new Vector2(entity.x, entity.z), new Vector2(x.x, x.z))).ToList();
-
-                entity.characterSession.rdpCommIn.connectionData.AddChannelObjects(entityList);
-
-
-
-                entityList.Clear();
+                m.Value.AddBulkObjects();
+                m.Value.RemoveBulkObjects();
+                m.Value.QueryObjectsForDistribution();
             }
         }
-
-        ///Takes a "radius" float for query
-        //Allows us to query for nearby objects to player, individual methods can handle cycling through the list for correctness
-        public static List<Entity> QueryNearbyObjects(Character myCharacter, float radius)
-        {
-            List<Entity> entityList = new();
-            foreach (Entity entity in qtree.GetAllObjects())
-            {
-                Console.WriteLine(entity.CharName);
-            }
-            qtree.GetObjects(new RectangleF(myCharacter.x - (radius / 2), myCharacter.z - (radius / 2), radius, radius), entityList);
-
-            return entityList;
-        }
-
-        /*Should we maybe build a queue for this and move players on everytick rather when their updates come in?
-         * makes everything more accurate on the state
-         */
-        public static void UpdatePosition(Entity entity)
-        {
-            qtree.Move(entity);
-        }
-
-        /*
-        public static void BulkRemovePlayers()
-        {
-            for(int i = 0; i < treeRemoveQueue.Count; i++)
-        }
-        */
-
-        /*
-         * Should all players be removed on a per tick basis?
-         */
-
-        public static void RemoveObjectFromTree(Entity entity)
-        {
-            if (entity == null)
-                return;
-
-            qtree.Remove(entity);
-            Logger.Info($"Removed: {entity.CharName} from tree");
-        }
-
-
     }
 }

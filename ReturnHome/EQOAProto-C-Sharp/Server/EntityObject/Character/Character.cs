@@ -1,19 +1,19 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-
+using System.Text.Json;
+using Newtonsoft.Json;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Player
-{
-    public class Character : Entity
+{  
+    public partial class Character : Entity
     {
         private static string Tunaria = "data\\tunaria.esf";
 
         //Our Lists for attributes of character
-        public List<Item> BankItems = new List<Item> { };
+        public ItemContainer Bank;
         public List<Item> AuctionItems = new List<Item> { };
         public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
         public List<Hotkey> MyHotkeys = new List<Hotkey> { };
@@ -21,34 +21,42 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
+        public Dialogue MyDialogue = new Dialogue();
+        public Dictionary<string, bool> playerFlags = new Dictionary<string, bool>();
 
+        public TrainingPoints PlayerTrainingPoints;
+
+        public int ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
         public int ServerID;
 
-        public int TotalXPEarned;
+        public int XPEarnedInThisLevel;
+        public long TotalXP = 0;
         public int totalDebt;
+
+        //Default this should be 350, once player is 45+ should be changed to 400
+        private int _maxTrainingPoints = 350;
 
         public int Breath;
 
         public int Fishing;
 
-        public int MaxAssignableTP;
-        public int UnusedTP;
-        public int Tunar;
-        public int BankTunar;
+        public int Teleportcounter { get; internal set; } = 0;
 
         public Character() : base(true)
         {
-
+            Inventory = new(0);
+            Bank = new(0, false);
         }
 
         //Need instantiation, but needs some review because it's so big... 
-        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int totalXP, int debt, int breath, int tunar, int bankTunar, int unusedTP, int totalAssignableTP,
+        public Character(string charName, int serverID, int modelID, int tClass, int race, string humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
                          int world, float xCoord, float yCoord, float zCoord, float facing, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC,
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
-                         int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, Session MySession) : base(true)
+                         int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, string playerFlags, Session MySession) : base(true)
         {
+            //playerFlags.Add("Freeport", true);
             Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;
@@ -62,19 +70,23 @@ namespace ReturnHome.Server.EntityObject.Player
             HairLength = hairLength;
             HairStyle = hairStyle;
             FaceOption = faceOption;
-            TotalXPEarned = totalXP;
+            XPEarnedInThisLevel = earnedXP;
+
+            //Calculate Total XP
+            for (int i = 1; i < Level; i++)
+                TotalXP += CharacterUtilities.CharXPDict[i];
+            TotalXP += XPEarnedInThisLevel;
+
             totalDebt = debt;
             Breath = breath;
-            Tunar = tunar;
-            BankTunar = bankTunar;
-            UnusedTP = unusedTP;
-            MaxAssignableTP = totalAssignableTP;
+            Inventory = new(tunar);
+            Bank = new(bankTunar, false);
+            PlayerTrainingPoints = new(TotalTrainingPoints, UnusedTrainingPoints);
             World = world;
+            ExpectedWorld = world;
             x = xCoord;
             y = yCoord;
             z = zCoord;
-            //set our base vactor 3 herw
-            SetPosition();
             Facing = (byte)(facing / 0.0245433693f);
             Strength = strength;
             Stamina = stamina;
@@ -105,29 +117,19 @@ namespace ReturnHome.Server.EntityObject.Player
             BaseWisdom = baseWisdom;
             BaseIntelligence = baseIntelligence;
             BaseCharisma = baseCharisma;
-            //CurrentHP2 = currentHP2;
-            //BaseHP = baseHP;
+            if(playerFlags != null){
+                this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
+            }
             //CurrentPower2 = currentPower2;
             //BasePower = basePower;
             //HealOT2 = healOT2;
             //PowerOT2 = powerOT2;
             characterSession = MySession;
-        }
 
-        public void UpdatePosition()
-        {
-            if (waypoint == Position)
-                return;
-            else
-            {
-                Position = waypoint;
-                VelocityX = WayPointVelocityX;
-                VelocityY = WayPointVelocityY;
-                VelocityZ = WayPointVelocityZ;
-            }
-            characterSession.objectUpdate = true;
+            //If Character level >= 45, change Max Training Points to 400
+            if (Level >= 45)
+                _maxTrainingPoints = 400;
         }
-
 
         public void UpdateFeatures(Session MySession, int hairColor, int hairLength, int hairStyle, int faceOption)
         {
@@ -138,35 +140,53 @@ namespace ReturnHome.Server.EntityObject.Player
             MySession.MyCharacter = this;
         }
 
-        public void DumpCharacter(MemoryStream memStream)
+        public void DumpCharacter(ref BufferWriter writer)
         {
             //Start pulling data together
-            memStream.WriteByte(0);
-            memStream.Write(BitConverter.GetBytes(Tunaria.Length));
-            memStream.Write(Encoding.UTF8.GetBytes(Tunaria));
-            memStream.Write(Utility_Funcs.DoublePack(ModelID));
-            memStream.Write(BitConverter.GetBytes(CharName.Length));
-            memStream.Write(Encoding.UTF8.GetBytes(CharName));
-            memStream.Write(Utility_Funcs.DoublePack(Class));
-            memStream.Write(Utility_Funcs.DoublePack(Race));
-            memStream.Write(Utility_Funcs.DoublePack(Level));
-            memStream.Write(Utility_Funcs.DoublePack(TotalXPEarned));
-            memStream.Write(Utility_Funcs.DoublePack(totalDebt));
-            memStream.WriteByte((byte)Breath);
-            memStream.Write(Utility_Funcs.DoublePack(Tunar));
-            memStream.Write(Utility_Funcs.DoublePack(BankTunar));
-            memStream.Write(Utility_Funcs.DoublePack(UnusedTP));
-            memStream.Write(Utility_Funcs.DoublePack(MaxAssignableTP));
-            memStream.Write(Utility_Funcs.DoublePack(World));
-            memStream.Write(BitConverter.GetBytes(x));
-            memStream.Write(BitConverter.GetBytes(y));
-            memStream.Write(BitConverter.GetBytes(z));
-            memStream.Write(BitConverter.GetBytes(FacingF));
+            writer.Write((byte)0);
+            writer.WriteString(Encoding.UTF8, Tunaria);
+            writer.Write7BitEncodedInt64(ServerID);
+            writer.WriteString(Encoding.UTF8, CharName);
+            writer.Write7BitEncodedInt64(Class);
+            writer.Write7BitEncodedInt64(Race);
+            writer.Write7BitEncodedInt64(Level);
+            writer.Write7BitEncodedInt64(XPEarnedInThisLevel);
+            writer.Write7BitEncodedInt64(totalDebt);
+            writer.Write((byte)Breath);
+            writer.Write7BitEncodedInt64(Inventory.Tunar);
+            writer.Write7BitEncodedInt64(Bank.Tunar);
+            writer.Write7BitEncodedInt64(PlayerTrainingPoints.RemainingTrainingPoints);
+            writer.Write7BitEncodedInt64(_maxTrainingPoints);
+            writer.Write7BitEncodedInt64(World);
+            writer.Write(x);
+            writer.Write(y);
+            writer.Write(z);
+            writer.Write(FacingF);
 
             //Two unknown values must be packed on the end, can be updated later to
             //include database values when we figure out what it does.
-            memStream.Write(BitConverter.GetBytes(0.0f));
-            memStream.Write(BitConverter.GetBytes(0.0f));
+            writer.Write(0.0f);
+            writer.Write(0.0f);
+        }
+        public bool GetPlayerFlags(Session mySession, string flagKey)
+        {
+            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
+                return true;
+
+            return false;
+        }
+
+        public void SetPlayerFlag(Session mySession, string flagKey, bool flagValue)
+        {
+            //TODO: Fix for characters without flags? bypassing for now
+            if (mySession.MyCharacter.playerFlags == null)
+                return;
+
+            if (!mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+                mySession.MyCharacter.playerFlags.Add(flagKey, flagValue);
+
+            else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+                mySession.MyCharacter.playerFlags[flagKey] = flagValue;
         }
     }
 }

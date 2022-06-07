@@ -3,9 +3,8 @@ using System.Collections.Concurrent;
 using System.Configuration;
 using System.Net;
 using System.Text;
-
-using ReturnHome.Opcodes;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Managers
@@ -15,7 +14,7 @@ namespace ReturnHome.Server.Managers
 
         private static Encoding unicode = Encoding.Unicode;
         private static ConcurrentDictionary<IPEndPoint, Session> sessionDict = new();
-        private static byte[] _serverList;
+        private static Message _message;
         public static void AddSession(Session session)
         {
             if (sessionDict.TryAdd(session.MyIPEndPoint, session))
@@ -34,7 +33,7 @@ namespace ReturnHome.Server.Managers
             //Means there is client's on the server list menu, let's send the list
             foreach (var result in sessionDict)
             {
-                SessionQueueMessages.PackMessage(result.Value, _serverList, 0xFC);
+                result.Value.sessionQueue.Add(_message);
             }
         }
 
@@ -88,19 +87,14 @@ namespace ReturnHome.Server.Managers
                             size += appSettings[$"Server{i}"].Length * 2;
                         }
 
-                        _serverList = new byte[size];
-                        Span<byte> temp = _serverList;
+                        _message = new Message(MessageType.ReliableMessage, GameOpcode.GameServers);
+                        BufferWriter writer = new BufferWriter(_message.Span);
 
-                        int offset = 0;
+                        writer.Write(_message.Opcode);
 
-                        BitConverter.GetBytes((ushort)GameOpcode.GameServers).CopyTo(temp.Slice(offset, 2));
-
-                        offset += 2;
                         ///Add Server count to our preformed packet
                         ///KEep this simple since value can't get very high
-                        byte[] bytetemp = new byte[] { (byte)(ServerCount * 2) };
-                        bytetemp.CopyTo(temp.Slice(offset, bytetemp.Length));
-                        offset += bytetemp.Length;
+                        writer.Write7BitEncodedInt64(ServerCount);
 
                         ///Cycle through servers in Config List
                         for (int i = 0; i < ServerCount; i++)
@@ -108,45 +102,27 @@ namespace ReturnHome.Server.Managers
 
                             ///Gets Server Name and Name Length
                             string ServerName = appSettings[$"Server{i}"];
-                            BitConverter.GetBytes(ServerName.Length).CopyTo(temp.Slice(offset, 4));
-                            offset += 4;
-
-                            unicode.GetBytes(ServerName).CopyTo(temp.Slice(offset, ServerName.Length * 2));
-                            offset += ServerName.Length * 2;
+                            writer.WriteString(Encoding.Unicode, ServerName);
 
                             ///Add Server Recommendation
-                            temp[offset] = (byte)(Convert.ToUInt32(appSettings[$"ServerRecommended{i}"]));
-                            offset += 1;
+                            writer.Write(Convert.ToByte(appSettings[$"ServerRecommended{i}"]));
 
                             ///Add Server End Point
-                            BitConverter.GetBytes(Convert.ToUInt16(appSettings[$"ServerEndPointID{i}"])).CopyTo(temp.Slice(offset, 2));
-                            offset += 2;
+                            writer.Write(Convert.ToUInt16(appSettings[$"ServerEndPointID{i}"]));
 
                             ///Add Server Port
-                            BitConverter.GetBytes(Convert.ToUInt16(appSettings[$"ServerPort{i}"])).CopyTo(temp.Slice(offset, 2));
-                            offset += 2;
+                            writer.Write(Convert.ToUInt16(appSettings[$"ServerPort{i}"]));
 
                             ///Add Server IP 
-                            IPAddress tempIP = IPAddress.Parse(appSettings[$"ServerIP{i}"]);
-                            byte[] tempbyte = tempIP.GetAddressBytes();
+                            writer.Write(IPAddress.Parse(appSettings[$"ServerIP{i}"]).GetAddressBytes());
 
-                            //Swap bytes for endianess here on the fly
-                            byte a = tempbyte[0];
-                            byte b = tempbyte[1];
-                            tempbyte[0] = tempbyte[3];
-                            tempbyte[1] = tempbyte[2];
-                            tempbyte[2] = b;
-                            tempbyte[3] = a;
-
-                            tempbyte.CopyTo(temp.Slice(offset, 4));
-                            offset += 4;
-
-                            temp[offset] = (byte)(Convert.ToUInt32(appSettings[$"ServerLanguage{i}"]));
-                            offset += 1;
+                            writer.Write(Convert.ToByte(appSettings[$"ServerLanguage{i}"]));
 
                             Logger.Info($"Acquired Server #{i + 1}");
                         }
+                        Memory<byte> temp = _message.message;
 
+                        _message.message = temp.Slice(0, writer.Position);
                         Logger.Info("Done...");
                     }
 
@@ -154,8 +130,8 @@ namespace ReturnHome.Server.Managers
                     {
                         Logger.Err($"Unable to parse '{result}'");
                     }
-
                 }
+
             }
             catch (ConfigurationErrorsException)
             {

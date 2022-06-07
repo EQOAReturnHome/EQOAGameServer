@@ -29,12 +29,11 @@ namespace ReturnHome.Server.EntityObject.Player
             SecondaryHandID = thisSecondaryHandID;
         }
         
-        public void DumpWeaponHotbar(MemoryStream memStream)
+        public void DumpWeaponHotbar(ref BufferWriter writer)
         {
-            memStream.Write(Utility_Funcs.DoublePack(PrimaryHandID));
-            memStream.Write(Utility_Funcs.DoublePack(SecondaryHandID));
-            memStream.Write(BitConverter.GetBytes(HotbarName.Length));
-            memStream.Write(Encoding.Unicode.GetBytes(HotbarName));
+            writer.Write7BitEncodedInt64(PrimaryHandID);
+            writer.Write7BitEncodedInt64(SecondaryHandID);
+            writer.WriteString(Encoding.Unicode, HotbarName);
         }
     }
 }

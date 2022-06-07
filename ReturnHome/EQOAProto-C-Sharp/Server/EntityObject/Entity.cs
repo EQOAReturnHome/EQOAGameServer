@@ -1,15 +1,10 @@
 using System;
-using System.Collections.Generic;
-using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-        //Should this be an array? There is a max capacity to inventory, bank and auctions. 
-
-        public List<Item> Inventory = new();
     
         //Implies if object is visible or not
         public bool Invisible = false;
@@ -58,14 +53,25 @@ namespace ReturnHome.Server.EntityObject
             get { return _level; }
             set
             {
-                if (value >= 1 && value <= 61)
+                if (isPlayer)
                 {
-                    _level = value;
-                    ObjectUpdateLevel();
-                }
+                    if (value >= 1 && value <= 61)
+                    {
+                        _level = value;
+                        ObjectUpdateLevel();
+                    }
 
+                    else
+                        Logger.Err($"Error setting Level {value} for {_charName}");
+                }
                 else
-                    Logger.Err($"Error setting Level {value} for {_charName}");
+                {
+                    if (value >= 1 && value <= 100)
+                    {
+                        _level = value;
+                        ObjectUpdateLevel();
+                    }
+                }
             }
         }
 

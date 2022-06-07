@@ -7,7 +7,6 @@ namespace ReturnHome.Utilities
 {
     public static class Utility_Funcs
     {
-
         public static ulong GetUnixEpoch(this DateTime dateTime)
         {
             var unixTime = dateTime.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -15,160 +14,21 @@ namespace ReturnHome.Utilities
             return (ulong)(unixTime.TotalSeconds);
         }
 
-        public static byte DoubleVariableLengthIntegerLength(int val)
+        public static byte VariableUIntLength(ulong param_2)
         {
-            uint value = (uint)val;
-            value *= 2;
+            byte result = 0;
 
-            if (value >= 0 && value <= 127)
-                return 1;
-
-            else if (value >= 128 && value <= 16383)
-                return 2;
-
-            else if (value >= 16384 && value <= 2097151)
-                return 3;
-
-            else if (value >= 2097152 && value <= 268435455)
-                return 4;
-
-            else if (value >= 268435456 && value <= 4294967295)
-                return 5;
-
-            else
-                //Throw an error and return 0?
-                return 0;
-        }
-
-        public static byte VariableLengthIntegerLength(uint val)
-        {
-            uint value = (uint)val;
-
-            if (value >= 0 && value <= 127)
-                return 1;
-
-            else if (value >= 128 && value <= 16383)
-                return 2;
-
-            else if (value >= 16384 && value <= 2097151)
-                return 3;
-
-            else if (value >= 2097152 && value <= 268435455)
-                return 4;
-
-            else if (value >= 268435456 && value <= 4294967295)
-                return 5;
-
-            else
-                //Throw an error and return 0?
-                return 0;
-        }
-
-        //This method unpacks VLI data
-        static public uint Unpack(ReadOnlySpan<byte> ClientPacket, ref int offset)
-        {
-            uint val = 0;
-
-            //Loop over our packet
-            for (int i = 0; i < ClientPacket.Length; i++)
-            {
-                //Grab the current byte and shift i * 7
-                val |= (uint)((ClientPacket[offset] & 0x7f) << (i * 7));
-
-                //Keep processing if true
-                if (!((ClientPacket[offset] & 0x80) == 0))
-                {
-                    offset += 1;
-                    continue;
-                }
-
-                offset += 1;
-                break;
-            }
-
-            return val;
-        }
-
-        //Packing
-        static public byte[] Pack(uint value)
-        {
-            byte[] temp = new byte[VariableLengthIntegerLength(value)];
-            byte b;
-            byte counter = 0;
-
-            b = (byte)(value & 0xFF);
             do
             {
-                value = value >> 7;
-                b = (byte)(b & 0x7f);
-                if (value != 0)
-                    b = (byte)(b | 0x80);
-
-                temp[counter++] = (byte)b;
-                b = (byte)(value & 0xff);
-            } while (value != 0);
-            return temp;
+                param_2 = param_2 >> 7;
+                ++result;
+            } while (param_2 != 0);
+            return result;
         }
 
-        static public byte[] DoublePack(int val)
+        public static byte VariableIntLength(long param_2)
         {
-            uint uVar1;
-            uVar1 = (uint)val;
-            uVar1 = val < 0 ? ((~uVar1) << 1) + 1 : uVar1 <<= 1;
-
-            return Pack(uVar1);
-        }
-
-        //Unpacking
-        static public int DoubleUnpack(byte[] buffer)
-        {
-            uint val = Unpack(buffer);
-            return (int)((val & 1) != 0 ? ~((val - 1) >> 1) : val >> 1);
-        }
-
-        static public uint Unpack(byte[] buffer)
-        {
-            byte local_60;
-            uint uVar2 = 0;
-            byte uVar1 = 0;
-            byte counter = 0;
-
-            while (uVar1 < 0x40)
-            {
-                local_60 = buffer[counter++];
-                uVar2 = (uint)(uVar2 | (local_60 & 0x7f) << uVar1);
-                if ((local_60 & 0x80) == 0)
-                    break;
-                uVar1 += 7;
-            }
-
-            return uVar2;
-        }
-
-        public static string GetMemoryString(ReadOnlySpan<byte> ClientPacket, ref int offset, int stringLength)
-        {
-            try
-            { return Encoding.Default.GetString(ClientPacket.Slice(offset, stringLength)); }
-
-            finally
-            { offset += stringLength; }
-        }
-
-        public static void WriteToBuffer<T>(this Memory<byte> buffer, T value, ref int offset) where T : unmanaged
-        {
-            Span<T> span = MemoryMarshal.CreateSpan(ref value, 1);
-            Span<byte> data = MemoryMarshal.AsBytes(span);
-            int size = data.Length;
-            data.CopyTo(buffer[offset..(offset + size)].Span);
-            for (int i = 0; i < size; i++)
-            {
-                if (data[i] == 0)
-                {
-                    size = i;
-                    break;
-                }
-            }
-            offset += size;
+            return VariableUIntLength((ulong)(param_2 * 2));
         }
     }
 

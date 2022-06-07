@@ -4,9 +4,10 @@ using System.Threading.Tasks;
 using System.Linq;
 
 using ReturnHome.Utilities;
-using ReturnHome.Opcodes;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -48,9 +49,9 @@ namespace ReturnHome.Server.Network.Managers
                 if (SessionHash.TryAdd(ClientSession))
                 {
                     Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
-                    ClientSession.SessionAck = true;
+                    ClientSession.PacketBodyFlags.SessionAck = true;
                     //Success, keep processing data
-                    ClientSession.ProcessPacket(packet);
+                    ClientSession.rdpCommIn.ProcessPacket(packet);
                 }
 			}
 
@@ -62,7 +63,7 @@ namespace ReturnHome.Server.Network.Managers
 					//Checks if IP/Port matches expected session to incoming packet
 					//This might not be needed?
                     if (ClientSession.MyIPEndPoint.Equals(ClientIPEndPoint))
-                        ClientSession.ProcessPacket(packet);
+                        ClientSession.rdpCommIn.ProcessPacket(packet);
 
                     else
                     {
@@ -126,10 +127,10 @@ namespace ReturnHome.Server.Network.Managers
             return NewID;
         }
 
-        public static void CreateMasterSession(Session MySession)
+        public static void CreateMasterSession(Session session)
         {
-            Session NewMasterSession = new Session(MySession.rdpCommOut._listener, MySession.MyIPEndPoint, DNP3Creation.DNP3Session(), ObtainIDUp(), MySession.rdpCommIn.clientID, MySession.rdpCommIn.serverID, true);
-            NewMasterSession.AccountID = MySession.AccountID;
+            Session NewMasterSession = new Session(session.rdpCommOut._listener, session.MyIPEndPoint, DNP3Creation.DNP3Session(), ObtainIDUp(), session.rdpCommIn.clientID, session.rdpCommIn.serverID, true);
+            NewMasterSession.AccountID = session.AccountID;
             NewMasterSession.Instance = true;
 
             if (SessionHash.TryAdd(NewMasterSession))
@@ -140,42 +141,29 @@ namespace ReturnHome.Server.Network.Managers
 
         }
 
-        public static void CreateMemoryDumpSession(Session MySession, Character MyCharacter)
+        public static void CreateMemoryDumpSession(Session session, Character MyCharacter)
         {
             //Start new session 
-            Session NewMasterSession = new Session(MySession.rdpCommOut._listener, MySession.MyIPEndPoint, DNP3Creation.DNP3Session(), MySession.SessionID + 1, MySession.rdpCommIn.clientID, MySession.rdpCommIn.serverID, true);
+            Session NewMasterSession = new Session(session.rdpCommOut._listener, session.MyIPEndPoint, DNP3Creation.DNP3Session(), session.SessionID + 1, session.rdpCommIn.clientID, session.rdpCommIn.serverID, true);
             NewMasterSession.Instance = true;
-            NewMasterSession.AccountID = MySession.AccountID;
+            NewMasterSession.AccountID = session.AccountID;
             NewMasterSession.MyCharacter = MyCharacter;
             NewMasterSession.MyCharacter.characterSession = NewMasterSession;
             NewMasterSession.MyCharacter.ObjectID = NewMasterSession.SessionID;
+            EntityManager.AddEntity(MyCharacter);
 
             if (SessionHash.TryAdd(NewMasterSession))
             {
-                Console.WriteLine("Ready For Memory Dump");
-                ProcessOpcode.ProcessMemoryDump(NewMasterSession);
+                Logger.Info($"Session {NewMasterSession.SessionID} starting Memory Dump");
+                ServerMemoryDump.MemoryDump(NewMasterSession);
             }
         }
 
         ///Used when starting a master session with client.
-        public static void GenerateClientContact(Session MySession)
+        public static void GenerateClientContact(Session session)
         {
-            int offset = 0;
-            Memory<byte> temp1 = new byte[6];
-            Span<byte> Message = temp1.Span;
-            Message.Write(BitConverter.GetBytes((ushort)GameOpcode.Camera1), ref offset);
-            Message.Write(new byte[] { 0x03, 0x00, 0x00, 0x00 }, ref offset);
-            ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(MySession, temp1, MessageOpcodeTypes.ShortReliableMessage);
-
-            offset = 0;
-            Memory<byte> temp2 = new byte[6];
-            Span<byte> Message2 = temp2.Span;
-            Message2.Write(BitConverter.GetBytes((ushort)GameOpcode.Camera2), ref offset);
-            Message2.Write(new byte[] { 0x1B, 0x00, 0x00, 0x00 }, ref offset);
-            ///Handles packing message into outgoing packet
-            SessionQueueMessages.PackMessage(MySession, temp2, MessageOpcodeTypes.ShortReliableMessage);
-
+            ServerOpcode0x07D1.Opcode0x07D1(session);
+            ServerOpcode0x07F5.Opcode0x07F5(session);
         }
 		
 		/// <summary>
@@ -187,10 +175,9 @@ namespace ReturnHome.Server.Network.Managers
             int sessionCount = 0;
 
             //Should push client object update directly to character if needed
-            Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
+            //test  Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
-            MapManager.BulkAddObjects();
-            MapManager.QueryObjectsForDistribution();
+            MapManager.UpdateMaps();
 
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());
@@ -200,7 +187,6 @@ namespace ReturnHome.Server.Network.Managers
             {
                 if (session.PendingTermination)
                 {
-                    Console.WriteLine("Dropping Session on server end");
                     session.DropSession();
                 }
 

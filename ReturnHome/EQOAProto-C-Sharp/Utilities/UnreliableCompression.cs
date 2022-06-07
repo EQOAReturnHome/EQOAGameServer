@@ -6,31 +6,24 @@ namespace ReturnHome.Utilities
     
     class Compression
     {
-        public static Memory<byte> runLengthEncode(ReadOnlyMemory<byte> temp)
+        public static void runLengthEncode(ref BufferWriter writer, Span<byte> span)
         {
-            ReadOnlySpan<byte> MyUnreliable = temp.Span;
-            int length = MyUnreliable.Length;
-            int offset = 0;
+            int length = span.Length;
             int thisReal = 0;
             int thisCompress = 0;
 
-            //Start with a Memory/Span of size 0xc9, will need to resize after compression
-            Memory<byte> tempMem = new Memory<byte>(new byte[0xC9]);
-            Span<byte> tempSpan = tempMem.Span;
-
             //Cycle through every byte of update message
-            //skip first 5 bytes
             for (int i = 0; i < length; i++)
             {
                 //Check if null byte
-                if (MyUnreliable[i] == 0)
+                if (span[i] == 0)
                 {
                     //Check if prior bytes were not null
                     if (thisReal > 0)
                     {
-                        tempSpan[offset++] = (byte)(thisReal | 0x80);
-                        tempSpan[offset++] = (byte)thisCompress;
-                        tempSpan.Write(MyUnreliable.Slice((i - thisReal), thisReal), ref offset);
+                        writer.Write((byte)(thisReal | 0x80));
+                        writer.Write((byte)thisCompress);
+                        writer.Write(span.Slice((i - thisReal), thisReal));
 
                         //Reset counters
                         thisCompress = 0;
@@ -45,19 +38,19 @@ namespace ReturnHome.Utilities
                 thisReal += 1;
             }
 
-            tempSpan[offset++] = (byte)(thisReal | 0x80);
-            tempSpan[offset++] = (byte)thisCompress;
+            writer.Write((byte)(thisReal | 0x80));
+            writer.Write((byte)thisCompress);
             if (thisReal != 0)
-                tempSpan.Write(MyUnreliable.Slice((length - thisReal), thisReal), ref offset);
+                writer.Write(span.Slice((length - thisReal), thisReal));
 
-            //Return the memory that was written too
-            return tempMem.Slice(0, offset);
+            //Ensure any compression is terminated by a 0x00
+            writer.Write((byte)0);
         }
 
         //Pass in Unreliable message and expected unreliable length
-        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, ref int offset, int length)
+        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, int length)
         {
-
+            int offset = 0;
             byte[] messageBuf = new byte[length];
 
             fixed (byte* tempBuf = &MemoryMarshal.GetReference(arg1))
@@ -87,7 +80,7 @@ namespace ReturnHome.Utilities
                     else
                     {
                         local_70 = buf[offset++];
-                        uVar2 = (uint)local_70;
+                        uVar2 = local_70;
                     }
 
                     uVar1 = 0;

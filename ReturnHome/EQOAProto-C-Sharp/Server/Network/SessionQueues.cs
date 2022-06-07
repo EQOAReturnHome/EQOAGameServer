@@ -1,18 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-using ReturnHome.Opcodes;
-using ReturnHome.Utilities;
+﻿using ReturnHome.Utilities;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace ReturnHome.Server.Network
 {
     public class SessionQueue
     {
-        private ConcurrentQueue<MessageStruct> OutGoingReliableMessageQueue = new();
-        private ConcurrentQueue<MessageStruct> OutGoingUnreliableMessageQueue = new();
-        private ConcurrentDictionary<ushort, MessageStruct> ResendMessageQueue = new();
+        private Message _segmentMessage = null;
+        private int _segmentPosition = 0;
+        private ConcurrentQueue<Message> _outGoingReliableMessageQueue = new();
+        private ConcurrentQueue<Message> _outGoingUnreliableMessageQueue = new();
+        private ConcurrentDictionary<ushort, Message> _resendMessageQueue = new();
 		
 		private Session _session;
 
@@ -21,138 +19,214 @@ namespace ReturnHome.Server.Network
 			_session = session;
 		}
 		
-        public void Add(MessageStruct thisMessage)
+        public void Add(Message message)
         {
-            byte messageType = thisMessage.Message.Span[0];
-
             //If it is a reliable message type
-            if (messageType == MessageOpcodeTypes.ShortReliableMessage || messageType == MessageOpcodeTypes.PingMessage || messageType == MessageOpcodeTypes.MultiShortReliableMessage)
-            {
-                OutGoingReliableMessageQueue.Enqueue(thisMessage);
-            }
+            if (message.Messagetype == MessageType.ReliableMessage || message.Messagetype == MessageType.SegmentReliableMessage || message.Messagetype == MessageType.PingMessage)
+                _outGoingReliableMessageQueue.Enqueue(message);
 
             //Unreliable message types
             else
-            {
-                OutGoingUnreliableMessageQueue.Enqueue(thisMessage);
-            }
+                _outGoingUnreliableMessageQueue.Enqueue(message);
         }
 
         public bool CheckQueue()
         {
             //If no message exist, just return false
-            if (OutGoingReliableMessageQueue.IsEmpty && OutGoingUnreliableMessageQueue.IsEmpty && ResendMessageQueue.IsEmpty)
-            {
+            if (_outGoingReliableMessageQueue.IsEmpty && _outGoingUnreliableMessageQueue.IsEmpty && _resendMessageQueue.IsEmpty && _segmentMessage == null)
                 return false;
-            }
+
+            //If either of these have items in the queue, return true
+            if (!_outGoingReliableMessageQueue.IsEmpty || !_outGoingUnreliableMessageQueue.IsEmpty || _segmentMessage != null)
+                return true;
 
             //If resend queue is not empty, check resend timer.
-            if (!ResendMessageQueue.IsEmpty)
+            if (!_resendMessageQueue.IsEmpty)
             {
                 //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
-                foreach (var item in ResendMessageQueue)
+                foreach (var item in _resendMessageQueue)
                 {
                     long stuff = DateTimeOffset.Now.ToUnixTimeMilliseconds() - item.Value.Time;
                     //If message needs to be resent, just add it back to the reliable queue
                     if (stuff > 2000)
-                    {
-                        OutGoingReliableMessageQueue.Enqueue(item.Value);
-                    }
+                        return true;
                 }
-            }
-
-            //If either of these have items in the queue, return true
-            if (!OutGoingReliableMessageQueue.IsEmpty || !OutGoingUnreliableMessageQueue.IsEmpty)
-            {
-                _session.RdpMessage = true;
-                return true;
             }
 
             return false;
         }
 
-        public (int, List<ReadOnlyMemory<byte>>) GatherMessages()
+        public void WriteMessages(ref BufferWriter writer, SegmentBodyFlags segmentBodyFlags)
         {
-            List<ReadOnlyMemory<byte>> messageList = new();
-            int messageLength = 0;
-
             //Resend queue is not needed here since we loop it back into the reliable queue on the check
-            while (messageLength < _session.rdpCommOut.maxSize)
+            while (writer.Position + 4 < RdpCommOut.maxSize)
             {
-                //Process reliable messages
-                if (OutGoingReliableMessageQueue.TryPeek(out MessageStruct temp2))
+
+                //Check for Segment messages needing to be sent sequentially
+                if(_segmentMessage != null)
                 {
-                    if ((messageLength + temp2.Message.Length) < _session.rdpCommOut.maxSize)
+                    //Write next message as a segment
+                    if (_segmentMessage.Size - _segmentPosition > 0x0484 && writer.Position + 1166 < RdpCommOut.maxSize)
                     {
-                        if (OutGoingReliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                        //Make sure to increment Index here
+                        Message tempMessage = new(_segmentMessage.Messagetype, _segmentMessage.message.Slice(_segmentPosition, 0x0484), _session.rdpCommIn.connectionData.lastSentMessageSequence++);
+
+                        writer.Write((byte)tempMessage.Messagetype);
+                        writer.WriteSize(tempMessage.Size);
+                        writer.Write(tempMessage.Sequence);
+                        writer.Write(tempMessage.Span[0..tempMessage.Size]);
+                        _segmentPosition += tempMessage.Size;
+
+                        //Reset Timestamp, this works well in our favour of reliables needing to be resent here
+                        tempMessage.updateTime();
+
+                        //Place segment into resend queue
+                        _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
+                        segmentBodyFlags.RdpMessage = true;
+                        continue;
+                    }
+
+                    //Final message of segment, use FB type
+                    else if (_segmentMessage.Size - _segmentPosition < 0x0484 && writer.Position + _segmentMessage.Size - _segmentPosition < RdpCommOut.maxSize)
+                    {
+                        //Make sure to increment Index here
+                        Message tempMessage = new(MessageType.ReliableMessage, _segmentMessage.message.Slice(_segmentPosition, _segmentMessage.Size - _segmentPosition), _session.rdpCommIn.connectionData.lastSentMessageSequence++);
+
+                        writer.Write((byte)tempMessage.Messagetype);
+                        writer.WriteSize(tempMessage.Size);
+                        writer.Write(tempMessage.Sequence);
+                        writer.Write(tempMessage.Span[0..tempMessage.Size]);
+
+                        //Reset Timestamp, this works well in our favour of reliables needing to be resent here
+                        tempMessage.updateTime();
+
+                        //Place segment into resend queue
+                        _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
+                        segmentBodyFlags.RdpMessage = true;
+
+                        //Release original message
+                        Message.Return(_segmentMessage);
+                        _segmentMessage = null;
+                        _segmentPosition = 0;
+                        continue;
+                    }
+
+                    else
+                        //break?
+                        break;
+                }
+
+                //Check for Resend
+                //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
+                long time = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                foreach (var item in _resendMessageQueue)
+                {
+                    //If message needs to be resent, just add it back to the reliable queue
+                    if ((time - item.Value.Time) > 2000)
+                    {
+                        if(writer.Position + item.Value.Size + 4 < RdpCommOut.maxSize)
                         {
-                            //Place message into outgoing message
-                            messageList.Add(reliableMessage.Message);
-                            messageLength += reliableMessage.Message.Length;
+                            writer.Write((byte)item.Value.Messagetype);
+                            writer.WriteSize(item.Value.Size);
+                            writer.Write(item.Value.Sequence);
+                            writer.Write(item.Value.Span[0..item.Value.Size]);
+                            item.Value.updateTime();
+                        }
+                    }
+                }
 
-                            //Reset Timestamp, this works well in our favour of reliables needing to be resent here
-                            reliableMessage.updateTime();
-
-                            //Place into resend queue
-                            if (ResendMessageQueue.TryAdd(reliableMessage.Messagenumber, reliableMessage))
+                //Process reliable messages
+                if (_outGoingReliableMessageQueue.TryPeek(out Message temp2))
+                {
+                    if ((writer.Position + 4 + temp2.Size + temp2.HeaderSize()) < RdpCommOut.maxSize || temp2.Messagetype == MessageType.SegmentReliableMessage)
+                    {
+                        if (_outGoingReliableMessageQueue.TryDequeue(out Message reliableMessage))
+                        {
+                            if (reliableMessage.Messagetype == MessageType.ReliableMessage || reliableMessage.Messagetype == MessageType.PingMessage || (reliableMessage.Messagetype == MessageType.SegmentReliableMessage && reliableMessage.Size < 0x0484))
                             {
-                                _session.RdpMessage = true;
+                                reliableMessage.AddSequence(_session.rdpCommIn.connectionData.lastSentMessageSequence++);
+
+                                writer.Write((byte)reliableMessage.Messagetype);
+                                writer.WriteSize(reliableMessage.Size);
+                                writer.Write(reliableMessage.Sequence);
+                                writer.Write(reliableMessage.Span[0..reliableMessage.Size]);
+
+                                //Reset Timestamp, this works well in our favour of reliables needing to be resent here
+                                reliableMessage.updateTime();
+
+                                //Place into resend queue
+                                _resendMessageQueue.TryAdd(reliableMessage.Sequence, reliableMessage);
+                                segmentBodyFlags.RdpMessage = true;
 
                                 //continue processing
                                 continue;
                             }
+
+                            //Should be a segment message, process a little differently
                             else
                             {
-                                //Should we track how many times a message doesn't end up getting ack'd? Eventually disconnect client?
-                                if (ResendMessageQueue.TryUpdate(reliableMessage.Messagenumber, reliableMessage, reliableMessage))
-                                {
-                                    _session.RdpMessage = true;
-                                    continue;
-                                }
+                                //Make sure to increment Index here
+                                Message tempMessage = new(reliableMessage.Messagetype, reliableMessage.message.Slice(_segmentPosition, 0x0484), _session.rdpCommIn.connectionData.lastSentMessageSequence++);
 
-                                else
-                                    Logger.Err($"Error occured adding or updating Message #{reliableMessage.Messagenumber} for session {_session.rdpCommIn.clientID.ToString("X")}");
-                                    //Log an error here?
+                                writer.Write(tempMessage.Messagetype);
+                                writer.WriteSize(tempMessage.Size);
+                                writer.Write(tempMessage.Sequence);
+                                writer.Write(tempMessage.Span[0..tempMessage.Size]);
+                                _segmentPosition += tempMessage.Size;
+
+                                //Reset Timestamp, this works well in our favour of reliables needing to be resent here
+                                tempMessage.updateTime();
+
+                                //Place segment into resend queue
+                                _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
+                                _segmentMessage = reliableMessage;
+                                segmentBodyFlags.RdpMessage = true;
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                //process unreliable messages
+                if (_outGoingUnreliableMessageQueue.TryPeek(out Message temp))
+                {
+                    if (temp.Messagetype == MessageType.UnreliableMessage)
+                    {
+                        if ((writer.Position + 4 + temp.Size + temp.HeaderSize()) < RdpCommOut.maxSize)
+                        {
+                            if (_outGoingUnreliableMessageQueue.TryDequeue(out Message message))
+                            {
+                                //Place message into outgoing message
+                                writer.Write((byte)message.Messagetype);
+                                writer.WriteSize(message.Size);
+                                writer.Write(message.Span[0..temp.Size]);
+                                continue;
                             }
                         }
                     }
 
                     else
-                        return (messageLength, messageList);
-                }
-
-                //process unreliable messages
-                if (OutGoingUnreliableMessageQueue.TryPeek(out MessageStruct temp))
-                {
-                    if ((messageLength + temp.Message.Length) < _session.rdpCommOut.maxSize)
                     {
-                        if (OutGoingUnreliableMessageQueue.TryDequeue(out MessageStruct reliableMessage))
+                        if ((writer.Position + 4 + temp.Size + temp.HeaderSize()) < RdpCommOut.maxSize)
                         {
-                            //Place message into outgoing message
-                            messageList.Add(reliableMessage.Message);
-                            messageLength += reliableMessage.Message.Length;
-                            _session.RdpMessage = true;
-                            continue;
+                            if (_outGoingUnreliableMessageQueue.TryDequeue(out Message message))
+                            {
+                                //Place message into outgoing message
+                                writer.Write((byte)message.Messagetype);
+                                writer.WriteSize(message.Size);
+                                writer.Write(message.Sequence);
+                                writer.Write(message.XORByte);
+                                Compression.runLengthEncode(ref writer, message.Span);
+                                continue;
+                            }
                         }
-                    }
 
-                    else
-                        return (messageLength, messageList);
+                    }
                 }
 
                 //Shouldn't hit this unless there is no messages at all
                 break;
             }
-
-			return (messageLength, messageList);
-        }
-
-        public int CalculateMessageList(List<ReadOnlyMemory<byte>> messageList)
-        {
-            int length = 0;
-            foreach (ReadOnlyMemory<byte> mes in messageList)
-                length += mes.Length;
-            return length;
         }
 
         //This method will check against 2 connection variables, if the hardack is less then the soft ack
@@ -161,12 +235,10 @@ namespace ReturnHome.Server.Network
         {
             while(_session.rdpCommIn.connectionData.clientLastReceivedMessage > _session.rdpCommIn.connectionData.clientLastReceivedMessageFinal)
             {
-                if(_session.sessionQueue.ResendMessageQueue.TryRemove(++_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal, out MessageStruct message))
-                {
-                    //Successfully removed message, should these get placed into a backup dictionary?
+                if(_session.sessionQueue._resendMessageQueue.TryRemove(++_session.rdpCommIn.connectionData.clientLastReceivedMessageFinal, out Message message))
+                    //TODO: Successfully removed message, should these get placed into a backup dictionary?
                     //Not 100% on proof yet, but pretty sure client can backstep and request a message #
                     continue;
-                }
 
                 else
                 {
