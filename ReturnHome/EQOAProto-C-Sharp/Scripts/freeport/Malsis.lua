@@ -46,6 +46,19 @@ function event_say()
         diagOptions = {}
         npcDialogue = "I will need an item to get started. You will need the iron ring from Merchant Yulia, then return to me."
     end
+   
+    if
+    (mySession.MyCharacter.Class == 10 and mySession.MyCharacter.Race == 0 and mySession.MyCharacter.HumTypeNum == 0 and
+    GetPlayerFlags(mySession, "EasternMagician0") and GetPlayerFlags(mySession, "EasternMagician1") == false and mySession.MyCharacter.Level >= 2)
+    then
+      npcDialogue = "Say what you must, I haven't got all day."
+      diagOptions = {"I seek my next task.", "Exit"}
+      if (ch:find("task")) then
+         diagOptions = {}
+         npcDialogue = "I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you….........oh wait"
+         SendDialogue(mySession, npcDialogue, diagOptions)
+         npcDialogue = "Malsis: That's right, I remember you now. I apologize. You must forgive my temper. Time inevitably takes its toll upon an elementalist."
+         SendDialogue(mySession, npcDialogue, diagOptions)
 
    else
       npcDialogue =
