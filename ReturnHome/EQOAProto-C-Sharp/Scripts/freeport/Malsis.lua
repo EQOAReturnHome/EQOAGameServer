@@ -57,9 +57,18 @@ function event_say()
          diagOptions = {}
          npcDialogue = "I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you….........oh wait"
          SendDialogue(mySession, npcDialogue, diagOptions)
-         npcDialogue = "Malsis: That's right, I remember you now. I apologize. You must forgive my temper. Time inevitably takes its toll upon an elementalist."
+         npcDialogue = "That's right, I remember you now. I apologize. You must forgive my temper. Time inevitably takes its toll upon an elementalist."
          SendDialogue(mySession, npcDialogue, diagOptions)
-
+         npcDialogue = "…............................................................................................................"
+         SendDialogue(mySession, npcDialogue, diagOptions)
+         npcDialogue = "Oh yes! So you're ready for your next task. I need you to speak to Spiritmaster Alshan."
+         SendDialogue(mySession, npcDialogue, diagOptions)
+         npcDialogue = "You can find him just outside the Academy, near the bottom of the stairs. Return only when you complete any tasks he gives you."
+         SendDialogue(mySession, npcDialogue, diagOptions)
+         SetPlayerFlags(mySession, "EasternMagician1", true)
+         local questText = "??"
+         AddQuestLog(mySession, 0, questText)
+         npcDialogue = "You have received a quest!"
    else
       npcDialogue =
       "Malsis: I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you know, We are quite busy."
