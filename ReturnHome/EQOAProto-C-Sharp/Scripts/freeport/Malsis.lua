@@ -52,7 +52,7 @@ function event_say()
     GetPlayerFlags(mySession, "EasternMagician0") and GetPlayerFlags(mySession, "EasternMagician1") == false and mySession.MyCharacter.Level >= 2)
     then
       npcDialogue = "Say what you must, I haven't got all day."
-      diagOptions = {"I seek my next task.", "Exit"}
+      diagOptions = {"I seek my next task."}
       if (ch:find("task")) then
          diagOptions = {}
          npcDialogue = "I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you….........oh wait"
@@ -66,9 +66,10 @@ function event_say()
          npcDialogue = "You can find him just outside the Academy, near the bottom of the stairs. Return only when you complete any tasks he gives you."
          SendDialogue(mySession, npcDialogue, diagOptions)
          SetPlayerFlags(mySession, "EasternMagician1", true)
-         local questText = "??"
+         local questText = "Go speak to Spiritmaster Alshan.!"
          AddQuestLog(mySession, 0, questText)
          npcDialogue = "You have received a quest!"
+      end
    else
       npcDialogue =
       "Malsis: I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you know, We are quite busy."
