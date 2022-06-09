@@ -87,7 +87,7 @@ namespace ReturnHome.Server.Managers
                             size += appSettings[$"Server{i}"].Length * 2;
                         }
 
-                        _message = new Message(MessageType.ReliableMessage, GameOpcode.GameServers);
+                        _message = new Message(MessageType.UnreliableMessage, GameOpcode.GameServers);
                         BufferWriter writer = new BufferWriter(_message.Span);
 
                         writer.Write(_message.Opcode);
@@ -120,9 +120,9 @@ namespace ReturnHome.Server.Managers
 
                             Logger.Info($"Acquired Server #{i + 1}");
                         }
-                        Memory<byte> temp = _message.message;
 
-                        _message.message = temp.Slice(0, writer.Position);
+                        _message.Size = writer.Position;
+
                         Logger.Info("Done...");
                     }
 
