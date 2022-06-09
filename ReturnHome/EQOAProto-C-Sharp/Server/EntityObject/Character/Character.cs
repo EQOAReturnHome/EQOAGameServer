@@ -170,6 +170,9 @@ namespace ReturnHome.Server.EntityObject.Player
         }
         public bool GetPlayerFlags(Session mySession, string flagKey)
         {
+            if (mySession.MyCharacter.playerFlags == null)
+                return false;
+
             if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
                 return true;
 
