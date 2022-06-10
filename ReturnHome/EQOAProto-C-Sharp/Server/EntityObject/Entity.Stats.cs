@@ -14,42 +14,44 @@ namespace ReturnHome.Server.EntityObject
     public int BaseCharisma;
     private int _randoValue = 0x64;
 
-    //Our most current stats. This is stats influenced by gear and buff's.
-    public int Strength;
-    public int Stamina;
-    public int Wisdom;
-    public int Intelligence;
-    public int Charisma;
-    public int Agility;
-    public int Dexterity;
+        //Our most current stats. This is stats influenced by gear and buff's.
+    private int _strength;
+    private int _stamina;
+    private int _wisdom;
+    private int _intelligence;
+    private int _charisma;
+    private int _agility;
+    private int _dexterity;
 
     //Influenced by CM's and gear and buffs
-    public int AC;
+    private int _ac;
 
     //Calculated on the fly during combat etc
     private bool _hpFlag;
     private int _currentHP;
-    public int CurrentPower;
+    private int _currentPower;
 
-    public int ArcaneResist = 0;
-    public int PoisonResist = 0;
-    public int DiseaseResist = 0;
-    public int LightningResist = 0;
-    public int ColdResist = 0;
-    public int FireResist = 0;
+    private int _arcaneResist = 0;
+    private int _poisonResist = 0;
+    private int _diseaseResist = 0;
+    private int _lightningResist = 0;
+    private int _coldResist = 0;
+    private int _fireResist = 0;
 
     //This is decided by the character's arch type, should npc/boss type mobs have special modifier's?
     private byte HPModifier = 0;
 
+    private int _fishing = 0;
+
     //Need to calculate HP/PWR max on the fly
     //Will be influenced by archtype, level, stamina, gear, buffs and CM's
     private int _hpMax;
-    public int PowerMax = 0;
+    private int _powerMax = 0;
 
     //Related to regeneration of health and PowerOverTime
     //There is a standard rate of 50 HP/PWR = 1 HoT/PoT, then buffs/heal's can get stacked ontop of this passive healing, incling gear/CM's that add directly to it
-    public int HealthOverTime;
-    public int PowerOverTime;
+    public int _healthOverTime;
+    public int _powerOverTime;
 
         #region Properrty sets
 
