@@ -12,6 +12,7 @@ namespace ReturnHome.Server.EntityObject
     public int BaseWisdom;
     public int BaseIntelligence;
     public int BaseCharisma;
+    private int _randoValue = 0x64;
 
     //Our most current stats. This is stats influenced by gear and buff's.
     public int Strength;
@@ -43,7 +44,7 @@ namespace ReturnHome.Server.EntityObject
     //Need to calculate HP/PWR max on the fly
     //Will be influenced by archtype, level, stamina, gear, buffs and CM's
     private int _hpMax;
-    public int PWRMax = 0;
+    public int PowerMax = 0;
 
     //Related to regeneration of health and PowerOverTime
     //There is a standard rate of 50 HP/PWR = 1 HoT/PoT, then buffs/heal's can get stacked ontop of this passive healing, incling gear/CM's that add directly to it

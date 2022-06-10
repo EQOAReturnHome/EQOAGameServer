@@ -145,8 +145,10 @@ namespace ReturnHome.Server.Network
                             if (reliableMessage.Messagetype == MessageType.ReliableMessage || reliableMessage.Messagetype == MessageType.PingMessage || (reliableMessage.Messagetype == MessageType.SegmentReliableMessage && reliableMessage.Size < 0x0484))
                             {
                                 reliableMessage.AddSequence(_session.rdpCommIn.connectionData.lastSentMessageSequence++);
-
-                                writer.Write((byte)reliableMessage.Messagetype);
+                                if(reliableMessage.Messagetype == MessageType.SegmentReliableMessage)
+                                    writer.Write((byte)MessageType.ReliableMessage);
+                                else
+                                    writer.Write((byte)reliableMessage.Messagetype);
                                 writer.WriteSize(reliableMessage.Size);
                                 writer.Write(reliableMessage.Sequence);
                                 writer.Write(reliableMessage.Span[0..reliableMessage.Size]);
