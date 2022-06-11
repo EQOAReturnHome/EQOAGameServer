@@ -22,4 +22,4 @@ EXPOSE 10070/udp
 COPY wait-for-it.sh wait-for-it.sh 
 RUN chmod +x wait-for-it.sh
 
-CMD ["./wait-for-it.sh" , "mariadb:3306" , "--strict" , "--timeout=300" , "--" , "dotnet", "ReturnHome/EQOAProto-C-Sharp/bin/Debug/net5.0/ReturnHome.dll"]
+CMD ["./wait-for-it.sh" , "mariadb:3306" , "--strict" , "--timeout=300" , "--" , "dotnet", "ReturnHome/EQOAProto-C-Sharp/bin/Debug/net6.0/ReturnHome.dll"]

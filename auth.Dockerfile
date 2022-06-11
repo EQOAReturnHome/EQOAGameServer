@@ -18,4 +18,4 @@ RUN dotnet build AuthenticationServer/Authserver.csproj
 
 EXPOSE 9735
 
-CMD ["dotnet", "AuthenticationServer/bin/Debug/net5.0/Authserver.dll"]
+CMD ["dotnet", "AuthenticationServer/bin/Debug/net6.0/Authserver.dll"]
