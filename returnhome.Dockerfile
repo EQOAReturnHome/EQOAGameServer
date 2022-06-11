@@ -12,7 +12,7 @@ RUN apt-get update -y \
     && apt-get update \
     && apt-get install -y apt-transport-https \
     && apt-get update \
-    && apt-get install -y dotnet-sdk-5.0
+    && apt-get install -y dotnet-sdk-6.0
 
 RUN dotnet build ReturnHome/EQOAProto-C-Sharp/ReturnHome.csproj
 
