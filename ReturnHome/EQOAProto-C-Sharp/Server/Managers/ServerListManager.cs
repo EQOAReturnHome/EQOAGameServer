@@ -121,7 +121,8 @@ namespace ReturnHome.Server.Managers
 
                             Logger.Info($"Acquired Server #{i + 1}");
                         }
-
+                        
+                        Memory<byte> temp = _message.message;
                         _message.message = temp.Slice(0, writer.Position);
                         _message.Size = writer.Position;
 
