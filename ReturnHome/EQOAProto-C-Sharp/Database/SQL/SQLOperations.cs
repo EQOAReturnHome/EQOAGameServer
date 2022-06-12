@@ -51,7 +51,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newCurrentHP", player.CurrentHP);
             SecondCmd.Parameters.AddWithValue("newMaxHP", player.HPMax);
             SecondCmd.Parameters.AddWithValue("newCurrentPower", player.CurrentPower);
-            SecondCmd.Parameters.AddWithValue("newMaxPower", player.PWRMax);
+            SecondCmd.Parameters.AddWithValue("newMaxPower", player.PowerMax);
             SecondCmd.Parameters.AddWithValue("newHealot", player.HealthOverTime);
             SecondCmd.Parameters.AddWithValue("newPowerot", player.PowerOverTime);
             SecondCmd.Parameters.AddWithValue("newAC", player.AC);
@@ -73,7 +73,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newCurrentHP2", player.CurrentHP);
             SecondCmd.Parameters.AddWithValue("newBaseHP", player.HPMax);
             SecondCmd.Parameters.AddWithValue("newCurrentPower2", player.CurrentPower);
-            SecondCmd.Parameters.AddWithValue("newBasePower", player.PWRMax);
+            SecondCmd.Parameters.AddWithValue("newBasePower", player.PowerMax);
             SecondCmd.Parameters.AddWithValue("newHealot2", player.HealthOverTime);
             SecondCmd.Parameters.AddWithValue("newPowerot2", player.PowerOverTime);
             SecondCmd.Parameters.AddWithValue("playerFlags", playerFlags);

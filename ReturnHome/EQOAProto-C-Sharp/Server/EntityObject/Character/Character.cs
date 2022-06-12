@@ -99,7 +99,7 @@ namespace ReturnHome.Server.EntityObject.Player
             CurrentHP = 300;
             HPMax = 500;
             CurrentPower = currentPower;
-            PWRMax = maxPower;
+            PowerMax = maxPower;
             HealthOverTime = healOT;
             PowerOverTime = powerOT;
             AC = aC;
@@ -170,6 +170,9 @@ namespace ReturnHome.Server.EntityObject.Player
         }
         public bool GetPlayerFlags(Session mySession, string flagKey)
         {
+            if (mySession.MyCharacter.playerFlags == null)
+                return false;
+
             if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
                 return true;
 

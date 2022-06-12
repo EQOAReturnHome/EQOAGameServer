@@ -113,14 +113,16 @@ namespace ReturnHome.Server.Managers
                             ///Add Server Port
                             writer.Write(Convert.ToUInt16(appSettings[$"ServerPort{i}"]));
 
-                            ///Add Server IP 
-                            writer.Write(IPAddress.Parse(appSettings[$"ServerIP{i}"]).GetAddressBytes());
+                            byte[] test = IPAddress.Parse(appSettings[$"ServerIP{i}"]).GetAddressBytes();
+                            Array.Reverse(test);
+                            writer.Write(test);
 
                             writer.Write(Convert.ToByte(appSettings[$"ServerLanguage{i}"]));
 
                             Logger.Info($"Acquired Server #{i + 1}");
                         }
 
+                        _message.message = temp.Slice(0, writer.Position);
                         _message.Size = writer.Position;
 
                         Logger.Info("Done...");
