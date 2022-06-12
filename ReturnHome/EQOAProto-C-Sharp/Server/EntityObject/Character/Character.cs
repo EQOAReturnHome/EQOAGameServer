@@ -99,7 +99,7 @@ namespace ReturnHome.Server.EntityObject.Player
             CurrentHP = 300;
             HPMax = 500;
             CurrentPower = currentPower;
-            PWRMax = maxPower;
+            PowerMax = maxPower;
             HealthOverTime = healOT;
             PowerOverTime = powerOT;
             AC = aC;

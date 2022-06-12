@@ -87,7 +87,7 @@ namespace ReturnHome.Server.Managers
                             size += appSettings[$"Server{i}"].Length * 2;
                         }
 
-                        _message = new Message(MessageType.ReliableMessage, GameOpcode.GameServers);
+                        _message = new Message(MessageType.UnreliableMessage, GameOpcode.GameServers);
                         BufferWriter writer = new BufferWriter(_message.Span);
 
                         writer.Write(_message.Opcode);
@@ -113,8 +113,9 @@ namespace ReturnHome.Server.Managers
                             ///Add Server Port
                             writer.Write(Convert.ToUInt16(appSettings[$"ServerPort{i}"]));
 
-                            ///Add Server IP 
-                            writer.Write(IPAddress.Parse(appSettings[$"ServerIP{i}"]).GetAddressBytes());
+                            byte[] test = IPAddress.Parse(appSettings[$"ServerIP{i}"]).GetAddressBytes();
+                            Array.Reverse(test);
+                            writer.Write(test);
 
                             writer.Write(Convert.ToByte(appSettings[$"ServerLanguage{i}"]));
 
@@ -123,6 +124,7 @@ namespace ReturnHome.Server.Managers
                         Memory<byte> temp = _message.message;
 
                         _message.message = temp.Slice(0, writer.Position);
+                        _message.Size = writer.Position;
                         Logger.Info("Done...");
                     }
 
