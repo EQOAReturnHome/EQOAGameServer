@@ -54,7 +54,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newMaxPower", player.PowerMax);
             SecondCmd.Parameters.AddWithValue("newHealot", player.HealthOverTime);
             SecondCmd.Parameters.AddWithValue("newPowerot", player.PowerOverTime);
-            SecondCmd.Parameters.AddWithValue("newAC", player.AC);
+            SecondCmd.Parameters.AddWithValue("newAC", player.CurrentAC);
             SecondCmd.Parameters.AddWithValue("newPoisonr", player.PoisonResist);
             SecondCmd.Parameters.AddWithValue("newDiseaser", player.DiseaseResist);
             SecondCmd.Parameters.AddWithValue("newFirer", player.FireResist);

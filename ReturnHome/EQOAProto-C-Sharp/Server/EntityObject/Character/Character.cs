@@ -102,7 +102,7 @@ namespace ReturnHome.Server.EntityObject.Player
             PowerMax = maxPower;
             HealthOverTime = healOT;
             PowerOverTime = powerOT;
-            AC = aC;
+            CurrentAC = aC;
             PoisonResist = poisonResist;
             DiseaseResist = diseaseResist;
             FireResist = fireResist;

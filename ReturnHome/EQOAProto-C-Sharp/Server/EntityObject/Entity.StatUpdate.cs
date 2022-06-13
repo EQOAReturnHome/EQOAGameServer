@@ -51,7 +51,7 @@ namespace ReturnHome.Server.EntityObject
             MemoryMarshal.Write(StatUpdate.Span[168..], ref _powerOverTime);
         }
 
-        public void UpdateAC() => MemoryMarshal.Write(StatUpdate.Span[56..], ref _ac);
+        public void UpdateAC() => MemoryMarshal.Write(StatUpdate.Span[56..], ref _currentAC);
 
         public void UpdatePoisonResist() => MemoryMarshal.Write(StatUpdate.Span[88..], ref _poisonResist);
 
@@ -67,18 +67,18 @@ namespace ReturnHome.Server.EntityObject
 
         public void UpdateFishing() => MemoryMarshal.Write(StatUpdate.Span[112..], ref _fishing);
 
-        public void UpdateBaseStrength() => MemoryMarshal.Write(StatUpdate.Span[116..], ref BaseStrength);
+        public void UpdateBaseStrength() => MemoryMarshal.Write(StatUpdate.Span[116..], ref _baseStrength);
 
-        public void UpdateBaseStamina() => MemoryMarshal.Write(StatUpdate.Span[120..], ref BaseStamina);
+        public void UpdateBaseStamina() => MemoryMarshal.Write(StatUpdate.Span[120..], ref _baseStamina);
 
-        public void UpdateBaseAgility() => MemoryMarshal.Write(StatUpdate.Span[124..], ref BaseAgility);
+        public void UpdateBaseAgility() => MemoryMarshal.Write(StatUpdate.Span[124..], ref _baseAgility);
 
-        public void UpdateBaseDexterity() => MemoryMarshal.Write(StatUpdate.Span[128..], ref BaseDexterity);
+        public void UpdateBaseDexterity() => MemoryMarshal.Write(StatUpdate.Span[128..], ref _baseDexterity);
 
-        public void UpdateBaseWisdom() => MemoryMarshal.Write(StatUpdate.Span[132..], ref BaseWisdom);
+        public void UpdateBaseWisdom() => MemoryMarshal.Write(StatUpdate.Span[132..], ref _baseWisdom);
 
-        public void UpdateBaseIntelligence() => MemoryMarshal.Write(StatUpdate.Span[136..], ref BaseIntelligence);
+        public void UpdateBaseIntelligence() => MemoryMarshal.Write(StatUpdate.Span[136..], ref _baseIntelligence);
 
-        public void UpdateBaseCharisma() => MemoryMarshal.Write(StatUpdate.Span[140..], ref BaseCharisma);
+        public void UpdateBaseCharisma() => MemoryMarshal.Write(StatUpdate.Span[140..], ref _baseCharisma);
     }
 }
