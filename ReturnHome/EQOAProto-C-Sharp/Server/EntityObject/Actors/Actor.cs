@@ -22,7 +22,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             z = zCoord;
             Position = new Vector3(x, y, z);
             Facing = (byte)facing;
-            World = world;
+            World = (World)world;
             ModelID = modelid;
             ModelSize = size;
             Primary = primary;
@@ -39,8 +39,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             Boots = (byte)feet;
             Helm = (byte)head;
             HPFlag = true;
-            CurrentHP = 300;
-            HPMax = 500;
+            BaseStamina = 300;
             Target = 0xFFFFFFFF;
             NPCType = (ushort)npcType;
 

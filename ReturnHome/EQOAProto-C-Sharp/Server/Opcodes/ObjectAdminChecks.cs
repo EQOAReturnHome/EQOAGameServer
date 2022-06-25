@@ -28,35 +28,35 @@ namespace ReturnHome.Server.Opcodes.Chat
                         break;
 
                     case "Lava":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 3, 7906.09f, 75.2822f, 5914.65f, -2.40847f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.LavaStorm, 7906.09f, 75.2822f, 5914.65f, -2.40847f);
                         break;
 
                     case "Tun":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 0, 25273f, 54.125f, 15723.3f, -1.56333f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.Tunaria, 25273f, 54.125f, 15723.3f, -1.56333f);
                         break;
 
                     case "Arc":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 2, 7065.4609375f, 57.65724563598633f, 3499.9208984375f, -3.1183998584747314f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.Odus, 7065.4609375f, 57.65724563598633f, 3499.9208984375f, -3.1183998584747314f);
                         break;
 
                     case "Rathe":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 1, 8949.796875f, 54.125919342041016f, 7189.22314453125f, -1.4557989835739136f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.RatheMountains, 8949.796875f, 54.125919342041016f, 7189.22314453125f, -1.4557989835739136f);
                         break;
 
                     case "pos":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 4, 4823.9443359375f, 250.42288208007812f, 5504.09716796875f, -3.1277709007263184f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.PlaneOfSky, 4823.9443359375f, 250.42288208007812f, 5504.09716796875f, -3.1277709007263184f);
                         break;
 
                     case "pod":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 5, 5063.4736328125f, -24.68804931640625f, 3880.777587890625f, 3.1250364780426025f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.Secrets, 5063.4736328125f, -24.68804931640625f, 3880.777587890625f, 3.1250364780426025f);
                         break;
 
                     case "zp":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 5, 4872.84375f, 147.65725708007812f, 7047.947265625f, -1.588308334350586f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.Secrets, 4872.84375f, 147.65725708007812f, 7047.947265625f, -1.588308334350586f);
                         break;
 
                     case "iod":
-                        ServerTeleportPlayer.TeleportPlayer(MySession, 0, 24568f, 53.5f, 3502f, -3.0826661586761475f);
+                        ServerTeleportPlayer.TeleportPlayer(MySession, World.Tunaria, 24568f, 53.5f, 3502f, -3.0826661586761475f);
                         break;
 
                     case "animation":

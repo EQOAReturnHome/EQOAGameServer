@@ -10,12 +10,44 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Actors;
 using System.Text.Json;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Database.SQL
 {
     //Class to handle all SQL Operations
     class CharacterSQL : SQLBase
     {
+        public void CollectDefaultCharacters()
+        {
+            using var cmd = new MySqlCommand("GetDefaultCharacters", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            int test = 0;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                test++;
+                DefaultCharacter.DefaultCharacterDict.TryAdd(((Race)rdr.GetInt32(0), (Class)rdr.GetInt32(1), (HumanType)rdr.GetInt32(2), (Sex)rdr.GetInt32(3)), new Character(rdr.GetInt32(0),
+                                                                                                                                                                             rdr.GetInt32(1),
+                                                                                                                                                                             rdr.GetInt32(2),
+                                                                                                                                                                             rdr.GetInt32(3),
+                                                                                                                                                                             rdr.GetFloat(4),
+                                                                                                                                                                             rdr.GetFloat(5),
+                                                                                                                                                                             rdr.GetFloat(6),
+                                                                                                                                                                             rdr.GetFloat(7),
+                                                                                                                                                                             rdr.GetInt32(8),
+                                                                                                                                                                             rdr.GetInt32(9),
+                                                                                                                                                                             rdr.GetInt32(10),
+                                                                                                                                                                             rdr.GetInt32(11),
+                                                                                                                                                                             rdr.GetInt32(12),
+                                                                                                                                                                             rdr.GetInt32(13),
+                                                                                                                                                                             rdr.GetInt32(14),
+                                                                                                                                                                             rdr.GetInt32(15),
+                                                                                                                                                                             rdr.GetInt32(16)));
+            }
+
+            Console.WriteLine($"Pulled {DefaultCharacter.DefaultCharacterDict.Count} default Character Option...");
+
+        }
 
         public void SavePlayerData(Character player, string playerFlags)
         {
@@ -303,7 +335,7 @@ namespace ReturnHome.Database.SQL
                     //race 5
                     rdr.GetInt32(4),
                     //humType 6
-                    rdr.GetString(5),
+                    rdr.GetInt32(5),
                     //level 7
                     rdr.GetInt32(6),
                     //haircolor 8
@@ -588,7 +620,7 @@ namespace ReturnHome.Database.SQL
                         //race
                         rdr.GetInt32(4),
                         //humType
-                        rdr.GetString(5),
+                        rdr.GetInt32(5),
                         //level
                         rdr.GetInt32(6),
                         //haircolor
@@ -1021,7 +1053,7 @@ namespace ReturnHome.Database.SQL
             //Local variables to get string values to store in the DB from dictionary keys received from client
             string humType = CharacterUtilities.HumTypeDict[charCreation.HumTypeNum];
             string classType = CharacterUtilities.CharClassDict[charCreation.StartingClass];
-            string raceType = CharacterUtilities.CharRaceDict[charCreation.Race];
+            string raceType = CharacterUtilities.CharRaceDict[(int)charCreation.Race];
             string sexType = CharacterUtilities.CharSexDict[charCreation.Gender];
 
             //Calculate total TP used among all stats for DB storage
@@ -1049,7 +1081,7 @@ namespace ReturnHome.Database.SQL
                 charCreation.y = rdr.GetFloat(10);
                 charCreation.z = rdr.GetFloat(11);
                 charCreation.FacingF = rdr.GetFloat(12);
-                charCreation.World = rdr.GetInt32(13);
+                charCreation.World = (World)rdr.GetInt32(13);
                 charCreation.DefaultStrength = rdr.GetInt32(14);
                 charCreation.DefaultStamina = rdr.GetInt32(15);
                 charCreation.DefaultAgility = rdr.GetInt32(16);
@@ -1073,13 +1105,13 @@ namespace ReturnHome.Database.SQL
             charCreation.PlayerTrainingPoints = new(20, 20 - UsedTP);
 
             //Add total strength from default plus added TP to each category. Not sure this is correct, may need to still add the TP from client
-            charCreation.Strength = charCreation.DefaultStrength + charCreation.AddStrength;
-            charCreation.Stamina = charCreation.DefaultStamina + charCreation.AddStamina;
-            charCreation.Agility = charCreation.DefaultAgility + charCreation.AddAgility;
-            charCreation.Dexterity = charCreation.DefaultDexterity + charCreation.AddDexterity;
-            charCreation.Wisdom = charCreation.DefaultWisdom + charCreation.AddWisdom;
-            charCreation.Intelligence = charCreation.DefaultIntelligence + charCreation.AddIntelligence;
-            charCreation.Charisma = charCreation.DefaultCharisma + charCreation.AddCharisma;
+            charCreation.BaseStrength = charCreation.DefaultStrength + charCreation.AddStrength;
+            charCreation.BaseStamina = charCreation.DefaultStamina + charCreation.AddStamina;
+            charCreation.BaseAgility = charCreation.DefaultAgility + charCreation.AddAgility;
+            charCreation.BaseDexterity = charCreation.DefaultDexterity + charCreation.AddDexterity;
+            charCreation.BaseWisdom = charCreation.DefaultWisdom + charCreation.AddWisdom;
+            charCreation.BaseIntelligence = charCreation.DefaultIntelligence + charCreation.AddIntelligence;
+            charCreation.BaseCharisma = charCreation.DefaultCharisma + charCreation.AddCharisma;
 
             //Create second command using second connection and char insert query string
             using var SecondCmd = new MySqlCommand("CreateCharacter", con);
@@ -1120,12 +1152,12 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("Intelligence", charCreation.Intelligence);
             SecondCmd.Parameters.AddWithValue("Charisma", charCreation.Charisma);
             //May need other default or calculated values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("CurrentHP", 1000);
-            SecondCmd.Parameters.AddWithValue("MaxHP", 1000);
-            SecondCmd.Parameters.AddWithValue("CurrentPower", 500);
-            SecondCmd.Parameters.AddWithValue("MaxPower", 500);
-            SecondCmd.Parameters.AddWithValue("Healot", 20);
-            SecondCmd.Parameters.AddWithValue("Powerot", 10);
+            SecondCmd.Parameters.AddWithValue("CurrentHP", charCreation.CurrentHP);
+            SecondCmd.Parameters.AddWithValue("MaxHP", charCreation.HPMax);
+            SecondCmd.Parameters.AddWithValue("CurrentPower", charCreation.CurrentPower);
+            SecondCmd.Parameters.AddWithValue("MaxPower", charCreation.PowerMax);
+            SecondCmd.Parameters.AddWithValue("Healot", charCreation.HealthOverTime);
+            SecondCmd.Parameters.AddWithValue("Powerot", charCreation.PowerOverTime);
             SecondCmd.Parameters.AddWithValue("Ac", 0);
             SecondCmd.Parameters.AddWithValue("PoisonR", 10);
             SecondCmd.Parameters.AddWithValue("DiseaseR", 10);

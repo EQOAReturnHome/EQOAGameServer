@@ -8,9 +8,10 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-        private int _race;
-        private int _class;
-        public string HumType;
+        private Race _race;
+        private Class _class;
+        private HumanType _humType;
+        private Sex _sex;
 
         private string _charName;
 
@@ -46,12 +47,12 @@ namespace ReturnHome.Server.EntityObject
 
         #region Objext Update Properties
 
-        public int Race
+        public Race Race
         {
             get { return _race; }
             set
             {
-                if (value >= 0 && value <= 9)
+                if (value >= Race.Human && value <= Race.Ogre)
                 {
                     _race = value;
                     ObjectUpdateRace();
@@ -62,12 +63,12 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public int Class
+        public Class Class
         {
             get { return _class; }
             set
             {
-                if (value >= 0 && value <= 15)
+                if (value >= Class.Warrior && value <= Class.Alchemist)
                 {
                     _class = value;
                     ObjectUpdateClass();
@@ -75,6 +76,28 @@ namespace ReturnHome.Server.EntityObject
 
                 else
                     Logger.Err($"Error setting Class value {value} for {_charName}");
+            }
+        }
+
+        public Sex Sex
+        {
+            get { return _sex; }
+            set
+            {
+                if(value >= Sex.Male && value <= Sex.Female)
+                    _sex = value;
+            }
+        }
+
+        public HumanType HumanType
+        {
+            get {  return _humType; }
+            set
+            {
+                if(value >= HumanType.Other && value <= HumanType.Qeynos)
+                {
+                    _humType = value;
+                }
             }
         }
 

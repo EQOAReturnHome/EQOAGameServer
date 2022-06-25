@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using ReturnHome.Database.SQL;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -42,7 +43,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 
                 //Divide startLevel by 2 because client doubles it
                 //Get single byte attributes
-                charCreation.Race = (int)reader.Read7BitEncodedInt64();
+                charCreation.Race = (Race)reader.Read7BitEncodedInt64();
                 charCreation.StartingClass = (int)reader.Read7BitEncodedInt64();
                 charCreation.Gender = (int)reader.Read7BitEncodedInt64();
                 charCreation.HairColor = (int)reader.Read7BitEncodedInt64();

@@ -19,7 +19,7 @@ namespace ReturnHome.Server.EntityObject
         //Store latest character update directly to character for other characters to pull
         //Doesn't seem right? But we can trigger each session to serialize to this array and distribute to other client's this way
         public Memory<byte> ObjectUpdate = new Memory<byte> ( new byte[0xC8]);
-        public Memory<byte> StatUpdate = new Memory<byte>(new byte[0xEB]);
+        public Memory<byte> StatUpdate = new Memory<byte>(new byte[0xEC]);
 
         /* These are all values for character creation, likely don't need to be attributes of the character object at all*/
         //Default character data should probably be stored in script's to generate from on client's request, saving that to the database
@@ -121,6 +121,22 @@ namespace ReturnHome.Server.EntityObject
         #endregion
         public Entity(bool isplayer)
         {
+            #region Stat stuff
+            //Players have limits on stats, NPC's will not
+            if (isplayer)
+            {
+                if (Level < 45)
+                    BaseMaxStat = 350;
+
+                else
+                    BaseMaxStat = 400;
+            }
+
+            //NPC, no limits atm
+            else
+                BaseMaxStat = 100000;
+
+            #endregion
             isPlayer = isplayer;
             ObjectUpdateEntity();
             ObjectUpdateVanillaColors();

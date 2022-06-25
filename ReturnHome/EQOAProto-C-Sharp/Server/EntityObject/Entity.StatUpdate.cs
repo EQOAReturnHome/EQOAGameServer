@@ -25,11 +25,15 @@ namespace ReturnHome.Server.EntityObject
         }
         public void UpdateMaxHP() => MemoryMarshal.Write(StatUpdate.Span[32..], ref _hpMax);
 
+        public void UpdateBaseHP() => MemoryMarshal.Write(StatUpdate.Span[148..], ref _baseHP);
+
         public void UpdateCurrentPower()
         {
             MemoryMarshal.Write(StatUpdate.Span[36..], ref _currentPower);
             MemoryMarshal.Write(StatUpdate.Span[152..], ref _currentPower);
         }
+
+        public void UpdateBasePower() => MemoryMarshal.Write(StatUpdate.Span[156..], ref _basePower);
 
         public void UpdateMaxPower() => MemoryMarshal.Write(StatUpdate.Span[40..], ref _powerMax);
 
@@ -80,5 +84,14 @@ namespace ReturnHome.Server.EntityObject
         public void UpdateBaseIntelligence() => MemoryMarshal.Write(StatUpdate.Span[136..], ref _baseIntelligence);
 
         public void UpdateBaseCharisma() => MemoryMarshal.Write(StatUpdate.Span[140..], ref _baseCharisma);
+
+        public void UpdateBaseAC() => MemoryMarshal.Write(StatUpdate.Span[172..], ref _baseAC);
+
+        public void UpdateBasePoisonResist() => MemoryMarshal.Write(StatUpdate.Span[204..], ref _basePoisonResist);
+        public void UpdateBaseDiseaseResist() => MemoryMarshal.Write(StatUpdate.Span[208..], ref _baseDiseaseResist);
+        public void UpdateBaseFireResist() => MemoryMarshal.Write(StatUpdate.Span[212..], ref _baseFireResist);
+        public void UpdateBaseColdResist() => MemoryMarshal.Write(StatUpdate.Span[216..], ref _baseColdResist);
+        public void UpdateBaseLightningResist() => MemoryMarshal.Write(StatUpdate.Span[220..], ref _baseLightningResist);
+        public void UpdateBaseArcaneResist() => MemoryMarshal.Write(StatUpdate.Span[224..], ref _baseArcaneResist);
     }
 }

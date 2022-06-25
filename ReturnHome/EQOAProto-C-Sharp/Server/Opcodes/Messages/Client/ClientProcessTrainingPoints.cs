@@ -27,13 +27,13 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             if (session.MyCharacter.PlayerTrainingPoints.SpendTrainingPoints(Total))
             {
                 //Check passed, add the requested stats to character
-                session.MyCharacter.Strength     += StrAdd;
-                session.MyCharacter.Stamina      += StaAdd;
-                session.MyCharacter.Agility      += AgiAdd;
-                session.MyCharacter.Dexterity    += DexAdd;
-                session.MyCharacter.Wisdom       += WisAdd;
-                session.MyCharacter.Intelligence += IntAdd;
-                session.MyCharacter.Charisma     += ChaAdd;
+                session.MyCharacter.BaseStrength     += StrAdd;
+                session.MyCharacter.BaseStamina      += StaAdd;
+                session.MyCharacter.BaseAgility      += AgiAdd;
+                session.MyCharacter.BaseDexterity    += DexAdd;
+                session.MyCharacter.BaseWisdom       += WisAdd;
+                session.MyCharacter.BaseIntelligence += IntAdd;
+                session.MyCharacter.BaseCharisma     += ChaAdd;
 
                 //Send total points as is, sending a positive number removes x amount on client
                 ServerAdjustTrainingPoints.AdjustTrainingPoints(session, Total);

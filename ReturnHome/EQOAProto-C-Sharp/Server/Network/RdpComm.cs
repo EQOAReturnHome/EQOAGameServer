@@ -131,9 +131,20 @@ namespace ReturnHome.Server.Network
 
             if (packet.Header.ChannelAcks != null)
             {
+                byte temp2;
                 Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;
                 foreach (KeyValuePair<byte, ushort> ack in packet.Header.ChannelAcks)
-                    temp[ack.Key].UpdateBaseXor(ack.Value);
+                {
+                    temp2 = ack.Key;
+
+                    if (temp2 >= 0 && temp2 <= 0x17)
+                        temp[temp2].UpdateBaseXor(ack.Value);
+
+                    else if (temp2 == (byte)MessageType.StatUpdate)
+                        connectionData.clientStatUpdate.UpdateBaseXor(ack.Value);
+                    else
+                        Console.WriteLine($"Received Channel {temp2}, not implemented yet or processing error on channel processing");
+                }
             }
 
             //Check client update message

@@ -344,6 +344,9 @@ namespace ReturnHome.Server.EntityObject
 
                     //Increase player level
                     session.MyCharacter.Level++;
+                    //When we level up, recalculate HP and Power
+                    session.MyCharacter.CalculateHP();
+                    session.MyCharacter.CalculatePower();
 
                     ChatMessage.GenerateClientSpecificChat(session, $"You have reached level {session.MyCharacter.Level}");
                     if (session.MyCharacter.Level >= 60)

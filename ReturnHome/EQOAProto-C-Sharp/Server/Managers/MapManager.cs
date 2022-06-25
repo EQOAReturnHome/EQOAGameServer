@@ -19,20 +19,20 @@ namespace ReturnHome.Server.Managers
 {
     public static class MapManager
     {
-        private static ConcurrentDictionary<int, Map> _gameDict;
+        private static ConcurrentDictionary<World, Map> _gameDict;
         //private static ObjectID class
 
         //Initializes all the map qudtree's
         public static void Initialize()
         {
             //make game map Dictionary
-            _gameDict = new ConcurrentDictionary<int, Map>();
-            _gameDict.TryAdd(0, new Map("Tunaria"));
-            _gameDict.TryAdd(1, new Map("Rathe Mountains"));
-            _gameDict.TryAdd(2, new Map("Odus"));
-            _gameDict.TryAdd(3, new Map("Lava Storm"));
-            _gameDict.TryAdd(4, new Map("Plane of Sky"));
-            _gameDict.TryAdd(5, new Map("Secrets"));
+            _gameDict = new ConcurrentDictionary<World, Map>();
+            _gameDict.TryAdd(World.Tunaria, new Map("Tunaria"));
+            _gameDict.TryAdd(World.RatheMountains, new Map("Rathe Mountains"));
+            _gameDict.TryAdd(World.Odus, new Map("Odus"));
+            _gameDict.TryAdd(World.LavaStorm, new Map("Lava Storm"));
+            _gameDict.TryAdd(World.PlaneOfSky, new Map("Plane of Sky"));
+            _gameDict.TryAdd(World.Secrets, new Map("Secrets"));
             foreach (var m in _gameDict)
                 m.Value.Initialize();
         }

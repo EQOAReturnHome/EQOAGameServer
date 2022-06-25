@@ -90,11 +90,39 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                                                             0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00,
                                                             0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00,
                                                             0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                            0x00, 0x00, 0x00, 0x00, 0xa0, 0x0f, 0xae, 0x98, 0x4c, 0x00, 0x55, 0x55, 0x0d, 0x41, 0xe6,
-                                                            0x01, 0x96, 0x01, 0x78, 0x96, 0x01, 0x00, 0x00, 0x00, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa,
-                                                            0x01, 0x00, 0x00, 0x00, 0xe8, 0x07, 0x00, 0x5a, 0x00, 0x00, 0x04, 0x00, 0x0c, 0x4f, 0x00,
-                                                            0x00, 0x00, 0x00, 0x00, 0x00, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa, 0x01, 0x00, 0x00, 0x00});
+                                                            0x00, 0x00, 0x00,
+                                                            /*Unspent CM's*/                  0x06,
+                                                            /*Spent CM's*/                    0xa0, 0x0f,
+                                                            0xae, 0x98, 0x4c, 0x05, 0x55, 0x55, 0x0d, 0x41,
+                                                            /*Addition to Strength Base*/     0xe6, 0x01,
+                                                            /*Addition to Stamina  Base*/     0x96, 0x01,
+                                                            /*Addition to Agility Base*/      0x78,
+                                                            /*Addition to Dexterity Base*/    0x96, 0x01,
+                                                            /*Addition to Wisdom Base*/       0x81, 0x01,
+                                                            /*Addition to Intelligence Base*/ 0x00,
+                                                            /*Addition to Charisma Base*/     0x00,
+                                                            0x08, 0x0a, 0x0c, 0xfa,
+                                                            0x01, 0x0e, 0x10, 0xe8, 0x07,
+                                                            /*Addition to HP Base*/           0xe8, 0x07,
+                                                            /*Addition to Power Base*/        0xe8, 0x07,
+                                                            0x5a, 0x02,
+                                                            /*Addition to AC Base*/           0x04,
+                                                            0x04, 0x06, 0x0c,
+                                                            /*Addition to FR Base*/           0x00,
+                                                            /*Addition to LR Base*/           0x51,
+                                                            /*Addition to CR Base*/           0x53,
+                                                            /*Addition to AR Base*/           0x55,
+                                                            /*Addition to PR Base*/           0x57,
+                                                            /*Addition to DR Base*/           0x59,
+                                                            0x70, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa, 0x01, 0x00, 0x00, 0x00});
 
+            /*writer.Write7BitEncodedInt64(session.MyCharacter.BaseStrength);
+            writer.Write7BitEncodedInt64(session.MyCharacter.BaseStamina);
+            writer.Write7BitEncodedInt64(session.MyCharacter.BaseAgility);
+            writer.Write7BitEncodedInt64(session.MyCharacter.BaseDexterity);
+            writer.Write7BitEncodedInt64(session.MyCharacter.BaseWisdom);
+            writer.Write7BitEncodedInt64(session.MyCharacter.BaseIntelligence);
+            writer.Write7BitEncodedInt64(session.MyCharacter.BaseCharisma);*/
 
             ServerTime.Time(session);
 

@@ -31,10 +31,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 writer.Write7BitEncodedInt64(character.ModelID);
 
                 ///Add Class
-                writer.Write7BitEncodedInt64(character.Class);
+                writer.Write7BitEncodedInt64((int)character.Class);
 
                 ///Add Race
-                writer.Write7BitEncodedInt64(character.Race);
+                writer.Write7BitEncodedInt64((int)character.Race);
 
                 ///Add Level
                 writer.Write7BitEncodedInt64(character.Level);

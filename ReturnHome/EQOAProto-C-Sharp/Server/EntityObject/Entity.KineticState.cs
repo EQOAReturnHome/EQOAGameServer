@@ -11,7 +11,7 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity : IPointFQuadStorable
     {
-        private int _world;
+        private World _world;
 
         public float x;
         public float y;
@@ -50,12 +50,12 @@ namespace ReturnHome.Server.EntityObject
 
         #region Property zone
 
-        public int World
+        public World World
         {
             get { return _world; }
             set
             {
-                if(true)
+                if(value >= World.Tunaria && value <= World.Secrets)
                 {
                     _world = value;
                     ObjectUpdateWorld();

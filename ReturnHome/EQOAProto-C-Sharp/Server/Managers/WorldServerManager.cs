@@ -43,6 +43,10 @@ namespace ReturnHome.Server.Managers
             }
             Console.WriteLine("Done.");
 
+            Console.WriteLine("Loading Default character options");
+            CharacterSQL LoadDefaultCharacters = new();
+            LoadDefaultCharacters.CollectDefaultCharacters();
+            LoadDefaultCharacters.CloseConnection();
             var thread = new Thread(() =>
             {
                 UpdateWorld();
