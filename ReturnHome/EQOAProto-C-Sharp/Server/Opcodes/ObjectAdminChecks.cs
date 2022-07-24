@@ -179,6 +179,105 @@ namespace ReturnHome.Server.Opcodes.Chat
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
+                    case "stat":
+                        switch(changes[2])
+                        {
+                            case "basestrength":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseSTR] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "basestamina":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseSTA] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "baseagility":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseAGI] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "basedexterity":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseDEX] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "basewisdom":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseWIS] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "baseintelligence":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseINT] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "basecharisma":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.dictionary[StatModifiers.BaseCHA] = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "gearstrength":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.STR, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "gearstamina":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.STA, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "gearagility":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.AGI, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "geardexterity":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.DEX, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "gearwisdom":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.WIS, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "gearintelligence":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.INT, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+
+                            case "gearcharisma":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentStats.Add(StatModifiers.CHA, int.Parse(changes[3]));
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+                            /*
+                            case "unk2":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.Unk2 = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
+                            */
+                            default:
+                                return false;
+
+                        }
+                        break;
+
                     default:
                         return false;
                 }

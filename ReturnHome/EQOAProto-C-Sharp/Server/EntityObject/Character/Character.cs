@@ -10,6 +10,11 @@ namespace ReturnHome.Server.EntityObject.Player
 {  
     public partial class Character : Entity
     {
+        public int CMCounter = 1;
+        public int CMPercentage = 0;
+        public int SpentCMs = 0;
+        public int UnspentCMs = 0;
+
         private static string Tunaria = "data\\tunaria.esf";
 
         //Our Lists for attributes of character
@@ -33,52 +38,86 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public int XPEarnedInThisLevel;
         public long TotalXP = 0;
-        public int totalDebt;
+        public int totalDebt = 0;
 
-        public int Breath;
+        public int Breath = 255;
 
         public int Fishing;
 
         public int Teleportcounter { get; internal set; } = 0;
 
         //Used to create our Default characters stored on the server to either reference values, or deep copy for entirely new characters
-        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, int world, int modelID, int defaultStrength, int defaultStamina, int defaultAgility, int defaultDexterity, int defaultWisdom, int defaultIntelligence, int defaultCharisma) : base(true)
+        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp) : base(true)
         {
-            Race = (Race)race;
-            Class = (Class)tclass;
-            HumanType = (HumanType)humanType;
-            Sex = (Sex)sex;
+            Speed = speed;
+            EntityRace = (Race)race;
+            EntityClass = (Class)tclass;
+            EntityHumanType = (HumanType)humanType;
+            EntitySex = (Sex)sex;
             //Default characters start with 20 total and 20 unused TP's
             PlayerTrainingPoints = new(20, 20);
             Level = 1;
-            Inventory = new(5000);
+            Inventory = new(0);
+            Bank = new(0, false);
             x = X;
             y = Y;
             z = Z;
             FacingF = facing;
             World = (World)world;
-        }
-        public Character() : base(true)
-        {
-            Inventory = new(0);
-            Bank = new(0, false);
+            ModelID = modelID;
+
+            //Base HPFactor calculated in Character
+            switch (EntityClass)
+            {
+                case Class.Paladin:
+                case Class.Warrior:
+                case Class.ShadowKnight:
+                    HPFactor = 24;
+                    break;
+
+                case Class.Druid:
+                case Class.Shaman:
+                case Class.Cleric:
+                    HPFactor = 13;
+                    break;
+
+                case Class.Ranger:
+                case Class.Monk:
+                case Class.Bard:
+                case Class.Rogue:
+                    HPFactor = 16;
+                    break;
+
+                case Class.Alchemist:
+                case Class.Enchanter:
+                case Class.Magician:
+                case Class.Necromancer:
+                case Class.Wizard:
+                    HPFactor = 10;
+                    break;
+            }
+
+            //Add Default Stats to dictionary
+            foreach (KeyValuePair<StatModifiers, int> kv in temp)
+                CurrentStats.Add(kv.Key, kv.Value);
         }
 
         //Need instantiation, but needs some review because it's so big... 
-        public Character(string charName, int serverID, int modelID, int tClass, int race, int humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
-                         int world, float xCoord, float yCoord, float zCoord, float facing, int strength, int stamina, int agility, int dexterity, int wisdom, int intelligence, int charisma, int currentHP, int maxHP, int currentPower, int maxPower, int healOT, int powerOT, int aC,
-                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, int baseStrength, int baseStamina, int baseAgility, int baseDexterity, int baseWisdom, int baseIntelligence, int baseCharisma, int currentHP2,
-                         int baseHP, int currentPower2, int basePower, int healOT2, int powerOT2, string playerFlags, Session MySession) : base(true)
+        public Character(string charName, int serverID, int modelID, int tClass, int race, int humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int sex, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
+                         float speed, int world, float xCoord, float yCoord, float zCoord, float facing, int tpStrength, int tpStamina, int tpAgility, int tpDexterity, int tpWisdom, int tpIntelligence, int tpCharisma, int currentHP, int currentPower, int aC,
+                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing,string playerFlags, Session MySession) : base(true)
         {
+            Speed = speed;
             //playerFlags.Add("Freeport", true);
             Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;
             ObjectID = MySession.SessionID;
             ModelID = modelID;
-            Class = (Class)tClass;
-            Race = (Race)race;
-            HumanType = (HumanType)humType;
+            EntityClass = (Class)tClass;
+            EntityRace = (Race)race;
+            EntityHumanType = (HumanType)humType;
+            EntitySex = (Sex)sex;
             Level = level;
             HairColor = hairColor;
             HairLength = hairLength;
@@ -110,28 +149,49 @@ namespace ReturnHome.Server.EntityObject.Player
             //Intelligence = intelligence;
             //Charisma = charisma;
             HPFlag = true;
-            CurrentPower = currentPower;
-            PowerMax = maxPower;
-            HealthOverTime = healOT;
-            PowerOverTime = powerOT;
-            CurrentAC = aC;
-            PoisonResist = poisonResist;
-            DiseaseResist = diseaseResist;
-            FireResist = fireResist;
-            ColdResist = coldResist;
-            LightningResist = lightningResist;
-            ArcaneResist = arcaneResist;
             Fishing = fishing;
             //TODO: Store HP Factors in database? Or should we calculate this once character loads in? BASE HP Factor + CM's, seems easy enough to calculate on the fly
-            HPFactor = 10;
-            BaseStrength = baseStrength;
-            BaseStamina = baseStamina;
-            BaseAgility = baseAgility;
-            BaseDexterity = baseDexterity;
-            BaseWisdom = baseWisdom;
-            BaseIntelligence = baseIntelligence;
-            BaseCharisma = baseCharisma;
-            if(playerFlags != null){
+            //Base HPFactor calculated in Character
+            switch (EntityClass)
+            {
+                case Class.Paladin:
+                case Class.Warrior:
+                case Class.ShadowKnight:
+                    HPFactor = 24;
+                    break;
+
+                case Class.Druid:
+                case Class.Shaman:
+                case Class.Cleric:
+                    HPFactor = 13;
+                    break;
+
+                case Class.Ranger:
+                case Class.Monk:
+                case Class.Bard:
+                case Class.Rogue:
+                    HPFactor = 16;
+                    break;
+
+                case Class.Alchemist:
+                case Class.Enchanter:
+                case Class.Magician:
+                case Class.Necromancer:
+                case Class.Wizard:
+                    HPFactor = 10;
+                    break;
+            }
+
+            CurrentStats.Add(StatModifiers.TPSTR, tpStrength);
+            CurrentStats.Add(StatModifiers.TPSTA, tpStamina);
+            CurrentStats.Add(StatModifiers.TPAGI, tpAgility);
+            CurrentStats.Add(StatModifiers.TPDEX, tpDexterity);
+            CurrentStats.Add(StatModifiers.TPWIS, tpWisdom);
+            CurrentStats.Add(StatModifiers.TPINT, tpIntelligence);
+            CurrentStats.Add(StatModifiers.TPCHA, tpCharisma);
+
+
+            if (playerFlags != null){
                 this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
             }
             //CurrentPower2 = currentPower2;
@@ -157,8 +217,8 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.WriteString(Encoding.UTF8, Tunaria);
             writer.Write7BitEncodedInt64(ServerID);
             writer.WriteString(Encoding.UTF8, CharName);
-            writer.Write7BitEncodedInt64((int)Class);
-            writer.Write7BitEncodedInt64((int)Race);
+            writer.Write7BitEncodedInt64((int)EntityClass);
+            writer.Write7BitEncodedInt64((int)EntityRace);
             writer.Write7BitEncodedInt64(Level);
             writer.Write7BitEncodedInt64(XPEarnedInThisLevel);
             writer.Write7BitEncodedInt64(totalDebt);
@@ -201,5 +261,8 @@ namespace ReturnHome.Server.EntityObject.Player
             else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
                 mySession.MyCharacter.playerFlags[flagKey] = flagValue;
         }
+
+        public Character Copy() => (Character)MemberwiseClone();
+
     }
 }

@@ -39,7 +39,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             Boots = (byte)feet;
             Helm = (byte)head;
             HPFlag = true;
-            BaseStamina = 300;
+            CurrentStats.Add(StatModifiers.STA, 300);
             Target = 0xFFFFFFFF;
             NPCType = (ushort)npcType;
 

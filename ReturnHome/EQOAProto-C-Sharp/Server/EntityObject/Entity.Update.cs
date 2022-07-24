@@ -176,9 +176,9 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateNamePlate(byte color = 255) => ObjectUpdate.Span[181] = color == 255 ? (byte)0 : color;
 
-        public void ObjectUpdateRace() => ObjectUpdate.Span[182] = (byte)Race;
+        public void ObjectUpdateRace() => ObjectUpdate.Span[182] = (byte)EntityRace;
 
-        public void ObjectUpdateClass() => ObjectUpdate.Span[183] = (byte)Class;
+        public void ObjectUpdateClass() => ObjectUpdate.Span[183] = (byte)EntityClass;
 
         public void ObjectUpdateNPCType() => MemoryMarshal.Write(ObjectUpdate.Span[184..], ref _npcType);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
@@ -27,13 +28,13 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             if (session.MyCharacter.PlayerTrainingPoints.SpendTrainingPoints(Total))
             {
                 //Check passed, add the requested stats to character
-                session.MyCharacter.BaseStrength     += StrAdd;
-                session.MyCharacter.BaseStamina      += StaAdd;
-                session.MyCharacter.BaseAgility      += AgiAdd;
-                session.MyCharacter.BaseDexterity    += DexAdd;
-                session.MyCharacter.BaseWisdom       += WisAdd;
-                session.MyCharacter.BaseIntelligence += IntAdd;
-                session.MyCharacter.BaseCharisma     += ChaAdd;
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPSTR, StrAdd);
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPSTA, StaAdd);
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPAGI, AgiAdd);
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPDEX, DexAdd);
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPWIS, WisAdd);
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPINT, IntAdd);
+                session.MyCharacter.CurrentStats.Add(StatModifiers.TPCHA, ChaAdd);
 
                 //Send total points as is, sending a positive number removes x amount on client
                 ServerAdjustTrainingPoints.AdjustTrainingPoints(session, Total);

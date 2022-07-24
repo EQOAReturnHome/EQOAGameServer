@@ -40,6 +40,9 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.RemoveInvItem, ClientDeleteItem.DeleteItem },
             { GameOpcode.EnableChannel, EnableChannel },
             { GameOpcode.UpdateTrainingPoints, ClientProcessTrainingPoints.ProcessTrainingPoints },
+            { GameOpcode.ClassMastery, ClientClassMastery.ProcessClassMastery },
+            { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
+            { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

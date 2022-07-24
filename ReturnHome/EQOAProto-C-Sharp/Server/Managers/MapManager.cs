@@ -40,11 +40,11 @@ namespace ReturnHome.Server.Managers
         //Adds entity to world buffers, to be loaded in on next tick
         public static void Add(Entity e)
         {
-          if(_gameDict.TryGetValue(e.World, out Map m))
-            m.AddObject(e);
+            if(_gameDict.TryGetValue(e.World, out Map m))
+                m.AddObject(e);
 
-          else
-            Logger.Err($"Error grabbing world: {e.World}");
+            else
+                Logger.Err($"Error grabbing world: {e.World}");
         }
 
         public static void UpdatePosition(Entity e)
@@ -58,11 +58,13 @@ namespace ReturnHome.Server.Managers
 
         public static void RemoveObject(Entity e)
         {
-          if(_gameDict.TryGetValue(e.World, out Map m))
-            m.RemoveObject(e);
+            if(e == null)
+                return;
+            if(_gameDict.TryGetValue(e.World, out Map m))
+                m.RemoveObject(e);
 
-          else
-            Logger.Err($"Error grabbing world: {e.World}");
+            else
+                Logger.Err($"Error grabbing world: {e.World}");
         }
 
         public static List<Entity> QueryObjects(Entity e, float Radius)

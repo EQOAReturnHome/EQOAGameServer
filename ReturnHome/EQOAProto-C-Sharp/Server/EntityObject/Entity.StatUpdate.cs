@@ -4,21 +4,42 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-        public void UpdateStrength() => MemoryMarshal.Write(StatUpdate.Span[0..], ref _strength);
-
-        public void UpdateStamina() => MemoryMarshal.Write(StatUpdate.Span[4..], ref _stamina);
-
-        public void UpdateAgility() => MemoryMarshal.Write(StatUpdate.Span[8..], ref _agility);
-
-        public void UpdateDexterity() => MemoryMarshal.Write(StatUpdate.Span[12..], ref _dexterity);
-
-        public void UpdateWisdom() => MemoryMarshal.Write(StatUpdate.Span[16..], ref _wisdom);
-
-        public void UpdateIntelligence() => MemoryMarshal.Write(StatUpdate.Span[20..], ref _intelligence);
-
-        public void UpdateCharisma() => MemoryMarshal.Write(StatUpdate.Span[24..], ref _charisma);
-
-        public void UpdateCurrentHP()
+        public void UpdateStrength()
+        {
+            int strength = Strength;
+            MemoryMarshal.Write(StatUpdate.Span[0..], ref strength);
+        }
+        public void UpdateStamina()
+        {
+            int stamina = Stamina;
+            MemoryMarshal.Write(StatUpdate.Span[4..], ref stamina);
+        }
+        public void UpdateAgility()
+        {
+            int agility = Agility;
+            MemoryMarshal.Write(StatUpdate.Span[8..], ref agility);
+        }
+        public void UpdateDexterity()
+        {
+            int dexterity = Dexterity;
+            MemoryMarshal.Write(StatUpdate.Span[12..], ref dexterity);
+        }
+        public void UpdateWisdom()
+        {
+            int wisdom = Wisdom;
+            MemoryMarshal.Write(StatUpdate.Span[16..], ref wisdom);
+        }
+        public void UpdateIntelligence()
+        {
+            int intelligence = Intelligence;
+            MemoryMarshal.Write(StatUpdate.Span[20..], ref intelligence);
+        }
+        public void UpdateCharisma()
+        {
+            int charisma = Charisma;
+            MemoryMarshal.Write(StatUpdate.Span[24..], ref charisma);
+        }
+        public void UpdateCurrentHP1()
         {
             MemoryMarshal.Write(StatUpdate.Span[28..], ref _currentHP);
             MemoryMarshal.Write(StatUpdate.Span[144..], ref _currentHP);
@@ -45,17 +66,20 @@ namespace ReturnHome.Server.EntityObject
 
         public void UpdateHealthOverTime()
         {
-            MemoryMarshal.Write(StatUpdate.Span[48..], ref _healthOverTime);
-            MemoryMarshal.Write(StatUpdate.Span[164..], ref _healthOverTime);
+            int hot = CurrentStats.dictionary[StatModifiers.HoT];
+            MemoryMarshal.Write(StatUpdate.Span[48..], ref hot);
+            MemoryMarshal.Write(StatUpdate.Span[164..], ref hot);
         }
 
         public void UpdatePowerOverTime()
         {
-            MemoryMarshal.Write(StatUpdate.Span[52..], ref _powerOverTime);
-            MemoryMarshal.Write(StatUpdate.Span[168..], ref _powerOverTime);
+            int pot = CurrentStats.dictionary[StatModifiers.PoT];
+            MemoryMarshal.Write(StatUpdate.Span[52..], ref pot);
+            MemoryMarshal.Write(StatUpdate.Span[168..], ref pot);
         }
 
         public void UpdateAC() => MemoryMarshal.Write(StatUpdate.Span[56..], ref _currentAC);
+        public void UpdateUnknown2() => MemoryMarshal.Write(StatUpdate.Span[64..], ref _unk2);
 
         public void UpdatePoisonResist() => MemoryMarshal.Write(StatUpdate.Span[88..], ref _poisonResist);
 
@@ -71,27 +95,72 @@ namespace ReturnHome.Server.EntityObject
 
         public void UpdateFishing() => MemoryMarshal.Write(StatUpdate.Span[112..], ref _fishing);
 
-        public void UpdateBaseStrength() => MemoryMarshal.Write(StatUpdate.Span[116..], ref _baseStrength);
-
-        public void UpdateBaseStamina() => MemoryMarshal.Write(StatUpdate.Span[120..], ref _baseStamina);
-
-        public void UpdateBaseAgility() => MemoryMarshal.Write(StatUpdate.Span[124..], ref _baseAgility);
-
-        public void UpdateBaseDexterity() => MemoryMarshal.Write(StatUpdate.Span[128..], ref _baseDexterity);
-
-        public void UpdateBaseWisdom() => MemoryMarshal.Write(StatUpdate.Span[132..], ref _baseWisdom);
-
-        public void UpdateBaseIntelligence() => MemoryMarshal.Write(StatUpdate.Span[136..], ref _baseIntelligence);
-
-        public void UpdateBaseCharisma() => MemoryMarshal.Write(StatUpdate.Span[140..], ref _baseCharisma);
-
+        public void UpdateBaseStrength()
+        {
+            int baseStrength = BaseStrength;
+            MemoryMarshal.Write(StatUpdate.Span[116..], ref baseStrength);
+        }
+        public void UpdateBaseStamina()
+        {
+            int baseStamina = BaseStamina;
+            MemoryMarshal.Write(StatUpdate.Span[120..], ref baseStamina);
+        }
+        public void UpdateBaseAgility()
+        {
+            int baseAgility = BaseAgility;
+            MemoryMarshal.Write(StatUpdate.Span[124..], ref baseAgility);
+        }
+        public void UpdateBaseDexterity()
+        {
+            int baseDexterity = BaseDexterity;
+            MemoryMarshal.Write(StatUpdate.Span[128..], ref baseDexterity);
+        }
+        public void UpdateBaseWisdom()
+        {
+            int baseWisdom = BaseWisdom;
+            MemoryMarshal.Write(StatUpdate.Span[132..], ref baseWisdom);
+        }
+        public void UpdateBaseIntelligence()
+        {
+            int baseIntelligence = BaseIntelligence;
+            MemoryMarshal.Write(StatUpdate.Span[136..], ref baseIntelligence);
+        }
+        public void UpdateBaseCharisma()
+        {
+            int baseCharisma = BaseCharisma;
+            MemoryMarshal.Write(StatUpdate.Span[140..], ref baseCharisma);
+        }
         public void UpdateBaseAC() => MemoryMarshal.Write(StatUpdate.Span[172..], ref _baseAC);
 
-        public void UpdateBasePoisonResist() => MemoryMarshal.Write(StatUpdate.Span[204..], ref _basePoisonResist);
-        public void UpdateBaseDiseaseResist() => MemoryMarshal.Write(StatUpdate.Span[208..], ref _baseDiseaseResist);
-        public void UpdateBaseFireResist() => MemoryMarshal.Write(StatUpdate.Span[212..], ref _baseFireResist);
-        public void UpdateBaseColdResist() => MemoryMarshal.Write(StatUpdate.Span[216..], ref _baseColdResist);
-        public void UpdateBaseLightningResist() => MemoryMarshal.Write(StatUpdate.Span[220..], ref _baseLightningResist);
-        public void UpdateBaseArcaneResist() => MemoryMarshal.Write(StatUpdate.Span[224..], ref _baseArcaneResist);
+        public void UpdateBasePoisonResist()
+        {
+            _basePoisonResist = BasePoisonResist;
+            MemoryMarshal.Write(StatUpdate.Span[204..], ref _basePoisonResist);
+        }
+        public void UpdateBaseDiseaseResist()
+        {
+            _baseDiseaseResist = BaseDiseaseResist;
+            MemoryMarshal.Write(StatUpdate.Span[208..], ref _baseDiseaseResist);
+        }
+        public void UpdateBaseFireResist()
+        {
+            _baseFireResist = BaseFireResist;
+            MemoryMarshal.Write(StatUpdate.Span[212..], ref _baseFireResist);
+        }
+        public void UpdateBaseColdResist()
+        {
+            _baseColdResist = BaseColdResist;
+            MemoryMarshal.Write(StatUpdate.Span[216..], ref _baseColdResist);
+        }
+        public void UpdateBaseLightningResist()
+        {
+            _baseLightningResist = BaseLightningResist;
+            MemoryMarshal.Write(StatUpdate.Span[220..], ref _baseLightningResist);
+        }
+        public void UpdateBaseArcaneResist()
+        {
+            _baseArcaneResist = BaseArcaneResist;
+            MemoryMarshal.Write(StatUpdate.Span[224..], ref _baseArcaneResist);
+        }
     }
 }

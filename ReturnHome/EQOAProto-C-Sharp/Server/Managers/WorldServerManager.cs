@@ -47,6 +47,7 @@ namespace ReturnHome.Server.Managers
             CharacterSQL LoadDefaultCharacters = new();
             LoadDefaultCharacters.CollectDefaultCharacters();
             LoadDefaultCharacters.CloseConnection();
+            Console.WriteLine("Done...");
             var thread = new Thread(() =>
             {
                 UpdateWorld();

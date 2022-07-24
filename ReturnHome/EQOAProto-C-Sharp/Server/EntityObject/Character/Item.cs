@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -46,24 +47,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public uint Color { get; private set; }
 
         //Gear stats
-        public int Str { get; private set; }
-        public int Sta { get; private set; }
-        public int Agi { get; private set; }
-        public int Dex { get; private set; }
-        public int Wis { get; private set; }
-        public int Int { get; private set; }
-        public int Cha { get; private set; }
-        public int HPMax { get; private set; }
-        public int POWMax { get; private set; }
-        public int PoT { get; private set; }
-        public int HoT { get; private set; }
-        public int AC { get; private set; }
-        public int PR { get; private set; }
-        public int DR { get; private set; }
-        public int FR { get; private set; }
-        public int CR { get; private set; }
-        public int LR { get; private set; }
-        public int AR { get; private set; }
+        public Dictionary<StatModifiers, int> Stats = new Dictionary<StatModifiers, int>();
 
         //Stat counter
         private int Counter;
@@ -99,7 +83,9 @@ namespace ReturnHome.Server.EntityObject.Player
         //Constructor object for armour and weapons
         //Alot of this could be managed by scripting as there is a huge portion that is static
         //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
-        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisEquipslot, int thisAttackType, int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse, int thisRaceuse, int thisProcanim, int Strength, int Stamina, int Agility, int Dexterity, int Wisdom, int Intelligence, int Charisma, int HpMax, int PowMax, int pot, int hot, int ac, int pr, int dr, int fr, int cr, int lr, int ar, int model, uint color)
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisEquipslot, int thisAttackType,
+                    int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse,
+                    int thisRaceuse, int thisProcanim, List<KeyValuePair<StatModifiers, int>> temp, int model, uint color)
 
         {
             StackLeft = thisStacksLeft;
@@ -133,25 +119,13 @@ namespace ReturnHome.Server.EntityObject.Player
             Color = color;
             Model = model;
 
-            //Stats if any
-            Str = Strength;
-            Sta = Stamina;
-            Agi = Agility;
-            Dex = Dexterity;
-            Wis = Wisdom;
-            Int = Intelligence;
-            Cha = Charisma;
-            HPMax = HpMax;
-            POWMax = PowMax;
-            PoT = pot;
-            HoT = hot;
-            AC = ac;
-            PR = pr;
-            DR = dr;
-            FR = fr;
-            CR = cr;
-            LR = lr;
-            AR = ar;
+            foreach(KeyValuePair<StatModifiers, int> t in temp)
+            {
+                if(t.Value == 0)
+                    continue;
+                else
+                    Stats.Add(t.Key, t.Value);
+            }
         }
 
         public Item AcquireItem(int qty)
@@ -200,148 +174,16 @@ namespace ReturnHome.Server.EntityObject.Player
 
         private void PullStats(ref BufferWriter writer)
         {
+            writer.Write7BitEncodedInt64((byte)Stats.Count);
 
-            //Gather stats if any exist
-            //Increment counter if if statement true, then add identifier int for stat and then DoublePack and add stat value
-            int position = writer.Position;
-            //Place 0 place holder here
-            writer.Write((byte)0);
-
-            if (Str > 0)
+            foreach (KeyValuePair<StatModifiers, int> t in Stats)
             {
-                Counter++;
-                writer.Write((byte)0);
-                writer.Write7BitEncodedInt64(Str);
+                if (t.Value == 0)
+                    continue;
+
+                writer.Write7BitEncodedInt64((byte)t.Key);
+                writer.Write7BitEncodedInt64(t.Value);
             }
-
-            if (Sta > 0)
-            {
-                Counter++;
-                writer.Write((byte)2);
-                writer.Write7BitEncodedInt64(Sta);
-            }
-
-            if (Agi > 0)
-            {
-                Counter++;
-                writer.Write((byte)4);
-                writer.Write7BitEncodedInt64(Agi);
-            }
-
-            if (Dex > 0)
-            {
-                Counter++;
-                writer.Write((byte)6);
-                writer.Write7BitEncodedInt64(Dex);
-            }
-
-            if (Wis > 0)
-            {
-                Counter++;
-                writer.Write((byte)8);
-                writer.Write7BitEncodedInt64(Wis);
-            }
-
-            if (Int > 0)
-            {
-                Counter++;
-                writer.Write((byte)10);
-                writer.Write7BitEncodedInt64(Int);
-            }
-
-            if (Cha > 0)
-            {
-                Counter++;
-                writer.Write((byte)12);
-                writer.Write7BitEncodedInt64(Cha);
-            }
-
-            if (HPMax > 0)
-            {
-                Counter++;
-                writer.Write((byte)16);
-                writer.Write7BitEncodedInt64(HPMax);
-            }
-
-            if (POWMax > 0)
-            {
-                Counter++;
-                writer.Write((byte)20);
-                writer.Write7BitEncodedInt64(POWMax);
-            }
-
-            if (PoT > 0)
-            {
-                Counter++;
-                writer.Write((byte)24);
-                writer.Write7BitEncodedInt64(PoT);
-            }
-
-            if (HoT > 0)
-            {
-                Counter++;
-                writer.Write((byte)26);
-                writer.Write7BitEncodedInt64(HoT);
-            }
-
-            if (AC > 0)
-            {
-                Counter++;
-                writer.Write((byte)28);
-                writer.Write7BitEncodedInt64(AC);
-            }
-
-            if (PR > 0)
-            {
-                Counter++;
-                writer.Write((byte)44);
-                writer.Write7BitEncodedInt64(PR);
-            }
-
-            if (DR > 0)
-            {
-                Counter++;
-                writer.Write((byte)46);
-                writer.Write7BitEncodedInt64(DR);
-            }
-
-            if (FR > 0)
-            {
-                Counter++;
-                writer.Write((byte)48);
-                writer.Write7BitEncodedInt64(FR);
-            }
-
-            if (CR > 0)
-            {
-                Counter++;
-                writer.Write((byte)50);
-                writer.Write7BitEncodedInt64(CR);
-            }
-
-            if (LR > 0)
-            {
-                Counter++;
-                writer.Write((byte)52);
-                writer.Write7BitEncodedInt64(LR);
-            }
-
-            if (AR > 0)
-            {
-                Counter++;
-                writer.Write((byte)54);
-                writer.Write7BitEncodedInt64(AR);
-            }
-
-            if (Counter == 0)
-                return;
-
-            int position2 = writer.Position;
-            writer.Position = position;
-            writer.Write7BitEncodedInt64(Counter);
-
-            writer.Position = position2;
-            Counter = 0;
         }
     }
 }

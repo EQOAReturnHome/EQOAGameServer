@@ -24,27 +24,6 @@ namespace ReturnHome.Server.EntityObject
         /* These are all values for character creation, likely don't need to be attributes of the character object at all*/
         //Default character data should probably be stored in script's to generate from on client's request, saving that to the database
         /*CONSIDER REMOVING IN FAVOR OF ABOVE IN TIME?*/
-        public string TestCharName;
-        public int StartingClass;
-        public int Gender;
-        //Note this is for holding the HumType from the client that is an int and base Character has a string HumType
-        public int HumTypeNum;
-        //Addxxxx attributes of the class are to hold a new characters initial allocated stat points in each category
-        public int AddStrength;
-        public int AddStamina;
-        public int AddAgility;
-        public int AddDexterity;
-        public int AddWisdom;
-        public int AddIntelligence;
-        public int AddCharisma;
-        //Defaultxxx attributes of the class pulled from the defaultClass table in the DB for new character creation
-        public int DefaultStrength;
-        public int DefaultStamina;
-        public int DefaultAgility;
-        public int DefaultDexterity;
-        public int DefaultWisdom;
-        public int DefaultIntelligence;
-        public int DefaultCharisma;
 
         public bool isPlayer;
 
@@ -121,6 +100,7 @@ namespace ReturnHome.Server.EntityObject
         #endregion
         public Entity(bool isplayer)
         {
+            CurrentStats = new ModifierDictionary(this);
             #region Stat stuff
             //Players have limits on stats, NPC's will not
             if (isplayer)

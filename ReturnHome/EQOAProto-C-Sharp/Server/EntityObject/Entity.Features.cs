@@ -9,7 +9,7 @@ namespace ReturnHome.Server.EntityObject
     public partial class Entity
     {
         private Race _race;
-        private Class _class;
+        private Class _actorClass;
         private HumanType _humType;
         private Sex _sex;
 
@@ -47,7 +47,7 @@ namespace ReturnHome.Server.EntityObject
 
         #region Objext Update Properties
 
-        public Race Race
+        public Race EntityRace
         {
             get { return _race; }
             set
@@ -63,14 +63,14 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public Class Class
+        public Class EntityClass
         {
-            get { return _class; }
+            get { return _actorClass; }
             set
             {
                 if (value >= Class.Warrior && value <= Class.Alchemist)
                 {
-                    _class = value;
+                    _actorClass = value;
                     ObjectUpdateClass();
                 }
 
@@ -79,7 +79,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public Sex Sex
+        public Sex EntitySex
         {
             get { return _sex; }
             set
@@ -89,7 +89,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public HumanType HumanType
+        public HumanType EntityHumanType
         {
             get {  return _humType; }
             set

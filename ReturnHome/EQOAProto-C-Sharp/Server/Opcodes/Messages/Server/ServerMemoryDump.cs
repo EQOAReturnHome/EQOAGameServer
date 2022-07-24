@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using ReturnHome.Database.SQL;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
@@ -81,63 +82,112 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             foreach (Spell s in session.MyCharacter.MySpells)
                 s.DumpSpell(ref writer);
 
+            DefaultCharacter.DefaultCharacterDict.TryGetValue((session.MyCharacter.EntityRace, session.MyCharacter.EntityClass, session.MyCharacter.EntityHumanType, session.MyCharacter.EntitySex), out Character defaultCharacter);
+
             //Not entirely known what this is at this time
             //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
-            writer.Write(new byte[] {                  0x55, 0x55, 0x0d, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
-                                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00,
-                                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x01,
-                                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00,
-                                                            0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00,
-                                                            0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00,
-                                                            0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                                            0x00, 0x00, 0x00,
-                                                            /*Unspent CM's*/                  0x06,
-                                                            /*Spent CM's*/                    0xa0, 0x0f,
-                                                            0xae, 0x98, 0x4c, 0x05, 0x55, 0x55, 0x0d, 0x41,
-                                                            /*Addition to Strength Base*/     0xe6, 0x01,
-                                                            /*Addition to Stamina  Base*/     0x96, 0x01,
-                                                            /*Addition to Agility Base*/      0x78,
-                                                            /*Addition to Dexterity Base*/    0x96, 0x01,
-                                                            /*Addition to Wisdom Base*/       0x81, 0x01,
-                                                            /*Addition to Intelligence Base*/ 0x00,
-                                                            /*Addition to Charisma Base*/     0x00,
-                                                            0x08, 0x0a, 0x0c, 0xfa,
-                                                            0x01, 0x0e, 0x10, 0xe8, 0x07,
-                                                            /*Addition to HP Base*/           0xe8, 0x07,
-                                                            /*Addition to Power Base*/        0xe8, 0x07,
-                                                            0x5a, 0x02,
-                                                            /*Addition to AC Base*/           0x04,
-                                                            0x04, 0x06, 0x0c,
-                                                            /*Addition to FR Base*/           0x00,
-                                                            /*Addition to LR Base*/           0x51,
-                                                            /*Addition to CR Base*/           0x53,
-                                                            /*Addition to AR Base*/           0x55,
-                                                            /*Addition to PR Base*/           0x57,
-                                                            /*Addition to DR Base*/           0x59,
-                                                            0x70, 0xde, 0x02, 0xde, 0x02, 0x00, 0xfa, 0x01, 0x00, 0x00, 0x00});
+            writer.Write(session.MyCharacter.Speed);
+            writer.Write(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                      0x09, 0x0a, 0x0b, 0x0c, //Weapon Level
+                                      0x0d, 0x0e, 0x0f, 0x10, //Weapon Rank
+                                      0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+                                      0x19, 0x1a, 0x1b, 0x1c, //Armor Level
+                                      0x1d, 0x1e, 0x1f, 0x20, //Armor Rank
+                                      0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
+                                      0x29, 0x00, 0x00, 0x00, //Tailor Level
+                                      0x30, 0x00, 0x00, 0x00, //Tailor Rank
+                                      0x00, 0x80, 0x00, 0x00, 0x03, 0x80, 0x00, 0x00,
+                                      0x50, 0x00, 0x00, 0x00, //Jewler Level
+                                      0x51, 0x00, 0x00, 0x00, //Jewlet Rank
+                                      0x25, 0x26, 0x27, 0x28,
+                                      0x11, 0x12, 0x13, 0x14,
+                                      0x15, 0x16, 0x17, 0x18,
+                                      0x0d, 0x0e, 0x0f, 0x10,
+                                      0x21, 0x22, 0x23, 0x24,
+                                      0x05, 0x06, 0x07, 0x08,
+                                      0x01, 0x02, 0x03, 0x04,
+                                      0x19, 0x1a, 0x1b, 0x1c,
+                                      0x1d, 0x1e, 0x1f, 0x20,
+                                      0x25, 0x26, 0x27, 0x28 });
 
-            /*writer.Write7BitEncodedInt64(session.MyCharacter.BaseStrength);
-            writer.Write7BitEncodedInt64(session.MyCharacter.BaseStamina);
-            writer.Write7BitEncodedInt64(session.MyCharacter.BaseAgility);
-            writer.Write7BitEncodedInt64(session.MyCharacter.BaseDexterity);
-            writer.Write7BitEncodedInt64(session.MyCharacter.BaseWisdom);
-            writer.Write7BitEncodedInt64(session.MyCharacter.BaseIntelligence);
-            writer.Write7BitEncodedInt64(session.MyCharacter.BaseCharisma);*/
+            writer.Write7BitEncodedInt64(session.MyCharacter.UnspentCMs);
+            writer.Write7BitEncodedInt64(session.MyCharacter.SpentCMs);
+
+            writer.Write(new byte[] { 0xae, 0x98, 0x4c });
+            writer.Write7BitEncodedInt64(session.MyCharacter.CMPercentage);
+            writer.Write(session.MyCharacter.Speed);
+
+            /*Addition to Strength Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Stamina  Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Agility Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Dexterity Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Wisdom Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Intelligence Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Charisma Base*/
+            writer.Write7BitEncodedInt64(0);
+
+            writer.Write(new byte[] { 0xde, 0x02, //CM Strength Max
+                                      0xde, 0x02, //CM Stamina Max
+                                      0x00, //CM Agility Max
+                                      0xfa, 0x01,  // CM Dexterity Max
+                                      0x00, // CM Wisdom Max
+                                      0x00, // CM Intelligence Max
+                                      0x00 }); // CM Charisma Max
+
+
+            /*Addition to HP Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to Power Base*/
+            writer.Write7BitEncodedInt64(0);
+
+            writer.Write(new byte[] { 0x5a, //CM HoT
+                                      0x00 }); // CM PoT?
+
+            /*Addition to AC Base*/
+            writer.Write7BitEncodedInt64(0);
+
+            writer.Write(new byte[] { 0x04, //CM OFF Mod's?
+                                      0x00, // CM DEF Mod's?
+                                      0x0c });//CM HP Factor's?
+
+            /*Addition to FR Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to LR Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to CR Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to AR Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to PR Base*/
+            writer.Write7BitEncodedInt64(0);
+            /*Addition to DR Base*/
+            writer.Write7BitEncodedInt64(0);
+
+            writer.Write(new byte[] { 0x00,
+                                      0xde, 0x02, //CM Strength Max
+                                      0xde, 0x02, //CM Stamina Max
+                                      0x00, //CM Agility Max
+                                      0xfa, 0x01,  // CM Dexterity Max
+                                      0x00, // CM Wisdom Max
+                                      0x00, // CM Intelligence Max
+                                      0x00 }); // CM Charisma Max
 
             ServerTime.Time(session);
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
 
-            //At this point, character should be loading in game, so we would want to get them added to the Player List and receiving any updates
-            //session.inGame = true;
-
             //Put player into channel 0?
             session.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(session.MyCharacter);
 
-            //Add player to world player list queue
             ServerPlayerIgnoreList.PlayerIgnoreList(session);
-            ServerPlayerSpeed.PlayerSpeed(session);
+            //ServerPlayerSpeed.PlayerSpeed(session);
         }
     }
 }

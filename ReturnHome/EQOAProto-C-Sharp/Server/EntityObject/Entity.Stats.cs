@@ -1,200 +1,38 @@
 using System;
+using System.Collections.Generic;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
+        //Initialize this with every entity to account for their stats
+        public ModifierDictionary CurrentStats;
+
+
         //This is the absolute max amount of a "base" stat that can be assigned, everything above here needs to be buff's and CM's
         public readonly int BaseMaxStat;
         private int _minimumStat = -100;
         private int _randoValue = 0x64;
 
-        #region Properties of Base Stats and private Var's
-        //Base starting stats based on race/class, along with TP spent and CM's acquired
-        private int _baseStrength;
-        private int _baseStamina;
-        private int _baseAgility;
-        private int _baseDexterity;
-        private int _baseWisdom;
-        private int _baseIntelligence;
-        private int _baseCharisma;
-
-        public int BaseStrength
-        {
-            get { return _baseStrength; }
-            set
-            {
-                _baseStrength = value;
-                CalculateStrength();
-                UpdateBaseStrength();
-            }
-        }
-
-        public int BaseStamina
-        {
-            get { return _baseStamina; }
-            set
-            {
-                _baseStamina = value;
-                CalculateStamina();
-                UpdateBaseStamina();
-            }
-        }
-
-        public int BaseWisdom
-        {
-            get { return _baseWisdom; }
-            set
-            {
-                _baseWisdom = value;
-                CalculateWisdom();
-                UpdateBaseWisdom();
-            }
-        }
-
-        public int BaseIntelligence
-        {
-            get { return _baseIntelligence; }
-            set
-            {
-                _baseIntelligence = value;
-                CalculateIntelligence();
-                UpdateBaseIntelligence();
-            }
-        }
-
-        public int BaseDexterity
-        {
-            get { return _baseDexterity; }
-            set
-            {
-                _baseDexterity = value;
-                CalculateDexterity();
-                UpdateBaseDexterity();
-            }
-        }
-
-        public int BaseAgility
-        {
-            get { return _baseAgility; }
-            set
-            {
-                _baseAgility = value;
-                CalculateAgility();
-                UpdateBaseAgility();
-            }
-        }
-
-        public int BaseCharisma
-        {
-            get { return _baseCharisma; }
-            set
-            {
-                _baseCharisma = value;
-                CalculateCharisma();
-                UpdateBaseCharisma();
-            }
-        }
-
-        #endregion
-
-        #region Properties for stats and private var's
+        private int _unk2;
 
         //Our most current stats. This is stat totals influenced by gear, buff's, CM's and TP's.
-        private int _strength;
-        public int GearBuffStrength = 0;
-        private int _stamina;
-        public int GearBuffStamina = 0;
-        private int _wisdom;
-        public int GearBuffWisdom = 0;
-        private int _intelligence;
-        public int GearBuffIntelligence = 0;
-        private int _charisma;
-        public int GearBuffCharisma = 0;
-        private int _agility;
-        public int GearBuffAgility = 0;
-        private int _dexterity;
-        public int GearBuffDexterity = 0;
+        public int BaseStrength => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseSTR] : 0) + CurrentStats.dictionary[StatModifiers.TPSTR], _minimumStat, BaseMaxStat);
+        public int BaseStamina => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseSTA] : 0) + CurrentStats.dictionary[StatModifiers.TPSTA], _minimumStat, BaseMaxStat);
+        public int BaseWisdom => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseWIS] : 0) + CurrentStats.dictionary[StatModifiers.TPWIS], _minimumStat, BaseMaxStat);
+        public int BaseIntelligence => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseINT] : 0) + CurrentStats.dictionary[StatModifiers.TPINT], _minimumStat, BaseMaxStat);
+        public int BaseDexterity => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseDEX] : 0) + CurrentStats.dictionary[StatModifiers.TPDEX], _minimumStat, BaseMaxStat);
+        public int BaseAgility => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseAGI] : 0) + CurrentStats.dictionary[StatModifiers.TPAGI], _minimumStat, BaseMaxStat);
+        public int BaseCharisma => Clamp((isPlayer ? DefaultCharacter.DefaultCharacterDict[(EntityRace, EntityClass, EntityHumanType, EntitySex)].CurrentStats.dictionary[StatModifiers.BaseCHA] : 0) + CurrentStats.dictionary[StatModifiers.TPCHA], _minimumStat, BaseMaxStat);
 
-        public int Strength
-        {
-            get { return Clamp(_strength, _minimumStat, MaxStrength); }
-            private set
-            {
-                _strength = value;
-                CalculatePower();
-                UpdateStrength();
-            }
-        }
-
-        public int Stamina
-        {
-            get { return Clamp(_stamina, _minimumStat, MaxStamina); }
-            private set
-            {
-                _stamina = value;
-                CalculatePower();
-                CalculateHP();
-                UpdateStamina();
-            }
-        }
-
-        public int Wisdom
-        {
-            get { return Clamp(_wisdom, _minimumStat, MaxWisdom); }
-            private set
-            {
-                _wisdom = value;
-                CalculatePower();
-                UpdateWisdom();
-            }
-        }
-
-        public int Intelligence
-        {
-            get { return Clamp(_intelligence, _minimumStat, MaxIntelligence); }
-            private set
-            {
-                _intelligence = value;
-                CalculatePower();
-                UpdateIntelligence();
-            }
-        }
-
-        public int Dexterity
-        {
-            get { return Clamp(_dexterity, _minimumStat, MaxDexterity); }
-            private set
-            {
-                _dexterity = value;
-                CalculatePower();
-                UpdateDexterity();
-            }
-        }
-
-        public int Agility
-        {
-            get { return Clamp(_agility, _minimumStat, MaxAgility); }
-            private set
-            {
-                _agility = value;
-                CalculatePower();
-                UpdateAgility();
-            }
-        }
-
-        public int Charisma
-        {
-            get { return Clamp(_charisma, _minimumStat, MaxCharisma); }
-            private set
-            {
-                _charisma = value;
-                CalculatePower();
-                UpdateCharisma();
-            }
-        }
-
-        #endregion
+        public int Strength => Clamp(BaseStrength + CurrentStats.dictionary[StatModifiers.STR], _minimumStat, MaxStrength);
+        public int Stamina => Clamp(BaseStamina + CurrentStats.dictionary[StatModifiers.STA], _minimumStat, MaxStamina);
+        public int Wisdom => Clamp(BaseWisdom + CurrentStats.dictionary[StatModifiers.WIS], _minimumStat, MaxWisdom);
+        public int Intelligence => Clamp(BaseIntelligence + CurrentStats.dictionary[StatModifiers.INT], _minimumStat, MaxIntelligence);
+        public int Dexterity => Clamp(BaseDexterity + CurrentStats.dictionary[StatModifiers.DEX], _minimumStat, MaxDexterity);
+        public int Agility => Clamp(BaseAgility + CurrentStats.dictionary[StatModifiers.AGI], _minimumStat, MaxAgility);
+        public int Charisma => Clamp(BaseCharisma + CurrentStats.dictionary[StatModifiers.CHA], _minimumStat, MaxCharisma);
 
         #region Properties for Stat Maxes and Private Var's
 
@@ -336,7 +174,7 @@ namespace ReturnHome.Server.EntityObject
                     Console.WriteLine($"{CharName} died.");
 
                 //Update HP for stat message
-                UpdateCurrentHP();
+                UpdateCurrentHP1();
 
                 //Update HP bar for the object update message
                 ObjectUpdateHPBar();
@@ -391,38 +229,7 @@ namespace ReturnHome.Server.EntityObject
                 ObjectUpdateHPFlag();
             }
         }
-        #endregion
 
-        #region Properties of HoT/PoT
-
-        //Related to regeneration of health and PowerOverTime
-        //There is a standard rate of 50 HP/PWR = 1 HoT/PoT, then buffs/heal's can get stacked ontop of this passive healing, incling gear/CM's that add directly to it
-        private int _healthOverTime;
-        private int _powerOverTime;
-
-        public int HealthOverTime
-        {
-            get { return _healthOverTime; }
-            set
-            {
-                _healthOverTime = value;
-                UpdateHealthOverTime();
-            }
-        }
-
-        public int PowerOverTime
-        {
-            get { return _powerOverTime; }
-            set
-            {
-                _powerOverTime = value;
-                UpdatePowerOverTime();
-            }
-        }
-
-        #endregion
-
-        #region Properties of Base resists + current Resists
 
         private int _baseArcaneResist;
         private int _basePoisonResist;
@@ -431,65 +238,12 @@ namespace ReturnHome.Server.EntityObject
         private int _baseColdResist;
         private int _baseFireResist;
 
-        public int BasePoisonResist
-        {
-            get { return _basePoisonResist; }
-            set
-            {
-                _basePoisonResist = value;
-                UpdateBasePoisonResist();
-            }
-        }
-
-        public int BaseDiseaseResist
-        {
-            get { return _baseDiseaseResist; }
-            set
-            {
-                _baseDiseaseResist = value;
-                UpdateBaseDiseaseResist();
-            }
-        }
-
-        public int BaseLightningResist
-        {
-            get { return _baseLightningResist; }
-            set
-            {
-                _baseLightningResist = value;
-                UpdateBaseLightningResist();
-            }
-        }
-
-        public int BaseFireResist
-        {
-            get { return _baseFireResist; }
-            set
-            {
-                _baseFireResist = value;
-                UpdateBaseFireResist();
-            }
-        }
-
-        public int BaseColdResist
-        {
-            get { return _baseColdResist; }
-            set
-            {
-                _baseColdResist = value;
-                UpdateBaseColdResist();
-            }
-        }
-
-        public int BaseArcaneResist
-        {
-            get { return _baseArcaneResist; }
-            set
-            {
-                _baseArcaneResist = value;
-                UpdateBaseArcaneResist();
-            }
-        }
+        public int BasePoisonResist { get { return Wisdom / 7; } }
+        public int BaseDiseaseResist { get { return Wisdom / 7; } }
+        public int BaseLightningResist { get { return Wisdom / 7; } }
+        public int BaseFireResist { get { return Wisdom / 7; } }
+        public int BaseColdResist { get { return Wisdom / 7; } }
+        public int BaseArcaneResist { get { return Wisdom / 7; } }
 
         private int _arcaneResist;
         private int _poisonResist;
@@ -562,7 +316,7 @@ namespace ReturnHome.Server.EntityObject
 
         private int _fishing;
 
-        private void CalculateHP()
+        public void CalculateHP()
         {
             //BaseHP is calculated by utilizing the current Stamina of the player + and HP Factors they may have
             BaseHP = (Level * ((_hpFactor * 100) + (Stamina * 100) / 11)) / 100;
@@ -574,10 +328,10 @@ namespace ReturnHome.Server.EntityObject
             CurrentHP = BaseHP;
         }
 
-        private void CalculatePower()
+        public void CalculatePower()
         {
             //Create a switch expression to calculate Base Power
-            BasePower = _class switch
+            BasePower = _actorClass switch
             {
                 //Warrior/Paladin/Shadowknight
                 Class.Warrior or Class.Paladin or Class.ShadowKnight => Calculatetemp(Strength, Stamina),
@@ -619,13 +373,6 @@ namespace ReturnHome.Server.EntityObject
 
             CurrentPower = BasePower;
         }
-        private void CalculateStrength() => Strength = BaseStrength + GearBuffStrength;
-        private void CalculateStamina() => Stamina = BaseStamina + GearBuffStamina;
-        private void CalculateAgility() => Agility = BaseAgility + GearBuffAgility;
-        private void CalculateWisdom() => Wisdom = BaseWisdom + GearBuffWisdom;
-        private void CalculateDexterity() => Dexterity = BaseDexterity + GearBuffDexterity;
-        private void CalculateIntelligence() => Intelligence = BaseIntelligence + GearBuffIntelligence;
-        private void CalculateCharisma() => Charisma = BaseCharisma + GearBuffCharisma;
 
         private int Calculatetemp(int Primary, int Secondary) => (((28 * 100) + ((Primary * 100) / 10) + ((Secondary * 100) / 20)) * Level) / 100;
 
