@@ -5,7 +5,7 @@ using System.Text;
 
 using ReturnHome.Utilities;
 
-namespace ReturnHome.Server.EntityObject.Player
+namespace ReturnHome.Server.EntityObject.Items
 {
     public class Item
     {
@@ -49,9 +49,6 @@ namespace ReturnHome.Server.EntityObject.Player
         //Gear stats
         public Dictionary<StatModifiers, int> Stats = new Dictionary<StatModifiers, int>();
 
-        //Stat counter
-        private int Counter;
-
         //default constructor
         public Item()
         { }
@@ -86,7 +83,6 @@ namespace ReturnHome.Server.EntityObject.Player
         public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisEquipslot, int thisAttackType,
                     int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse,
                     int thisRaceuse, int thisProcanim, List<KeyValuePair<StatModifiers, int>> temp, int model, uint color)
-
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;

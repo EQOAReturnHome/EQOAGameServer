@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
+using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-    
+
+        Dictionary<ItemSlot, sbyte> EquippedGear;
         //Implies if object is visible or not
         public bool Invisible = false;
 
@@ -101,6 +104,7 @@ namespace ReturnHome.Server.EntityObject
         public Entity(bool isplayer)
         {
             CurrentStats = new ModifierDictionary(this);
+            EquippedGear = new();
             #region Stat stuff
             //Players have limits on stats, NPC's will not
             if (isplayer)

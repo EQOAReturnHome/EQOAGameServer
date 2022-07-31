@@ -11,6 +11,7 @@ using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.EntityObject.Player
 {

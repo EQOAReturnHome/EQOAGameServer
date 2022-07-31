@@ -1,94 +1,196 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Collections.Generic;
 using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Utilities
 {
-    /*
-    public interface ModifierDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>>
+    public sealed class ModifierDictionary
     {
-        // Interfaces are not serializable
-        // The Item property provides methods to read and edit entries
-        // in the Dictionary.
-        TValue this[TKey key]
+        public readonly Dictionary<StatModifiers, int> dictionary;
+        private Entity _e;
+
+        public ModifierDictionary(Entity e)
         {
-            get;
-            set;
+            _e = e;
+            dictionary = new Dictionary<StatModifiers, int>();
+            foreach(StatModifiers mod in Enum.GetValues(typeof(StatModifiers)))
+                dictionary.Add(mod, 0);
         }
 
-        // Returns a collections of the keys in this dictionary.
-        ICollection<TKey> Keys
+        public void Add(StatModifiers key, int value)
         {
-            get;
+            if (dictionary.ContainsKey(key))
+                dictionary[key] += value;
+
+            //Shouldn't be needed
+            else
+                dictionary.Add(key, value);
+
+            //If it is an npc, this isn't really relevant to run through?
+            if (!_e.isPlayer && (key != StatModifiers.STA))
+                return;
+
+            UpdateStatInformation(key);
         }
 
-        // Returns a collections of the values in this dictionary.
-        ICollection<TValue> Values
-        {
-            get;
-        }
-
-        // Returns whether this dictionary contains a particular key.
-        //
-        bool ContainsKey(TKey key);
-
-        // Adds a key-value pair to the dictionary.
-        //
-        void Add(TKey key, TValue value, Entity e)
-        {
-            this[key] = value;
-
-            switch(key)
+        public void UpdateStatInformation(StatModifiers key)
+        { 
+            switch (key)
             {
                 case StatModifiers.STR:
-                    e.CalculatePower();
-                    e.UpdateStrength();
+                    _e.CalculatePower();
+                    _e.UpdateStrength();
                     break;
 
                 case StatModifiers.STA:
-                    e.CalculatePower();
-                    e.CalculateHP();
-                    e.UpdateStamina();
+                    _e.CalculateHP();
+                    if (_e.isPlayer)
+                    { 
+                        _e.CalculatePower();
+                        _e.UpdateStamina();
+                    }
                     break;
 
                 case StatModifiers.AGI:
-                    e.CalculatePower();
-                    e.UpdateAgility();
+                    _e.CalculatePower();
+                    _e.UpdateAgility();
                     break;
 
                 case StatModifiers.DEX:
-                    e.CalculatePower();
-                    e.UpdateDexterity();
+                    _e.CalculatePower();
+                    _e.UpdateDexterity();
                     break;
 
                 case StatModifiers.WIS:
-                    e.CalculatePower();
-                    e.UpdateWisdom();
+                    _e.CalculatePower();
+                    _e.UpdateWisdom();
+                    //UpdateBaseResists(e);
                     break;
 
                 case StatModifiers.INT:
-                    e.CalculatePower();
-                    e.UpdateIntelligence();
+                    _e.CalculatePower();
+                    _e.UpdateIntelligence();
                     break;
 
                 case StatModifiers.CHA:
-                    e.CalculatePower();
-                    e.UpdateCharisma();
+                    _e.CalculatePower();
+                    _e.UpdateCharisma();
                     break;
 
                 case StatModifiers.HPMAX:
                     //Check to make sure currentHP doesn't exceed MaxHP
-                    e.UpdateMaxHP();
-                    e.ObjectUpdateHPBar();
+                    _e.UpdateMaxHP();
+                    _e.ObjectUpdateHPBar();
                     break;
-            }
 
+                    //Need to recalculate Power, adjust the Power slider in object update and adjust the power stats in the stat update message
+                case StatModifiers.POWMAX:
+                    _e.UpdateMaxPower();
+                    break;
+
+                case StatModifiers.PoT:
+                    _e.UpdatePowerOverTime();
+                    break;
+
+                case StatModifiers.HoT:
+                    _e.UpdateHealthOverTime();
+                    break;
+
+                case StatModifiers.AC:
+                    _e.UpdateAC();
+                    break;
+
+                case StatModifiers.PoisonResistance:
+                    _e.UpdatePoisonResist();
+                    break;
+
+                case StatModifiers.DiseaseResistance:
+                    _e.UpdateDiseaseResist();
+                    break;
+
+                case StatModifiers.FireResistance:
+                    _e.FireResist = dictionary[StatModifiers.FireResistance];
+                    _e.UpdateFireResist();
+                    break;
+
+                case StatModifiers.ColdResistance:
+                    _e.UpdateColdResist();
+                    break;
+
+                case StatModifiers.LightningResistance:
+                    _e.UpdateLightningResist();
+                    break;
+
+                case StatModifiers.ArcaneResistance:
+                    _e.UpdateArcaneResist();
+                    break;
+
+                case StatModifiers.TPSTR:
+                    _e.UpdateBaseStrength();
+                    goto case StatModifiers.STR;
+
+                case StatModifiers.TPSTA:
+                    _e.UpdateBaseStamina();
+                    goto case StatModifiers.STA;
+
+                case StatModifiers.TPAGI:
+                    _e.UpdateBaseAgility();
+                    goto case StatModifiers.AGI;
+
+                case StatModifiers.TPDEX:
+                    _e.UpdateBaseDexterity();
+                    goto case StatModifiers.DEX;
+
+                case StatModifiers.TPWIS:
+                    _e.UpdateBaseWisdom();
+                    goto case StatModifiers.WIS;
+
+                case StatModifiers.TPINT:
+                    _e.UpdateBaseIntelligence();
+                    goto case StatModifiers.INT;
+
+                case StatModifiers.TPCHA:
+                    _e.UpdateBaseCharisma();
+                    goto case StatModifiers.CHA;
+            }
         }
 
-        // Removes a particular key from the dictionary.
-        //
-        bool Remove(TKey key);
+        public void Remove(StatModifiers key, int value)
+        {
+            if (dictionary.ContainsKey(key))
+                dictionary[key] -= value;
 
-        bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value);
-    }*/
+            //Shouldn't be needed
+            else
+                dictionary.Add(key, value);
+
+            //If it is an npc, this isn't really relevant to run through?
+            if (!_e.isPlayer && (key != StatModifiers.STA))
+                return;
+
+            UpdateStatInformation(key);
+        }
+
+        private void UpdateBaseResists(Entity e)
+        {
+            _e.UpdateBaseArcaneResist();
+            _e.UpdateBaseFireResist();
+            _e.UpdateBaseDiseaseResist();
+            _e.UpdateBaseColdResist();
+            _e.UpdateBaseLightningResist();
+            _e.UpdateBasePoisonResist();
+            UpdateResists(e);
+        }
+
+        private void UpdateResists(Entity e)
+        {
+            
+            _e.UpdatePoisonResist();
+            _e.UpdateDiseaseResist();
+            _e.UpdateFireResist();
+            _e.UpdateColdResist();
+            _e.UpdateLightningResist();
+            _e.UpdateArcaneResist();
+        }
+    }
 }

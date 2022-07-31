@@ -14,6 +14,7 @@ using ReturnHome.Server.Opcodes.Chat;
 
 using NLua;
 using Newtonsoft.Json;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.EntityObject
 {

@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using ReturnHome.Utilities;
-using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Actors;
 using System.Text.Json;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Database.SQL
 {
@@ -721,6 +721,9 @@ namespace ReturnHome.Database.SQL
                         selectedCharacter.AuctionItems.Add(ThisItem);
                     }
                 }
+
+                //With all of the gear in inventory, cycle over and equip it if equipped
+
             }
             SecondRdr.Close();
 
