@@ -14,7 +14,7 @@ namespace ReturnHome.Server.EntityObject.Items
         public int StackLeft { get; set; }
         public int RemainingHP { get; set; }
         public int Charges { get; set; }
-        public int EquipLocation { get; set; }
+        public EquipSlot EquipLocation { get; set; }
         public byte Location { get; set; } //inventory, bank auction etc
         public int ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
 
@@ -23,7 +23,7 @@ namespace ReturnHome.Server.EntityObject.Items
         public int Unk1 { get; private set; }
         public int ItemIcon { get; private set; }
         public int Unk2 { get; private set; }
-        public int Equipslot { get; private set; }
+        public ItemSlot itemSlot { get; private set; }
         public int Unk3 { get; private set; }
         public int Trade { get; private set; }
         public int Rent { get; private set; }
@@ -80,7 +80,7 @@ namespace ReturnHome.Server.EntityObject.Items
         //Constructor object for armour and weapons
         //Alot of this could be managed by scripting as there is a huge portion that is static
         //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
-        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisEquipslot, int thisAttackType,
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, int thisItemID, uint thisItemCost, int thisItemIcon, int thisItemSlot, int thisAttackType,
                     int thisWeaponDamage, int thisMaxHP, int thisTrade, int thisRent, int thisCraft, int thisLore, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse,
                     int thisRaceuse, int thisProcanim, List<KeyValuePair<StatModifiers, int>> temp, int model, uint color)
         {
@@ -102,8 +102,8 @@ namespace ReturnHome.Server.EntityObject.Items
 
             //Null this for outgoing packet
             RemainingHP = thisRemainingHP;
-            EquipLocation = thisEquipLocation;
-            Equipslot = thisEquipslot;
+            EquipLocation = (EquipSlot)thisEquipLocation;
+            itemSlot = (ItemSlot)thisItemSlot;
             Attacktype = thisAttackType;
             Weapondamage = thisWeaponDamage;
             Maxhp = thisMaxHP;
@@ -137,7 +137,7 @@ namespace ReturnHome.Server.EntityObject.Items
             writer.Write7BitEncodedInt64(StackLeft);
             writer.Write7BitEncodedInt64(RemainingHP);
             writer.Write7BitEncodedInt64(Charges);
-            writer.Write7BitEncodedInt64(EquipLocation);
+            writer.Write7BitEncodedInt64((sbyte)EquipLocation);
             writer.Write(Location);
             writer.Write(ServerKey);
             writer.Write7BitEncodedInt64(ItemID);
@@ -145,7 +145,7 @@ namespace ReturnHome.Server.EntityObject.Items
             writer.Write7BitEncodedInt64(Unk1);
             writer.Write7BitEncodedInt64(ItemIcon);
             writer.Write7BitEncodedInt64(Unk2);
-            writer.Write7BitEncodedInt64(Equipslot);
+            writer.Write7BitEncodedInt64((sbyte)itemSlot);
             writer.Write7BitEncodedInt64(Unk3);
             writer.Write7BitEncodedInt64(Trade);
             writer.Write7BitEncodedInt64(Rent);

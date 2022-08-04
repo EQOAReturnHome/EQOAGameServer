@@ -178,6 +178,9 @@ namespace ReturnHome.Database.SQL
                 //Iterate through characterData list finding charnames that exist
                 Actor thisActor = npcData.Find(i => Equals(i.CharName, actorName));
 
+                if (thisActor.Inventory == null)
+                    thisActor.Inventory = new(0);
+
                 Item ThisItem = new Item(
                   //Stacksleft
                   SecondRdr.GetInt32(1),
@@ -705,21 +708,15 @@ namespace ReturnHome.Database.SQL
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
-                    {
                         selectedCharacter.Inventory.AddItem(ThisItem);
-                    }
 
                     //If this is 2, it needs to go to the Bank
                     else if (ThisItem.Location == 2)
-                    {
                         selectedCharacter.Bank.AddItem(ThisItem);
-                    }
 
                     //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
                     else if (ThisItem.Location == 4)
-                    {
                         selectedCharacter.AuctionItems.Add(ThisItem);
-                    }
                 }
 
                 //With all of the gear in inventory, cycle over and equip it if equipped

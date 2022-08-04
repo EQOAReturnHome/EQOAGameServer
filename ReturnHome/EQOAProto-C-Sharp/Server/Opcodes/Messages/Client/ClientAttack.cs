@@ -9,7 +9,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
         public static void ClientProcessAttack(Session session, PacketMessage ClientPacket)
         {
             BufferReader reader = new(ClientPacket.Data.Span);
-            ServerFaction.ServerSendFaction(session);
+            //ServerFaction.ServerSendFaction(session);
         }
     }
 }

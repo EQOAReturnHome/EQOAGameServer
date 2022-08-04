@@ -81,17 +81,41 @@ namespace ReturnHome.Server.EntityObject
         public void UpdateAC() => MemoryMarshal.Write(StatUpdate.Span[56..], ref _currentAC);
         public void UpdateUnknown2() => MemoryMarshal.Write(StatUpdate.Span[64..], ref _unk2);
 
-        public void UpdatePoisonResist() => MemoryMarshal.Write(StatUpdate.Span[88..], ref _poisonResist);
+        public void UpdatePoisonResist()
+        {
+            int Poison = PoisonResist - 40 - (Wisdom / 7);
+            MemoryMarshal.Write(StatUpdate.Span[88..], ref Poison);
+        }
 
-        public void UpdateDiseaseResist() => MemoryMarshal.Write(StatUpdate.Span[92..], ref _diseaseResist);
+        public void UpdateDiseaseResist()
+        {
+            int Disease = DiseaseResist - 40 - (Wisdom / 7);
+            MemoryMarshal.Write(StatUpdate.Span[92..], ref Disease);
+        }
 
-        public void UpdateFireResist() => MemoryMarshal.Write(StatUpdate.Span[96..], ref _fireResist);
+        public void UpdateFireResist()
+        {
+            int Fire = FireResist - 40 - (Wisdom / 7);
+            MemoryMarshal.Write(StatUpdate.Span[96..], ref Fire);
+        }
 
-        public void UpdateColdResist() => MemoryMarshal.Write(StatUpdate.Span[100..], ref _coldResist);
+        public void UpdateColdResist()
+        {
+            int Cold = ColdResist - 40 - (Wisdom / 7);
+            MemoryMarshal.Write(StatUpdate.Span[100..], ref Cold);
+        }
 
-        public void UpdateLightningResist() => MemoryMarshal.Write(StatUpdate.Span[104..], ref _lightningResist);
+        public void UpdateLightningResist()
+        {
+            int Lightning = LightningResist - 40 - (Wisdom / 7);
+            MemoryMarshal.Write(StatUpdate.Span[104..], ref Lightning);
+        }
 
-        public void UpdateArcaneResist() => MemoryMarshal.Write(StatUpdate.Span[108..], ref _arcaneResist);
+        public void UpdateArcaneResist()
+        {
+            int Arcane = ArcaneResist - 40 - (Wisdom / 7);
+            MemoryMarshal.Write(StatUpdate.Span[108..], ref Arcane);
+        }
 
         public void UpdateFishing() => MemoryMarshal.Write(StatUpdate.Span[112..], ref _fishing);
 
@@ -131,7 +155,7 @@ namespace ReturnHome.Server.EntityObject
             MemoryMarshal.Write(StatUpdate.Span[140..], ref baseCharisma);
         }
         public void UpdateBaseAC() => MemoryMarshal.Write(StatUpdate.Span[172..], ref _baseAC);
-
+        /*
         public void UpdateBasePoisonResist()
         {
             _basePoisonResist = BasePoisonResist;
@@ -161,6 +185,6 @@ namespace ReturnHome.Server.EntityObject
         {
             _baseArcaneResist = BaseArcaneResist;
             MemoryMarshal.Write(StatUpdate.Span[224..], ref _baseArcaneResist);
-        }
+        }*/
     }
 }

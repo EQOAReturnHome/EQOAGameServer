@@ -8,7 +8,7 @@ namespace ReturnHome.Server.EntityObject
     public partial class Entity
     {
 
-        Dictionary<ItemSlot, sbyte> EquippedGear;
+        public EquippedGear equippedGear;
         //Implies if object is visible or not
         public bool Invisible = false;
 
@@ -103,8 +103,10 @@ namespace ReturnHome.Server.EntityObject
         #endregion
         public Entity(bool isplayer)
         {
+            isPlayer = isplayer;
             CurrentStats = new ModifierDictionary(this);
-            EquippedGear = new();
+            if (isPlayer)
+                equippedGear = new(this);
             #region Stat stuff
             //Players have limits on stats, NPC's will not
             if (isplayer)
@@ -121,7 +123,6 @@ namespace ReturnHome.Server.EntityObject
                 BaseMaxStat = 100000;
 
             #endregion
-            isPlayer = isplayer;
             ObjectUpdateEntity();
             ObjectUpdateVanillaColors();
             ObjectUpdateEnd();

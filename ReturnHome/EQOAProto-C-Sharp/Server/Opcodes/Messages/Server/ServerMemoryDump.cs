@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
@@ -53,9 +54,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Inventory.itemContainer)
                 entry.Value.DumpItem(ref writer);
 
-            //While we are here, lets "equip" our equipped gear
-            session.MyCharacter.EquipGear(session.MyCharacter);
-
             foreach (WeaponHotbar wb in session.MyCharacter.WeaponHotbars)
                 wb.DumpWeaponHotbar(ref writer);
 
@@ -83,8 +81,19 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             foreach (Spell s in session.MyCharacter.MySpells)
                 s.DumpSpell(ref writer);
 
-            DefaultCharacter.DefaultCharacterDict.TryGetValue((session.MyCharacter.EntityRace, session.MyCharacter.EntityClass, session.MyCharacter.EntityHumanType, session.MyCharacter.EntitySex), out Character defaultCharacter);
+            //Collect Character Stats
+            //DefaultCharacter.DefaultCharacterDict.TryGetValue((session.MyCharacter.EntityRace, session.MyCharacter.EntityClass, session.MyCharacter.EntityHumanType, session.MyCharacter.EntitySex), out Character defaultCharacter);
+            foreach (KeyValuePair<byte, Item> kv in session.MyCharacter.Inventory.itemContainer)
+            {
+                if ((sbyte)kv.Value.EquipLocation != -1)
+                {
+                    if (ItemInteraction.EquipItem(session.MyCharacter, kv.Value))
+                        Console.WriteLine($"{session.MyCharacter.CharName} successfully equipped {kv.Value.ItemName}");
 
+                    else
+                        Console.WriteLine($"{session.MyCharacter.CharName} could not equip {kv.Value.ItemName}");
+                }
+            }
             //Not entirely known what this is at this time
             //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.
             writer.Write(session.MyCharacter.Speed);

@@ -230,87 +230,24 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
+        private int _basePoisonResist { get { return 40 + BaseWisdom / 7; } }
+        private int _baseDiseaseResist { get { return 40 + BaseWisdom / 7; } }
+        private int _baseLightningResist { get { return 40 + BaseWisdom / 7; } }
+        private int _baseFireResist { get { return 40 + BaseWisdom / 7; } }
+        private int _baseColdResist { get { return 40 + BaseWisdom / 7; } }
+        private int _baseArcaneResist { get { return 40 + BaseWisdom / 7; } }
 
-        private int _baseArcaneResist;
-        private int _basePoisonResist;
-        private int _baseDiseaseResist;
-        private int _baseLightningResist;
-        private int _baseColdResist;
-        private int _baseFireResist;
+        public int PoisonResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.PoisonResistance], -100, 315);
 
-        public int BasePoisonResist { get { return Wisdom / 7; } }
-        public int BaseDiseaseResist { get { return Wisdom / 7; } }
-        public int BaseLightningResist { get { return Wisdom / 7; } }
-        public int BaseFireResist { get { return Wisdom / 7; } }
-        public int BaseColdResist { get { return Wisdom / 7; } }
-        public int BaseArcaneResist { get { return Wisdom / 7; } }
+        public int DiseaseResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.DiseaseResistance], -100, 315);
 
-        private int _arcaneResist;
-        private int _poisonResist;
-        private int _diseaseResist;
-        private int _lightningResist;
-        private int _coldResist;
-        private int _fireResist;
+        public int LightningResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.LightningResistance], -100, 315);
 
-        public int PoisonResist
-        {
-            get { return _poisonResist; }
-            set
-            {
-                _poisonResist = value;
-                UpdatePoisonResist();
-            }
-        }
+        public int FireResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.FireResistance], -100, 315);
 
-        public int DiseaseResist
-        {
-            get { return _diseaseResist; }
-            set
-            {
-                _diseaseResist = value;
-                UpdateDiseaseResist();
-            }
-        }
+        public int ColdResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.ColdResistance], -100, 315);
 
-        public int LightningResist
-        {
-            get { return _lightningResist; }
-            set
-            {
-                _lightningResist = value;
-                UpdateLightningResist();
-            }
-        }
-
-        public int FireResist
-        {
-            get { return _fireResist; }
-            set
-            {
-                _fireResist = value;
-                UpdateFireResist();
-            }
-        }
-
-        public int ColdResist
-        {
-            get { return _coldResist; }
-            set
-            {
-                _coldResist = value;
-                UpdateColdResist();
-            }
-        }
-
-        public int ArcaneResist
-        {
-            get { return _arcaneResist; }
-            set
-            {
-                _arcaneResist = value;
-                UpdateArcaneResist();
-            }
-        }
+        public int ArcaneResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.ArcaneResistance], -100, 315);
 
         #endregion
 
@@ -322,7 +259,7 @@ namespace ReturnHome.Server.EntityObject
             BaseHP = (Level * ((_hpFactor * 100) + (Stamina * 100) / 11)) / 100;
 
             //Utilizing BaseHP + Gear HP + buffs
-            HPMax = BaseHP + GearBuffHPMax;
+            HPMax = BaseHP + CurrentStats.dictionary[StatModifiers.HPMAX];
 
             //For now set current HP to HP MAX
             CurrentHP = BaseHP;
@@ -369,7 +306,7 @@ namespace ReturnHome.Server.EntityObject
                 _ => throw new NotImplementedException()
             }; // + CMPower;
 
-            PowerMax = BasePower + GearBuffPowerMax;
+            PowerMax = BasePower + CurrentStats.dictionary[StatModifiers.POWMAX];
 
             CurrentPower = BasePower;
         }

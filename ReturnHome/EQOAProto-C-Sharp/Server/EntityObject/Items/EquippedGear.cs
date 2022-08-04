@@ -10,6 +10,7 @@ namespace ReturnHome.Server.EntityObject.Items
         private readonly static Dictionary<ItemSlot, EquipSlot> ItemSlotToEquipSlots = new Dictionary<ItemSlot, EquipSlot>()
         {
             { ItemSlot.NotEquipped, EquipSlot.NotEquipped },
+            { ItemSlot.Hand, EquipSlot.Hand },
             { ItemSlot.Head, EquipSlot.Head },
             { ItemSlot.Robe, EquipSlot.Robe },
             { ItemSlot.Earring, EquipSlot.RightEar},
@@ -44,10 +45,10 @@ namespace ReturnHome.Server.EntityObject.Items
         }
 
         //Should we find the appropriate slot first, then work from there?
-        public void Add(ItemSlot slot, Item item)
+        public void Add(Item item)
         {
             //Find appropriate slot
-            EquipSlot equipSlot = ItemSlotToEquipSlots[slot];
+            EquipSlot equipSlot = ItemSlotToEquipSlots[item.itemSlot];
 
             //Add To Dictionary/Equip item
             EquipItem(equipSlot, item);

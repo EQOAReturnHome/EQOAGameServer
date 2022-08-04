@@ -6,6 +6,7 @@ namespace ReturnHome.Server.EntityObject.Actors
   public class Actor : Entity
   {
         public long killtime = 0;
+        public int Tunar = 0;
         public Actor() : base(false)
         {
 
@@ -44,7 +45,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             NPCType = (ushort)npcType;
 
             //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
-            Inventory = new(3000);
+            //Inventory = new(3000);
         }
   }
 }

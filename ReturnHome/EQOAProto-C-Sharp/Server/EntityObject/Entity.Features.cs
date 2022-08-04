@@ -451,23 +451,26 @@ namespace ReturnHome.Server.EntityObject
             ///Start processing MyItem
             foreach (Item MyItem in character.Inventory.itemContainer.Values)
             {
+                if ((sbyte)MyItem.itemSlot == -1)
+                    return;
+
                 ///Use a switch to sift through MyItem and add them properly
-                switch (MyItem.EquipLocation)
+                switch ((byte)MyItem.EquipLocation)
                 {
                     ///Helm
-                    case 1:
+                    case 0:
                         Helm = (byte)MyItem.Model;
                         HelmColor = MyItem.Color;
                         break;
 
                     ///Robe
-                    case 2:
+                    case 21:
                         Robe = (byte)MyItem.Model;
                         RobeColor = MyItem.Color;
                         break;
 
                     ///Gloves
-                    case 19:
+                    case 1:
                         Gloves = (byte)MyItem.Model;
                         GloveColor = MyItem.Color;
                         break;
@@ -485,24 +488,24 @@ namespace ReturnHome.Server.EntityObject
                         break;
 
                     ///Legs
-                    case 10:
+                    case 12:
                         Legs = (byte)MyItem.Model;
                         LegColor = MyItem.Color;
                         break;
 
                     ///Feet
-                    case 11:
+                    case 13:
                         Boots = (byte)MyItem.Model;
                         BootsColor = MyItem.Color;
                         break;
 
                     ///Primary
-                    case 12:
+                    case 14:
                         Primary = MyItem.Model;
                         break;
 
                     ///Secondary
-                    case 14:
+                    case 15:
 
                         ///If we have a secondary equipped already, puts next secondary into primary slot
                         if (Secondary > 0)
@@ -518,27 +521,23 @@ namespace ReturnHome.Server.EntityObject
                         break;
 
                     ///2 Hand
-                    case 15:
-                        Primary = MyItem.Model;
-                        break;
-
-                    ///Shield
-                    case 13:
-                        Shield = MyItem.Model;
-                        break;
-
-                    ///Bow
                     case 16:
                         Primary = MyItem.Model;
                         break;
 
-                    ///Thrown
+                    ///Shield
                     case 17:
+                        Shield = MyItem.Model;
+                        break;
+
+                    ///Bow
+                    case 18:
                         Primary = MyItem.Model;
                         break;
 
                     ///Held
-                    case 18:
+                    case 19:
+                    case 20: 
                         ///If we have a secondary equipped already, puts next secondary into primary slot
                         if (Secondary > 0)
                         {

@@ -1,5 +1,4 @@
-﻿
-namespace ReturnHome.Server.EntityObject
+﻿namespace ReturnHome.Server.EntityObject
 {
     public enum StatModifiers : byte
     {

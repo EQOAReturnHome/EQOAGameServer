@@ -64,7 +64,7 @@ namespace ReturnHome.Utilities
                 case StatModifiers.WIS:
                     _e.CalculatePower();
                     _e.UpdateWisdom();
-                    //UpdateBaseResists(e);
+                    UpdateResists();
                     break;
 
                 case StatModifiers.INT:
@@ -109,7 +109,6 @@ namespace ReturnHome.Utilities
                     break;
 
                 case StatModifiers.FireResistance:
-                    _e.FireResist = dictionary[StatModifiers.FireResistance];
                     _e.UpdateFireResist();
                     break;
 
@@ -171,18 +170,20 @@ namespace ReturnHome.Utilities
             UpdateStatInformation(key);
         }
 
-        private void UpdateBaseResists(Entity e)
+        private void UpdateBaseResists()
         {
+            /*
             _e.UpdateBaseArcaneResist();
             _e.UpdateBaseFireResist();
             _e.UpdateBaseDiseaseResist();
             _e.UpdateBaseColdResist();
             _e.UpdateBaseLightningResist();
             _e.UpdateBasePoisonResist();
-            UpdateResists(e);
+            */
+            UpdateResists();
         }
 
-        private void UpdateResists(Entity e)
+        private void UpdateResists()
         {
             
             _e.UpdatePoisonResist();
