@@ -1,11 +1,14 @@
 using System;
+using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-    
+
+        public EquippedGear equippedGear;
         //Implies if object is visible or not
         public bool Invisible = false;
 
@@ -19,31 +22,11 @@ namespace ReturnHome.Server.EntityObject
         //Store latest character update directly to character for other characters to pull
         //Doesn't seem right? But we can trigger each session to serialize to this array and distribute to other client's this way
         public Memory<byte> ObjectUpdate = new Memory<byte> ( new byte[0xC8]);
+        public Memory<byte> StatUpdate = new Memory<byte>(new byte[0xEC]);
 
         /* These are all values for character creation, likely don't need to be attributes of the character object at all*/
         //Default character data should probably be stored in script's to generate from on client's request, saving that to the database
         /*CONSIDER REMOVING IN FAVOR OF ABOVE IN TIME?*/
-        public string TestCharName;
-        public int StartingClass;
-        public int Gender;
-        //Note this is for holding the HumType from the client that is an int and base Character has a string HumType
-        public int HumTypeNum;
-        //Addxxxx attributes of the class are to hold a new characters initial allocated stat points in each category
-        public int AddStrength;
-        public int AddStamina;
-        public int AddAgility;
-        public int AddDexterity;
-        public int AddWisdom;
-        public int AddIntelligence;
-        public int AddCharisma;
-        //Defaultxxx attributes of the class pulled from the defaultClass table in the DB for new character creation
-        public int DefaultStrength;
-        public int DefaultStamina;
-        public int DefaultAgility;
-        public int DefaultDexterity;
-        public int DefaultWisdom;
-        public int DefaultIntelligence;
-        public int DefaultCharisma;
 
         public bool isPlayer;
 
@@ -118,9 +101,28 @@ namespace ReturnHome.Server.EntityObject
             }
         }
         #endregion
-        public Entity(bool isplayer)
+        public Entity(bool isplayer, int Level2)
         {
             isPlayer = isplayer;
+            CurrentStats = new ModifierDictionary(this);
+            if (isPlayer)
+                equippedGear = new(this);
+            #region Stat stuff
+            //Players have limits on stats, NPC's will not
+            if (isplayer)
+            {
+                if (Level2 < 45)
+                    BaseMaxStat = 350;
+
+                else
+                    BaseMaxStat = 400;
+            }
+
+            //NPC, no limits atm
+            else
+                BaseMaxStat = 100000;
+
+            #endregion
             ObjectUpdateEntity();
             ObjectUpdateVanillaColors();
             ObjectUpdateEnd();

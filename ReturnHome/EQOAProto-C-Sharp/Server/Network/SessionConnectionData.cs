@@ -34,7 +34,7 @@ namespace ReturnHome.Server.Network
         //Create an array of all 24 object updates
         //Need a way to ensure no more then 24 objects can be allocated, array may be best?
         public Memory<ServerObjectUpdate> serverObjects;
-
+        public ServerStatUpdate clientStatUpdate;
         /*
          * Need to be able to do a full cycle reset for server objects.
          * Whenever a player moves/teleports to a new map/world, all of the c9 channels need to be reset
@@ -60,6 +60,7 @@ namespace ReturnHome.Server.Network
 
             //Create the object to track incoming client updates
             client = new();
+            clientStatUpdate = new(_session, (byte)MessageType.StatUpdate);
 
             serverObjects = new Memory<ServerObjectUpdate>(new ServerObjectUpdate[0x17]);
             Span<ServerObjectUpdate> tempSpan = serverObjects.Span;

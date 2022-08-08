@@ -83,7 +83,7 @@ namespace ReturnHome.Server.Network
                         //Place segment into resend queue
                         _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
                         segmentBodyFlags.RdpMessage = true;
-                        continue;
+                        break;
                     }
 
                     //Final message of segment, use FB type
@@ -145,8 +145,10 @@ namespace ReturnHome.Server.Network
                             if (reliableMessage.Messagetype == MessageType.ReliableMessage || reliableMessage.Messagetype == MessageType.PingMessage || (reliableMessage.Messagetype == MessageType.SegmentReliableMessage && reliableMessage.Size < 0x0484))
                             {
                                 reliableMessage.AddSequence(_session.rdpCommIn.connectionData.lastSentMessageSequence++);
-
-                                writer.Write((byte)reliableMessage.Messagetype);
+                                if(reliableMessage.Messagetype == MessageType.SegmentReliableMessage)
+                                    writer.Write((byte)MessageType.ReliableMessage);
+                                else
+                                    writer.Write((byte)reliableMessage.Messagetype);
                                 writer.WriteSize(reliableMessage.Size);
                                 writer.Write(reliableMessage.Sequence);
                                 writer.Write(reliableMessage.Span[0..reliableMessage.Size]);
@@ -181,7 +183,7 @@ namespace ReturnHome.Server.Network
                                 _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
                                 _segmentMessage = reliableMessage;
                                 segmentBodyFlags.RdpMessage = true;
-                                continue;
+                                break;
                             }
                         }
                     }
