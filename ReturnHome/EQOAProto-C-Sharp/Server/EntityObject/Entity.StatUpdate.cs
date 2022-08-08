@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using ReturnHome.Server.EntityObject.Stats;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -83,37 +84,37 @@ namespace ReturnHome.Server.EntityObject
 
         public void UpdatePoisonResist()
         {
-            int Poison = PoisonResist - 40 - (Wisdom / 7);
+            int Poison = _poisonResist;
             MemoryMarshal.Write(StatUpdate.Span[88..], ref Poison);
         }
 
         public void UpdateDiseaseResist()
         {
-            int Disease = DiseaseResist - 40 - (Wisdom / 7);
+            int Disease = _diseaseResist;
             MemoryMarshal.Write(StatUpdate.Span[92..], ref Disease);
         }
 
         public void UpdateFireResist()
         {
-            int Fire = FireResist - 40 - (Wisdom / 7);
+            int Fire = _fireResist;
             MemoryMarshal.Write(StatUpdate.Span[96..], ref Fire);
         }
 
         public void UpdateColdResist()
         {
-            int Cold = ColdResist - 40 - (Wisdom / 7);
+            int Cold = _coldResist;
             MemoryMarshal.Write(StatUpdate.Span[100..], ref Cold);
         }
 
         public void UpdateLightningResist()
         {
-            int Lightning = LightningResist - 40 - (Wisdom / 7);
+            int Lightning = _lightningResist;
             MemoryMarshal.Write(StatUpdate.Span[104..], ref Lightning);
         }
 
         public void UpdateArcaneResist()
         {
-            int Arcane = ArcaneResist - 40 - (Wisdom / 7);
+            int Arcane = _arcaneResist;
             MemoryMarshal.Write(StatUpdate.Span[108..], ref Arcane);
         }
 

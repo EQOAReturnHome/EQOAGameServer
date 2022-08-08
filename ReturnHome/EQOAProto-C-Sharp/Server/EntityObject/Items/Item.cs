@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ReturnHome.Server.EntityObject.Stats;
 
 using ReturnHome.Utilities;
 

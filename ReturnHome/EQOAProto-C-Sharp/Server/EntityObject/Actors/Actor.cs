@@ -1,3 +1,5 @@
+using ReturnHome.Server.EntityObject.Stats;
+
 using System;
 using System.Numerics;
 
@@ -7,14 +9,14 @@ namespace ReturnHome.Server.EntityObject.Actors
   {
         public long killtime = 0;
         public int Tunar = 0;
-        public Actor() : base(false)
+        public Actor() : base(false, 0)
         {
 
         }
 
         public Actor(string charName, float xCoord, float yCoord, float zCoord, int facing, int world, int modelid, float size,
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
-            int gloves, int legs, int feet, int head, uint npcType) : base(false)
+            int gloves, int legs, int feet, int head, uint npcType) : base(false, level)
         {
 
             CharName = charName;

@@ -43,6 +43,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.ClassMastery, ClientClassMastery.ProcessClassMastery },
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
             { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
+            { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

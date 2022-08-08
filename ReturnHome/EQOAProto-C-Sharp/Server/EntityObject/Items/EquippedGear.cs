@@ -1,5 +1,8 @@
-﻿using System;
+﻿using ReturnHome.Server.EntityObject.Stats;
+
+using System;
 using System.Collections.Generic;
+
 
 namespace ReturnHome.Server.EntityObject.Items
 {
@@ -33,15 +36,15 @@ namespace ReturnHome.Server.EntityObject.Items
             { ItemSlot.Bait, EquipSlot.Secondary }, //Is this technically correct?
         };
 
-        private Dictionary<EquipSlot, Item> EquippedItems;
+        private Dictionary<EquipSlot, Item> _equippedItems;
 
         public EquippedGear(Entity entity)
         {
             _entity = entity;
-            EquippedItems = new();
+            _equippedItems = new();
 
             foreach (EquipSlot e in Enum.GetValues(typeof(EquipSlot)))
-                EquippedItems.Add(e, null);
+                _equippedItems.Add(e, null);
         }
 
         //Should we find the appropriate slot first, then work from there?
@@ -54,6 +57,14 @@ namespace ReturnHome.Server.EntityObject.Items
             EquipItem(equipSlot, item);
         }
 
+        public EquipSlot Remove(Item item) => UnequipItem(item.EquipLocation, item);
+
+        public bool Exists(Item i)
+        {
+            if (i == _equippedItems[i.EquipLocation])
+                return true;
+            return false;
+        }
         private void AddStats(Item item)
         {
             try
@@ -84,49 +95,156 @@ namespace ReturnHome.Server.EntityObject.Items
             }
         }
 
+        private EquipSlot UnequipItem(EquipSlot equipSlot, Item item)
+        {
+            switch (equipSlot)
+            {
+                case EquipSlot.Robe:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Robe = -1;
+                    _entity.RobeColor = 0xFFFFFFFF;
+                    break;
+
+                case EquipSlot.Head:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Helm = 0;
+                    _entity.HelmColor = 0xFFFFFFFF;
+                    break;
+
+                case EquipSlot.Chest:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.ChestColor = 0xFFFFFFFF;
+                    _entity.Chest = 0;
+                    break;
+
+                case EquipSlot.Bracers:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Bracer = 0;
+                    _entity.BracerColor = 0xFFFFFFFF;
+                    break;
+
+                //If bracers are equipped, remove them and stats, first bracelet is always right, left always changes.
+                case EquipSlot.RightBracelet:
+                case EquipSlot.LeftBracelet:
+                case EquipSlot.RightRing:
+                case EquipSlot.LeftRing:
+                case EquipSlot.RightEar:
+                case EquipSlot.LeftEar:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    break;
+
+                case EquipSlot.Hand:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Gloves = 0;
+                    _entity.GloveColor = 0xFFFFFFFF;
+                    break;
+
+                case EquipSlot.Leg:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.LegColor = 0xFFFFFFFF;
+                    _entity.Legs = 0;
+                    break;
+
+                case EquipSlot.Feet:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Boots = 0;
+                    _entity.BootsColor = 0xFFFFFFFF;
+                    break;
+
+                case EquipSlot.Primary:
+                case EquipSlot.Held:
+                case EquipSlot.TwoHand:
+                case EquipSlot.Thrown:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Primary = 0;
+                    break;
+
+
+                case EquipSlot.Held2:
+                case EquipSlot.Secondary:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Secondary = 0;
+                    break;
+
+                case EquipSlot.Shield:
+                    if (_equippedItems[equipSlot] != null)
+                        RemoveStats(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = null;
+                    _entity.Shield = 0;
+                    break;
+            }
+
+            item.EquipLocation = EquipSlot.NotEquipped;
+            return equipSlot;
+        }
+
         private void EquipItem(EquipSlot equipSlot,Item item)
         {
             switch (equipSlot)
             {
                 case EquipSlot.Robe:
-                    if(EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Robe = item.Model;
                     _entity.RobeColor = item.Color;
                     break;
 
                 case EquipSlot.Head:
-                    if (EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Helm = (byte)item.Model;
                     _entity.HelmColor = item.Color;
                     break;
 
                 case EquipSlot.Chest:
-                    if (EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.ChestColor = item.Color;
                     _entity.Chest = (byte)item.Model;
                     break;
 
                 case EquipSlot.Bracers:
                     //If any bracelet's are equipped, unequip them and remove stats
-                    if (EquippedItems[EquipSlot.LeftBracelet] != null)
+                    if (_equippedItems[EquipSlot.LeftBracelet] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.LeftBracelet]);
-                        EquippedItems[EquipSlot.LeftBracelet] = null;
+                        Remove(_equippedItems[EquipSlot.LeftBracelet]);
+                        _equippedItems[EquipSlot.LeftBracelet] = null;
                     }
 
-                    else if (EquippedItems[EquipSlot.RightBracelet] != null)
+                    if (_equippedItems[EquipSlot.RightBracelet] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.RightBracelet]);
-                        EquippedItems[EquipSlot.RightBracelet] = null;
+                        Remove(_equippedItems[EquipSlot.RightBracelet]);
+                        _equippedItems[EquipSlot.RightBracelet] = null;
                     }
 
-                    EquippedItems[equipSlot] = item;
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Bracer = (byte)item.Model;
                     _entity.BracerColor = item.Color;
                     break;
@@ -134,21 +252,24 @@ namespace ReturnHome.Server.EntityObject.Items
                 //If bracers are equipped, remove them and stats, first bracelet is always right, left always changes.
                 case EquipSlot.RightBracelet:
                 case EquipSlot.LeftBracelet:
-                    if (EquippedItems[EquipSlot.Bracers] != null)
+                    if (_equippedItems[EquipSlot.Bracers] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Bracers]);
-                        EquippedItems[EquipSlot.Bracers] = null;
+                        Remove(_equippedItems[EquipSlot.Bracers]);
+                        _equippedItems[EquipSlot.Bracers] = null;
                     }
 
-                    if (EquippedItems[EquipSlot.RightBracelet] == null)
-                        EquippedItems[EquipSlot.RightBracelet] = item;
-
+                    if (_equippedItems[EquipSlot.RightBracelet] == null)
+                    {
+                        _equippedItems[EquipSlot.RightBracelet] = item;
+                        item.EquipLocation = EquipSlot.RightBracelet;
+                    }
                     else
                     {
-                        if(EquippedItems[EquipSlot.LeftBracelet] != null)
-                            RemoveStats(EquippedItems[EquipSlot.LeftBracelet]);
+                        if (_equippedItems[EquipSlot.LeftBracelet] != null)
+                            Remove(_equippedItems[EquipSlot.LeftBracelet]);
 
-                        EquippedItems[EquipSlot.LeftBracelet] = item;
+                        _equippedItems[EquipSlot.LeftBracelet] = item;
+                        item.EquipLocation = EquipSlot.LeftBracelet;
                     }
 
                     _entity.Bracer = 0;
@@ -156,61 +277,72 @@ namespace ReturnHome.Server.EntityObject.Items
                     break;
 
                 case EquipSlot.Hand:
-                    if (EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Gloves = (byte)item.Model;
                     _entity.GloveColor = item.Color;
                     break;
 
                 case EquipSlot.Leg:
-                    if (EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.LegColor = item.Color;
                     _entity.Legs = (byte)item.Model;
                     break;
 
                 case EquipSlot.Feet:
-                    if (EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Boots = (byte)item.Model;
                     _entity.BootsColor = item.Color;
                     break;
 
                 case EquipSlot.RightRing:
                 case EquipSlot.LeftRing:
-                    if (EquippedItems[EquipSlot.RightRing] == null)
-                        EquippedItems[EquipSlot.RightRing] = item;
+                    if (_equippedItems[EquipSlot.RightRing] == null)
+                    {
+                        _equippedItems[EquipSlot.RightRing] = item;
+                        item.EquipLocation = EquipSlot.RightRing;
+                    }
                     else
                     {
-                        if (EquippedItems[EquipSlot.LeftRing] != null)
-                            RemoveStats(EquippedItems[EquipSlot.LeftRing]);
+                        if (_equippedItems[EquipSlot.LeftRing] != null)
+                            Remove(_equippedItems[EquipSlot.LeftRing]);
 
-                        EquippedItems[EquipSlot.LeftRing] = item;
+                        _equippedItems[EquipSlot.LeftRing] = item;
+                        item.EquipLocation = EquipSlot.LeftRing;
                     }
                     break;
 
                 case EquipSlot.RightEar:
                 case EquipSlot.LeftEar:
-                    if (EquippedItems[EquipSlot.RightEar] == null)
-                        EquippedItems[EquipSlot.RightEar] = item;
+                    if (_equippedItems[EquipSlot.RightEar] == null)
+                    {
+                        _equippedItems[EquipSlot.RightEar] = item;
+                        item.EquipLocation = EquipSlot.RightEar;
+                    }
                     else
                     {
-                        if (EquippedItems[EquipSlot.LeftEar] != null)
-                            RemoveStats(EquippedItems[EquipSlot.LeftEar]);
+                        if (_equippedItems[EquipSlot.LeftEar] != null)
+                            Remove(_equippedItems[EquipSlot.LeftEar]);
 
-                        EquippedItems[EquipSlot.LeftEar] = item;
+                        _equippedItems[EquipSlot.LeftEar] = item;
+                        item.EquipLocation = EquipSlot.LeftEar;
                     }
                     break;
 
                 case EquipSlot.Neck:
                 case EquipSlot.Belt:
-                    if (EquippedItems[equipSlot] == null)
-                        RemoveStats(EquippedItems[equipSlot]);
-
-                    EquippedItems[equipSlot] = item;
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     break;
 
                 case EquipSlot.Primary:
@@ -233,225 +365,234 @@ namespace ReturnHome.Server.EntityObject.Items
             {
                 case EquipSlot.Primary:
                     //If any of the first 2 if's are equipped, unequip them and remove stats
-                    if (EquippedItems[EquipSlot.TwoHand] != null)
+                    if (_equippedItems[EquipSlot.TwoHand] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.TwoHand]);
-                        EquippedItems[EquipSlot.TwoHand] = null;
+                        Remove(_equippedItems[EquipSlot.TwoHand]);
+                        _equippedItems[EquipSlot.TwoHand] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Thrown] != null)
+                    if (_equippedItems[EquipSlot.Thrown] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Thrown]);
-                        EquippedItems[EquipSlot.Thrown] = null;
+                        Remove(_equippedItems[EquipSlot.Thrown]);
+                        _equippedItems[EquipSlot.Thrown] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Held] != null)
+                    if (_equippedItems[EquipSlot.Held] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Held]);
-                        EquippedItems[EquipSlot.Held] = null;
+                        Remove(_equippedItems[EquipSlot.Held]);
+                        _equippedItems[EquipSlot.Held] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[equipSlot] != null)
-                        RemoveStats(EquippedItems[equipSlot]);
+                    if (_equippedItems[equipSlot] != null)
+                        Remove(_equippedItems[equipSlot]);
+
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Primary = item.Model;
                     break;
 
                 //If a primary is equipped, secondary is always in secondary
                 case EquipSlot.Secondary:
                     //If any of the first 2 if's are equipped, unequip them and remove stats
-                    if (EquippedItems[EquipSlot.TwoHand] != null)
+                    if (_equippedItems[EquipSlot.TwoHand] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.TwoHand]);
-                        EquippedItems[EquipSlot.TwoHand] = null;
+                        Remove(_equippedItems[EquipSlot.TwoHand]);
+                        _equippedItems[EquipSlot.TwoHand] = null;
                         _entity.Primary = 0;
                     }
 
-                    if(EquippedItems[EquipSlot.Thrown] != null)
+                    if(_equippedItems[EquipSlot.Thrown] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Thrown]);
-                        EquippedItems[EquipSlot.Thrown] = null;
+                        Remove(_equippedItems[EquipSlot.Thrown]);
+                        _equippedItems[EquipSlot.Thrown] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Primary] == null)
+                    if (_equippedItems[EquipSlot.Primary] == null)
                     {
-                        EquippedItems[EquipSlot.Primary] = item;
+                        _equippedItems[EquipSlot.Primary] = item;
+                        item.EquipLocation = EquipSlot.Primary;
                         _entity.Primary = item.Model;
                     }
 
                     else
                     {
-                        if(EquippedItems[EquipSlot.Shield] != null)
+                        if(_equippedItems[EquipSlot.Shield] != null)
                         {
-                            RemoveStats(EquippedItems[EquipSlot.Shield]);
-                            EquippedItems[EquipSlot.Shield] = null;
+                            Remove(_equippedItems[EquipSlot.Shield]);
+                            _equippedItems[EquipSlot.Shield] = null;
                             _entity.Shield = 0;
                         }
 
-                        if (EquippedItems[EquipSlot.Held2] != null)
+                        if (_equippedItems[EquipSlot.Held2] != null)
                         {
-                            RemoveStats(EquippedItems[EquipSlot.Held2]);
-                            EquippedItems[EquipSlot.Held2] = null;
+                            Remove(_equippedItems[EquipSlot.Held2]);
+                            _equippedItems[EquipSlot.Held2] = null;
                             _entity.Secondary = 0;
                         }
 
-                        if (EquippedItems[EquipSlot.Secondary] != null)
+                        if (_equippedItems[EquipSlot.Secondary] != null)
                         {
-                            RemoveStats(EquippedItems[EquipSlot.Secondary]);
-                            EquippedItems[EquipSlot.Secondary] = null;
+                            Remove(_equippedItems[EquipSlot.Secondary]);
+                            _equippedItems[EquipSlot.Secondary] = null;
                             _entity.Secondary = 0;
                         }
 
-                        EquippedItems[equipSlot] = item;
+                        _equippedItems[equipSlot] = item;
+                        item.EquipLocation = equipSlot;
                         _entity.Secondary = item.Model;
                     }
                     break;
 
                 case EquipSlot.Shield:
-                    if (EquippedItems[EquipSlot.TwoHand] != null)
+                    if (_equippedItems[EquipSlot.TwoHand] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.TwoHand]);
-                        EquippedItems[EquipSlot.TwoHand] = null;
+                        Remove(_equippedItems[EquipSlot.TwoHand]);
+                        _equippedItems[EquipSlot.TwoHand] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Thrown] != null)
+                    if (_equippedItems[EquipSlot.Thrown] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Thrown]);
-                        EquippedItems[EquipSlot.Thrown] = null;
+                        Remove(_equippedItems[EquipSlot.Thrown]);
+                        _equippedItems[EquipSlot.Thrown] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Shield] != null)
+                    if (_equippedItems[EquipSlot.Shield] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Shield]);
-                        EquippedItems[EquipSlot.Shield] = null;
+                        Remove(_equippedItems[EquipSlot.Shield]);
+                        _equippedItems[EquipSlot.Shield] = null;
                         _entity.Shield = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Held2] != null)
+                    if (_equippedItems[EquipSlot.Held2] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Held2]);
-                        EquippedItems[EquipSlot.Held2] = null;
+                        Remove(_equippedItems[EquipSlot.Held2]);
+                        _equippedItems[EquipSlot.Held2] = null;
                         _entity.Secondary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Secondary] != null)
+                    if (_equippedItems[EquipSlot.Secondary] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Secondary]);
-                        EquippedItems[EquipSlot.Secondary] = null;
+                        Remove(_equippedItems[EquipSlot.Secondary]);
+                        _equippedItems[EquipSlot.Secondary] = null;
                         _entity.Secondary = 0;
                     }
 
-                    EquippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
+                    _equippedItems[equipSlot] = item;
                     _entity.Shield = item.Model;
                     break;
 
                 case EquipSlot.Held:
                 case EquipSlot.Held2:
-                    if (EquippedItems[EquipSlot.TwoHand] != null)
+                    if (_equippedItems[EquipSlot.TwoHand] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.TwoHand]);
-                        EquippedItems[EquipSlot.TwoHand] = null;
+                        Remove(_equippedItems[EquipSlot.TwoHand]);
+                        _equippedItems[EquipSlot.TwoHand] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Thrown] != null)
+                    if (_equippedItems[EquipSlot.Thrown] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Thrown]);
-                        EquippedItems[EquipSlot.Thrown] = null;
+                        Remove(_equippedItems[EquipSlot.Thrown]);
+                        _equippedItems[EquipSlot.Thrown] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Primary] == null)
+                    if (_equippedItems[EquipSlot.Primary] == null)
                     {
-                        EquippedItems[EquipSlot.Held] = item;
+                        _equippedItems[EquipSlot.Held] = item;
+                        item.EquipLocation = EquipSlot.Held;
                         _entity.Primary = item.Model;
                     }
 
                     else
                     {
-                        if (EquippedItems[EquipSlot.Shield] != null)
+                        if (_equippedItems[EquipSlot.Shield] != null)
                         {
-                            RemoveStats(EquippedItems[EquipSlot.Shield]);
-                            EquippedItems[EquipSlot.Shield] = null;
+                            Remove(_equippedItems[EquipSlot.Shield]);
+                            _equippedItems[EquipSlot.Shield] = null;
                             _entity.Shield = 0;
                         }
 
-                        if (EquippedItems[EquipSlot.Held2] != null)
+                        if (_equippedItems[EquipSlot.Held2] != null)
                         {
-                            RemoveStats(EquippedItems[EquipSlot.Held2]);
-                            EquippedItems[EquipSlot.Held2] = null;
+                            Remove(_equippedItems[EquipSlot.Held2]);
+                            _equippedItems[EquipSlot.Held2] = null;
                             _entity.Secondary = 0;
                         }
 
-                        if (EquippedItems[EquipSlot.Secondary] != null)
+                        if (_equippedItems[EquipSlot.Secondary] != null)
                         {
-                            RemoveStats(EquippedItems[EquipSlot.Secondary]);
-                            EquippedItems[EquipSlot.Secondary] = null;
+                            Remove(_equippedItems[EquipSlot.Secondary]);
+                            _equippedItems[EquipSlot.Secondary] = null;
                             _entity.Secondary = 0;
                         }
 
-                        EquippedItems[EquipSlot.Held2] = item;
+                        _equippedItems[EquipSlot.Held2] = item;
+                        item.EquipLocation = EquipSlot.Held2;
                         _entity.Secondary = item.Model;
                     }
                     break;
 
                 case EquipSlot.TwoHand:
                 case EquipSlot.Thrown:
-                    if (EquippedItems[EquipSlot.TwoHand] != null)
+                    if (_equippedItems[EquipSlot.TwoHand] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.TwoHand]);
-                        EquippedItems[EquipSlot.TwoHand] = null;
+                        Remove(_equippedItems[EquipSlot.TwoHand]);
+                        _equippedItems[EquipSlot.TwoHand] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Thrown] != null)
+                    if (_equippedItems[EquipSlot.Thrown] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Thrown]);
-                        EquippedItems[EquipSlot.Thrown] = null;
+                        Remove(_equippedItems[EquipSlot.Thrown]);
+                        _equippedItems[EquipSlot.Thrown] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Primary] != null)
+                    if (_equippedItems[EquipSlot.Primary] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Primary]);
-                        EquippedItems[EquipSlot.Primary] = null;
+                        Remove(_equippedItems[EquipSlot.Primary]);
+                        _equippedItems[EquipSlot.Primary] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Held] != null)
+                    if (_equippedItems[EquipSlot.Held] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Held]);
-                        EquippedItems[EquipSlot.Held] = null;
+                        Remove(_equippedItems[EquipSlot.Held]);
+                        _equippedItems[EquipSlot.Held] = null;
                         _entity.Primary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Shield] != null)
+                    if (_equippedItems[EquipSlot.Shield] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Shield]);
-                        EquippedItems[EquipSlot.Shield] = null;
+                        Remove(_equippedItems[EquipSlot.Shield]);
+                        _equippedItems[EquipSlot.Shield] = null;
                         _entity.Shield = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Held2] != null)
+                    if (_equippedItems[EquipSlot.Held2] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Held2]);
-                        EquippedItems[EquipSlot.Held2] = null;
+                        Remove(_equippedItems[EquipSlot.Held2]);
+                        _equippedItems[EquipSlot.Held2] = null;
                         _entity.Secondary = 0;
                     }
 
-                    if (EquippedItems[EquipSlot.Secondary] != null)
+                    if (_equippedItems[EquipSlot.Secondary] != null)
                     {
-                        RemoveStats(EquippedItems[EquipSlot.Secondary]);
-                        EquippedItems[EquipSlot.Secondary] = null;
+                        Remove(_equippedItems[EquipSlot.Secondary]);
+                        _equippedItems[EquipSlot.Secondary] = null;
                         _entity.Secondary = 0;
                     }
 
-                    EquippedItems[equipSlot] = item;
+                    _equippedItems[equipSlot] = item;
+                    item.EquipLocation = equipSlot;
                     _entity.Primary = item.Model;
                     break;
             }

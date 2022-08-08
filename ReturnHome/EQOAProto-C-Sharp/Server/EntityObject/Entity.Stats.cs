@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using ReturnHome.Utilities;
+using ReturnHome.Server.EntityObject.Stats;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -248,7 +247,17 @@ namespace ReturnHome.Server.EntityObject
         public int ColdResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.ColdResistance], -100, 315);
 
         public int ArcaneResist => Clamp(40 + (Wisdom / 7) + CurrentStats.dictionary[StatModifiers.ArcaneResistance], -100, 315);
+        public int _poisonResist => Clamp(CurrentStats.dictionary[StatModifiers.PoisonResistance], -100, 315 - 40 + (Wisdom / 7));
 
+        public int _diseaseResist => Clamp(CurrentStats.dictionary[StatModifiers.DiseaseResistance], -100, 315 - 40 + (Wisdom / 7));
+
+        public int _lightningResist => Clamp(CurrentStats.dictionary[StatModifiers.LightningResistance], -100, 315 - 40 + (Wisdom / 7));
+
+        public int _fireResist => Clamp(CurrentStats.dictionary[StatModifiers.FireResistance], -100, 315 - 40 + (Wisdom / 7));
+
+        public int _coldResist => Clamp(CurrentStats.dictionary[StatModifiers.ColdResistance], -100, 315 - 40 + (Wisdom / 7));
+
+        public int _arcaneResist => Clamp(CurrentStats.dictionary[StatModifiers.ArcaneResistance], -100, 315 - 40 + (Wisdom / 7));
         #endregion
 
         private int _fishing;

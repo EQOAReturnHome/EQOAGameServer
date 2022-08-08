@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
+using ReturnHome.Server.EntityObject.Stats;
 
 namespace ReturnHome.Server.EntityObject.Player
 {  
@@ -46,7 +47,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public int Teleportcounter { get; internal set; } = 0;
 
         //Used to create our Default characters stored on the server to either reference values, or deep copy for entirely new characters
-        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp) : base(true)
+        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp) : base(true, 1)
         {
             Speed = speed;
             EntityRace = (Race)race;
@@ -104,7 +105,7 @@ namespace ReturnHome.Server.EntityObject.Player
         //Need instantiation, but needs some review because it's so big... 
         public Character(string charName, int serverID, int modelID, int tClass, int race, int humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int sex, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
                          float speed, int world, float xCoord, float yCoord, float zCoord, float facing, int tpStrength, int tpStamina, int tpAgility, int tpDexterity, int tpWisdom, int tpIntelligence, int tpCharisma, int currentHP, int currentPower, int aC,
-                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing,string playerFlags, Session MySession) : base(true)
+                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing,string playerFlags, Session MySession) : base(true, level)
         {
             Speed = speed;
             //playerFlags.Add("Freeport", true);

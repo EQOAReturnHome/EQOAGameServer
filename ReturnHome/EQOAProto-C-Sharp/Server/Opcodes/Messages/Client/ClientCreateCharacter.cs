@@ -5,6 +5,7 @@ using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client

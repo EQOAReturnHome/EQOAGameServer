@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ReturnHome.Server.EntityObject;
 
-namespace ReturnHome.Utilities
+namespace ReturnHome.Server.EntityObject.Stats
 {
     public sealed class ModifierDictionary
     {

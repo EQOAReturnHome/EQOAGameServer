@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
@@ -101,7 +101,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
         #endregion
-        public Entity(bool isplayer)
+        public Entity(bool isplayer, int Level2)
         {
             isPlayer = isplayer;
             CurrentStats = new ModifierDictionary(this);
@@ -111,7 +111,7 @@ namespace ReturnHome.Server.EntityObject
             //Players have limits on stats, NPC's will not
             if (isplayer)
             {
-                if (Level < 45)
+                if (Level2 < 45)
                     BaseMaxStat = 350;
 
                 else

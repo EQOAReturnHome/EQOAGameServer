@@ -19,11 +19,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write(npc.ObjectID);
             writer.Write7BitEncodedInt64(unknownInt);
             writer.Write7BitEncodedInt64(unknownInt);
-            writer.Write7BitEncodedInt64(npc.Inventory.Count);
-            writer.Write(npc.Inventory.Count);
-            foreach (Item entry in npc.Inventory.itemContainer.Values)
-                entry.DumpItem(ref writer);
 
+            writer.Write7BitEncodedInt64(npc.Inventory == null ? 0 : npc.Inventory.Count);
+            writer.Write(npc.Inventory == null ? 0 : npc.Inventory.Count);
+            if (npc.Inventory != null)
+            {
+                foreach (Item entry in npc.Inventory.itemContainer.Values)
+                    entry.DumpItem(ref writer);
+            }
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
         }
