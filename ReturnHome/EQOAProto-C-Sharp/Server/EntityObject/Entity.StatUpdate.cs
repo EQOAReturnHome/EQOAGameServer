@@ -79,7 +79,12 @@ namespace ReturnHome.Server.EntityObject
             MemoryMarshal.Write(StatUpdate.Span[168..], ref pot);
         }
 
-        public void UpdateAC() => MemoryMarshal.Write(StatUpdate.Span[56..], ref _currentAC);
+        public void UpdateAC()
+        {
+            int ac = CurrentAC;
+            MemoryMarshal.Write(StatUpdate.Span[56..], ref ac);
+        }
+
         public void UpdateUnknown2() => MemoryMarshal.Write(StatUpdate.Span[64..], ref _unk2);
 
         public void UpdatePoisonResist()

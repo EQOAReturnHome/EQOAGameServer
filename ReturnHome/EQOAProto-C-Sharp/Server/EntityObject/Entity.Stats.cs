@@ -146,15 +146,7 @@ namespace ReturnHome.Server.EntityObject
         private int _currentPower;
         private bool _hpFlag;
 
-        public int CurrentAC
-        {
-            get { return _currentAC; }
-            set
-            {
-                _currentAC = value;
-                UpdateAC();
-            }
-        }
+        public int CurrentAC => BaseAC + CurrentStats.dictionary[StatModifiers.AC];
 
         public int CurrentHP
         {
