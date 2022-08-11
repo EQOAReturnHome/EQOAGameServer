@@ -30,6 +30,12 @@ namespace ReturnHome.Utilities
         {
             return VariableUIntLength((ulong)(param_2 * 2));
         }
+
+
+        public static T GetEnumObjectByValue<T>(int valueId)
+        {
+            return (T)Enum.ToObject(typeof(T), valueId);
+        }
     }
 
     public class ByteSwaps
@@ -62,5 +68,7 @@ namespace ReturnHome.Utilities
                  | (0xFF00000000000000) & (uvalue << 56));
             return swapped;
         }
+
+       
     }
 }

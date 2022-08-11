@@ -15,15 +15,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Database\SQL\Character\**" />
-    <Compile Remove="Server\EntityObject\NewFolder\**" />
     <Compile Remove="Server\NewFolder1\**" />
     <Compile Remove="Server\NewFolder\**" />
     <EmbeddedResource Remove="Database\SQL\Character\**" />
-    <EmbeddedResource Remove="Server\EntityObject\NewFolder\**" />
     <EmbeddedResource Remove="Server\NewFolder1\**" />
     <EmbeddedResource Remove="Server\NewFolder\**" />
     <None Remove="Database\SQL\Character\**" />
-    <None Remove="Server\EntityObject\NewFolder\**" />
     <None Remove="Server\NewFolder1\**" />
     <None Remove="Server\NewFolder\**" />
   </ItemGroup>

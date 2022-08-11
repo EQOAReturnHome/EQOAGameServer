@@ -11,6 +11,7 @@ using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -93,13 +94,16 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public void TransferItem(byte giveOrTake, byte itemToTransfer, int qtyToTransfer)
         {
-            //Deposit Item
+            //Deposit Item to bank
             if (giveOrTake == 0)
             {
                 //Remove item from Inventory
                 if (Inventory.RemoveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
                     ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, qtyToTransfer, clientIndex);
+
+                    //unequip item
+                    equippedGear.Remove(item);
 
                     //Deposit into bank
                     Bank.AddItem(item);
@@ -124,7 +128,7 @@ namespace ReturnHome.Server.EntityObject.Player
             }
         }
 
-        //TODO: Flawed logic involved with stackable items and rearranging inventory
+        //TODO: Flawed logic involved with stackable items and rearranging inventory, fix
         public void SellItem(byte itemSlot, int itemQty, uint targetNPC)
         {
             if(Inventory.Exists(itemSlot))

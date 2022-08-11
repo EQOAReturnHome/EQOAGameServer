@@ -14,6 +14,7 @@ using ReturnHome.Server.Opcodes.Chat;
 
 using NLua;
 using Newtonsoft.Json;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -130,17 +131,25 @@ namespace ReturnHome.Server.EntityObject
         {
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
+
                 npc.Inventory.RetrieveItem(itemSlot, out Item item);
-                Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
+                if (Inventory.Tunar < item.ItemCost)
+                {
+                    ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
+                }
+                else
+                {
+                    Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
 
-                //Adjust player tunar
-                ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
+                    //Adjust player tunar
+                    ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
 
-                Item newItem = item.AcquireItem(itemQty);
+                    Item newItem = item.AcquireItem(itemQty);
 
-                Inventory.AddItem(newItem);
+                    Inventory.AddItem(newItem);
 
-                ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
+                    ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
+                }
             }
         }
 
@@ -344,6 +353,9 @@ namespace ReturnHome.Server.EntityObject
 
                     //Increase player level
                     session.MyCharacter.Level++;
+                    //When we level up, recalculate HP and Power
+                    session.MyCharacter.CalculateHP();
+                    session.MyCharacter.CalculatePower();
 
                     ChatMessage.GenerateClientSpecificChat(session, $"You have reached level {session.MyCharacter.Level}");
                     if (session.MyCharacter.Level >= 60)

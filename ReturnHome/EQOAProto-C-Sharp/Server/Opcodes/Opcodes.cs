@@ -51,6 +51,16 @@
         AddBankItem = 0x1251,
         Teleport = 0x07F6,
         UpdateTrainingPoints = 0x001D,
+        ClassMasteryServer = 0x1402,
+        FactionStuff  = 0xa7a,
+        CharacterModifiedDisconnect = 0x07d2,
+        LoggedInFromAnotherLocationDisconnect = 0x07A4,
+        BadLoginPassword = 0x0729,
+        OutmatchedAttackingAgainNotAdvised = 0x77A, //Outmatched Attacking again not advised
+        NotSubscribed = 0x072B,
+        AddBuddyFailed = 0x03d8,
+        BuddyListFull = 0x03d7,
+        Something = 0x468, //Guild stuff
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -70,7 +80,10 @@
         DeleteQuest = 0x7D, //125
         MerchantBuy = 0x4A, //74
         MerchantSell = 0x4B, //75
-        EnableChannel = 0x49
+        EnableChannel = 0x49,
+        ClassMastery = 0x1401,
+        ClientFaction = 0x0AC4,
+        Attack = 0x0F,
     }
 
     public static class GameVersions

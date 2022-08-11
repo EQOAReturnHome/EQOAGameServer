@@ -4,18 +4,49 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using ReturnHome.Utilities;
-using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Actors;
 using System.Text.Json;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Stats;
 
 namespace ReturnHome.Database.SQL
 {
     //Class to handle all SQL Operations
     class CharacterSQL : SQLBase
     {
+        public void CollectDefaultCharacters()
+        {
+            using var cmd = new MySqlCommand("GetDefaultCharacters", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                List<KeyValuePair<StatModifiers, int>> temp = new();
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTR, rdr.GetInt32(11)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTA, rdr.GetInt32(12)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseAGI, rdr.GetInt32(13)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseDEX, rdr.GetInt32(14)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseWIS, rdr.GetInt32(15)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseINT, rdr.GetInt32(16)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseCHA, rdr.GetInt32(17)));
+                DefaultCharacter.DefaultCharacterDict.TryAdd(((Race)rdr.GetInt32(0), (Class)rdr.GetInt32(1), (HumanType)rdr.GetInt32(2), (Sex)rdr.GetInt32(3)), new Character(rdr.GetInt32(0),
+                                                                                                                                                                             rdr.GetInt32(1),
+                                                                                                                                                                             rdr.GetInt32(2),
+                                                                                                                                                                             rdr.GetInt32(3),
+                                                                                                                                                                             rdr.GetFloat(4),
+                                                                                                                                                                             rdr.GetFloat(5),
+                                                                                                                                                                             rdr.GetFloat(6),
+                                                                                                                                                                             rdr.GetFloat(7),
+                                                                                                                                                                             rdr.GetFloat(8),
+                                                                                                                                                                             rdr.GetInt32(9),
+                                                                                                                                                                             rdr.GetInt32(10),
+                                                                                                                                                                             temp));
+            }
+        }
 
         public void SavePlayerData(Character player, string playerFlags)
         {
@@ -35,26 +66,22 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newBankTunar", player.Bank.Tunar);
             SecondCmd.Parameters.AddWithValue("newUnusedTP", player.PlayerTrainingPoints.RemainingTrainingPoints);
             SecondCmd.Parameters.AddWithValue("newTotalTP", player.PlayerTrainingPoints.TotalTrainingPoints);
-            SecondCmd.Parameters.AddWithValue("newWorld", player.World);
+            SecondCmd.Parameters.AddWithValue("newSpeed", player.Speed);
+            SecondCmd.Parameters.AddWithValue("newWorld", (byte)player.World);
             SecondCmd.Parameters.AddWithValue("newX", player.x);
             SecondCmd.Parameters.AddWithValue("newY", player.y);
             SecondCmd.Parameters.AddWithValue("newZ", player.z);
             SecondCmd.Parameters.AddWithValue("newFacing", player.Facing);
-            SecondCmd.Parameters.AddWithValue("newStrength", player.Strength);
-            SecondCmd.Parameters.AddWithValue("newStamina", player.Stamina);
-            SecondCmd.Parameters.AddWithValue("newAgility", player.Agility);
-            SecondCmd.Parameters.AddWithValue("newDexterity", player.Dexterity);
-            SecondCmd.Parameters.AddWithValue("newWisdom", player.Wisdom);
-            SecondCmd.Parameters.AddWithValue("newIntel", player.Intelligence);
-            SecondCmd.Parameters.AddWithValue("newCharisma", player.Charisma);
-            //May need other default or calculated values but these hard set values are placeholders for now
+            SecondCmd.Parameters.AddWithValue("newTPStrength", player.CurrentStats.dictionary[StatModifiers.TPSTR]);
+            SecondCmd.Parameters.AddWithValue("newTPStamina", player.CurrentStats.dictionary[StatModifiers.TPSTA]);
+            SecondCmd.Parameters.AddWithValue("newTPAgility", player.CurrentStats.dictionary[StatModifiers.TPAGI]);
+            SecondCmd.Parameters.AddWithValue("newTPDexterity", player.CurrentStats.dictionary[StatModifiers.TPDEX]);
+            SecondCmd.Parameters.AddWithValue("newTPWisdom", player.CurrentStats.dictionary[StatModifiers.TPWIS]);
+            SecondCmd.Parameters.AddWithValue("newTPIntel", player.CurrentStats.dictionary[StatModifiers.TPINT]);
+            SecondCmd.Parameters.AddWithValue("newTPCharisma", player.CurrentStats.dictionary[StatModifiers.TPCHA]);
             SecondCmd.Parameters.AddWithValue("newCurrentHP", player.CurrentHP);
-            SecondCmd.Parameters.AddWithValue("newMaxHP", player.HPMax);
             SecondCmd.Parameters.AddWithValue("newCurrentPower", player.CurrentPower);
-            SecondCmd.Parameters.AddWithValue("newMaxPower", player.PowerMax);
-            SecondCmd.Parameters.AddWithValue("newHealot", player.HealthOverTime);
-            SecondCmd.Parameters.AddWithValue("newPowerot", player.PowerOverTime);
-            SecondCmd.Parameters.AddWithValue("newAC", player.AC);
+            SecondCmd.Parameters.AddWithValue("newAC", player.CurrentAC);
             SecondCmd.Parameters.AddWithValue("newPoisonr", player.PoisonResist);
             SecondCmd.Parameters.AddWithValue("newDiseaser", player.DiseaseResist);
             SecondCmd.Parameters.AddWithValue("newFirer", player.FireResist);
@@ -62,20 +89,6 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newLightningr", player.LightningResist);
             SecondCmd.Parameters.AddWithValue("newArcaner", player.ArcaneResist);
             SecondCmd.Parameters.AddWithValue("newFishing", player.Fishing);
-            SecondCmd.Parameters.AddWithValue("newBaseStrength", player.DefaultStrength);
-            SecondCmd.Parameters.AddWithValue("newBaseStamina", player.DefaultStamina);
-            SecondCmd.Parameters.AddWithValue("newBaseAgility", player.DefaultAgility);
-            SecondCmd.Parameters.AddWithValue("newBaseDexterity", player.DefaultDexterity);
-            SecondCmd.Parameters.AddWithValue("newBaseWisdom", player.DefaultWisdom);
-            SecondCmd.Parameters.AddWithValue("newBaseIntel", player.DefaultIntelligence);
-            SecondCmd.Parameters.AddWithValue("newBaseCharisma", player.DefaultCharisma);
-            //See above comments regarding hard set values
-            SecondCmd.Parameters.AddWithValue("newCurrentHP2", player.CurrentHP);
-            SecondCmd.Parameters.AddWithValue("newBaseHP", player.HPMax);
-            SecondCmd.Parameters.AddWithValue("newCurrentPower2", player.CurrentPower);
-            SecondCmd.Parameters.AddWithValue("newBasePower", player.PowerMax);
-            SecondCmd.Parameters.AddWithValue("newHealot2", player.HealthOverTime);
-            SecondCmd.Parameters.AddWithValue("newPowerot2", player.PowerOverTime);
             SecondCmd.Parameters.AddWithValue("playerFlags", playerFlags);
 
             //Execute parameterized statement entering it into the DB
@@ -166,6 +179,9 @@ namespace ReturnHome.Database.SQL
                 //Iterate through characterData list finding charnames that exist
                 Actor thisActor = npcData.Find(i => Equals(i.CharName, actorName));
 
+                if (thisActor.Inventory == null)
+                    thisActor.Inventory = new(0);
+
                 Item ThisItem = new Item(
                   //Stacksleft
                   SecondRdr.GetInt32(1),
@@ -217,42 +233,25 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetInt32(24),
                   //Proc Animation
                   SecondRdr.GetInt32(25),
-                  //Strength
-                  SecondRdr.GetInt32(26),
-                  //Stamina
-                  SecondRdr.GetInt32(27),
-                  //Agility
-                  SecondRdr.GetInt32(28),
-                  //Dexterity
-                  SecondRdr.GetInt32(29),
-                  //Wisdom
-                  SecondRdr.GetInt32(30),
-                  //Intelligence
-                  SecondRdr.GetInt32(31),
-                  //Charisma
-                  SecondRdr.GetInt32(32),
-                  //HPMax
-                  SecondRdr.GetInt32(33),
-                  //POWMax
-                  SecondRdr.GetInt32(34),
-                  //Powerot
-                  SecondRdr.GetInt32(35),
-                  //Healot
-                  SecondRdr.GetInt32(36),
-                  //Ac
-                  SecondRdr.GetInt32(37),
-                  //PR 
-                  SecondRdr.GetInt32(38),
-                  //DR 
-                  SecondRdr.GetInt32(39),
-                  //FR 
-                  SecondRdr.GetInt32(40),
-                  //CR 
-                  SecondRdr.GetInt32(41),
-                  //LR 
-                  SecondRdr.GetInt32(42),
-                  //AR 
-                  SecondRdr.GetInt32(43),
+                  new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
+                                                               },
                   //Model
                   SecondRdr.GetInt32(44),
                   //Color
@@ -303,7 +302,7 @@ namespace ReturnHome.Database.SQL
                     //race 5
                     rdr.GetInt32(4),
                     //humType 6
-                    rdr.GetString(5),
+                    rdr.GetInt32(5),
                     //level 7
                     rdr.GetInt32(6),
                     //haircolor 8
@@ -314,6 +313,8 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(9),
                     //faceoption 11
                     rdr.GetInt32(10),
+                    //sex
+                    rdr.GetInt32(11),
                     //totalXP 12
                     rdr.GetInt32(12),
                     //debt 13
@@ -328,86 +329,53 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(17),
                     //totalTP 18
                     rdr.GetInt32(18),
+                    rdr.GetFloat(19),
                     //world 19
-                    rdr.GetInt32(19),
+                    rdr.GetInt32(20),
                     //x 20
                     rdr.GetFloat(21),
                     //y 21
-                    rdr.GetFloat(21),
-                    //z 22
                     rdr.GetFloat(22),
-                    //facing 23
+                    //z 22
                     rdr.GetFloat(23),
+                    //facing 23
+                    rdr.GetFloat(24),
                     //strength 24
-                    rdr.GetInt32(24),
-                    //stamina 25
                     rdr.GetInt32(25),
-                    //agility 26
+                    //stamina 25
                     rdr.GetInt32(26),
-                    //dexterity 27
+                    //agility 26
                     rdr.GetInt32(27),
-                    //wisdom 28
+                    //dexterity 27
                     rdr.GetInt32(28),
-                    //intel 29
+                    //wisdom 28
                     rdr.GetInt32(29),
-                    //charisma 30
+                    //intel 29
                     rdr.GetInt32(30),
-                    //currentHP 31
+                    //charisma 30
                     rdr.GetInt32(31),
-                    //maxHP 32
+                    //currentHP 31
                     rdr.GetInt32(32),
-                    //currentPower 33
+                    //currentPower 32
                     rdr.GetInt32(33),
-                    //maxPower 34
+                    //ac 33
                     rdr.GetInt32(34),
-                    //healot 35
+                    //poisonr 34
                     rdr.GetInt32(35),
-                    //powerot 36
+                    //diseaser 35
                     rdr.GetInt32(36),
-                    //ac 37 
+                    //firer 36
                     rdr.GetInt32(37),
-                    //poisonr 38
+                    //coldr 37
                     rdr.GetInt32(38),
-                    //diseaser 39
+                    //lightningr 38
                     rdr.GetInt32(39),
-                    //firer 40
+                    //arcaner 39
                     rdr.GetInt32(40),
-                    //coldr 41
+                    //fishing 40
                     rdr.GetInt32(41),
-                    //lightningr 42
-                    rdr.GetInt32(42),
-                    //arcaner 43
-                    rdr.GetInt32(43),
-                    //fishing 44
-                    rdr.GetInt32(44),
-                    //baseStr 45
-                    rdr.GetInt32(45),
-                    //baseSta 46
-                    rdr.GetInt32(46),
-                    //baseAgi 47
-                    rdr.GetInt32(47),
-                    //baseDex 48
-                    rdr.GetInt32(48),
-                    //baseWisdom 49
-                    rdr.GetInt32(49),
-                    //baseIntel 50
-                    rdr.GetInt32(50),
-                    //baseCha 51
-                    rdr.GetInt32(51),
-                    //currentHP2 52
-                    rdr.GetInt32(52),
-                    //baseHp 53
-                    rdr.GetInt32(53),
-                    //currentPower2 54
-                    rdr.GetInt32(54),
-                    //basePower 55
-                    rdr.GetInt32(55),
-                    //healot2 55
-                    rdr.GetInt32(56),
-                    //powerot2 56
-                    rdr.GetInt32(57),
-                    //flags 57
-                    rdr.GetString(58),
+                    //flags 41
+                    rdr.GetString(42),
                     //58
                     session);
 
@@ -485,42 +453,25 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetInt32(24),
                   //Proc Animation
                   SecondRdr.GetInt32(25),
-                  //Strength
-                  SecondRdr.GetInt32(26),
-                  //Stamina
-                  SecondRdr.GetInt32(27),
-                  //Agility
-                  SecondRdr.GetInt32(28),
-                  //Dexterity
-                  SecondRdr.GetInt32(29),
-                  //Wisdom
-                  SecondRdr.GetInt32(30),
-                  //Intelligence
-                  SecondRdr.GetInt32(31),
-                  //Charisma
-                  SecondRdr.GetInt32(32),
-                  //HPMax
-                  SecondRdr.GetInt32(33),
-                  //POWMax
-                  SecondRdr.GetInt32(34),
-                  //Powerot
-                  SecondRdr.GetInt32(35),
-                  //Healot
-                  SecondRdr.GetInt32(36),
-                  //Ac
-                  SecondRdr.GetInt32(37),
-                  //PR 
-                  SecondRdr.GetInt32(38),
-                  //DR 
-                  SecondRdr.GetInt32(39),
-                  //FR 
-                  SecondRdr.GetInt32(40),
-                  //CR 
-                  SecondRdr.GetInt32(41),
-                  //LR 
-                  SecondRdr.GetInt32(42),
-                  //AR 
-                  SecondRdr.GetInt32(43),
+                  new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
+                  },
                   //Model
                   SecondRdr.GetInt32(44),
                   //Color
@@ -533,17 +484,17 @@ namespace ReturnHome.Database.SQL
                     thisChar.Inventory.AddItem(ThisItem);
                 }
 
-                /*
+                
                 //If this is 2, it needs to go to the Bank
                 else if (ThisItem.Location == 2)
                 {
-                    thisChar.BankItems.Add(ThisItem.InventoryNumber, ThisItem);
+                    thisChar.Bank.AddItem(ThisItem);
                 }
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                else if (ThisItem.InventoryNumber == 4)
+                else if (ThisItem.Location == 4)
                 {
                     thisChar.AuctionItems.Add(ThisItem);
-                }*/
+                }
             }
 
             SecondRdr.Close();
@@ -566,134 +517,103 @@ namespace ReturnHome.Database.SQL
             cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
-            //string to hold local charcter Name
-            string charName;
-
             //Read through results from query populating character data needed for character select
             while (rdr.Read())
             {
                 if (rdr.GetInt32(1) == serverID)
                 {
-                    //Instantiate new character object, not to be confused with a newly created character
+                    //Instantiate character object
                     selectedCharacter = new Character
                     (
-                        //charName
+                        //charName 1
                         rdr.GetString(0),
-                        //serverid
+                        //serverid 2
                         rdr.GetInt32(1),
-                        //modelid
+                        //modelid 3
                         rdr.GetInt32(2),
-                        //tclass
+                        //tclass 4
                         rdr.GetInt32(3),
-                        //race
+                        //race 5
                         rdr.GetInt32(4),
-                        //humType
-                        rdr.GetString(5),
-                        //level
+                        //humType 6
+                        rdr.GetInt32(5),
+                        //level 7
                         rdr.GetInt32(6),
-                        //haircolor
+                        //haircolor 8
                         rdr.GetInt32(7),
-                        //hairlength
+                        //hairlength 9
                         rdr.GetInt32(8),
-                        //hairstyle
+                        //hairstyle 10
                         rdr.GetInt32(9),
-                        //faceoption
+                        //faceoption 11
                         rdr.GetInt32(10),
-                        //totalXP
+                        //sex
+                        rdr.GetInt32(11),
+                        //totalXP 12
                         rdr.GetInt32(12),
-                        //debt
+                        //debt 13
                         rdr.GetInt32(13),
-                        //breath
+                        //breath 14
                         rdr.GetInt32(14),
-                        //tunar
+                        //tunar 15
                         rdr.GetInt32(15),
-                        //bankTunar
+                        //bankTunar 16
                         rdr.GetInt32(16),
-                        //unusedTP
+                        //unusedTP 17
                         rdr.GetInt32(17),
-                        //totalTP
+                        //totalTP 18
                         rdr.GetInt32(18),
-                        //world
-                        rdr.GetInt32(19),
-                        //x
-                        rdr.GetFloat(20),
-                        //y
+                        //world 19
+                        rdr.GetFloat(19),
+                        //world 19
+                        rdr.GetInt32(20),
+                        //x 20
                         rdr.GetFloat(21),
-                        //z
+                        //y 21
                         rdr.GetFloat(22),
-                        //facing
+                        //z 22
                         rdr.GetFloat(23),
-                        //strength
-                        rdr.GetInt32(24),
-                        //stamina
+                        //facing 23
+                        rdr.GetFloat(24),
+                        //strength 24
                         rdr.GetInt32(25),
-                        //agility
+                        //stamina 25
                         rdr.GetInt32(26),
-                        //dexterity
+                        //agility 26
                         rdr.GetInt32(27),
-                        //wisdom
+                        //dexterity 27
                         rdr.GetInt32(28),
-                        //intel
+                        //wisdom 28
                         rdr.GetInt32(29),
-                        //charisma
+                        //intel 29
                         rdr.GetInt32(30),
-                        //currentHP
+                        //charisma 30
                         rdr.GetInt32(31),
-                        //maxHP
+                        //currentHP 31
                         rdr.GetInt32(32),
-                        //currentPower
+                        //currentPower 32
                         rdr.GetInt32(33),
-                        //maxPower
+                        //ac 33
                         rdr.GetInt32(34),
-                        //healot
+                        //poisonr 34
                         rdr.GetInt32(35),
-                        //powerot
+                        //diseaser 35
                         rdr.GetInt32(36),
-                        //ac
+                        //firer 36
                         rdr.GetInt32(37),
-                        //poisonr
+                        //coldr 37
                         rdr.GetInt32(38),
-                        //diseaser
+                        //lightningr 38
                         rdr.GetInt32(39),
-                        //firer
+                        //arcaner 39
                         rdr.GetInt32(40),
-                        //coldr
+                        //fishing 40
                         rdr.GetInt32(41),
-                        //lightningr
-                        rdr.GetInt32(42),
-                        //arcaner
-                        rdr.GetInt32(43),
-                        //fishing
-                        rdr.GetInt32(44),
-                        //baseStr
-                        rdr.GetInt32(45),
-                        //baseSta
-                        rdr.GetInt32(46),
-                        //baseAgi
-                        rdr.GetInt32(47),
-                        //baseDex
-                        rdr.GetInt32(48),
-                        //baseWisdom
-                        rdr.GetInt32(49),
-                        //baseIntel
-                        rdr.GetInt32(50),
-                        //baseCha
-                        rdr.GetInt32(51),
-                        //currentHP2
-                        rdr.GetInt32(52),
-                        //baseHp
-                        rdr.GetInt32(53),
-                        //currentPower2
-                        rdr.GetInt32(54),
-                        //basePower
-                        rdr.GetInt32(55),
-                        //healot2
-                        rdr.GetInt32(56),
-                        //powerot2
-                        rdr.GetInt32(57),
-                        rdr.GetString(58),
+                        //flags 41
+                        rdr.GetString(42),
+                        //58
                         session);
-                    break;
+                        break;
                 }
             }
 
@@ -763,42 +683,25 @@ namespace ReturnHome.Database.SQL
                       SecondRdr.GetInt32(24),
                       //Proc Animation
                       SecondRdr.GetInt32(25),
-                      //Strength
-                      SecondRdr.GetInt32(26),
-                      //Stamina
-                      SecondRdr.GetInt32(27),
-                      //Agility
-                      SecondRdr.GetInt32(28),
-                      //Dexterity
-                      SecondRdr.GetInt32(29),
-                      //Wisdom
-                      SecondRdr.GetInt32(30),
-                      //Intelligence
-                      SecondRdr.GetInt32(31),
-                      //Charisma
-                      SecondRdr.GetInt32(32),
-                      //HPMax
-                      SecondRdr.GetInt32(33),
-                      //POWMax
-                      SecondRdr.GetInt32(34),
-                      //Powerot
-                      SecondRdr.GetInt32(35),
-                      //Healot
-                      SecondRdr.GetInt32(36),
-                      //Ac
-                      SecondRdr.GetInt32(37),
-                      //PR 
-                      SecondRdr.GetInt32(38),
-                      //DR 
-                      SecondRdr.GetInt32(39),
-                      //FR 
-                      SecondRdr.GetInt32(40),
-                      //CR 
-                      SecondRdr.GetInt32(41),
-                      //LR 
-                      SecondRdr.GetInt32(42),
-                      //AR 
-                      SecondRdr.GetInt32(43),
+                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
+                      },
                       //Model
                       SecondRdr.GetInt32(44),
                       //Color
@@ -806,22 +709,19 @@ namespace ReturnHome.Database.SQL
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
-                    {
                         selectedCharacter.Inventory.AddItem(ThisItem);
-                    }
 
                     //If this is 2, it needs to go to the Bank
                     else if (ThisItem.Location == 2)
-                    {
                         selectedCharacter.Bank.AddItem(ThisItem);
-                    }
 
                     //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
                     else if (ThisItem.Location == 4)
-                    {
                         selectedCharacter.AuctionItems.Add(ThisItem);
-                    }
                 }
+
+                //With all of the gear in inventory, cycle over and equip it if equipped
+
             }
             SecondRdr.Close();
 
@@ -1018,68 +918,13 @@ namespace ReturnHome.Database.SQL
         //Method to create new character for player's account
         public void CreateCharacter(Session session, Character charCreation)
         {
-            //Local variables to get string values to store in the DB from dictionary keys received from client
-            string humType = CharacterUtilities.HumTypeDict[charCreation.HumTypeNum];
-            string classType = CharacterUtilities.CharClassDict[charCreation.StartingClass];
-            string raceType = CharacterUtilities.CharRaceDict[charCreation.Race];
-            string sexType = CharacterUtilities.CharSexDict[charCreation.Gender];
-
-            //Calculate total TP used among all stats for DB storage
-            int UsedTP = charCreation.AddStrength + charCreation.AddStamina + charCreation.AddAgility + charCreation.AddDexterity + charCreation.AddWisdom + charCreation.AddIntelligence
-                             + charCreation.AddCharisma;
-
-            //Assign query string and connection to commands
-            using var cmd = new MySqlCommand("GetCharModel", con);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            //Add parameter values for parameterized string.
-            cmd.Parameters.AddWithValue("@RaceType", raceType);
-            cmd.Parameters.AddWithValue("@ClassType", classType);
-            cmd.Parameters.AddWithValue("@HumType", humType);
-            cmd.Parameters.AddWithValue("@SexType", sexType);
-
-            //Execute reader on SQL command
-            using MySqlDataReader rdr = cmd.ExecuteReader();
-
-            //Iterate through default character values for class and race and assign to new character
-            while (rdr.Read())
-            {
-                charCreation.Inventory.AddTunar(rdr.GetInt32(5));
-                charCreation.x = rdr.GetFloat(9);
-                charCreation.y = rdr.GetFloat(10);
-                charCreation.z = rdr.GetFloat(11);
-                charCreation.FacingF = rdr.GetFloat(12);
-                charCreation.World = rdr.GetInt32(13);
-                charCreation.DefaultStrength = rdr.GetInt32(14);
-                charCreation.DefaultStamina = rdr.GetInt32(15);
-                charCreation.DefaultAgility = rdr.GetInt32(16);
-                charCreation.DefaultDexterity = rdr.GetInt32(17);
-                charCreation.DefaultWisdom = rdr.GetInt32(18);
-                charCreation.DefaultIntelligence = rdr.GetInt32(19);
-                charCreation.DefaultCharisma = rdr.GetInt32(20);
-                charCreation.ModelID = rdr.GetInt32(21);
-            }
-            rdr.Close();
-
             Console.WriteLine("Trying to write flags");
             charCreation.playerFlags = new Dictionary<string, bool>()
             {
                 { "NewPlayerControls", true }
             };
-            string serializedPlayerFlags = (string)Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
+            string serializedPlayerFlags = Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
             Console.WriteLine(serializedPlayerFlags);
-
-            //Calculate Unused TP still available to character upon entering world.
-            charCreation.PlayerTrainingPoints = new(20, 20 - UsedTP);
-
-            //Add total strength from default plus added TP to each category. Not sure this is correct, may need to still add the TP from client
-            charCreation.Strength = charCreation.DefaultStrength + charCreation.AddStrength;
-            charCreation.Stamina = charCreation.DefaultStamina + charCreation.AddStamina;
-            charCreation.Agility = charCreation.DefaultAgility + charCreation.AddAgility;
-            charCreation.Dexterity = charCreation.DefaultDexterity + charCreation.AddDexterity;
-            charCreation.Wisdom = charCreation.DefaultWisdom + charCreation.AddWisdom;
-            charCreation.Intelligence = charCreation.DefaultIntelligence + charCreation.AddIntelligence;
-            charCreation.Charisma = charCreation.DefaultCharisma + charCreation.AddCharisma;
 
             //Create second command using second connection and char insert query string
             using var SecondCmd = new MySqlCommand("CreateCharacter", con);
@@ -1090,67 +935,49 @@ namespace ReturnHome.Database.SQL
             //Needs to be session.AccountID once CharacterSelect shows characters off true AccountID.
             SecondCmd.Parameters.AddWithValue("AccountID", session.AccountID);
             SecondCmd.Parameters.AddWithValue("ModelID", charCreation.ModelID);
-            SecondCmd.Parameters.AddWithValue("TClass", charCreation.StartingClass);
-            SecondCmd.Parameters.AddWithValue("Race", charCreation.Race);
-            SecondCmd.Parameters.AddWithValue("HumType", humType);
+            SecondCmd.Parameters.AddWithValue("TClass", (byte)charCreation.EntityClass);
+            SecondCmd.Parameters.AddWithValue("Race", (byte)charCreation.EntityRace);
+            SecondCmd.Parameters.AddWithValue("HumType", (byte)charCreation.EntityHumanType);
             SecondCmd.Parameters.AddWithValue("Level", charCreation.Level);
             SecondCmd.Parameters.AddWithValue("HairColor", charCreation.HairColor);
             SecondCmd.Parameters.AddWithValue("HairLength", charCreation.HairLength);
             SecondCmd.Parameters.AddWithValue("HairStyle", charCreation.HairStyle);
             SecondCmd.Parameters.AddWithValue("FaceOption", charCreation.FaceOption);
-            SecondCmd.Parameters.AddWithValue("classIcon", charCreation.StartingClass);
+            SecondCmd.Parameters.AddWithValue("Sex", (byte)charCreation.EntitySex);
             //May need other default values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("TotalXP", 0);
-            SecondCmd.Parameters.AddWithValue("Debt", 0);
-            SecondCmd.Parameters.AddWithValue("Breath", 255);
+            SecondCmd.Parameters.AddWithValue("TotalXP", charCreation.TotalXP);
+            SecondCmd.Parameters.AddWithValue("Debt", charCreation.totalDebt);
+            SecondCmd.Parameters.AddWithValue("Breath", charCreation.Breath);
             SecondCmd.Parameters.AddWithValue("Tunar", charCreation.Inventory.Tunar);
             SecondCmd.Parameters.AddWithValue("BankTunar", charCreation.Bank.Tunar);
             SecondCmd.Parameters.AddWithValue("UnusedTP", charCreation.PlayerTrainingPoints.RemainingTrainingPoints);
             SecondCmd.Parameters.AddWithValue("TotalTP", charCreation.PlayerTrainingPoints.TotalTrainingPoints);
-            SecondCmd.Parameters.AddWithValue("World", charCreation.World);
+            SecondCmd.Parameters.AddWithValue("Speed", charCreation.Speed);
+            SecondCmd.Parameters.AddWithValue("World", (byte)charCreation.World);
             SecondCmd.Parameters.AddWithValue("X", charCreation.x);
             SecondCmd.Parameters.AddWithValue("Y", charCreation.y);
             SecondCmd.Parameters.AddWithValue("Z", charCreation.z);
             SecondCmd.Parameters.AddWithValue("Facing", charCreation.Facing);
-            SecondCmd.Parameters.AddWithValue("Strength", charCreation.Strength);
-            SecondCmd.Parameters.AddWithValue("Stamina", charCreation.Stamina);
-            SecondCmd.Parameters.AddWithValue("Agility", charCreation.Agility);
-            SecondCmd.Parameters.AddWithValue("Dexterity", charCreation.Dexterity);
-            SecondCmd.Parameters.AddWithValue("Wisdom", charCreation.Wisdom);
-            SecondCmd.Parameters.AddWithValue("Intelligence", charCreation.Intelligence);
-            SecondCmd.Parameters.AddWithValue("Charisma", charCreation.Charisma);
+            SecondCmd.Parameters.AddWithValue("TPStrength", charCreation.CurrentStats.dictionary[StatModifiers.TPSTR]);
+            SecondCmd.Parameters.AddWithValue("TPStamina", charCreation.CurrentStats.dictionary[StatModifiers.TPSTA]);
+            SecondCmd.Parameters.AddWithValue("TPAgility", charCreation.CurrentStats.dictionary[StatModifiers.TPAGI]);
+            SecondCmd.Parameters.AddWithValue("TPDexterity", charCreation.CurrentStats.dictionary[StatModifiers.TPDEX]);
+            SecondCmd.Parameters.AddWithValue("TPWisdom", charCreation.CurrentStats.dictionary[StatModifiers.TPWIS]);
+            SecondCmd.Parameters.AddWithValue("TPIntelligence", charCreation.CurrentStats.dictionary[StatModifiers.TPINT]);
+            SecondCmd.Parameters.AddWithValue("TPCharisma", charCreation.CurrentStats.dictionary[StatModifiers.TPCHA]);
             //May need other default or calculated values but these hard set values are placeholders for now
-            SecondCmd.Parameters.AddWithValue("CurrentHP", 1000);
-            SecondCmd.Parameters.AddWithValue("MaxHP", 1000);
-            SecondCmd.Parameters.AddWithValue("CurrentPower", 500);
-            SecondCmd.Parameters.AddWithValue("MaxPower", 500);
-            SecondCmd.Parameters.AddWithValue("Healot", 20);
-            SecondCmd.Parameters.AddWithValue("Powerot", 10);
-            SecondCmd.Parameters.AddWithValue("Ac", 0);
-            SecondCmd.Parameters.AddWithValue("PoisonR", 10);
-            SecondCmd.Parameters.AddWithValue("DiseaseR", 10);
-            SecondCmd.Parameters.AddWithValue("FireR", 10);
-            SecondCmd.Parameters.AddWithValue("ColdR", 10);
-            SecondCmd.Parameters.AddWithValue("LightningR", 10);
-            SecondCmd.Parameters.AddWithValue("ArcaneR", 10);
+            SecondCmd.Parameters.AddWithValue("CurrentHP", charCreation.CurrentHP);
+            SecondCmd.Parameters.AddWithValue("CurrentPower", charCreation.CurrentPower);
+            SecondCmd.Parameters.AddWithValue("Ac", charCreation.BaseAC);
+            SecondCmd.Parameters.AddWithValue("PoisonR", 40);
+            SecondCmd.Parameters.AddWithValue("DiseaseR", 40);
+            SecondCmd.Parameters.AddWithValue("FireR", 40);
+            SecondCmd.Parameters.AddWithValue("ColdR", 40);
+            SecondCmd.Parameters.AddWithValue("LightningR", 40);
+            SecondCmd.Parameters.AddWithValue("ArcaneR", 40);
             SecondCmd.Parameters.AddWithValue("Fishing", 0);
-            SecondCmd.Parameters.AddWithValue("Base_Strength", charCreation.DefaultStrength);
-            SecondCmd.Parameters.AddWithValue("Base_Stamina", charCreation.DefaultStamina);
-            SecondCmd.Parameters.AddWithValue("Base_Agility", charCreation.DefaultAgility);
-            SecondCmd.Parameters.AddWithValue("Base_Dexterity", charCreation.DefaultDexterity);
-            SecondCmd.Parameters.AddWithValue("Base_Wisdom", charCreation.DefaultWisdom);
-            SecondCmd.Parameters.AddWithValue("Base_Intelligence", charCreation.DefaultIntelligence);
-            SecondCmd.Parameters.AddWithValue("Base_Charisma", charCreation.DefaultCharisma);
-            //See above comments regarding hard set values
-            SecondCmd.Parameters.AddWithValue("CurrentHP2", 1000);
-            SecondCmd.Parameters.AddWithValue("BaseHP", 1000);
-            SecondCmd.Parameters.AddWithValue("CurrentPower2", 500);
-            SecondCmd.Parameters.AddWithValue("BasePower", 500);
-            SecondCmd.Parameters.AddWithValue("Healot2", 20);
-            SecondCmd.Parameters.AddWithValue("Powerot2", 10);
             SecondCmd.Parameters.AddWithValue("playerFlags", serializedPlayerFlags);
             //Execute parameterized statement entering it into the DB
-            //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
             SecondCmd.ExecuteNonQuery();
 
             //Don't close connection because we have character list generated next

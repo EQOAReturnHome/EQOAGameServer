@@ -1,5 +1,5 @@
 using System;
-using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 

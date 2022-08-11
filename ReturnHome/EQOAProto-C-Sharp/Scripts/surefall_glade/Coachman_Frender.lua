@@ -14,11 +14,11 @@ function event_say()
 SetPlayerFlags(mySession, "admin", true)
    if(GetPlayerFlags(mySession, "surefall_coach")) then
       if (ch:find("Darvar")) then
-         TeleportPlayer(mySession,coaches.darvar_manor.world,coaches.darvar_manor.x,coaches.darvar_manor.y,coaches.darvar_manor.z,coaches.darvar_manor.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.darvar_manor.world),coaches.darvar_manor.x,coaches.darvar_manor.y,coaches.darvar_manor.z,coaches.darvar_manor.facing)
       elseif (ch:find("Qeynos")) then
-         TeleportPlayer(mySession,coaches.qeynos.world,coaches.qeynos.x,coaches.qeynos.y,coaches.qeynos.z,coaches.qeynos.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.qeynos.world),coaches.qeynos.x,coaches.qeynos.y,coaches.qeynos.z,coaches.qeynos.facing)
       elseif (ch:find("Wyndhaven")) then
-         TeleportPlayer(mySession,coaches.wyndhaven.world,coaches.wyndhaven.x,coaches.wyndhaven.y,coaches.wyndhaven.z,coaches.wyndhaven.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.wyndhaven.world),coaches.wyndhaven.x,coaches.wyndhaven.y,coaches.wyndhaven.z,coaches.wyndhaven.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

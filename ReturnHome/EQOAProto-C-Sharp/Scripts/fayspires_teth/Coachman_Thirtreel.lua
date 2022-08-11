@@ -14,13 +14,13 @@ local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "fayspires_coach")) then
       if (ch:find("Klick'Anon")) then
-         TeleportPlayer(mySession,coaches.klick_anon.world,coaches.klick_anon.x,coaches.klick_anon.y,coaches.klick_anon.z,coaches.klick_anon.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.klick_anon.world),coaches.klick_anon.x,coaches.klick_anon.y,coaches.klick_anon.z,coaches.klick_anon.facing)
       elseif (ch:find("Moradhim")) then
-         TeleportPlayer(mySession,coaches.moradhim.world,coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.moradhim.world),coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
       elseif (ch:find("Tethelin")) then
-         TeleportPlayer(mySession,coaches.tethelin.world,coaches.tethelin.x,coaches.tethelin.y,coaches.tethelin.z,coaches.tethelin.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.tethelin.world),coaches.tethelin.x,coaches.tethelin.y,coaches.tethelin.z,coaches.tethelin.facing)
       elseif (ch:find("Rivervale")) then
-         TeleportPlayer(mySession,coaches.rivervale.world,coaches.rivervale.x,coaches.rivervale.y,coaches.rivervale.z,coaches.rivervale.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.rivervale.world),coaches.rivervale.x,coaches.rivervale.y,coaches.rivervale.z,coaches.rivervale.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

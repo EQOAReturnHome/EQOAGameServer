@@ -7,6 +7,7 @@ using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using System.Runtime.CompilerServices;
 using ReturnHome.Server.Managers;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network
 {
@@ -48,7 +49,7 @@ namespace ReturnHome.Server.Network
             Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
             BufferReader reader = new(MyPacket.Span);
 
-            Mysession.MyCharacter.World = reader.Read<byte>();
+            Mysession.MyCharacter.World = (World)reader.Read<byte>();
 
             float x = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
             float y = CoordinateConversions.ConvertYToFloat(reader.ReadUint24());

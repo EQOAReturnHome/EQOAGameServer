@@ -16,7 +16,7 @@ function event_say()
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
-         coaches.freeport.world,
+         GetWorld(coaches.freeport.world),
          coaches.freeport.x,
          coaches.freeport.y,
          coaches.freeport.z,
@@ -25,7 +25,7 @@ function event_say()
       elseif (ch:find("Klick")) then
          TeleportPlayer(
          mySession,
-         coaches.klick_anon.world,
+         GetWorld(coaches.klick_anon.world),
          coaches.klick_anon.x,
          coaches.klick_anon.y,
          coaches.klick_anon.z,
@@ -34,7 +34,7 @@ function event_say()
       elseif (ch:find("Rivervale")) then
          TeleportPlayer(
          mySession,
-         coaches.rivervale.world,
+         GetWorld(coaches.rivervale.world),
          coaches.rivervale.x,
          coaches.rivervale.y,
          coaches.rivervale.z,

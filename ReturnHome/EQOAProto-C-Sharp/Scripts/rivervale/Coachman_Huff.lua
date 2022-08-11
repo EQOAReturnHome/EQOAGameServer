@@ -12,11 +12,11 @@ local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "rivervale_coach")) then
       if (ch:find("Moradhim")) then
-         TeleportPlayer(mySession,coaches.moradhim.world,coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.moradhim.world),coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
       elseif (ch:find("Fayspires")) then
-         TeleportPlayer(mySession,coaches.fayspires.world,coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.fayspires.world),coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
       elseif (ch:find("Bobble")) then
-         TeleportPlayer(mySession,coaches.bobble_by_water.world,coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.bobble_by_water.world),coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

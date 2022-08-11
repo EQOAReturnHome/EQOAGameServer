@@ -14,13 +14,13 @@ local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "moradhim_coach")) then
       if (ch:find("Darvar Manor")) then
-         TeleportPlayer(mySession,coaches.darvar_manor.world,coaches.darvar_manor.x,coaches.darvar_manor.y,coaches.darvar_manor.z,coaches.darvar_manor.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.darvar_manor.world),coaches.darvar_manor.x,coaches.darvar_manor.y,coaches.darvar_manor.z,coaches.darvar_manor.facing)
       elseif (ch:find("Fayspires")) then
-         TeleportPlayer(mySession,coaches.fayspires.world,coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.fayspires.world),coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
       elseif (ch:find("Halas")) then
-         TeleportPlayer(mySession,coaches.halas.world,coaches.halas.x,coaches.halas.y,coaches.halas.z,coaches.halas.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.halas.world),coaches.halas.x,coaches.halas.y,coaches.halas.z,coaches.halas.facing)
       elseif (ch:find("Rivervale")) then
-         TeleportPlayer(mySession,coaches.rivervale.world,coaches.rivervale.x,coaches.rivervale.y,coaches.rivervale.z,coaches.rivervale.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.rivervale.world),coaches.rivervale.x,coaches.rivervale.y,coaches.rivervale.z,coaches.rivervale.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
