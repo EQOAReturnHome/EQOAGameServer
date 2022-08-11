@@ -142,5 +142,24 @@ namespace ReturnHome.Server.EntityObject
             ModelSize = 1.0f;
             Movement = 1;
         }
+        public static string GetClass(Class playerClass)
+        {
+            string className = playerClass.ToString().Split(':')[0];
+            return className;
+        }
+
+        public static string GetRace(Race playerRace)
+        {
+            string raceName = playerRace.ToString().Split(':')[0];
+            return raceName;
+        }
+
+        public static string GetHumanType(HumanType humanType)
+        {
+            string playerHumanType = humanType.ToString().Split(':')[0];
+            return playerHumanType;
+        }
+
+
     }
 }

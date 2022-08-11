@@ -14,7 +14,7 @@ function event_say()
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
-         coaches.freeport.world,
+         GetWorld(coaches.freeport.world),
          coaches.freeport.x,
          coaches.freeport.y,
          coaches.freeport.z,
@@ -23,7 +23,7 @@ function event_say()
       elseif (ch:find("Seriak")) then
          TeleportPlayer(
          mySession,
-         coaches.fort_seriak.world,
+         GetWorld(coaches.fort_seriak.world),
          coaches.fort_seriak.x,
          coaches.fort_seriak.y,
          coaches.fort_seriak.z,
@@ -32,7 +32,7 @@ function event_say()
       elseif (ch:find("Solace")) then
          TeleportPlayer(
          mySession,
-         coaches.dark_solace.world,
+         GetWorld(coaches.dark_solace.world),
          coaches.dark_solace.x,
          coaches.dark_solace.y,
          coaches.dark_solace.z,
@@ -41,7 +41,7 @@ function event_say()
       elseif (ch:find("Rivervale")) then
          TeleportPlayer(
          mySession,
-         coaches.rivervale.world,
+         GetWorld(coaches.rivervale.world),
          coaches.rivervale.x,
          coaches.rivervale.y,
          coaches.rivervale.z,
@@ -51,7 +51,7 @@ function event_say()
          SendDialogue(mySession, npcDialogue, dialogueOptions)
          TeleportPlayer(
          mySession,
-         coaches.darvar_manor.world,
+         GetWorld(coaches.darvar_manor.world),
          coaches.darvar_manor.x,
          coaches.darvar_manor.y,
          coaches.darvar_manor.z,

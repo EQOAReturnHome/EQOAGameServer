@@ -13,11 +13,11 @@ local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "klick_anon_coach")) then
       if (ch:find("Neriak")) then
-         TeleportPlayer(mySession,coaches.neriak.world,coaches.neriak.x,coaches.neriak.y,coaches.neriak.z,coaches.neriak.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.neriak.world),coaches.neriak.x,coaches.neriak.y,coaches.neriak.z,coaches.neriak.facing)
       elseif (ch:find("Fayspires")) then
-         TeleportPlayer(mySession,coaches.fayspires.world,coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.fayspires.world),coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
       elseif (ch:find("Bobble")) then
-         TeleportPlayer(mySession,coaches.bobble_by_water.world,coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
+         TeleportPlayer(mySession,GeWorld(coaches.bobble_by_water.world),coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

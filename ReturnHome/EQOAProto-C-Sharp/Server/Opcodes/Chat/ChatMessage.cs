@@ -154,9 +154,18 @@ namespace ReturnHome.Server.Opcodes.Chat
             //Processes client messages bound for group chat
         }
 
-        public static void DistributeSpecificMessageAndColor(Session MySession, string message, byte[] color)
+        public static void DistributeSpecificMessageAndColor(Session session, string chatMessage, byte[] color)
         {
-            //This method could
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ColoredChat);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            writer.WriteString(Encoding.Unicode, chatMessage);
+            writer.Write(color);
+            message.Size = writer.Position;
+
+            //Send Message
+            session.sessionQueue.Add(message);
         }
     }
 }

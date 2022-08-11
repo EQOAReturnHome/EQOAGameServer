@@ -14,13 +14,13 @@ local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "darvar_manor_coach")) then
       if (ch:find("Forkwatch")) then
-         TeleportPlayer(mySession,coaches.forkwatch.world,coaches.forkwatch.x,coaches.forkwatch.y,coaches.forkwatch.z,coaches.forkwatch.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.forkwatch.world),coaches.forkwatch.x,coaches.forkwatch.y,coaches.forkwatch.z,coaches.forkwatch.facing)
       elseif (ch:find("Highpass")) then
-         TeleportPlayer(mySession,coaches.highpass.world,coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.highpass.world),coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
       elseif (ch:find("Moradhim")) then
-         TeleportPlayer(mySession,coaches.moradhim.world,coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.moradhim.world),coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
       elseif (ch:find("Surefall")) then
-         TeleportPlayer(mySession,coaches.surefall_glade.world,coaches.surefall_glade.x,coaches.surefall_glade.y,coaches.surefall_glade.z,coaches.surefall_glade.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.surefall_glade.world),coaches.surefall_glade.x,coaches.surefall_glade.y,coaches.surefall_glade.z,coaches.surefall_glade.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

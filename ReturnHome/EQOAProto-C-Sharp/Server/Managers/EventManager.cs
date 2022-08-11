@@ -4,6 +4,8 @@ using ReturnHome.Server.EntityObject.Player;
 using NLua;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Managers
 {
@@ -13,11 +15,9 @@ namespace ReturnHome.Server.Managers
         {
             //Strip white spaces from NPC name and replace with Underscores
             mySession.MyCharacter.MyDialogue.npcName = mySession.MyCharacter.MyDialogue.npcName.Replace(" ", "_");
-
             //Find Lua script recursively through scripts directory by zone
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
             string[] file = Directory.GetFiles("Scripts\\", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
-
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
             if (file.Length < 1 || file == null)
                 return;
@@ -31,6 +31,7 @@ namespace ReturnHome.Server.Managers
             {
                 //send the dialogue choice to the lua script based on the chosen option index
                 string choiceOption = mySession.MyCharacter.MyDialogue.diagOptions[(int)mySession.MyCharacter.MyDialogue.choice];
+
                 //pass the string choice to the Lua as choice
                 lua["choice"] = choiceOption;
             }
@@ -45,6 +46,16 @@ namespace ReturnHome.Server.Managers
             lua["mySession"] = mySession;
             lua["GenerateChatMessage"] = Opcodes.Chat.ChatMessage.GenerateClientSpecificChat;
             lua["GrantXP"] = Character.GrantXP;
+            lua["GetWorld"] = Utility_Funcs.GetEnumObjectByValue<World>;
+            lua["GetClass"] = Utility_Funcs.GetEnumObjectByValue<Class>;
+            lua["GetRace"] = Utility_Funcs.GetEnumObjectByValue<Race>;
+            lua["GetHumanType"] = Utility_Funcs.GetEnumObjectByValue<HumanType>;
+
+            lua["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
+            lua["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
+            lua["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);
+
+
 
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);

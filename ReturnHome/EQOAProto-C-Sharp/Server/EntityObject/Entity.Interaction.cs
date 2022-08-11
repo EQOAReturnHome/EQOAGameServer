@@ -131,17 +131,25 @@ namespace ReturnHome.Server.EntityObject
         {
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
+
                 npc.Inventory.RetrieveItem(itemSlot, out Item item);
-                Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
+                if (Inventory.Tunar < item.ItemCost)
+                {
+                    ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
+                }
+                else
+                {
+                    Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
 
-                //Adjust player tunar
-                ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
+                    //Adjust player tunar
+                    ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
 
-                Item newItem = item.AcquireItem(itemQty);
+                    Item newItem = item.AcquireItem(itemQty);
 
-                Inventory.AddItem(newItem);
+                    Inventory.AddItem(newItem);
 
-                ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
+                    ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
+                }
             }
         }
 
