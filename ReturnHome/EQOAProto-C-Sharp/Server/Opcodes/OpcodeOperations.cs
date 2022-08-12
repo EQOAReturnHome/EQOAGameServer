@@ -44,6 +44,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
             { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
             { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
+            { GameOpcode.CastSpell, ClientCastSpell.CastSpell },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

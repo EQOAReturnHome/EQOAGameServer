@@ -24,7 +24,8 @@ namespace ReturnHome.Server.EntityObject
         private uint _target;
         private uint _targetCounter = 1;
         private Entity _ourTarget;
-
+        private uint _spell;
+        private Entity _ourSpell;
         public uint Target
         {
             get { return _target; }
@@ -58,6 +59,35 @@ namespace ReturnHome.Server.EntityObject
                     return;
 
                 ServerPlayerTarget.PlayerTarget(((Character)this).characterSession, 3, GenerateConColor(), _target, _targetCounter++);
+            }
+        }
+
+        public uint Spell
+        {
+            get { return _spell; }
+            set
+            {
+                if (true)
+                {
+                    _spell = value;
+                    ObjectUpdateSpell();
+                    //Keep a reference to our current target on hand
+                    EntityManager.QueryForEntity(_spell, out _ourSpell);
+                    SpellInfo(_spell);
+                }
+            }
+        }
+
+        public void SpellInfo(uint spell)
+        {
+
+            if (EntityManager.QueryForEntity(_target, out Entity ent))
+            {
+                //This shouldn't happen, but to be safe? Eventually could be an expired object that was originally target?
+                //if (ent == null)
+                //  return;
+                SpellManager.GetSpell(((Character)this).characterSession, spell, _target);
+
             }
         }
 

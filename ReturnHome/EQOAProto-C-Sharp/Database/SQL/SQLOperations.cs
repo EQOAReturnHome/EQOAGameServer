@@ -107,7 +107,7 @@ namespace ReturnHome.Database.SQL
             cmd.CommandType = CommandType.StoredProcedure;
             //create reader and execute
             using MySqlDataReader rdr = cmd.ExecuteReader();
-            //while rows exist from data set continue to read in data 
+            //while rows exist from data set continue to read in data
             while (rdr.Read())
             {
                 //create new actor object using database rows
@@ -173,7 +173,7 @@ namespace ReturnHome.Database.SQL
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
-                //Hold charactervalue so we have names to compare against 
+                //Hold charactervalue so we have names to compare against
                 actorName = SecondRdr.GetString(0);
 
                 //Iterate through characterData list finding charnames that exist
@@ -197,17 +197,17 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetByte(6),
                   //ItemID
                   SecondRdr.GetInt32(7),
-                  //Item cost 
+                  //Item cost
                   SecondRdr.GetUInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
                   SecondRdr.GetInt32(10),
-                  //Attack Type 
+                  //Attack Type
                   SecondRdr.GetInt32(11),
                   //WeaponDamage
                   SecondRdr.GetInt32(12),
-                  //MaxHP of item 
+                  //MaxHP of item
                   SecondRdr.GetInt32(13),
                   //Tradeable?
                   SecondRdr.GetInt32(14),
@@ -215,11 +215,11 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetInt32(15),
                   //Craft Item
                   SecondRdr.GetInt32(16),
-                  //Lore item 
+                  //Lore item
                   SecondRdr.GetInt32(17),
-                  //Level requirement 
+                  //Level requirement
                   SecondRdr.GetInt32(18),
-                  //Max stack of item 
+                  //Max stack of item
                   SecondRdr.GetInt32(19),
                   //ItemName
                   SecondRdr.GetString(20),
@@ -396,7 +396,7 @@ namespace ReturnHome.Database.SQL
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
-                //Hold charactervalue so we have names to compare against 
+                //Hold charactervalue so we have names to compare against
                 charName = SecondRdr.GetString(0);
 
                 //Iterate through characterData list finding charnames that exist
@@ -417,17 +417,17 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetByte(6),
                   //ItemID
                   SecondRdr.GetInt32(7),
-                  //Item cost 
+                  //Item cost
                   SecondRdr.GetUInt32(8),
                   //ItemIcon
                   SecondRdr.GetInt32(9),
                   //Itempattern equipslot
                   SecondRdr.GetInt32(10),
-                  //Attack Type 
+                  //Attack Type
                   SecondRdr.GetInt32(11),
                   //WeaponDamage
                   SecondRdr.GetInt32(12),
-                  //MaxHP of item 
+                  //MaxHP of item
                   SecondRdr.GetInt32(13),
                   //Tradeable?
                   SecondRdr.GetInt32(14),
@@ -435,11 +435,11 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetInt32(15),
                   //Craft Item
                   SecondRdr.GetInt32(16),
-                  //Lore item 
+                  //Lore item
                   SecondRdr.GetInt32(17),
-                  //Level requirement 
+                  //Level requirement
                   SecondRdr.GetInt32(18),
-                  //Max stack of item 
+                  //Max stack of item
                   SecondRdr.GetInt32(19),
                   //ItemName
                   SecondRdr.GetString(20),
@@ -484,7 +484,7 @@ namespace ReturnHome.Database.SQL
                     thisChar.Inventory.AddItem(ThisItem);
                 }
 
-                
+
                 //If this is 2, it needs to go to the Bank
                 else if (ThisItem.Location == 2)
                 {
@@ -629,7 +629,7 @@ namespace ReturnHome.Database.SQL
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
-                //Hold character value so we have names to compare against 
+                //Hold character value so we have names to compare against
                 if (SecondRdr.GetString(0) == selectedCharacter.CharName)
                 {
                     Item ThisItem = new Item(
@@ -647,17 +647,17 @@ namespace ReturnHome.Database.SQL
                       SecondRdr.GetByte(6),
                       //ItemID
                       SecondRdr.GetInt32(7),
-                      //Item cost 
+                      //Item cost
                       SecondRdr.GetUInt32(8),
                       //ItemIcon
                       SecondRdr.GetInt32(9),
                       //Itempattern equipslot
                       SecondRdr.GetInt32(10),
-                      //Attack Type 
+                      //Attack Type
                       SecondRdr.GetInt32(11),
                       //WeaponDamage
                       SecondRdr.GetInt32(12),
-                      //MaxHP of item 
+                      //MaxHP of item
                       SecondRdr.GetInt32(13),
                       //Tradeable?
                       SecondRdr.GetInt32(14),
@@ -665,11 +665,11 @@ namespace ReturnHome.Database.SQL
                       SecondRdr.GetInt32(15),
                       //Craft Item
                       SecondRdr.GetInt32(16),
-                      //Lore item 
+                      //Lore item
                       SecondRdr.GetInt32(17),
-                      //Level requirement 
+                      //Level requirement
                       SecondRdr.GetInt32(18),
-                      //Max stack of item 
+                      //Max stack of item
                       SecondRdr.GetInt32(19),
                       //ItemName
                       SecondRdr.GetString(20),
@@ -786,6 +786,31 @@ namespace ReturnHome.Database.SQL
 
                 //Add these spells to player book
                 session.MyCharacter.MySpells.Add(thisSpell);
+            }
+
+            rdr.Close();
+        }
+
+        public void GetPlayerSpellIDs(Session session)
+        {
+            //Queries DB for SpellIDs relevant to the character to link to Lua Spell Files
+            using var cmd = new MySqlCommand("GetCharSpellIDs", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ServerID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                //Add SpellID to MySpellIDs Dictionary with WhereOnHotBar as the Key
+                //SpellID
+                int spellID = rdr.GetInt32(0);
+                //location in SpellBook
+                int addedOrder = rdr.GetInt32(1);
+                //WhereOnHotBar
+                uint whereOnBar = rdr.GetUInt32(2);
+
+                session.MyCharacter.MySpellIDs.Add(whereOnBar, spellID);
+                session.MyCharacter.MySpellBook.Add(spellID, addedOrder);
+
             }
 
             rdr.Close();

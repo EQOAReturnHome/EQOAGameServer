@@ -15,24 +15,24 @@ namespace ReturnHome.Server.Network
     {
         //Message List
 		//New data to Session...
-		public RdpCommIn rdpCommIn { get; private set; } 
+		public RdpCommIn rdpCommIn { get; private set; }
 		public RdpCommOut rdpCommOut { get; private set; }
         public SessionQueue sessionQueue { get; private set; }
         //public ServerListener listener { get; private set; }
-		
-		
+
+
         private short _pingCount = 0;
         public uint InstanceID;
         public uint SessionID;
 		public ushort ClientEndpoint;
-		
+
 		//Helps to identify master of session
 		public bool didServerInitiate { get; private set; }
         public bool PendingTermination { get; set; } = false;
-		
+
 		///Client IPEndPoint
         public IPEndPoint MyIPEndPoint { get; private set; }
-		
+
 		//End
 
         ///SessionList Objects, probably need bundle information here too?
@@ -54,7 +54,7 @@ namespace ReturnHome.Server.Network
         ///Once we receive account ID, this should never change...
         public int AccountID;
 
-        //Character 
+        //Character
         public Character MyCharacter { get; set; }
 
         /// <summary>
@@ -95,6 +95,13 @@ namespace ReturnHome.Server.Network
         public void TargetUpdate()
         {
             string message = $"Targeting ObjectID: {MyCharacter.Target}";
+            ChatMessage.GenerateClientSpecificChat(this, message);
+        }
+
+        //For testing to make sure server is sending correct data - cj
+        public void SpellCastUpdate()
+        {
+            string message = $"Test SpellCast: {MyCharacter.Spell}";
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 

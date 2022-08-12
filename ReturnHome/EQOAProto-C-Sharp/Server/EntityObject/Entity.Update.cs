@@ -92,6 +92,8 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateTarget() => MemoryMarshal.Write(ObjectUpdate.Span[58..], ref _target);
 
+        public void ObjectUpdateSpell() => MemoryMarshal.Write(ObjectUpdate.Span[60..], ref _spell);
+
         public void ObjectUpdateUnknown()
         {
             ushort temp = 0x0105;
@@ -124,7 +126,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVanillaColors()
         {
-            ushort temp = 0xFFFF; 
+            ushort temp = 0xFFFF;
             for(int i = 0; i < 6; i++)
                 MemoryMarshal.Write(ObjectUpdate.Span[(98 + ( i * 2))..], ref temp);
         }

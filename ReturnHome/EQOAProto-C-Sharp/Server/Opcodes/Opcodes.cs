@@ -53,6 +53,9 @@
         UpdateTrainingPoints = 0x001D,
         ClassMasteryServer = 0x1402,
         FactionStuff  = 0xa7a,
+        SpellInformation = 0x00b1,
+        Damage = 0x00db,
+        SpellCoolDown = 0x00cd,
         CharacterModifiedDisconnect = 0x07d2,
         LoggedInFromAnotherLocationDisconnect = 0x07A4,
         BadLoginPassword = 0x0729,
@@ -84,6 +87,7 @@
         ClassMastery = 0x1401,
         ClientFaction = 0x0AC4,
         Attack = 0x0F,
+        CastSpell = 0x32,
     }
 
     public static class GameVersions
