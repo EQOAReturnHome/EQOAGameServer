@@ -54,6 +54,7 @@ namespace ReturnHome.Server.Managers
             lua["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
             lua["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
             lua["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);
+            lua["level"] = mySession.MyCharacter.Level;
 
 
 
