@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Configuration;
 using System.Net;
@@ -19,7 +19,7 @@ namespace ReturnHome.Server.Managers
         {
             if (sessionDict.TryAdd(session.MyIPEndPoint, session))
                 return;
-            
+
             Console.WriteLine("Error occured and session was not added to ServerList Queue");
         }
 
@@ -39,8 +39,8 @@ namespace ReturnHome.Server.Managers
 
         public static void RemoveSession(Session session)
         {
-            if ( session != null)
-            { 
+            if (session != null)
+            {
                 if (sessionDict.TryRemove(session.MyIPEndPoint, out _))
                 {
                     Console.WriteLine("Session removed from ServerList");
@@ -113,7 +113,8 @@ namespace ReturnHome.Server.Managers
                             ///Add Server Port
                             writer.Write(Convert.ToUInt16(appSettings[$"ServerPort{i}"]));
 
-                            byte[] test = IPAddress.Parse(appSettings[$"ServerIP{i}"]).GetAddressBytes();
+                            IPAddress test2 = IPAddress.Parse(appSettings[$"ServerIP{i}"]);
+                            byte[] test = test2.GetAddressBytes();
                             Array.Reverse(test);
                             writer.Write(test);
 
@@ -121,7 +122,7 @@ namespace ReturnHome.Server.Managers
 
                             Logger.Info($"Acquired Server #{i + 1}");
                         }
-                        
+
                         Memory<byte> temp = _message.message;
                         _message.message = temp.Slice(0, writer.Position);
                         _message.Size = writer.Position;

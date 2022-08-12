@@ -2,10 +2,9 @@
    freeport_coach = "Get me a horse to Freeport.",
    oasis_coach = "Get me a horse to the Oasis of Marr."
 }
-local coaches = {
-   Freeport = {world = 0, x = 25273.03125, y = 54.125, z = 15723.29102, facing = 3.138683081},
-   Highpass = {world = 0, x = 16776.640625, y = 187.8125, z = 15351.3916015625, facing = 0.8122978806495667},
-   Oasis =  { world = 0, x = 21109.69531, y = 54.12599564, z = 25173.51172, facing = 1.570796371}
+
+local coaches = require('Scripts/ports')
+
 }
 local ch = tostring(choice)
 function event_say()
@@ -16,7 +15,7 @@ function event_say()
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
-         coaches.Freeport.world,
+         GetWorld(coaches.Freeport.world),
          coaches.Freeport.x,
          coaches.Freeport.y,
          coaches.Freeport.z,
@@ -25,7 +24,7 @@ function event_say()
       elseif (ch:find("Oasis")) then
          TeleportPlayer(
          mySession,
-         coaches.Oasis.world,
+         GetWorld(coaches.Oasis.world),
          coaches.Oasis.x,
          coaches.Oasis.y,
          coaches.Oasis.z,

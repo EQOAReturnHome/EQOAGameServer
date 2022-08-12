@@ -11,7 +11,7 @@ local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "tethelin_coach")) then
       if (ch:find("Fayspires")) then
-         TeleportPlayer(mySession,coaches.fayspires.world,coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.fayspires.world),coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

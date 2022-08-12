@@ -83,7 +83,7 @@ namespace ReturnHome.Server.Network
                         //Place segment into resend queue
                         _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
                         segmentBodyFlags.RdpMessage = true;
-                        continue;
+                        break;
                     }
 
                     //Final message of segment, use FB type
@@ -183,7 +183,7 @@ namespace ReturnHome.Server.Network
                                 _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
                                 _segmentMessage = reliableMessage;
                                 segmentBodyFlags.RdpMessage = true;
-                                continue;
+                                break;
                             }
                         }
                     }

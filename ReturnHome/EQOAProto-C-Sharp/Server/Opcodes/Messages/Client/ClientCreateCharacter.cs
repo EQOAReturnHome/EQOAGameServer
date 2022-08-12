@@ -1,8 +1,11 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using ReturnHome.Database.SQL;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client
@@ -33,38 +36,61 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             //If name not found continue to actually create character
             else
             {
-                //Create NewCharacter object
-                Character charCreation = new Character();
-
-                charCreation.CharName = CharName;
+                string charName = CharName;
                 //Get starting level
-                charCreation.Level = (int)reader.Read7BitEncodedInt64();
+                int Level = (int)reader.Read7BitEncodedInt64();
 
                 //Divide startLevel by 2 because client doubles it
                 //Get single byte attributes
-                charCreation.Race = (int)reader.Read7BitEncodedInt64();
-                charCreation.StartingClass = (int)reader.Read7BitEncodedInt64();
-                charCreation.Gender = (int)reader.Read7BitEncodedInt64();
-                charCreation.HairColor = (int)reader.Read7BitEncodedInt64();
-                charCreation.HairLength = (int)reader.Read7BitEncodedInt64();
-                charCreation.HairStyle = (int)reader.Read7BitEncodedInt64();
-                charCreation.FaceOption = (int)reader.Read7BitEncodedInt64();
-                charCreation.HumTypeNum = (int)reader.Read7BitEncodedInt64();
+                Race Race = (Race)reader.Read7BitEncodedInt64();
+                Class Class = (Class)reader.Read7BitEncodedInt64();
+                Sex Gender = (Sex)reader.Read7BitEncodedInt64();
+                int HairColor = (int)reader.Read7BitEncodedInt64();
+                int HairLength = (int)reader.Read7BitEncodedInt64();
+                int HairStyle = (int)reader.Read7BitEncodedInt64();
+                int FaceOption = (int)reader.Read7BitEncodedInt64();
+                HumanType HumType = (HumanType)reader.Read7BitEncodedInt64();
+                
+                if(DefaultCharacter.DefaultCharacterDict.TryGetValue((Race, Class, HumType, Gender), out Character defaultCharacter))
+                {
+                    Character newCharacter = defaultCharacter.Copy();
+                    
+                    int Strength = reader.Read<int>();
+                    int Stamina = reader.Read<int>();
+                    int Agility = reader.Read<int>();
+                    int Dexterity = reader.Read<int>();
+                    int Wisdom = reader.Read<int>();
+                    int Intelligence = reader.Read<int>();
+                    int Charisma = reader.Read<int>();
 
-                //Get player attributes from packet and remove bytes after reading into variable
-                charCreation.AddStrength = reader.Read<int>();
-                charCreation.AddStamina = reader.Read<int>();
-                charCreation.AddAgility = reader.Read<int>();
-                charCreation.AddDexterity = reader.Read<int>();
-                charCreation.AddWisdom = reader.Read<int>();
-                charCreation.AddIntelligence = reader.Read<int>();
-                charCreation.AddCharisma = reader.Read<int>();
+                    newCharacter.CharName = charName;
 
-                //Call SQL method for character creation
-                createCharacter.CreateCharacter(session, charCreation);
+                    if (newCharacter.PlayerTrainingPoints.SpendTrainingPoints(Strength + Stamina + Agility + Dexterity + Wisdom + Intelligence + Charisma))
+                    {
+                        newCharacter.CurrentStats.Add(StatModifiers.TPSTR, Strength);
+                        newCharacter.CurrentStats.Add(StatModifiers.TPSTA, Stamina);
+                        newCharacter.CurrentStats.Add(StatModifiers.TPAGI, Agility);
+                        newCharacter.CurrentStats.Add(StatModifiers.TPDEX, Dexterity);
+                        newCharacter.CurrentStats.Add(StatModifiers.TPWIS, Wisdom);
+                        newCharacter.CurrentStats.Add(StatModifiers.TPINT, Intelligence);
+                        newCharacter.CurrentStats.Add(StatModifiers.TPCHA, Charisma);
+                    }
 
-                //CLose SQL connection
-                createCharacter.CloseConnection();
+                    newCharacter.HairColor = HairColor;
+                    newCharacter.HairLength = HairLength;
+                    newCharacter.HairStyle = HairStyle;
+                    newCharacter.FaceOption = FaceOption;
+
+                    //Call SQL method for character creation
+                    createCharacter.CreateCharacter(session, newCharacter);
+
+                    //CLose SQL connection
+                    createCharacter.CloseConnection();
+
+                }
+
+                else
+                    Console.WriteLine($"Character creation failed, couldn't find a default with Race: {Race} Class: {Class} HumanType: {HumType} Sex: {Gender}");
             }
         }
     }

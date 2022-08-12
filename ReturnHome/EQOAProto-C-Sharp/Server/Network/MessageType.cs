@@ -33,7 +33,7 @@ namespace ReturnHome.Server.Network
         ObjectUpdateChannel23  = 0x17,
         ClientUpdate           = 0x40, // Client unreliable that updates user inputs xyz, camera etc
         GroupUpdate            = 0x40, //?
-        BuffUpdate             = 0x42, //?
-        StatUpdate             = 0x43 //?
+        StatUpdate             = 0x42, //?
+        BuffUpdate             = 0x43, //?
     }
 }

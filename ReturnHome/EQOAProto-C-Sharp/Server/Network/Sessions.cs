@@ -136,6 +136,8 @@ namespace ReturnHome.Server.Network
                 //Check for updates on current objects
                 foreach (ServerObjectUpdate i in rdpCommIn.connectionData.serverObjects.Span)
                     i.GenerateUpdate();
+
+                rdpCommIn.connectionData.clientStatUpdate.GenerateUpdate();
             }
 
             PendingTermination = inGame ? _pingCount >= 50 ? true : false : _pingCount >= 10 ? true : false;

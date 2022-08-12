@@ -1,4 +1,5 @@
-﻿using ReturnHome.Server.Managers;
+﻿using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
@@ -7,7 +8,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     class ServerTeleportPlayer
     {
         //TODO: Account for group teleporting somehow
-        public static void TeleportPlayer(Session session, byte world, float x, float y, float z, float facing)
+        public static void TeleportPlayer(Session session, World world, float x, float y, float z, float facing)
         {
             Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.Teleport);
             BufferWriter writer = new BufferWriter(message.Span);
