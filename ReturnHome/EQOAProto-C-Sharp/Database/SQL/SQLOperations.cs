@@ -12,6 +12,7 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Server.EntityObject.Spells;
 
 namespace ReturnHome.Database.SQL
 {
@@ -731,6 +732,7 @@ namespace ReturnHome.Database.SQL
 
         public void GetPlayerSpells(Session session)
         {
+            List<Spell> spellList = new List<Spell>();
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
@@ -747,7 +749,7 @@ namespace ReturnHome.Database.SQL
                      //SpellID
                      rdr.GetInt32(0),
                      //AddedOrder
-                     rdr.GetInt32(1),
+                     rdr.GetByte(1),
                      //OnHotBar
                      rdr.GetInt32(2),
                      //WhereOnHotBar
@@ -783,14 +785,15 @@ namespace ReturnHome.Database.SQL
                      //SpellDesc
                      rdr.GetString(18)
                 );
-
-                //Add these spells to player book
-                session.MyCharacter.MySpells.Add(thisSpell);
+                spellList.Add(thisSpell);
             }
+
+            //Load All spells into Spell Book
+            session.MyCharacter.MySpellBook = new(session.MyCharacter, spellList);
 
             rdr.Close();
         }
-
+        
         public void GetPlayerSpellIDs(Session session)
         {
             //Queries DB for SpellIDs relevant to the character to link to Lua Spell Files
@@ -808,8 +811,8 @@ namespace ReturnHome.Database.SQL
                 //WhereOnHotBar
                 uint whereOnBar = rdr.GetUInt32(2);
 
-                session.MyCharacter.MySpellIDs.Add(whereOnBar, spellID);
-                session.MyCharacter.MySpellBook.Add(spellID, addedOrder);
+                //session.MyCharacter.MySpellIDs.Add(whereOnBar, spellID);
+                //session.MyCharacter.MySpellBook.Add(spellID, addedOrder);
 
             }
 

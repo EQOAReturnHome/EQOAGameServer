@@ -12,6 +12,7 @@ namespace ReturnHome.Server.Managers
     {
         public static void GetSpell(Session session, uint whereOnBar, uint target)
         {
+            /*
             int spellID = session.MyCharacter.MySpellIDs[whereOnBar];
             int addedOrder = session.MyCharacter.MySpellBook[spellID];
             //Find Lua script recursively through scripts directory by class
@@ -43,7 +44,7 @@ namespace ReturnHome.Server.Managers
             //Call Lua function for initial interaction
             LuaFunction callFunction = lua.GetFunction("spell");
             callFunction.Call();
-
+            */
         }
     }
 }

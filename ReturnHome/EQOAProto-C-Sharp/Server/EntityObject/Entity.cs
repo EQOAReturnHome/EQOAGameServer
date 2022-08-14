@@ -1,5 +1,6 @@
 using System;
 using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 
@@ -11,7 +12,7 @@ namespace ReturnHome.Server.EntityObject
         public EquippedGear equippedGear;
         //Implies if object is visible or not
         public bool Invisible = false;
-
+        public SpellBook MySpellBook;
         private int _level;
         private uint _objectID;
         private long _killTime;

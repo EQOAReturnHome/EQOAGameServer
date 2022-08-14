@@ -91,11 +91,12 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public bool IsWithinRange()
+        //Define distance as a standard unless otherwise dictated
+        public bool IsWithinRange(float distance = 10.0f)
         {
             //What should be the distance check against interacting with NPC's?
             //Should this distance check be farther or shorter for attacking in combat, too? Such as auto attack
-            if (Vector3.Distance(Position, _ourTarget.Position) <= 10.0f)
+            if (Vector3.Distance(Position, _ourTarget.Position) <= distance)
                 return true;
             return false;
         }

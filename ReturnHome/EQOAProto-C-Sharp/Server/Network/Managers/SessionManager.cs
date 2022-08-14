@@ -165,8 +165,8 @@ namespace ReturnHome.Server.Network.Managers
             ServerOpcode0x07D1.Opcode0x07D1(session);
             ServerOpcode0x07F5.Opcode0x07F5(session);
         }
-		
-		/// <summary>
+
+        /// <summary>
         /// Dispatches all outgoing messages.<para />
         /// Removes dead sessions.
         /// </summary>
@@ -181,6 +181,13 @@ namespace ReturnHome.Server.Network.Managers
 
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());
+
+            //Should abilities stuff be updated here? Works for now considering NPC's do nothing yet
+            foreach (Session session in SessionHash)
+            {
+                if (session.inGame)
+                    session.MyCharacter.MySpellBook.CheckCoolDownAndCast();
+            }
 
             // Removes sessions in the NetworkTimeout state, including sessions that have reached a timeout limit.
             foreach (var session in SessionHash.Where(k => !Equals(null, k)))

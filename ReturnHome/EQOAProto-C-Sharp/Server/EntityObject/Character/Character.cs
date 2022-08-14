@@ -5,6 +5,7 @@ using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Server.EntityObject.Spells;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -22,13 +23,10 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Item> AuctionItems = new List<Item> { };
         public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
         public List<Hotkey> MyHotkeys = new List<Hotkey> { };
-        public List<Spell> MySpells = new List<Spell> { };
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
         public Dialogue MyDialogue = new Dialogue();
-        public Dictionary<uint, int> MySpellIDs = new Dictionary<uint, int>();
-        public Dictionary<int, int> MySpellBook = new Dictionary<int, int>();
         public Dictionary<string, bool> playerFlags = new Dictionary<string, bool>();
 
         public TrainingPoints PlayerTrainingPoints;

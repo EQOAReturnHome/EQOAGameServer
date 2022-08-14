@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using ReturnHome.Database.SQL;
-using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
@@ -23,7 +23,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             charDump.GetPlayerHotkeys(session);
             charDump.GetPlayerWeaponHotbar(session);
             charDump.GetPlayerSpells(session);
-            charDump.GetPlayerSpellIDs(session);
+            //charDump.GetPlayerSpellIDs(session);
 
             //Toss opcode in
             writer.Write(message.Opcode);
@@ -78,9 +78,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 sa.DumpAuction(ref writer);
 
             //Spell count and Spells
-            writer.Write7BitEncodedInt64(session.MyCharacter.MySpells.Count);
-            foreach (Spell s in session.MyCharacter.MySpells)
-                s.DumpSpell(ref writer);
+            writer.Write7BitEncodedInt64(session.MyCharacter.MySpellBook.Count);
+            session.MyCharacter.MySpellBook.DumpSpellBook(ref writer);
 
             //Collect Character Stats
             //DefaultCharacter.DefaultCharacterDict.TryGetValue((session.MyCharacter.EntityRace, session.MyCharacter.EntityClass, session.MyCharacter.EntityHumanType, session.MyCharacter.EntitySex), out Character defaultCharacter);

@@ -272,6 +272,12 @@ namespace ReturnHome.Server.Opcodes.Chat
                                 c.CurrentStats.Add(StatModifiers.FireResistance, int.Parse(changes[3]));
                                 ChatMessage.GenerateClientSpecificChat(MySession, message);
                                 break;
+
+                            case "pwr":
+                                message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
+                                c.CurrentPower = int.Parse(changes[3]);
+                                ChatMessage.GenerateClientSpecificChat(MySession, message);
+                                break;
                             /*
                             case "unk2":
                                 message = $"Changing character: {c.CharName}, {changes[2]} to {changes[3]}";
