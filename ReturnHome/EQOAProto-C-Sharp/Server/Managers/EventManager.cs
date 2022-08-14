@@ -17,7 +17,7 @@ namespace ReturnHome.Server.Managers
             mySession.MyCharacter.MyDialogue.npcName = mySession.MyCharacter.MyDialogue.npcName.Replace(" ", "_");
             //Find Lua script recursively through scripts directory by zone
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
-            string[] file = Directory.GetFiles("Scripts\\", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+            string[] file = Directory.GetFiles("../../../Scripts", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
             if (file.Length < 1 || file == null)
                 return;

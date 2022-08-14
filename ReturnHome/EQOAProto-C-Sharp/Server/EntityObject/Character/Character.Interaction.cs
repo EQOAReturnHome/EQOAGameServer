@@ -154,7 +154,7 @@ namespace ReturnHome.Server.EntityObject.Player
         }
 
         public static void AddQuestLog(Session session, uint questNumber, string questText)
-        {
+        {        
             ServerAddQuestLog.AddQuestLog(session, questNumber, questText);
         }
 

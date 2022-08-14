@@ -5,9 +5,10 @@ using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Stats;
+using System;
 
 namespace ReturnHome.Server.EntityObject.Player
-{  
+{
     public partial class Character : Entity
     {
         public int CMCounter = 1;
@@ -27,7 +28,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
         public Dialogue MyDialogue = new Dialogue();
-        public Dictionary<string, bool> playerFlags = new Dictionary<string, bool>();
+        public Dictionary<string, string> playerFlags = new Dictionary<string, string>();
 
         public TrainingPoints PlayerTrainingPoints;
 
@@ -105,7 +106,7 @@ namespace ReturnHome.Server.EntityObject.Player
         //Need instantiation, but needs some review because it's so big... 
         public Character(string charName, int serverID, int modelID, int tClass, int race, int humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int sex, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
                          float speed, int world, float xCoord, float yCoord, float zCoord, float facing, int tpStrength, int tpStamina, int tpAgility, int tpDexterity, int tpWisdom, int tpIntelligence, int tpCharisma, int currentHP, int currentPower, int aC,
-                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing,string playerFlags, Session MySession) : base(true, level)
+                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, string playerFlags, Session MySession) : base(true, level)
         {
             Speed = speed;
             //playerFlags.Add("Freeport", true);
@@ -191,8 +192,9 @@ namespace ReturnHome.Server.EntityObject.Player
             CurrentStats.Add(StatModifiers.TPCHA, tpCharisma);
 
 
-            if (playerFlags != null){
-                this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
+            if (playerFlags != null)
+            {
+                this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, string>>(playerFlags);
             }
             //CurrentPower2 = currentPower2;
             //BasePower = basePower;
@@ -238,18 +240,20 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write(0.0f);
             writer.Write(0.0f);
         }
-        public bool GetPlayerFlags(Session mySession, string flagKey)
+        public string GetPlayerFlags(Session mySession, string flagKey)
         {
             if (mySession.MyCharacter.playerFlags == null)
-                return false;
+                return "noFlags";
 
-            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
-                return true;
+            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+                return mySession.MyCharacter.playerFlags[flagKey];
 
-            return false;
+            else
+                return "noFlags";
+
         }
 
-        public void SetPlayerFlag(Session mySession, string flagKey, bool flagValue)
+        public void SetPlayerFlag(Session mySession, string flagKey, string flagValue)
         {
             //TODO: Fix for characters without flags? bypassing for now
             if (mySession.MyCharacter.playerFlags == null)
@@ -260,6 +264,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
                 mySession.MyCharacter.playerFlags[flagKey] = flagValue;
+            Console.WriteLine(mySession.MyCharacter.playerFlags[flagKey]);
         }
 
         public Character Copy() => (Character)MemberwiseClone();

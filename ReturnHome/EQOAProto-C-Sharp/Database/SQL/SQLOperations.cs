@@ -919,9 +919,9 @@ namespace ReturnHome.Database.SQL
         public void CreateCharacter(Session session, Character charCreation)
         {
             Console.WriteLine("Trying to write flags");
-            charCreation.playerFlags = new Dictionary<string, bool>()
+            charCreation.playerFlags = new Dictionary<string, string>()
             {
-                { "NewPlayerControls", true }
+                { "NewPlayerControls", "true" }
             };
             string serializedPlayerFlags = Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
             Console.WriteLine(serializedPlayerFlags);

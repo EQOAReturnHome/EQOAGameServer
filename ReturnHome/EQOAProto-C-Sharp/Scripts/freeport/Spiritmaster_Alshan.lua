@@ -3,8 +3,7 @@ function event_say()
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
-    if (class == "Magician" and race == "Human" and humanType == "Freeport" and
-    GetPlayerFlags(mySession, "EasternMagician3") and not GetPlayerFlags(mySession, "EasternMagician4"))
+    if (GetPlayerFlags(mySession, "10011") == "0")
     then
         npcDialogue = "Hello."
         diagOptions = { "Sorry to bother, but Malsis sent me.", "Good day!" }
@@ -23,8 +22,9 @@ function event_say()
             SendDialogue(mySession, npcDialogue, diagOptions)
             npcDialogue = "Spiritmaster Alshan: You can find him just passed the southern exit of Freeport. Head out the doorway southeast of here, then south along the midroad, then southwest to the stables."
             questText = "Go speak to Coachman Ronks at the Stable."
+            DeleteQuestLog(mySession, 0)
             AddQuestLog(mySession, 0, questText)
-            SetPlayerFlags(mySession, "EasternMagician4", true)
+            SetPlayerFlags(mySession, "10011", "1")
         end
     else
         npcDialogue = "Would you like me to bind your spirit to this location, child?"
