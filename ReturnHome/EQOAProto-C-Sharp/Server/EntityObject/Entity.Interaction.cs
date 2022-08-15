@@ -442,7 +442,8 @@ namespace ReturnHome.Server.EntityObject
 
         public static void RemoveQuestItem(Session session, int itemID, int itemQty)
         {
-            session.MyCharacter.Inventory.RemoveItem(session.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID));
+           
+
         }
 
 
