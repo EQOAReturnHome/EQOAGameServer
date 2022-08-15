@@ -3,7 +3,7 @@ function event_say()
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
-    if (GetPlayerFlags(mySession, "10011") == "0")
+    if (GetPlayerFlags(mySession, "10011") == "1")
     then
         npcDialogue = "Hello."
         diagOptions = { "Sorry to bother, but Malsis sent me.", "Good day!" }
@@ -24,7 +24,7 @@ function event_say()
             questText = "Go speak to Coachman Ronks at the Stable."
             DeleteQuestLog(mySession, 0)
             AddQuestLog(mySession, 0, questText)
-            SetPlayerFlags(mySession, "10011", "1")
+            SetPlayerFlags(mySession, "10011", "2")
         end
     else
         npcDialogue = "Would you like me to bind your spirit to this location, child?"

@@ -39,6 +39,7 @@ namespace ReturnHome.Server.Managers
             lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
             lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
             lua["SendDialogue"] = mySession.MyCharacter.SendDialogue;
+            lua["SendMultiDialogue"] = mySession.MyCharacter.SendMultiDialogue;
             lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
             lua["AddQuestLog"] = Character.AddQuestLog;
             lua["DeleteQuestLog"] = Character.DeleteQuest;

@@ -1,19 +1,42 @@
 -- coachman ronks
-
 local coaches = require('Scripts/ports')
-
 local playerCoaches = {
    highpass_coach = "Get me a horse to Highpass.",
    bobble_coach = "Get me a horse to Bobble By Water.",
    tea_garden_coach = "Get me a horse to Muniel's Tea Garden.",
    neriak_coach = "Get me a horse to the dark city of Neriak."
 }
-
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "freeport_coach")) then
+if(GetPlayerFlags(mySession, "10011") == "2") then
+        npcDialogue = "What do you want?"
+        diagOptions = { "Spiritmaster Alshan sent me.", "Nothing" }
+        if(ch:find("Alshan")) then
+        multiDialogue = { "Coachman Ronks: Oh….from Spiritmaster Alshan. You know, I'm getting sick and tired of th….well, nevermind.",
+        "Coachman Ronks: Apparently, it is my duty as a citizen of this fine city to add you to the stable ledger.",
+        "Coachman Ronks: This means that if you find yourself in a nearby city, you can visit the stable there and pay for a ride to Freeport.",
+        "Coachman Ronks: Without that record, they cannot offer you passage. If you do, then one of their horses will take you to your destination.",
+        "Coachman Ronks: All you need to do is talk to the coachman of the stable and he will add you to his ledger. I'll add you to mine now.",
+        "Coachman Ronks: Ok, I've done my duty. You may return to your masters now. Be sure to tell them how much I appreciate the business." }
+        questText = "Go Speak to Malsis."
+        DeleteQuestLog(mySession, 0)
+        AddQuestLog(mySession, 0, questText)
+        SetPlayerFlags(mySession, "10011", "3")
+        SetPlayerFlags(mySession, "freeport_coach", "true")
+        SendMultiDialogue(mySession, multiDialogue)
+        npcDialogue = ""
+        elseif(ch:find("Nothing")) then
+        npcDialogue = "Coachman Ronks: Well don't just stand around here, I have work to do!"
+        diagOptions = {}
+        end
+        if(npcDialogue ~= "") then
+        SendDialogue(mySession, npcDialogue, diagOptions)
+        end
+
+SetPlayerFlags(mySession, "admin", "true")
+elseif(GetPlayerFlags(mySession, "10011") ~= "1") then
+   if(GetPlayerFlags(mySession, "freeport_coach") == "true") then
       if (ch:find("Highpass")) then
          TeleportPlayer(mySession,GetWorld(coaches.highpass.world),coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
       elseif (ch:find("Tea")) then
@@ -25,7 +48,7 @@ SetPlayerFlags(mySession, "admin", true)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if (GetPlayerFlags(mySession, coach) == "true" or GetPlayerFlags(mySession, "admin") == "true") then
                table.insert(dialogueOptions, diag)
             end
          end
@@ -34,7 +57,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "freeport_coach", true)
+         SetPlayerFlags(mySession, "freeport_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
@@ -45,7 +68,9 @@ SetPlayerFlags(mySession, "admin", true)
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       end
    end
+   end
 end
+
 
 
 

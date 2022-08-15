@@ -162,8 +162,14 @@ namespace ReturnHome.Server.EntityObject
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
         public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
         {
+
+            if (dialogue == "")
+            {
+                return;
+            }
             //Clear player's previous dialogue options before adding new ones.
             session.MyCharacter.MyDialogue.diagOptions.Clear();
+
 
             //loop over luatable, assigning every value to an element of the players diagOptions list
             //lua table always returns a dict type object of <object,object>
@@ -177,6 +183,7 @@ namespace ReturnHome.Server.EntityObject
                 if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
                     session.MyCharacter.MyDialogue.diagOptions.Sort();
             }
+
 
             //Length of choices
             uint choicesLength = 0;
@@ -227,6 +234,40 @@ namespace ReturnHome.Server.EntityObject
             //Send Message
             session.sessionQueue.Add(message);
             session.MyCharacter.MyDialogue.choice = 1000;
+        }
+
+        //Method for only sending multiple strings of dialogue.
+        public void SendMultiDialogue(Session session, LuaTable dialogue)
+        {
+            int choiceCounter = 0;
+            List<string> multiDialogue = new List<string>();
+            //Converts luatable 
+            if (dialogue != null)
+            {
+                foreach (KeyValuePair<object, object> k in dialogue)
+                {
+                    multiDialogue.Add(k.Value.ToString());
+                    
+                }
+            }
+
+            
+
+                foreach (string d in multiDialogue)
+            {
+                //create variable memory span for sending out dialogue
+                Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.DialogueBox);
+                BufferWriter writer = new BufferWriter(message.Span);
+
+                writer.Write(message.Opcode);
+                writer.Write(choiceCounter);
+                writer.WriteString(Encoding.Unicode, d);
+                //if it's an option box iterate through options and write options to message
+
+                message.Size = writer.Position;
+                //Send Message
+                session.sessionQueue.Add(message);
+            }
         }
 
         public void ProcessDialogue(Session session, BufferReader reader, PacketMessage ClientPacket)
@@ -397,6 +438,11 @@ namespace ReturnHome.Server.EntityObject
             {
                 return false;
             }
+        }
+
+        public static void RemoveQuestItem(Session session, int itemID, int itemQty)
+        {
+            session.MyCharacter.Inventory.RemoveItem(session.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID));
         }
 
 
