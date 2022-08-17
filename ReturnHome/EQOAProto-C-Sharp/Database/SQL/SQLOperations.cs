@@ -180,7 +180,7 @@ namespace ReturnHome.Database.SQL
                 Actor thisActor = npcData.Find(i => Equals(i.CharName, actorName));
 
                 if (thisActor.Inventory == null)
-                    thisActor.Inventory = new(0);
+                    thisActor.Inventory = new(0, thisActor);
 
                 Item ThisItem = new Item(
                   //Stacksleft

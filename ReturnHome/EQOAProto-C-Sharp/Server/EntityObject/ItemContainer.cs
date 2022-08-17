@@ -3,8 +3,10 @@ using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.EntityObject
 {
+    //TODO: Rewrite ItemContainer class to handle sending messages if a player
     public class ItemContainer
     {
+        private Entity _e;
         private ConcurrentDictionary<byte, Item> _itemContainer;
         private byte _counter = 0;
         private int _tunar;
@@ -14,23 +16,15 @@ namespace ReturnHome.Server.EntityObject
 
         private byte type = 0;
 
-        public int Tunar
-        {
-          get { return _tunar; }
-        }
+        public int Tunar => _tunar;
 
-        public int Count
-        {
-            get { return _itemContainer.Count; }
-        }
+        public int Count => _itemContainer.Count;
 
-        public ConcurrentDictionary<byte, Item> itemContainer
-        {
-            get { return _itemContainer; }
-        }
+        public ConcurrentDictionary<byte, Item> itemContainer => _itemContainer;
 
-        public ItemContainer(int tunar, bool inventory = true)
+        public ItemContainer(int tunar, Entity e, bool inventory = true)
         {
+            _e = e;
             _tunar = tunar;
             _itemContainer = new();
             Inventory = inventory;
@@ -93,10 +87,16 @@ namespace ReturnHome.Server.EntityObject
             if (_itemContainer.TryGetValue(index, out Item temp))
             {
                 if (temp.StackLeft >= quantityToDestroy)
-                    temp.StackLeft -= quantityToDestroy;
+                {
+                    if(temp.StackLeft == quantityToDestroy)
+                        RemoveItem(index, out _, out _);
 
-                item = temp;
-                return true;
+                    else
+                        temp.StackLeft -= quantityToDestroy;
+
+                    item = temp;
+                    return true;
+                }
             }
 
             return false;

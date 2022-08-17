@@ -43,7 +43,7 @@ namespace ReturnHome.Server.Managers
             lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
             lua["AddQuestLog"] = Character.AddQuestLog;
             lua["DeleteQuestLog"] = Character.DeleteQuest;
-            lua["CheckQuestItem"] = Character.CheckQuestItem;
+            lua["CheckQuestItem"] = Character.CheckIfQuestItemInInventory;
             lua["mySession"] = mySession;
             lua["GenerateChatMessage"] = Opcodes.Chat.ChatMessage.GenerateClientSpecificChat;
             lua["GrantXP"] = Character.GrantXP;
@@ -56,8 +56,6 @@ namespace ReturnHome.Server.Managers
             lua["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
             lua["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);
             lua["level"] = mySession.MyCharacter.Level;
-
-
 
             //Call the Lua script found by the Dictionary Find above
             lua.DoFile(file[0]);

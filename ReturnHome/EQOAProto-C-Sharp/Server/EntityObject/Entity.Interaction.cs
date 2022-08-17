@@ -15,6 +15,7 @@ using ReturnHome.Server.Opcodes.Chat;
 using NLua;
 using Newtonsoft.Json;
 using ReturnHome.Server.EntityObject.Items;
+using System.Collections.Concurrent;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -428,25 +429,36 @@ namespace ReturnHome.Server.EntityObject
 
         }
 
-        public static bool CheckQuestItem(Session session, int itemID, int itemQty)
+        //Not the most efficent, but works..
+        public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
-            if (session.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID && p.Value.StackLeft >= itemQty))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
+            for (byte i = 0; i < temp.Count; i++ )
+                if(temp[i].ItemID == itemID)
+                    if(temp[i].StackLeft >= itemQty)
+                        return true;
+
+            return false;
         }
 
-        public static void RemoveQuestItem(Session session, int itemID, int itemQty)
+        //Not the most efficent, but works..
+        public static bool RemoveQuestItemFromPlayerInventory(Session session, int itemID, int itemQty)
         {
-           
+            ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
+            for (byte i = 0; i < temp.Count; i++)
+                if (temp[i].ItemID == itemID && temp[i].StackLeft >= itemQty)
+                    if(session.MyCharacter.Inventory.UpdateQuantity(temp[i].ServerKey, itemQty, out _))
+                        return true;
 
+            return false;
         }
 
-
-
+        public static bool AddItemToPlayerInventory(Session session)
+        {
+            //Do some magic to create an item here?!
+            //Maybe quest NPC's store quest rewards and we figure out how to give accordingly?
+            throw new NotImplementedException("AddItemToPlayerInventory not fully implemented, don't use this");
+            session.MyCharacter.Inventory.AddItem(default);
+        }
     }
 }

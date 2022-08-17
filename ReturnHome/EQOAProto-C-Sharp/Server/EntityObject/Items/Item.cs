@@ -17,8 +17,7 @@ namespace ReturnHome.Server.EntityObject.Items
         public int Charges { get; set; }
         public EquipSlot EquipLocation { get; set; }
         public byte Location { get; set; } //inventory, bank auction etc
-        public int ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
-
+        public byte ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
         public int ItemID { get; private set; }
         public uint ItemCost { get; private set; }
         public int Unk1 { get; private set; }
