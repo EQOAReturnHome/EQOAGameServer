@@ -58,7 +58,7 @@ namespace ReturnHome.Server.EntityObject.Player
             //Default characters start with 20 total and 20 unused TP's
             PlayerTrainingPoints = new(20, 20);
             Level = 1;
-            Inventory = new(0, this);
+            Inventory = new(5000, this);
             Bank = new(0, this, false);
             x = X;
             y = Y;
