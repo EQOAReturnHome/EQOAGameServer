@@ -90,9 +90,13 @@ namespace ReturnHome.Server.Network
                 PlayerManager.AddPlayer(Mysession.MyCharacter);
                 EntityManager.AddEntity(Mysession.MyCharacter);
                 MapManager.Add(Mysession.MyCharacter);
-                
-                
+
                 Mysession.inGame = true;
+                if (Mysession.MyCharacter.GetPlayerFlags(Mysession, "1001") == "0")
+                {
+                    Mysession.MyCharacter.MyDialogue.npcName = "NewPlayerIntro";
+                    EventManager.GetNPCDialogue(GameOpcode.DialogueBox, Mysession);
+                }
             }
 
             else

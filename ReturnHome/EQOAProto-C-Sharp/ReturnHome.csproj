@@ -46,11 +46,13 @@
     <EmbeddedResource Remove="Scripts\wyndhaven\coachman_brumley.lua" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Scripts\freeport\Magician_start.lua" />
     <None Remove="Scripts\ports.lua" />
     <None Remove="Scripts\wyndhaven\coachman_brumley.lua" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\dirTest.lua" />
+    <Content Include="Scripts\freeport\Magician_start.lua" />
     <Content Include="Scripts\ports.lua" />
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />
   </ItemGroup>
