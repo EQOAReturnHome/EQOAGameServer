@@ -17,8 +17,7 @@ namespace ReturnHome.Server.EntityObject.Items
         public int Charges { get; set; }
         public EquipSlot EquipLocation { get; set; }
         public byte Location { get; set; } //inventory, bank auction etc
-        public int ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
-
+        public byte ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
         public int ItemID { get; private set; }
         public uint ItemCost { get; private set; }
         public int Unk1 { get; private set; }
@@ -140,7 +139,7 @@ namespace ReturnHome.Server.EntityObject.Items
             writer.Write7BitEncodedInt64(Charges);
             writer.Write7BitEncodedInt64((sbyte)EquipLocation);
             writer.Write(Location);
-            writer.Write(ServerKey);
+            writer.Write<int>(ServerKey);
             writer.Write7BitEncodedInt64(ItemID);
             writer.Write7BitEncodedUInt64(ItemCost);
             writer.Write7BitEncodedInt64(Unk1);
