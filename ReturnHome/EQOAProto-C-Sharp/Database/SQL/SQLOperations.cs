@@ -918,10 +918,9 @@ namespace ReturnHome.Database.SQL
         //Method to create new character for player's account
         public void CreateCharacter(Session session, Character charCreation)
         {
-            Console.WriteLine("Trying to write flags");
             charCreation.playerFlags = new Dictionary<string, string>()
             {
-                { "NewPlayerControls", "true" }
+                { "NewPlayerIntro", "0" }
             };
             string serializedPlayerFlags = Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
             Console.WriteLine(serializedPlayerFlags);
