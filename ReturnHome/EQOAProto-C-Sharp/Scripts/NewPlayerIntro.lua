@@ -41,7 +41,7 @@ if(race == "Human")then
        "As a new rogue, you have been invited to join The Spiteful Shield. They are the rogue's guild here in Freeport.",
        "Before we get too far, do you need instructions on how to use the basic controls?" }
      npcDialogue = "Then you are ready to move on to your first quest. Speak to Necorik the Ghost, he is the guildmaster standing before you."
-      elseif(class == "Shadowknight")then
+      elseif(class == "ShadowKnight")then
      multiDialogue = { "Welcome to Freeport young shadowknight. This is the city of trade and the eastern home of the humans.",
        "As a new shadowknight, you have been invited to join The Spiteful Shield. They are the shadowknight's guild here in Freeport.",
        "Before we get too far, do you need instructions on how to use the basic controls?" }

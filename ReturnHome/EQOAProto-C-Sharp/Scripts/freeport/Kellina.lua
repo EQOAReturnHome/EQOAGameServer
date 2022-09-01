@@ -13,41 +13,35 @@ if(GetPlayerFlags(mySession, "10012") == "0") then
       SetPlayerFlags(mySession, "10012", "1")
       questText = "Return two cracked ant pincers to Kellina."
       AddQuestLog(mySession, 0, questText)
-      end
-  elseif (GetPlayerFlags(mySession, "10012") == "1") then
-      if (CheckQuestItem(mySession, 31010, 1)) then
-	    if(ch:find("actually"))then
-        diagOptions = {}
-        npcDialogue = "I will need an item to get started. You will need the iron ring from Merchant Yulia, then return to me."
-        elseif(ch:find("Yes"))then
-           diagOptions = {}
-           multiDialogue = { "Kellina: I suppose I can disregard your folly. You are new after all. And you did complete the task I assigned you.",
-           "Kellina: I am a woman of my word. Take this scroll and study it well. The spell is paltry compared to my power, but it's a start.",
-           "You have finished a quest!", "You have given away a cracked ant pincer.", "You have given away a cracked ant pincer.",
-           "You have received a Smoldering Aura Scroll." ,
-           "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later." }
-	    SendMultiDialogue(mySession, npcDialogue)
-           
-           GrantXP(mySession, 6900)
-           DeleteQuestLog(mySession, 0)
-	       SetPlayerFlags(mySession, "10012", "99")
-           SetPlayerFlags(mySession, "10013", "0")
-	else
-           npcDialogue = "I don't remember calling for you."
-           diagOptions = {"I apologize Lady, but I have the pincers.", "Yes, but…I...nevermind, sorry."}
-      	    SendDialogue(mySession, npcDialogue, diagOptions)
+  else
+      diagOptions = { "Actually, Malsis sent me."}
+      npcDialogue = "Kellina: I don't have time for chit chat, dear."
+      SendDialogue(mySession, npcDialogue, diagOptions)
+  end
+elseif (GetPlayerFlags(mySession, "10012") == "1") then
+    if (CheckQuestItem(mySession, 4866, 2)) then
+	  if(ch:find("nevermind"))then
+         npcDialogue = "Kellina: It's important that you bring me what I have asked for. What was it now… Ah yes, I need two cracked ant pincers."
+      elseif(ch:find("pincers"))then
+         multiDialogue = { "Kellina: I suppose I can disregard your folly. You are new after all. And you did complete the task I assigned you.",
+         "Kellina: I am a woman of my word. Take this scroll and study it well. The spell is paltry compared to my power, but it's a start.",
+         "You have finished a quest!", "You have given away a cracked ant pincer.", "You have given away a cracked ant pincer.",
+         "You have received a Smoldering Aura Scroll." ,
+         "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later." }
+	     SendMultiDialogue(mySession, npcDialogue)
+         GrantXP(mySession, 6900)
+         DeleteQuestLog(mySession, 0)
+	     SetPlayerFlags(mySession, "10012", "99")
+         SetPlayerFlags(mySession, "10013", "0")
+	   else
+         npcDialogue = "I don't remember calling for you."
+         diagOptions = {"I apologize Lady, but I have the pincers.", "Yes, but...I...nevermind, sorry."}
        end
-     else
-        diagOptions = {}
-        npcDialogue = "I will need an item to get started. You will need the iron ring from Merchant Yulia, then return to me."
+    else
+    npcDialogue = "Kellina: It's important that you bring me what I have asked for. What was it now… Ah yes, I need two cracked ant pincers."
     end
 else
-diagOptions = { "Actually, Malsis sent me."}
-npcDialogue = "Kellina: I don’t have time for chit chat, dear."
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
-else
 npcDialogue = "I am quite busy with my students right now. Are you sure you're in the right place?"
-SendDialogue(mySession, npcDialogue, diagOptions)
 end
+SendDialogue(mySession, npcDialogue, diagOptions)
 end

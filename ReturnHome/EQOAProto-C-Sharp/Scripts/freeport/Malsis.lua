@@ -42,7 +42,7 @@ function event_say()
         else
             npcDialogue = "I will need an item to get started. You will need the iron ring from Merchant Yulia, then return to me."
         end
-    elseif (GetPlayerFlags(mySession, "10011") == "0" and level >= 2) then
+    elseif (GetPlayerFlags(mySession, "10011") == "0") then
         if (ch:find("task")) then
             multiDialogue = { "I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you….........oh wait",
             "That's right, I remember you now. I apologize. You must forgive my temper. Time inevitably takes its toll upon an elementalist.",
