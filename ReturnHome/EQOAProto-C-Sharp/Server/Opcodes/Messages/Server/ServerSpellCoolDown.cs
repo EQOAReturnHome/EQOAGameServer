@@ -7,7 +7,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerSpellCoolDown
     {
-        public static void SpellCoolDown(Session session, uint addedOrder, int timer)
+        public static void SpellCoolDown(Session session, byte addedOrder, int timer)
         {
             Debug.WriteLine("start cooldown");
             //Send Spell Effect Packet with Target to Client

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Diagnostics;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Player;
@@ -740,7 +741,6 @@ namespace ReturnHome.Database.SQL
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("charID", session.MyCharacter.ServerID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
-
             while (rdr.Read())
             {
                 //Instantiate new character object, not to be confused with a newly created character
@@ -780,20 +780,21 @@ namespace ReturnHome.Database.SQL
                      rdr.GetInt32(15),
                      //EqpRequirement
                      rdr.GetInt32(16),
+                     //SpellEffect
+                     rdr.GetInt64(17),
                      //SpellName
-                     rdr.GetString(17),
+                     rdr.GetString(18),
                      //SpellDesc
-                     rdr.GetString(18)
+                     rdr.GetString(19)
                 );
                 spellList.Add(thisSpell);
             }
 
             //Load All spells into Spell Book
             session.MyCharacter.MySpellBook = new(session.MyCharacter, spellList);
-
             rdr.Close();
         }
-        
+
         public void GetPlayerSpellIDs(Session session)
         {
             //Queries DB for SpellIDs relevant to the character to link to Lua Spell Files

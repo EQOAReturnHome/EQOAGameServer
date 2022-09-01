@@ -30,6 +30,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         public int Scope { get; private set; }
         public int Recast { get; private set; }
         public int EqpRequirement { get; private set; }
+        public long SpellEffect { get; private set; }
         public string SpellName { get; private set; }
         public string SpellDesc { get; private set; }
 
@@ -39,7 +40,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         //Will instantiate a spell object
         //Alot of this probably should move to some kind of scripting? Alot of repetitive data here on a per object instance basis, that could be maximized by scripting
         //Only items really needed are (int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide) rest of data could be acquired from scripting
-        public Spell(int thisSpellID, byte thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide, int thisAbilityLevel, int thisUnk2, int thisUnk3, float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc)
+        public Spell(int thisSpellID, byte thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide, int thisAbilityLevel, int thisUnk2, int thisUnk3, float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon, int thisScope, int thisRecast, int thisEqpRequirement, long thisSpellEffect, string thisSpellName, string thisSpellDesc)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;
@@ -58,6 +59,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             Scope = thisScope;
             Recast = thisRecast;
             EqpRequirement = thisEqpRequirement;
+            SpellEffect = thisSpellEffect;
             SpellName = thisSpellName;
             SpellDesc = thisSpellDesc;
         }
@@ -100,7 +102,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                 if (e.isPlayer)
                 {
                     //TODO: May need to be different here?
-                    ServerCastSpell.CastSpell(((Character)e).characterSession, 0x0A286E2E/*SpellEffect*/, e.Target, CastTime);
+                    ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);
                     ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
 
                 }
