@@ -26,9 +26,4 @@ RUN dotnet publish -c Release -o out ReturnHome/EQOAProto-C-Sharp/ReturnHome.csp
 
 EXPOSE 10070/udp
 
-# Add wait-for-it
-# Temporarily removing wait-for-it, docker restarts enough to reconnect to the db when it is finished
-# COPY wait-for-it.sh wait-for-it.sh 
-RUN chmod +x wait-for-it.sh
-
 CMD ["dotnet", "out/ReturnHome.dll"]
