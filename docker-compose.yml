@@ -21,6 +21,7 @@ services:
       dockerfile: returnhome.Dockerfile
     ports:
       - "10070:10070/udp"
+    restart: on-failure
     networks:
       - docknetwork
   dnsmasq:
@@ -45,5 +46,20 @@ services:
       - $PWD:/app/public
     ports:
       - "7000:7000"
+    networks:
+      - docknetwork
+  mariadb:
+    hostname: mariadb
+    container_name: mariadb
+    image: mariadb:10.2
+    environment:
+      MARIADB_ROOT_PASSWORD: foobar
+      MARIADB_DATABASE: eqoabase
+      MARIADB_USER: fooUser
+      MARIADB_PASSWORD: fooPass
+    volumes:
+      - ./docker-sql/:/docker-entrypoint-initdb.d/
+    ports:
+      - "3306:3306"
     networks:
       - docknetwork

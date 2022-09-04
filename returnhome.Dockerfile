@@ -18,4 +18,8 @@ RUN dotnet build ReturnHome/EQOAProto-C-Sharp/ReturnHome.csproj
 
 EXPOSE 10070/udp
 
-CMD ["dotnet", "ReturnHome/EQOAProto-C-Sharp/bin/Debug/net5.0/ReturnHome.dll"]
+# Add wait-for-it
+COPY wait-for-it.sh wait-for-it.sh 
+RUN chmod +x wait-for-it.sh
+
+CMD ["./wait-for-it.sh" , "mariadb:3306" , "--strict" , "--timeout=300" , "--" , "dotnet", "ReturnHome/EQOAProto-C-Sharp/bin/Debug/net5.0/ReturnHome.dll"]
