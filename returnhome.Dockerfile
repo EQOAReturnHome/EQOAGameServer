@@ -14,12 +14,21 @@ RUN apt-get update -y \
     && apt-get update \
     && apt-get install -y dotnet-sdk-6.0
 
+# sets paths for both linux and windows
+COPY ReturnHome/EQOAProto-C-Sharp/Scripts/ /Scripts\\
+COPY ReturnHome/EQOAProto-C-Sharp/Scripts/ /Scripts
+
+# build dll
 RUN dotnet build ReturnHome/EQOAProto-C-Sharp/ReturnHome.csproj
+
+# publish dll
+RUN dotnet publish -c Release -o out ReturnHome/EQOAProto-C-Sharp/ReturnHome.csproj
 
 EXPOSE 10070/udp
 
 # Add wait-for-it
-COPY wait-for-it.sh wait-for-it.sh 
+# Temporarily removing wait-for-it, docker restarts enough to reconnect to the db when it is finished
+# COPY wait-for-it.sh wait-for-it.sh 
 RUN chmod +x wait-for-it.sh
 
-CMD ["./wait-for-it.sh" , "mariadb:3306" , "--strict" , "--timeout=300" , "--" , "dotnet", "ReturnHome/EQOAProto-C-Sharp/bin/Debug/net6.0/ReturnHome.dll"]
+CMD ["dotnet", "out/ReturnHome.dll"]
