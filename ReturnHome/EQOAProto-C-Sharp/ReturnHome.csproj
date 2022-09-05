@@ -16,13 +16,10 @@
   <ItemGroup>
     <Compile Remove="Database\SQL\Character\**" />
     <Compile Remove="Server\NewFolder1\**" />
-    <Compile Remove="Server\NewFolder\**" />
     <EmbeddedResource Remove="Database\SQL\Character\**" />
     <EmbeddedResource Remove="Server\NewFolder1\**" />
-    <EmbeddedResource Remove="Server\NewFolder\**" />
     <None Remove="Database\SQL\Character\**" />
     <None Remove="Server\NewFolder1\**" />
-    <None Remove="Server\NewFolder\**" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\.editorconfig" Link=".editorconfig" />

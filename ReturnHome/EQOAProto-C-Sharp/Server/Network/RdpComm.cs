@@ -101,8 +101,10 @@ namespace ReturnHome.Server.Network
                                 break;
 
                             default:
-                                Logger.Info("Processing Object update messages");
-                                ProcessUnreliable.ProcessUnreliables(_session, message);
+                                Console.WriteLine("Placing Client update into stack");
+                                connectionData.ClientUpdateStack.Push(message);
+                                //Logger.Info("Processing Object update messages");
+                                //ProcessUnreliable.ProcessUnreliables(_session, message);
                                 //Do stuff to process 0x40 type messages from client
                                 break;
                         }
@@ -142,6 +144,9 @@ namespace ReturnHome.Server.Network
 
                     else if (temp2 == (byte)MessageType.StatUpdate)
                         connectionData.clientStatUpdate.UpdateBaseXor(ack.Value);
+
+                    else if (temp2 == (byte)MessageType.GroupUpdate)
+                        connectionData.serverGroupUpdate.UpdateBaseXor(ack.Value);
                     else
                         Console.WriteLine($"Received Channel {temp2}, not implemented yet or processing error on channel processing");
                 }

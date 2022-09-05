@@ -60,7 +60,23 @@
         NotSubscribed = 0x072B,
         AddBuddyFailed = 0x03d8,
         BuddyListFull = 0x03d7,
-        Something = 0x468, //Guild stuff
+        WorldUnavailable = 0x07F3, //An error you can get when memory dump happens if character is in a world unavailable
+        GroupInviteResponse = 0x0773,
+        WhoListResponse = 0x0E02,
+        CreateGroup = 0x0772,
+        GroupInviteAcceptedMessage = 0x0770,
+        OutMatched = 0x077A,
+        BuddyListStuff = 0x0771, //1: Player is busy 2: Declined invite 5: Cannot accept invitations 6: Invitation expired 7: Invite failed: Too many open invites 8: Full buddy list and cannot accept 9: Already in buddy list 10: is ignoring you
+        BuddyInvite = 0x076F,
+        GroupStuff = 0x069C, //1: Declined Invitation 2: Already in a group 3: Recipient not found 4: is ignoring you 5: is still loading
+        GroupChat = 0x069E,
+        GuildInviteStuff = 0x057A, //1: Guild Invite 2: Accepted Invitation 3: Busy and cannot accept invitations
+        AdminCode = 0x0700,
+        AuctionStuff = 0x1206,
+        DisconnectNoError = 0x0777,//Disconnects client with no error message
+        AdministratorShutdown = 0x07C1,
+        Something = 0x0774,
+        Something2 = 0x062F,
         Loot = 0x0018, //24
 
 
@@ -86,6 +102,12 @@
         ClassMastery = 0x1401,
         ClientFaction = 0x0AC4,
         Attack = 0x0F,
+        WhoList = 0x0E01,
+        GroupInvite = 0x0625,
+        AcceptGroupInvite = 0x0622,
+        DisbandGroup = 0x0627,
+        BootGroupMember = 0x0626,
+        LeaveGroup = 0x0624
         ClientCloseLoot = 0x0016,
         ClientLoot = 0x0019,
     }

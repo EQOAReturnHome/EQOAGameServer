@@ -45,10 +45,6 @@ namespace ReturnHome.Server.Managers
             return playerList;
         }
 
-        public static List<Character> RequestPlayerList()
-        {
-            return playerList;
-        }
 
         //Stub method to be called on timer to save all characters in world
         public static void SaveCharacterData()

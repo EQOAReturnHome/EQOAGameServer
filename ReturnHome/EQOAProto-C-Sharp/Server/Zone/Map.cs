@@ -24,6 +24,7 @@ namespace ReturnHome.Server.Zone
         private List<Character> _playerList = new();
         private List<Entity> _entityBuffer = new();
         private List<Entity> _removeBuffer = new();
+        private List<Entity> _entityList = new();
         //private quadTree 
         private string _name;
         public string Name
@@ -91,18 +92,16 @@ namespace ReturnHome.Server.Zone
 
         public void QueryObjectsForDistribution()
         {
-            List<Entity> entityList = new();
-
             foreach (Character entity in _playerList)
             {
-                _qtree.GetObjects(new RectangleF(entity.x - 100f, entity.z - 100f, 200f, 150.0f), entityList);
+                _qtree.GetObjects(new RectangleF(entity.x - 100f, entity.z - 100f, 200f, 150.0f), _entityList);
 
                 //Sort Character List
-                entityList = entityList.OrderBy(x => Vector3.Distance(new Vector3(entity.x, entity.y, entity.z), new Vector3(x.x, x.y, x.z))).ToList();
+                _entityList = _entityList.OrderBy(x => Vector3.Distance(new Vector3(entity.x, entity.y, entity.z), new Vector3(x.x, x.y, x.z))).ToList();
 
-                entity.characterSession.rdpCommIn.connectionData.AddChannelObjects(entityList);
+                entity.characterSession.rdpCommIn.connectionData.AddChannelObjects(_entityList);
 
-                entityList.Clear();
+                _entityList.Clear();
             }
         }
 

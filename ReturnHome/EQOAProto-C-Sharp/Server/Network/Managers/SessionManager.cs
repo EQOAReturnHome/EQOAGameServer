@@ -174,11 +174,14 @@ namespace ReturnHome.Server.Network.Managers
         {
             int sessionCount = 0;
 
+            //process client's pending updates before reloading map
+            Parallel.ForEach(SessionHash, s => s?.UpdateClientStatus());
+
             //Should push client object update directly to character if needed
             //test  Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
 
             MapManager.UpdateMaps();
-
+            GroupManager.DistributeGroupUpdates();
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());
 

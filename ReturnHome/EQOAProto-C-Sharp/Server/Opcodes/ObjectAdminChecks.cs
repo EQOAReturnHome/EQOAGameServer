@@ -23,6 +23,10 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                 switch(changes[1])
                 {
+                    case "test":
+                        ServerClientMenu.ChangeMenu(MySession, 0x23, 0x80);
+                        break;
+                        
                     case "Zone":
                         message = $"Map: {MySession.MyCharacter.map.Name}";
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
@@ -162,7 +166,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
-                    case "test":
+                    case "test2":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
                         c.ObjectUpdateUnknown();
                         ChatMessage.GenerateClientSpecificChat(MySession, message);

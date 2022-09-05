@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System;
 using System.Runtime.InteropServices;
+using System.Buffers.Binary;
 
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes;
@@ -48,16 +49,20 @@ namespace ReturnHome.Server.Network
 
             Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
             BufferReader reader = new(MyPacket.Span);
-
+            Span<byte> vs = MyPacket.Span;
             Mysession.MyCharacter.World = (World)reader.Read<byte>();
 
             float x = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
             float y = CoordinateConversions.ConvertYToFloat(reader.ReadUint24());
             float z = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
 
-            float Velx = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
-            float Vely = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
-            float Velz = 15.3f * 2 * reader.Read<ushort>() / 0xffff - 15.3f;
+            float Velx = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
+            float Vely = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
+            float Velz = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
+
+            float Velx2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[10..]) / 0xffff - 15.3f;
+            float Vely2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[12..]) / 0xffff - 15.3f;
+            float Velz2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[14..]) / 0xffff - 15.3f;
 
             //Skip 6 bytes...
             reader.Position += 6;

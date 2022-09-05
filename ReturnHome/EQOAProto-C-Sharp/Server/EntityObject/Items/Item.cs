@@ -99,7 +99,7 @@ namespace ReturnHome.Server.EntityObject.Items
             Maxstack = thisMaxStack;
             ItemName = thisItemName;
             ItemDesc = thisItemDesc;
-
+            
             //Null this for outgoing packet
             RemainingHP = thisRemainingHP;
             EquipLocation = (EquipSlot)thisEquipLocation;

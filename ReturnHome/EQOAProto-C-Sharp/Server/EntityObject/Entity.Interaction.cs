@@ -38,6 +38,8 @@ namespace ReturnHome.Server.EntityObject
 
                     //Keep a reference to our current target on hand
                     EntityManager.QueryForEntity(_target, out _ourTarget);
+                    if(_ourTarget != null)
+                        Console.WriteLine($"{CharName} targeting {_ourTarget.CharName} at X: {_ourTarget.x} Y: {_ourTarget.y} Z: {_ourTarget.z} XVel:{_ourTarget.VelocityX} VelY: {_ourTarget.VelocityY} VelZ: {_ourTarget.VelocityZ}");
 
                     if (isPlayer && ObjectID != 0)
                     {

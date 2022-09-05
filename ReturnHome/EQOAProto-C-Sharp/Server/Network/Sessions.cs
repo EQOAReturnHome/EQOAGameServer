@@ -115,6 +115,14 @@ namespace ReturnHome.Server.Network
             }
         }
 
+        public void UpdateClientStatus()
+        {
+            if(rdpCommIn.connectionData.ClientUpdateStack.TryPop(out PacketMessage result))
+                ProcessUnreliable.ProcessUnreliables(this, result);
+
+            //Always clear the stack
+            rdpCommIn.connectionData.ClientUpdateStack.Clear();
+        }
         /// <summary>
         /// This will send outgoing packets as well as the final logoff message.
         /// </summary>
@@ -138,6 +146,7 @@ namespace ReturnHome.Server.Network
                     i.GenerateUpdate();
 
                 rdpCommIn.connectionData.clientStatUpdate.GenerateUpdate();
+                rdpCommIn.connectionData.serverGroupUpdate.GenerateUpdate();
             }
 
             PendingTermination = inGame ? _pingCount >= 50 ? true : false : _pingCount >= 10 ? true : false;

@@ -45,6 +45,10 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
             { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
             { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
+            { GameOpcode.WhoList, ClientWhoListRequest.ProcessWhoList },
+            { GameOpcode.GroupInvite, ClientAddCharacterToGroup.AddCharacterToGroup },
+            { GameOpcode.AcceptGroupInvite, ClientAcceptGroupInvite.AcceptGroupInvite },
+            { GameOpcode.DisbandGroup, ClientDisbandGroup.DisbandGroup },
             { GameOpcode.ClientCloseLoot, ClientLoot.ClientLootClose },
             { GameOpcode.ClientLoot, ClientLoot.ClientLootItem },
         };

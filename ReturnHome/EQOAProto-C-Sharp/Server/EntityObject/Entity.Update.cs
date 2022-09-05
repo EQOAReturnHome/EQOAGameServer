@@ -58,11 +58,12 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVelocityY()
         {
-            /*Don't need to adjust Y, for now
-            sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
-            if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
-            if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(39, 1));
+            /*
+            //Don't need to adjust Y, for now
+            sbyte svy = (sbyte)Math.Round(VelocityY * _speedAdjust);
+            if (svy > 127) { Console.WriteLine("WARNING: svx=" + svy); svy = 127; }
+            if (svy < -128) { Console.WriteLine("WARNING: svx=" + svy); svy = -128; }
+            MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svy);
             */
         }
 

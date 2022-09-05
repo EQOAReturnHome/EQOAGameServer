@@ -16,6 +16,8 @@ namespace ReturnHome.Server.EntityObject.Player
         public int SpentCMs = 0;
         public int UnspentCMs = 0;
 
+        public uint GroupID = 0;
+
         private static string Tunaria = "data\\tunaria.esf";
 
         //Our Lists for attributes of character

@@ -6,6 +6,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Zone;
+using ReturnHome.Server.Opcodes.Chat;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -256,6 +257,10 @@ namespace ReturnHome.Server.EntityObject
         public void UpdatePosition(float X, float Y, float Z)
         {
             Position = new Vector3(X, Y, Z);
+            /*
+            string message = $"X: {X} Y: {Y} Z: {Z}";
+            ChatMessage.GenerateClientSpecificChat(((Character)this).characterSession, message);
+            */
         }
 
         public void UpdateFacing(byte facing, byte turning)
@@ -278,6 +283,10 @@ namespace ReturnHome.Server.EntityObject
             VelocityX = velocityX;
             VelocityY = velocityY;
             VelocityZ = velocityZ;
+            /*
+            string message = $"VelX: {velocityX} VelY: {velocityY} VelZ: {velocityZ}";
+            ChatMessage.GenerateClientSpecificChat(((Character)this).characterSession, message);
+            */
         }
 
         /*
