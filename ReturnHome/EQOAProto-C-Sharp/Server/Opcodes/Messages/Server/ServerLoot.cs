@@ -38,27 +38,24 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
         {
             if (EntityManager.QueryForEntity(session.MyCharacter.Target, out Entity ent))
             {
-                ent.Inventory.RetrieveItem(clientIndex, out Item item);
+                if (ent.Inventory.RemoveItem(clientIndex, out Item item, out byte _))
+                {
+                    Item newItem = item.AcquireItem(itemQty);
 
+                    //Console.WriteLine(newItem.ItemName);
+                    session.MyCharacter.Inventory.AddItem(item);
 
+                    //Sends 
+                    Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ClientLoot);
+                    BufferWriter writer = new BufferWriter(message.Span);
 
-                Item newItem = item.AcquireItem(itemQty);
-
-                Console.WriteLine(newItem.ItemName);
-                session.MyCharacter.Inventory.AddItem(newItem);
-
-
-                ServerAddInventoryItemQuantity.AddInventoryItemQuantity(session, newItem);
+                    writer.Write(message.Opcode);
+                    writer.Write(clientIndex);
+                    writer.Write((byte)1);
+                    message.Size = writer.Position;
+                    session.sessionQueue.Add(message);
+                }
             }
-            //Sends 
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ClientLoot);
-            BufferWriter writer = new BufferWriter(message.Span);
-
-            writer.Write(message.Opcode);
-            writer.Write(clientIndex);
-            writer.Write((byte)1);
-            message.Size = writer.Position;
-            session.sessionQueue.Add(message);
         }
     }
 }

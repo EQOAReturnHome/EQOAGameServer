@@ -27,6 +27,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             ServerLoot.ServerLootItem(session, itemSlot, itemQty);
 
         }
+
         public static void ClientLootClose(Session session, PacketMessage clientPacket)
         {
             //Sends 

@@ -107,7 +107,7 @@
         AcceptGroupInvite = 0x0622,
         DisbandGroup = 0x0627,
         BootGroupMember = 0x0626,
-        LeaveGroup = 0x0624
+        LeaveGroup = 0x0624,
         ClientCloseLoot = 0x0016,
         ClientLoot = 0x0019,
     }
