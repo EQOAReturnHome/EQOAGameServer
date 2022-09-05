@@ -9,7 +9,7 @@ local playerCoaches = {
 }
 
 local ch = tostring(choice)
-SetPlayerFlags(mySession, "admin", true)
+SetPlayerFlags(mySession, "admin", "true")
 function event_say()
    dialogueOptions = {}
    if(GetPlayerFlags(mySession, "bobble_by_water_coach")) then
@@ -43,7 +43,7 @@ function event_say()
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin") == "true") then
                table.insert(dialogueOptions, diag)
             end
 

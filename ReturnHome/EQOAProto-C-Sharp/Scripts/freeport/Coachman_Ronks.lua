@@ -9,20 +9,25 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-if(GetPlayerFlags(mySession, "10011") == "2") then
+if(GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011") == "2") then
         npcDialogue = "What do you want?"
         diagOptions = { "Spiritmaster Alshan sent me.", "Nothing" }
         if(ch:find("Alshan")) then
-        multiDialogue = { "Coachman Ronks: Oh….from Spiritmaster Alshan. You know, I'm getting sick and tired of th….well, nevermind.",
+        multiDialogue = { "Coachman Ronks: Oh...from Spiritmaster Alshan. You know, I'm getting sick and tired of the...well, nevermind.",
         "Coachman Ronks: Apparently, it is my duty as a citizen of this fine city to add you to the stable ledger.",
         "Coachman Ronks: This means that if you find yourself in a nearby city, you can visit the stable there and pay for a ride to Freeport.",
         "Coachman Ronks: Without that record, they cannot offer you passage. If you do, then one of their horses will take you to your destination.",
         "Coachman Ronks: All you need to do is talk to the coachman of the stable and he will add you to his ledger. I'll add you to mine now.",
         "Coachman Ronks: Ok, I've done my duty. You may return to your masters now. Be sure to tell them how much I appreciate the business." }
-        questText = "Go Speak to Malsis."
         DeleteQuestLog(mySession, 0)
+        if(GetPlayerFlags(mySession, "10011") == "2") then
+            SetPlayerFlags(mySession, "10011", "3")
+            questText = "Go Speak to Malsis."
+        elseif(GetPlayerFlags(mySession, "12011") == "2") then
+            SetPlayerFlags(mySession, "12011", "3")
+            questText = "Go Speak to Azlynn."    
+        end
         AddQuestLog(mySession, 0, questText)
-        SetPlayerFlags(mySession, "10011", "3")
         SetPlayerFlags(mySession, "freeport_coach", "true")
         SendMultiDialogue(mySession, multiDialogue)
         npcDialogue = ""

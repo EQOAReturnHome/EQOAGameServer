@@ -6,6 +6,7 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Opcodes.Messages.Client;
 using ReturnHome.Server.Managers;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Opcodes
 {
@@ -44,6 +45,8 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
             { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
             { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
+            { GameOpcode.ClientCloseLoot, ClientLoot.ClientLootClose },
+            { GameOpcode.ClientLoot, ClientLoot.ClientLootItem },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

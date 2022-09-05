@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Text;
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
@@ -24,7 +25,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                 ProcessCommands(MySession, message);
             }
 
-            else if( MySession.MyCharacter.chatMode == 0)
+            else if (MySession.MyCharacter.chatMode == 0)
             {
                 SayChat.ProcessSay(MySession, message);
             }
@@ -64,6 +65,13 @@ namespace ReturnHome.Server.Opcodes.Chat
         /// </summary>
         public static void ProcessCommands(Session MySession, string message)
         {
+            if (message[0..3] == "!xp")
+            {
+                int xp = int.Parse(message.Substring(3, message.Length - 3));
+                Console.WriteLine(xp);
+                Character.GrantXP(MySession, xp);
+            }
+
             if (message[0..2] == "!c")
             {
                 MySession.CoordinateUpdate();
@@ -85,7 +93,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                 }
             }
 
-            if(message[0..2] == "!a")
+            if (message[0..2] == "!a")
             {
                 MySession.MyCharacter.ArrangeItem(0, 1);
             }
@@ -95,7 +103,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                 MySession.MyCharacter.DestroyItem(0, 1);
             }
 
-            if (message[0..2] == "!oid")
+            if (message[0..4] == "!oid")
             {
                 MySession.TargetUpdate();
             }

@@ -460,5 +460,10 @@ namespace ReturnHome.Server.EntityObject
             throw new NotImplementedException("AddItemToPlayerInventory not fully implemented, don't use this");
             session.MyCharacter.Inventory.AddItem(default);
         }
+
+        public void takeDamage(int dmg)
+        {
+            this.CurrentHP -= dmg;
+        }
     }
 }

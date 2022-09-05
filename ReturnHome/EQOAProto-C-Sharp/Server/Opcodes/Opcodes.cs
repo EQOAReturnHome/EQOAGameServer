@@ -52,7 +52,7 @@
         Teleport = 0x07F6,
         UpdateTrainingPoints = 0x001D,
         ClassMasteryServer = 0x1402,
-        FactionStuff  = 0xa7a,
+        FactionStuff = 0xa7a,
         CharacterModifiedDisconnect = 0x07d2,
         LoggedInFromAnotherLocationDisconnect = 0x07A4,
         BadLoginPassword = 0x0729,
@@ -61,6 +61,8 @@
         AddBuddyFailed = 0x03d8,
         BuddyListFull = 0x03d7,
         Something = 0x468, //Guild stuff
+        Loot = 0x0018, //24
+
 
         //From client
         ClientSayChat = 0x000B, //11 - Normal say message from client
@@ -84,6 +86,8 @@
         ClassMastery = 0x1401,
         ClientFaction = 0x0AC4,
         Attack = 0x0F,
+        ClientCloseLoot = 0x0016,
+        ClientLoot = 0x0019,
     }
 
     public static class GameVersions

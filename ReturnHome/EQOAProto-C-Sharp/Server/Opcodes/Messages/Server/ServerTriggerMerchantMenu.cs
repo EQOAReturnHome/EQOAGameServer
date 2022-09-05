@@ -1,4 +1,5 @@
-﻿using ReturnHome.Server.EntityObject;
+﻿using System;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
@@ -25,7 +26,11 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             if (npc.Inventory != null)
             {
                 foreach (Item entry in npc.Inventory.itemContainer.Values)
+                {
+                    Console.WriteLine(entry.ItemName);
+
                     entry.DumpItem(ref writer);
+                        }
             }
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
