@@ -9,7 +9,8 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-if(GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011") == "2") then
+print(GetPlayerFlags(mySession, "10011"))
+if((GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011")) == "2") then
         npcDialogue = "What do you want?"
         diagOptions = { "Spiritmaster Alshan sent me.", "Nothing" }
         if(ch:find("Alshan")) then
@@ -35,9 +36,9 @@ if(GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011") == "
         npcDialogue = "Coachman Ronks: Well don't just stand around here, I have work to do!"
         diagOptions = {}
         end
-        if(npcDialogue ~= "") then
+        --if(npcDialogue ~= "") then
         SendDialogue(mySession, npcDialogue, diagOptions)
-        end
+        --end
 
 SetPlayerFlags(mySession, "admin", "true")
 elseif(GetPlayerFlags(mySession, "10011") ~= "1") then
