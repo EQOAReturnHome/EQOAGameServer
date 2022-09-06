@@ -65,16 +65,18 @@ namespace ReturnHome.Server.Opcodes.Chat
         /// </summary>
         public static void ProcessCommands(Session MySession, string message)
         {
+            
+
+            if (message[0..2] == "!c")
+            {
+                MySession.CoordinateUpdate();
+            }
+
             if (message[0..3] == "!xp")
             {
                 int xp = int.Parse(message.Substring(3, message.Length - 3));
                 Console.WriteLine(xp);
                 Character.GrantXP(MySession, xp);
-            }
-
-            if (message[0..2] == "!c")
-            {
-                MySession.CoordinateUpdate();
             }
 
             //Add a check here to verify account has admin privileges?

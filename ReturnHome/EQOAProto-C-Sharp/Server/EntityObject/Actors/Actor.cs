@@ -16,7 +16,7 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public Actor(string charName, float xCoord, float yCoord, float zCoord, int facing, int world, int modelid, float size,
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
-            int gloves, int legs, int feet, int head, uint npcType) : base(false, level)
+            int gloves, int legs, int feet, int head, uint npcType, int serverID) : base(false, level)
         {
 
             CharName = charName;
@@ -45,6 +45,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             CurrentStats.Add(StatModifiers.STA, 300);
             Target = 0xFFFFFFFF;
             NPCType = (ushort)npcType;
+            ServerID = serverID;
 
             //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
             //Inventory = new(3000);

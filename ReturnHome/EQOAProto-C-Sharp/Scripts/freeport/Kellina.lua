@@ -68,12 +68,13 @@ function event_say()
                     "Kellina: Now shoo. And don't come back until you have everything in proper order.",
                     "You have received a quest!"
                 }
+                SendMultiDialogue(mySession, multiDialogue)
                 questText =
                     "Kellina needs a plain robe from Merchant Yulia, a silk cord from Merchant Yesam, and a ruined bat wing."
                 AddQuestLog(mySession, 0, questText)
                 SetPlayerFlags(mySession, "10013", "1")
             else
-                npcDialogue = "I don’t have time for chit chat, dear."
+                npcDialogue = "I don't have time for chit chat, dear."
                 diagOptions = {"I wish to continue my apprenticeship."}
             end
         else
@@ -86,8 +87,9 @@ function event_say()
                 CheckQuestItem(mySession, 4891, 1))
          then
             if (ch:find("No")) then
-                npcDialogue =
-                    "Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."
+                multiDialogue =
+                    {"Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."}
+                    SendMultiDialogue(mySession, multiDialogue)
             elseif (ch:find("have")) then
                 multiDialogue = {
                     "Kellina: Thank you, the enchantment on this robe shall serve to strengthen your defenses against elemental cold.",
@@ -113,7 +115,7 @@ function event_say()
             npcDialogue =
                 "Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."
         end
-    elseif (GetPlayerFlags(mySession, "10013") == "0") then
+    elseif (GetPlayerFlags(mySession, "10014") == "0") then
         if (level >= 5) then
             if (ch:find("task")) then
                 multiDialogue = {
@@ -127,6 +129,7 @@ function event_say()
                 SendDialogue(mySession, npcDialogue, diagOptions)
             elseif(ch:find("Sorry")) then
                 multiDialogue = {"Kellina: Do you fancy yourself your own master? You had best reconsider getting this done or we will have to reconsider your enrollment here."}
+                SendMultiDialogue(mySession, multiDialogue)
             elseif(ch:find("will")) then 
                 multiDialogue = {
                     "Kellina: Great knowledge will be the reward for your bravery. However this is no challenge to take lightly or alone.",
@@ -135,10 +138,11 @@ function event_say()
                     "Kellina: Go now my apprentice, and return when you've recovered the stolen goods.",
                     "You have received a quest!"
                 }
+                SendMultiDialogue(mySession, multiDialogue)
                 questText =
                     "Travel west from Freeport to find the highwaymen and retrieve from them the stolen goods. Return to Kellina."
                 AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10013", "1")
+                SetPlayerFlags(mySession, "10014", "1")
             else
                 npcDialogue = "I don’t have time for chit chat, dear."
                 diagOptions = {"I am ready for my next task."}
@@ -163,7 +167,6 @@ function event_say()
                     "Kellina: I will certainly have more tasks for you, but I need some time to look into a few things. Come see me again later.",
                     "You have given away stolen goods.",
                     "You have finished a quest!",
-                    "You have received blue robe",
                     "You have received Motivate.",
                 }
                 SendMultiDialogue(mySession, multiDialogue)

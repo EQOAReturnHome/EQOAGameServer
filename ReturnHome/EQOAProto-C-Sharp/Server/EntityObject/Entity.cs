@@ -16,6 +16,7 @@ namespace ReturnHome.Server.EntityObject
         private uint _objectID;
         private long _killTime;
         private ushort _npcType;
+        public int ServerID;
 
         public byte chatMode = 0; //Default to 0, say = 0, Shout = 3 NPC's can technically talk in chat too?
 

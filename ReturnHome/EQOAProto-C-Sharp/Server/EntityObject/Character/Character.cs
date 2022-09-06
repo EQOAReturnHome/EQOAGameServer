@@ -37,7 +37,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public World ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
-        public int ServerID;
+        
 
         public int XPEarnedInThisLevel;
         public long TotalXP = 0;

@@ -156,7 +156,9 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(21),
                     //NPC Type
                     //Should be a ushort but throws an overflow error, needs to be looked at eventually, cast to ushort in Actor.cs
-                    rdr.GetUInt32(22));
+                    rdr.GetUInt32(22),
+                    //NPC ID
+                    rdr.GetInt32(23));
                 //add the created actor to the npcData list
                 npcData.Add(newActor);
 
@@ -168,72 +170,75 @@ namespace ReturnHome.Database.SQL
             SecondCmd.CommandType = CommandType.StoredProcedure;
             using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
 
-            string actorName;
+            int actorID;
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
                 //Hold charactervalue so we have names to compare against 
-                actorName = SecondRdr.GetString(0);
+                actorID = SecondRdr.GetInt32(0);
+                Console.WriteLine(actorID);
+
 
                 //Iterate through characterData list finding charnames that exist
-                Actor thisActor = npcData.Find(i => Equals(i.CharName, actorName));
+                Actor thisActor = npcData.Find(i => Equals(i.ServerID, actorID));
+                if (thisActor != null)
+                {
+                    if (thisActor.Inventory == null)
+                        thisActor.Inventory = new(0, thisActor);
 
-                if (thisActor.Inventory == null)
-                    thisActor.Inventory = new(0, thisActor);
-
-                Item ThisItem = new Item(
-                  //Stacksleft
-                  SecondRdr.GetInt32(1),
-                  //RemainingHP
-                  SecondRdr.GetInt32(2),
-                  //Charges
-                  SecondRdr.GetInt32(3),
-                  //Equipment Location
-                  SecondRdr.GetInt32(4),
-                  //Location (Bank, self, auction etc)
-                  SecondRdr.GetByte(5),
-                  //Location in inventory
-                  SecondRdr.GetByte(6),
-                  //ItemID
-                  SecondRdr.GetInt32(7),
-                  //Item cost 
-                  SecondRdr.GetUInt32(8),
-                  //ItemIcon
-                  SecondRdr.GetInt32(9),
-                  //Itempattern equipslot
-                  SecondRdr.GetInt32(10),
-                  //Attack Type 
-                  SecondRdr.GetInt32(11),
-                  //WeaponDamage
-                  SecondRdr.GetInt32(12),
-                  //MaxHP of item 
-                  SecondRdr.GetInt32(13),
-                  //Tradeable?
-                  SecondRdr.GetInt32(14),
-                  //Rentable
-                  SecondRdr.GetInt32(15),
-                  //Craft Item
-                  SecondRdr.GetInt32(16),
-                  //Lore item 
-                  SecondRdr.GetInt32(17),
-                  //Level requirement 
-                  SecondRdr.GetInt32(18),
-                  //Max stack of item 
-                  SecondRdr.GetInt32(19),
-                  //ItemName
-                  SecondRdr.GetString(20),
-                  //Item Description
-                  SecondRdr.GetString(21),
-                  //Duration
-                  SecondRdr.GetInt32(22),
-                  //useable classes
-                  SecondRdr.GetInt32(23),
-                  //useable races
-                  SecondRdr.GetInt32(24),
-                  //Proc Animation
-                  SecondRdr.GetInt32(25),
-                  new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
+                    Item ThisItem = new Item(
+                      //Stacksleft
+                      SecondRdr.GetInt32(1),
+                      //RemainingHP
+                      SecondRdr.GetInt32(2),
+                      //Charges
+                      SecondRdr.GetInt32(3),
+                      //Equipment Location
+                      SecondRdr.GetInt32(4),
+                      //Location (Bank, self, auction etc)
+                      SecondRdr.GetByte(5),
+                      //Location in inventory
+                      SecondRdr.GetByte(6),
+                      //ItemID
+                      SecondRdr.GetInt32(7),
+                      //Item cost 
+                      SecondRdr.GetUInt32(8),
+                      //ItemIcon
+                      SecondRdr.GetInt32(9),
+                      //Itempattern equipslot
+                      SecondRdr.GetInt32(10),
+                      //Attack Type 
+                      SecondRdr.GetInt32(11),
+                      //WeaponDamage
+                      SecondRdr.GetInt32(12),
+                      //MaxHP of item 
+                      SecondRdr.GetInt32(13),
+                      //Tradeable?
+                      SecondRdr.GetInt32(14),
+                      //Rentable
+                      SecondRdr.GetInt32(15),
+                      //Craft Item
+                      SecondRdr.GetInt32(16),
+                      //Lore item 
+                      SecondRdr.GetInt32(17),
+                      //Level requirement 
+                      SecondRdr.GetInt32(18),
+                      //Max stack of item 
+                      SecondRdr.GetInt32(19),
+                      //ItemName
+                      SecondRdr.GetString(20),
+                      //Item Description
+                      SecondRdr.GetString(21),
+                      //Duration
+                      SecondRdr.GetInt32(22),
+                      //useable classes
+                      SecondRdr.GetInt32(23),
+                      //useable races
+                      SecondRdr.GetInt32(24),
+                      //Proc Animation
+                      SecondRdr.GetInt32(25),
+                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
                                                                  new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
                                                                  new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
                                                                  new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
@@ -251,16 +256,17 @@ namespace ReturnHome.Database.SQL
                                                                  new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
                                                                  new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
                                                                  new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                                                               },
-                  //Model
-                  SecondRdr.GetInt32(44),
-                  //Color
-                  SecondRdr.GetUInt32(45));
+                                                                   },
+                      //Model
+                      SecondRdr.GetInt32(44),
+                      //Color
+                      SecondRdr.GetUInt32(45));
 
-                //If this is 1, it needs to go to inventory
-                if (ThisItem.Location == 1)
-                {
-                    thisActor.Inventory.AddItem(ThisItem);
+                    //If this is 1, it needs to go to inventory
+                    if (ThisItem.Location == 1)
+                    {
+                        thisActor.Inventory.AddItem(ThisItem);
+                    }
                 }
             }
 
@@ -484,7 +490,7 @@ namespace ReturnHome.Database.SQL
                     thisChar.Inventory.AddItem(ThisItem);
                 }
 
-                
+
                 //If this is 2, it needs to go to the Bank
                 else if (ThisItem.Location == 2)
                 {
@@ -613,7 +619,7 @@ namespace ReturnHome.Database.SQL
                         rdr.GetString(42),
                         //58
                         session);
-                        break;
+                    break;
                 }
             }
 
