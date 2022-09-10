@@ -177,8 +177,6 @@ namespace ReturnHome.Database.SQL
             {
                 //Hold charactervalue so we have names to compare against 
                 actorID = SecondRdr.GetInt32(0);
-                Console.WriteLine(actorID);
-
 
                 //Iterate through characterData list finding charnames that exist
                 Actor thisActor = npcData.Find(i => Equals(i.ServerID, actorID));
@@ -274,6 +272,100 @@ namespace ReturnHome.Database.SQL
             //return the list of actors from DB
             return npcData;
         }
+
+        public List<Item> ItemPatterns()
+        {
+            List<Item> itemPatterns = new();
+
+            using var cmd = new MySqlCommand("GetItemPatterns", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                Item item = new Item(
+                    //StackLeft
+                    1,
+                    //RemainingHP
+                    rdr.GetInt32(6),
+                    //Charges
+                    0,
+                    //Equipment Location
+                    -1,
+                    //Location(inventory/bank)
+                    1,
+                    //InventoryNumber
+                    0,
+                      //ItemID
+                      rdr.GetInt32(0),
+                      //Item cost 
+                      rdr.GetUInt32(1),
+                      //ItemIcon
+                      rdr.GetInt32(2),
+                      //Itempattern equipslot
+                      rdr.GetInt32(3),
+                      //Attack Type 
+                      rdr.GetInt32(4),
+                      //WeaponDamage
+                      rdr.GetInt32(5),
+                      //MaxHP of item 
+                      rdr.GetInt32(6),
+                      //Tradeable?
+                      rdr.GetInt32(7),
+                      //Rentable
+                      rdr.GetInt32(8),
+                      //Craft Item
+                      rdr.GetInt32(9),
+                      //Lore item 
+                      rdr.GetInt32(10),
+                      //Level requirement 
+                      rdr.GetInt32(11),
+                      //Max stack of item 
+                      rdr.GetInt32(12),
+                      //ItemName
+                      rdr.GetString(13),
+                      //Item Description
+                      rdr.GetString(14),
+                      //Duration
+                      rdr.GetInt32(15),
+                      //useable classes
+                      rdr.GetInt32(16),
+                      //useable races
+                      rdr.GetInt32(17),
+                      //Proc Animation
+                      rdr.GetInt32(18),
+                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, rdr.GetInt32(19)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, rdr.GetInt32(20)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, rdr.GetInt32(21)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, rdr.GetInt32(22)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, rdr.GetInt32(23)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, rdr.GetInt32(24)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, rdr.GetInt32(25)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, rdr.GetInt32(26)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, rdr.GetInt32(27)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, rdr.GetInt32(28)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, rdr.GetInt32(29)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, rdr.GetInt32(30)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, rdr.GetInt32(31)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, rdr.GetInt32(32)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, rdr.GetInt32(33)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, rdr.GetInt32(34)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, rdr.GetInt32(35)),
+                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, rdr.GetInt32(36))
+                                                                   },
+                      //Model
+                      rdr.GetInt32(37),
+                      //Color
+                      rdr.GetUInt32(38));
+
+                itemPatterns.Add(item);
+            }
+
+            rdr.Close();
+            return itemPatterns;
+        }
+
+
         //Class to pull characters from DB via serverid
         public List<Character> AccountCharacters(Session session)
         {

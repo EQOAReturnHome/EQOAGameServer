@@ -38,7 +38,7 @@ namespace ReturnHome.Server.EntityObject
 
                     //Keep a reference to our current target on hand
                     EntityManager.QueryForEntity(_target, out _ourTarget);
-                    if(_ourTarget != null)
+                    if (_ourTarget != null)
                         Console.WriteLine($"{CharName} targeting {_ourTarget.CharName} at X: {_ourTarget.x} Y: {_ourTarget.y} Z: {_ourTarget.z} XVel:{_ourTarget.VelocityX} VelY: {_ourTarget.VelocityY} VelZ: {_ourTarget.VelocityZ}");
 
                     if (isPlayer && ObjectID != 0)
@@ -250,13 +250,13 @@ namespace ReturnHome.Server.EntityObject
                 foreach (KeyValuePair<object, object> k in dialogue)
                 {
                     multiDialogue.Add(k.Value.ToString());
-                    
+
                 }
             }
 
-            
 
-                foreach (string d in multiDialogue)
+
+            foreach (string d in multiDialogue)
             {
                 //create variable memory span for sending out dialogue
                 Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.DialogueBox);
@@ -435,10 +435,34 @@ namespace ReturnHome.Server.EntityObject
         public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
             ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
-            for (byte i = 0; i < temp.Count; i++ )
-                if(temp[i].ItemID == itemID)
-                    if(temp[i].StackLeft >= itemQty)
+            //for (byte i = 0; i < temp.Count; i++)
+            foreach (Item item in temp.Values)
+                if (item.ItemID == itemID)
+                {
+                    if (item.StackLeft >= itemQty)
+                    {
                         return true;
+                    }
+
+
+                }
+            return false;
+        }
+
+        public static bool CheckIfItemInInventory(Session session, int itemID, out Item item)
+        { 
+            Console.WriteLine("Checking Item Inventory");
+            item = default;
+            ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
+            foreach (Item itm in temp.Values)
+            {
+                Console.WriteLine(itm.ItemID);
+                if (itm.ItemID == itemID)
+                {
+                    item = itm;
+                    return true;
+                }
+            }
 
             return false;
         }
@@ -449,7 +473,7 @@ namespace ReturnHome.Server.EntityObject
             ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
             for (byte i = 0; i < temp.Count; i++)
                 if (temp[i].ItemID == itemID && temp[i].StackLeft >= itemQty)
-                    if(session.MyCharacter.Inventory.UpdateQuantity(temp[i].ServerKey, itemQty, out _))
+                    if (session.MyCharacter.Inventory.UpdateQuantity(temp[i].ServerKey, itemQty, out _))
                         return true;
 
             return false;
@@ -465,7 +489,45 @@ namespace ReturnHome.Server.EntityObject
 
         public void takeDamage(int dmg)
         {
-            this.CurrentHP -= dmg;
+            if (CurrentHP > 0)
+            {
+                if (dmg > this.CurrentHP)
+                {
+                    this.CurrentHP = 0;
+                }
+                else
+                {
+                    this.CurrentHP -= dmg;
+                }
+            }
+        }
+
+        public static void UpdateAnim(uint ServerID, AnimationState animation)
+        {
+            if (EntityManager.QueryForEntityByServerID(ServerID, out Entity entity))
+            {
+                entity.Animation = (byte)animation;
+            }
+        }
+
+        public static void UpdateAnimByte(uint ServerID, byte animation)
+        {
+            if (EntityManager.QueryForEntityByServerID(ServerID, out Entity entity))
+            {
+                entity.Animation = animation;
+            }
+        }
+
+        public static void ModifyTunar(Session session, int tunar)
+        {
+            if (tunar > 0)
+            {
+                session.MyCharacter.Inventory.AddTunar(tunar);
+            }
+            else if (tunar < 0)
+            {
+                session.MyCharacter.Inventory.RemoveTunar(tunar);
+            }
         }
     }
 }

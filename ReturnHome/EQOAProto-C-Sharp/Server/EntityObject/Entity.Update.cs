@@ -19,7 +19,7 @@ namespace ReturnHome.Server.EntityObject
 
             BinaryPrimitives.WriteInt32BigEndian(temp[10..], (int)(Position.Z * 128.0f));
             BinaryPrimitives.WriteInt32BigEndian(temp[7..], (int)(Position.Y * 128.0f));
-            BinaryPrimitives.WriteInt32BigEndian(temp[4..],(int)(Position.X * 128.0f));
+            BinaryPrimitives.WriteInt32BigEndian(temp[4..], (int)(Position.X * 128.0f));
 
             //Critical to make sure that writing the int's don't override the facing value
             ObjectUpdateEntity();
@@ -37,9 +37,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateHPBar()
         {
-            if (HPMax == 0 || CurrentHP == 0)
-                return;
-            ObjectUpdate.Span[26] = (byte)((255 * CurrentHP) / HPMax);
+            ObjectUpdate.Span[26] = (byte)(255f * CurrentHP / HPMax);
         }
 
         public void ObjectUpdateModelID() => MemoryMarshal.Write(ObjectUpdate.Span[27..], ref _modelID);
@@ -125,9 +123,9 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVanillaColors()
         {
-            ushort temp = 0xFFFF; 
-            for(int i = 0; i < 6; i++)
-                MemoryMarshal.Write(ObjectUpdate.Span[(98 + ( i * 2))..], ref temp);
+            ushort temp = 0xFFFF;
+            for (int i = 0; i < 6; i++)
+                MemoryMarshal.Write(ObjectUpdate.Span[(98 + (i * 2))..], ref temp);
         }
 
         public void ObjectUpdateChestColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(110, 4).Span, ChestColor);
@@ -160,7 +158,7 @@ namespace ReturnHome.Server.EntityObject
             span3[154..177].Fill(0);
             ReadOnlySpan<char> span2 = _charName.AsSpan();
             for (int i = 0; i < span2.Length; ++i)
-                span3[154+i] = (byte)span2[i];
+                span3[154 + i] = (byte)span2[i];
         }
 
         public void ObjectUpdateLevel() => ObjectUpdate.Span[178] = (byte)Level;
@@ -169,7 +167,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateNameColor(byte color = 255)
         {
-            if(isPlayer)
+            if (isPlayer)
                 ObjectUpdate.Span[180] = color == 255 ? (byte)2 : color;
             else
                 ObjectUpdate.Span[180] = color == 255 ? (byte)0 : color;

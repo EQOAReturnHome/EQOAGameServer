@@ -27,13 +27,17 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                         
                     }
                 }*/
+                //Blacksmith starts on 0x0008, 0x0018
+
                 if (npc.CurrentHP <= 0)
                 {
                     npc.Animation = 0x0e;
 
-
+                    npc.KillTime = 1;
                     ServerLoot.ServerLootBox(session, npc);
                 }
+
+                
 
 
             }

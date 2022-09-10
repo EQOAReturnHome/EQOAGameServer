@@ -31,15 +31,7 @@ namespace ReturnHome.Server
             // Start SocketManager
 			SocketManager.Initialize();
             Console.WriteLine("Server started.");
-            /*EventManager eManager = new EventManager();
-            Dialogue newDiag = new Dialogue("Aeric Sparelli", 0, 0);
-            Character newCharacter = new Character();
-            newCharacter.MyDialogue = newDiag;
-            Dialogue thisDiag = eManager.GetNPCDialogue(GameOpcode.DialogueBox,newCharacter);
-            foreach(string dialogue in thisDiag.diagOptions)
-            {
-                Console.WriteLine(dialogue);
-            }*/
+            
            
 
             string stuff = Console.ReadLine();

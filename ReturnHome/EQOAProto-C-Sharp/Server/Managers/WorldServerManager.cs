@@ -10,6 +10,7 @@ using QuadTrees;
 
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.Managers
 {
@@ -30,9 +31,17 @@ namespace ReturnHome.Server.Managers
             CharacterSQL npcList = new();
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
+            List<Item> myItemPatterns = npcList.ItemPatterns();
+            Console.WriteLine(myItemPatterns.Count);
             //Closing DB connection
             npcList.CloseConnection();
             MapManager.Initialize();
+            Console.WriteLine("Adding Item Patterns...");
+            foreach(Item myItem in myItemPatterns)
+            {
+                ItemManager.AddItem(myItem);
+            }
+            Console.WriteLine("Done.");
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");
             foreach (Actor myActor in myNpcList)

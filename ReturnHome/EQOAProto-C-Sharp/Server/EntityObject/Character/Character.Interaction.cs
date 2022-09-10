@@ -3,6 +3,7 @@ using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -32,9 +33,14 @@ namespace ReturnHome.Server.EntityObject.Player
         {
             if (Inventory.ArrangeItems(itemSlot1, itemSlot2, out byte clientItem1, out byte clientItem2))
             {
+                Console.WriteLine(clientItem1);
+                Console.WriteLine(clientItem2);
                 ServerInventoryItemArrange.InventoryItemArrange(characterSession, clientItem1, clientItem2);
             }
         }
+
+        
+
 
         public void AddItem(Item itemToBeAdded)
         {

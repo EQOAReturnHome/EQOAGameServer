@@ -42,7 +42,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 {
                     Item newItem = item.AcquireItem(itemQty);
 
-                    //Console.WriteLine(newItem.ItemName);
                     session.MyCharacter.Inventory.AddItem(item);
 
                     //Sends 

@@ -37,6 +37,8 @@ function event_say()
                 }
                 SendMultiDialogue(mySession, multiDialogue)
                 GrantXP(mySession, 6900)
+                TurnInItem(mySession, 4866, 2)
+                GrantItem(mySession, 8373, 1)
                 DeleteQuestLog(mySession, 0)
                 SetPlayerFlags(mySession, "10012", "99")
                 SetPlayerFlags(mySession, "10013", "0")
@@ -59,7 +61,7 @@ function event_say()
                 npcDialogue = "Go on, fetch them quickly"
                 diagOptions = {"But...I don't know what they are?"}
                 SendDialogue(mySession, npcDialogue, diagOptions)
-            elseif(ch:find("know")) then
+            elseif (ch:find("know")) then
                 multiDialogue = {
                     "Kellina: Soulusek's eye, do I even have to think for you now? Nevermind. What I require is a plain robe, and a silk cord.",
                     "Kellina: Plain robes can be purchased from Merchant Yulia just outside this building.",
@@ -87,9 +89,10 @@ function event_say()
                 CheckQuestItem(mySession, 4891, 1))
          then
             if (ch:find("No")) then
-                multiDialogue =
-                    {"Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."}
-                    SendMultiDialogue(mySession, multiDialogue)
+                multiDialogue = {
+                    "Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."
+                }
+                SendMultiDialogue(mySession, multiDialogue)
             elseif (ch:find("have")) then
                 multiDialogue = {
                     "Kellina: Thank you, the enchantment on this robe shall serve to strengthen your defenses against elemental cold.",
@@ -104,6 +107,10 @@ function event_say()
                 }
                 SendMultiDialogue(mySession, multiDialogue)
                 GrantXP(mySession, 17000)
+                TurnInItem(mySession, 5002, 1)
+                TurnInItem(mySession, 8314, 1)
+                TurnInItem(mySession, 4891, 1)
+                GrantItem(mySession, 4927, 1)
                 DeleteQuestLog(mySession, 0)
                 SetPlayerFlags(mySession, "10013", "99")
                 SetPlayerFlags(mySession, "10014", "0")
@@ -121,16 +128,19 @@ function event_say()
                 multiDialogue = {
                     "Kellina: I truly hope you are my dear, for the task I have for you is necessarily fraught with peril.",
                     "Kellina: Our Academy depends on caravan shipments from the west for a great deal of our research supplies.",
-                    "Kellina: Just recently, a band of highwaymen have been hijacking caravans into Freeport in both the deserts and grasslands.",
+                    "Kellina: Just recently, a band of highwaymen have been hijacking caravans into Freeport in both the deserts and grasslands."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                npcDialogue = "Will you use the knowledge we have taught you thus far to recover the stolen goods and bring these criminals to justice?"
+                npcDialogue =
+                    "Will you use the knowledge we have taught you thus far to recover the stolen goods and bring these criminals to justice?"
                 diagOptions = {"I will.", "Sorry, I can't help you with this"}
                 SendDialogue(mySession, npcDialogue, diagOptions)
-            elseif(ch:find("Sorry")) then
-                multiDialogue = {"Kellina: Do you fancy yourself your own master? You had best reconsider getting this done or we will have to reconsider your enrollment here."}
+            elseif (ch:find("Sorry")) then
+                multiDialogue = {
+                    "Kellina: Do you fancy yourself your own master? You had best reconsider getting this done or we will have to reconsider your enrollment here."
+                }
                 SendMultiDialogue(mySession, multiDialogue)
-            elseif(ch:find("will")) then 
+            elseif (ch:find("will")) then
                 multiDialogue = {
                     "Kellina: Great knowledge will be the reward for your bravery. However this is no challenge to take lightly or alone.",
                     "Kellina: For this you should seek the company of other adventurers in Freeport. The Smiling Serpent tavern is a good place to start.",
@@ -153,8 +163,7 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10014") == "1") then
         if
-            (CheckQuestItem(mySession, 5002, 1) and CheckQuestItem(mySession, 8314, 1) and
-                CheckQuestItem(mySession, 4891, 1))
+            (CheckQuestItem(mySession, 8321, 1))
          then
             if (ch:find("Not")) then
                 npcDialogue =
@@ -167,10 +176,12 @@ function event_say()
                     "Kellina: I will certainly have more tasks for you, but I need some time to look into a few things. Come see me again later.",
                     "You have given away stolen goods.",
                     "You have finished a quest!",
-                    "You have received Motivate.",
+                    "You have received Motivate."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
                 GrantXP(mySession, 36500)
+                TurnInItem(mySession, 8321, 1)
+                GrantItem(mySession, 8445, 1)
                 DeleteQuestLog(mySession, 0)
                 SetPlayerFlags(mySession, "10014", "99")
                 SetPlayerFlags(mySession, "10015", "0")
@@ -182,6 +193,137 @@ function event_say()
             npcDialogue =
                 "Kellina: Get your head together, and focus on the task at hand. Find the highwaymen and retrieve from them the stolen goods."
         end
+    elseif (GetPlayerFlags(mySession, "10015") == "0") then
+        if (level >= 7) then
+            if (ch:find("Nothing")) then
+                multiDialogue = {
+                    "Kellina: You'll need to learn to speak up for yourself, or you won't get far in this city."
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+            elseif (ch:find("ready")) then
+                multiDialogue = {
+                    "Kellina: You've returned not a moment too soon. I have a task that needs attention but I am preoccupied at the moment.",
+                    "Kellina: I've just received word of a dangerous creature spotted near freeport. The Chichan is a poisonous eel that preys upon unwitting travelers.",
+                    "Kellina: The thing is, the eels are not native of this region. Someone must have brought it to freeport intentionally.",
+                    "Kellina: I'll need a piece of the eel to investigate further. Bring to me it's venom sac. You will find it north of Freeport, along the river.",
+                    "Kellina: You'll need to learn to speak up for yourself, or you won't get far in this city.",
+                    "You have received a quest!"
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+                questText =
+                    "Bring Kellina a chichan eel venom sac. You will find it north of Freeport, along the river."
+                AddQuestLog(mySession, 0, questText)
+                SetPlayerFlags(mySession, "10015", "1")
+            else
+                npcDialogue = "I am quite busy, what could you possibly need?"
+                diagOptions = {"I am ready for my next assignment.", "Nothing, really."}
+            end
+        else
+            npcDialogue =
+                "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
+        end
+    elseif (GetPlayerFlags(mySession, "10015") == "1") then
+        if (CheckQuestItem(mySession, 8332, 1)) then
+            if (ch:find("sorry")) then
+                npcDialogue =
+                    "Bring Kellina a chichan eel venom sac. You will find it north of Freeport, along the river."
+            elseif (ch:find("here")) then
+                multiDialogue = {
+                    "Kellina: Well done. You might be a bright spot in this otherwise dreary place.",
+                    "Kellina: I must investigate this venom sac immediately.",
+                    "Kellina: As for your reward, take this Infusion scroll and this pair of blackened leggings.",
+                    "Kellina: Thank you for your services. Come see me later, I will have more for you.",
+                    "You have given away venom sac",
+                    "You have received Infusion",
+                    "You have received blackened leggings",
+                    "You have finished a quest!"
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+                GrantXP(mySession, 157474)
+                TurnInItem(mySession, 8332, 1)
+                GrantItem(mySession, 8446, 1)
+                GrantItem(mySession, 8447, 1)
+                DeleteQuestLog(mySession, 0)
+                SetPlayerFlags(mySession, "10015", "99")
+                SetPlayerFlags(mySession, "10016", "0")
+            else
+                npcDialogue = "Do you have the venom sac?"
+                diagOptions = {"It is right here.", "Oh sorry, not yet."}
+            end
+        else
+            npcDialogue =
+                "Kellina: Do you have the eel venom sac yet?!"
+        end
+    elseif (GetPlayerFlags(mySession, "10016") == "0") then
+        if (level >= 10) then
+            if (ch:find("later")) then
+                multiDialogue = {
+                    "Kellina: Declining to help your teacher will not look good on your records, I assure you."
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+            elseif (ch:find("am")) then
+                multiDialogue = {
+                    "Kellina: I have so many requests for assistance now I can barely keep up. I must now have you help me with this next task.",
+                    "Kellina: Guard Sareken is in need of assistance. Please find him at the north entrance of Freeport.",
+                    "Kellina: I may call upon you later, so please check back when you can.",
+                    "You have received a quest!"
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+                questText = "Guard Sareken is in need of assistance. Please find him at the north entrance of Freeport."
+                AddQuestLog(mySession, 0, questText)
+                SetPlayerFlags(mySession, "10016", "1")
+            else
+                npcDialogue = "Please tell me you are here to help..."
+                diagOptions = {"I am.", "Maybe later..."}
+            end
+        else
+            npcDialogue =
+                "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
+        end
+    elseif (GetPlayerFlags(mySession, "10017") == "0") then
+        if (level >= 13) then
+            if (ch:find("nevermind")) then
+                multiDialogue = {
+                    "Kellina: You'll need to learn to speak up for yourself, or you won't get far in this city."
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+            elseif (ch:find("returned")) then
+                multiDialogue = {
+                    "Kellina: Yes of course, I can use you to...Oh nevermind that.",
+                    "Kellina: It is good you have returned. A colleague of mine has returned to Freeport. To be honest, I cant stand him. He's had a bit of a mishap, and needs our…your help.",
+                    "Kellina: See to him at once. I must warn you, he can be a bit...demanding. See to it that his wishes are fulfilled.",
+                    "Kellina: You can find Ilenar in the Shining Shield Guild Hall. Head out through the midroad, and to the southeast a little, head through the Smiling Serpent Inn.",
+                    "Kellina: To the east of the inn is the Shining Shield Mercenaries. Watch your step there...",
+                    "You have received a quest!"
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+                questText = "See Ilenar in the Shining Shield guild hall."
+                AddQuestLog(mySession, 0, questText)
+                SetPlayerFlags(mySession, "10017", "1")
+            else
+                npcDialogue = "What do you want? I really can't.."
+                diagOptions = {"I have returned to learn more.", "Oh nevermind..."}
+            end
+        else
+            npcDialogue =
+                "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
+        end
+    elseif (GetPlayerFlags(mySession, "10018") == "6") then
+        GrantXP(mySession, 883791)
+        multiDialogue = {"Kellina: I've received word that the venerable Ilenar Crelwin is pleased with your work as of late. You have proved yourself a worthy agent.",
+        "Kellina: For all of your accomplishments, it is time you wore something befitting of your rank. I therefore award you with a Summoners Garb.",
+        "Kellina: I also award you with this Endure Fire Scroll. May these things protect you, in dangerous places.",
+        "Kellina: I believe it is time for you to explore the world a bit more. But do check back later, I may yet have another quest to fit your skills.",
+        "You have finished a quest!",
+        "You have received Endure Fire.",
+        "You have received a summoners garb."
+        }
+        DeleteQuestLog(mySession,0)
+        GrantItem(mySession, 8451, 1)
+        GrantItem(mySession, 8452, 1)
+        SetPlayerFlags(mySession, "10018", "99")
+        SetPlayerFlags(mySession, "10019", "0")
+
     else
         npcDialogue = "I am quite busy with my students right now. Are you sure you're in the right place?"
     end

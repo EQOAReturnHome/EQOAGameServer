@@ -51,6 +51,11 @@ namespace ReturnHome.Server.Managers
             lua["GetClass"] = Utility_Funcs.GetEnumObjectByValue<Class>;
             lua["GetRace"] = Utility_Funcs.GetEnumObjectByValue<Race>;
             lua["GetHumanType"] = Utility_Funcs.GetEnumObjectByValue<HumanType>;
+            lua["UpdateAnim"] = Entity.UpdateAnim;
+            lua["thisNPC"] = mySession.MyCharacter.Target;
+            lua["GrantItem"] = ItemManager.GrantItem;
+            lua["TurnInItem"] = ItemManager.UpdateQuantity;
+
 
             lua["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
             lua["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
