@@ -43,14 +43,17 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.UpdateTrainingPoints, ClientProcessTrainingPoints.ProcessTrainingPoints },
             { GameOpcode.ClassMastery, ClientClassMastery.ProcessClassMastery },
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
-            { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
+            { GameOpcode.Attack, ClientFaction.ProcessClientFaction },
             { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
             { GameOpcode.WhoList, ClientWhoListRequest.ProcessWhoList },
-            { GameOpcode.GroupInvite, ClientAddCharacterToGroup.AddCharacterToGroup },
-            { GameOpcode.AcceptGroupInvite, ClientAcceptGroupInvite.AcceptGroupInvite },
-            { GameOpcode.DisbandGroup, ClientDisbandGroup.DisbandGroup },
+            { GameOpcode.GroupInvite, ClientGroup.AddCharacterToGroup },
+            { GameOpcode.AcceptGroupInvite, ClientGroup.AcceptGroupInvite },
+            { GameOpcode.DisbandGroup, ClientGroup.DisbandGroup },
             { GameOpcode.ClientCloseLoot, ClientLoot.ClientLootClose },
             { GameOpcode.ClientLoot, ClientLoot.ClientLootItem },
+            { GameOpcode.DeclineGroupInvite, ClientGroup.DeclineGroupInvite },
+            { GameOpcode.LeaveGroup, ClientGroup.LeaveGroup },
+            { GameOpcode.BootGroupMember, ClientGroup.BootGroupMember },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

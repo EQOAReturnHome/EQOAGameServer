@@ -21,29 +21,21 @@ namespace ReturnHome.Server.Opcodes.Chat
 
             //Admin command of sorts, possibly temporary
             if (message[0] == '!')
-            {
                 ProcessCommands(MySession, message);
-            }
 
             else if (MySession.MyCharacter.chatMode == 0)
-            {
                 SayChat.ProcessSay(MySession, message);
-            }
 
             else if (MySession.MyCharacter.chatMode == 1)
-            {
-                //Group?
-            }
-
-            else if (MySession.MyCharacter.chatMode == 2)
             {
                 //Guild?
             }
 
+            else if (MySession.MyCharacter.chatMode == 2)
+                GroupChat.ProcessGroupChat(MySession, message);
+
             else if (MySession.MyCharacter.chatMode == 3)
-            {
                 ShoutChat.ProcessShout(MySession, message);
-            }
         }
 
         public static void GenerateClientSpecificChat(Session session, string chatMessage)

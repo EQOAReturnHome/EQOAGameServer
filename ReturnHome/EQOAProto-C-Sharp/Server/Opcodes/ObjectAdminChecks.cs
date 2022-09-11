@@ -64,6 +64,30 @@ namespace ReturnHome.Server.Opcodes.Chat
                         ServerTeleportPlayer.TeleportPlayer(MySession, World.Tunaria, 24568f, 53.5f, 3502f, -3.0826661586761475f);
                         break;
 
+                    case "on":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdateOnline(byte.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
+                    case "pat":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdatePattern(uint.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
+                    case "unk2":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdateUnknown2(ushort.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
+                    case "attack":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdateUnknown(ushort.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
                     case "animation":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
                         c.Animation = byte.Parse(changes[2]);
@@ -114,7 +138,7 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                     case "move":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.Movement = byte.Parse(changes[2]);
+                        c.ObjectUpdateMovement(byte.Parse(changes[2]));
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 

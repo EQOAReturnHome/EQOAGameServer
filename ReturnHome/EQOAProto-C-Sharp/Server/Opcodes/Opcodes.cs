@@ -76,7 +76,8 @@
         DisconnectNoError = 0x0777,//Disconnects client with no error message
         AdministratorShutdown = 0x07C1,
         Something = 0x0774,
-        Something2 = 0x062F,
+        RemoveGroupMember = 0x069A, //0 removes from group, no message //1 Group leader ejected you //2 Group disbanded //3 not invited to this group //4 Group is full //5 no message, not in group
+        ServerDisbandGroup = 0x062F,
         Loot = 0x0018, //24
 
 
@@ -104,10 +105,11 @@
         Attack = 0x0F,
         WhoList = 0x0E01,
         GroupInvite = 0x0625,
+        LeaveGroup = 0x0623,
         AcceptGroupInvite = 0x0622,
         DisbandGroup = 0x0627,
         BootGroupMember = 0x0626,
-        LeaveGroup = 0x0624,
+        DeclineGroupInvite = 0x0624,
         ClientCloseLoot = 0x0016,
         ClientLoot = 0x0019,
     }

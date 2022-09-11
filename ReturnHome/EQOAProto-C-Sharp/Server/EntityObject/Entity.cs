@@ -132,6 +132,10 @@ namespace ReturnHome.Server.EntityObject
             ObjectUpdateNamePlate();
             ObjectUpdateUnknown();
             ObjectUpdatePattern();
+            if(isPlayer)
+            {
+                ObjectUpdateOnline();
+            }
             //Set armour to defaults
             HelmColor = 0xFFFFFFFF;
             ChestColor = 0xFFFFFFFF;

@@ -48,10 +48,11 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVelocityX()
         {
+            /*
             sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
             if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
             if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);
+            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);*/
         }
 
         public void ObjectUpdateVelocityY()
@@ -67,10 +68,11 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVelocityZ()
         {
+            /*
             sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
             if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
             if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);
+            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);*/
         }
 
         public void ObjectUpdateEastWest() => ObjectUpdate.Span[44] = EastToWest;
@@ -91,10 +93,14 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateTarget() => MemoryMarshal.Write(ObjectUpdate.Span[58..], ref _target);
 
-        public void ObjectUpdateUnknown()
+        public void ObjectUpdateUnknown(ushort temp = 0x0501)
         {
-            ushort temp = 0x0105;
             MemoryMarshal.Write(ObjectUpdate.Span[62..], ref temp);
+        }
+
+        public void ObjectUpdateUnknown2(ushort temp = 0x0105)
+        {
+            MemoryMarshal.Write(ObjectUpdate.Span[64..], ref temp);
         }
 
         public void ObjectUpdatePrimary() => MemoryMarshal.Write(ObjectUpdate.Span[66..], ref _primary);
@@ -163,7 +169,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateLevel() => ObjectUpdate.Span[178] = (byte)Level;
 
-        public void ObjectUpdateMovement() => ObjectUpdate.Span[179] = Movement;
+        public void ObjectUpdateMovement(byte temp = 1) => ObjectUpdate.Span[179] = temp;
 
         public void ObjectUpdateNameColor(byte color = 255)
         {
@@ -181,9 +187,11 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateNPCType() => MemoryMarshal.Write(ObjectUpdate.Span[184..], ref _npcType);
 
-        public void ObjectUpdatePattern() => BitConverter.GetBytes(0xFFFFFFFF).CopyTo(ObjectUpdate.Slice(186, 4));
+        public void ObjectUpdatePattern(uint stuff = 0xFFFFFFFF) => BitConverter.GetBytes(stuff).CopyTo(ObjectUpdate.Slice(186, 4));
 
         public void ObjectUpdateStatus(byte status = 0) => ObjectUpdate.Span[192] = status;
+
+        public void ObjectUpdateOnline(byte status = 1) => ObjectUpdate.Span[194] = status;
 
         public void ObjectUpdateEnd() => Encoding.UTF8.GetBytes("trsq").CopyTo(ObjectUpdate.Slice(196, 4));
     }

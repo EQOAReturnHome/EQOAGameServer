@@ -27,28 +27,28 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             session.sessionQueue.Add(message);
         }
 
-        public static void DisbandGroup(Session session, Group g)
-        {
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.CreateGroup);
+        public static void DisbandGroup(Session session)
+        { 
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.RemoveGroupMember);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);
-            writer.Write(0);
-            writer.Write(4);
-            for (int i = 0; i < 4; i++)
-                writer.Write(0);
-
-            for (int i = 0; i < 4; i++)
-                writer.Write(0);
-
-            //foreach (Character c in g.GroupList)
-            //writer.Write(0);
-
-            //foreach (Character c in g.GroupList)
-            //writer.WriteString(Encoding.UTF8, "");
+            writer.Write(GroupActionEnum.GroupDisbanded);
 
             message.Size = writer.Position;
 
+            session.sessionQueue.Add(message);
+        }
+
+        public static void RemoveGroupMember(Session session, GroupActionEnum e)
+        {
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.RemoveGroupMember);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            writer.Write(e);
+
+            message.Size = writer.Position;
             session.sessionQueue.Add(message);
         }
 
@@ -59,6 +59,20 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             writer.Write(message.Opcode);
             writer.WriteString(Encoding.UTF8, c.CharName);
+
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
+        }
+
+        public static void PlayerDeclinedInvite(Session session, GroupActionEnum action, string charName = "")
+        {
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.GroupStuff);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            writer.Write(action);
+            if(action != GroupActionEnum.RecipientNotFound || action != GroupActionEnum.GroupIsFull)
+                writer.WriteString(Encoding.UTF8, charName);
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);

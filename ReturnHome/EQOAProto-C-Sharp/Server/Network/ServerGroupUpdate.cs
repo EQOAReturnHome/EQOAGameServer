@@ -116,9 +116,14 @@ namespace ReturnHome.Server.Network
         public void DisableChannel()
         {
             //0 out group channel information to disable it
-            Span<byte> temp = _session.MyCharacter.GroupUpdate.Span;
-            for (int i = 0; i < _session.MyCharacter.GroupUpdate.Length; i++)
-                temp[i] = 0;
+            Span<byte> temp2 = _session.MyCharacter.GroupUpdate.Span;
+            temp2.Fill(0);
+
+            Memory<byte> temp = new Memory<byte>(new byte[0x27]);
+            CoordinateConversions.Xor_data(temp, _session.MyCharacter.GroupUpdate, _baseXOR, 0x27);
+            _currentXORResults.Add(MessageCounter, temp);
+            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
+            MessageCounter++;
         }
 
         public void UpdateBaseXor(ushort msgCounter)

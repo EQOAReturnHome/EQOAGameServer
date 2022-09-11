@@ -53,13 +53,39 @@ namespace ReturnHome.Server.EntityObject.Group
             {
                 c.GroupID = 0;
                 c.characterSession.rdpCommIn.connectionData.serverGroupUpdate.IsActive = false;
-                ServerGroup.DisbandGroup(c.characterSession, this);
+                ServerGroup.DisbandGroup(c.characterSession);
             }
         }
 
-        public bool RemoveMember(int i)
+        private void UpdatePlayerList()
         {
+            foreach (Character c in charList)
+                ServerGroup.CreateGroup(c.characterSession, this);
+        }
+
+        public bool RemoveMember(uint MemberToRemove, GroupActionEnum e)
+        {
+            for (int i = 0; i < charList.Count; i++)
+            {
+                //Remove member
+                if (MemberToRemove == charList[i].ObjectID)
+                {
+                    Character c = (Character)charList[i];
+                    Console.WriteLine($"Removing {c.CharName}");
+                    DisableGroupForCharacter(c);
+                    ServerGroup.RemoveGroupMember(c.characterSession, e);
+                    charList.RemoveAt(i);
+                    UpdatePlayerList();
+                    return true;
+                }
+            }
             return false;
+        }
+
+        private void DisableGroupForCharacter(Character c)
+        {
+            c.GroupID = 0;
+            c.characterSession.rdpCommIn.connectionData.serverGroupUpdate.IsActive = false;
         }
 
         public void  DistributeUpdates()
@@ -104,6 +130,9 @@ namespace ReturnHome.Server.EntityObject.Group
                     MemoryMarshal.Write(temp[11..], ref z);
                     counter += 2;
                 }
+
+                //Fill rest of span with 0's
+                temp[counter..].Fill(0);
             }
         }
     }

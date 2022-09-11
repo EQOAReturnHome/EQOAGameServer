@@ -142,6 +142,8 @@ namespace ReturnHome.Server.EntityObject
                     z = _position.Z;
                     _point = new PointF(_position.X, _position.Z);
                     ObjectUpdatePosition();
+                    if (isPlayer)
+                        ObjectUpdateCoordY();
                 }
             }
         }
@@ -266,7 +268,8 @@ namespace ReturnHome.Server.EntityObject
         public void UpdateFacing(byte facing, byte turning)
         {
             Facing = (byte)(facing + 128);
-            FacingF = CoordinateConversions.ConvertFacing(Facing);
+            if(isPlayer)
+                FacingF = CoordinateConversions.ConvertFacing(Facing);
             Turning = turning;
         }
 
