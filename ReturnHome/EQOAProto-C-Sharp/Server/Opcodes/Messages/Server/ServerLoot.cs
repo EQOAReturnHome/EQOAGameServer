@@ -42,7 +42,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 {
                     Item newItem = item.AcquireItem(itemQty);
 
-                    session.MyCharacter.Inventory.AddItem(item);
+                    session.MyCharacter.Inventory.AddItem(newItem);
 
                     //Sends 
                     Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ClientLoot);

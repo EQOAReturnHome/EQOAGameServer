@@ -9,11 +9,10 @@ namespace ReturnHome.Server.EntityObject.Player
 {
     public partial class Character
     {
-
         public void DestroyItem(byte itemToDestroy, int quantityToDestroy)
         {
             //If this returns true, use quantityToDestroy
-            if(Inventory.UpdateQuantity(itemToDestroy, quantityToDestroy, out Item item))
+            if (Inventory.UpdateQuantity(itemToDestroy, quantityToDestroy, out Item item))
             {
                 if (item.StackLeft <= 0)
                 {
@@ -39,9 +38,6 @@ namespace ReturnHome.Server.EntityObject.Player
             }
         }
 
-        
-
-
         public void AddItem(Item itemToBeAdded)
         {
             if (Inventory.AddItem(itemToBeAdded))
@@ -61,14 +57,11 @@ namespace ReturnHome.Server.EntityObject.Player
                     Logger.Err($"Player: {CharName} Account: {characterSession.AccountID} attempted to add {transferAmount} to bank when only {Inventory.Tunar} on hand");
                     return;
                 }
-
                 //Remove from Inventory
                 Inventory.RemoveTunar(transferAmount);
-
                 //Add to bank
                 Bank.AddTunar(transferAmount);
             }
-
             //withdraw transaction
             else if (giveOrTake == 1)
             {
@@ -77,14 +70,12 @@ namespace ReturnHome.Server.EntityObject.Player
                     Logger.Err($"Player: {CharName} Account: {characterSession.AccountID} attempted to remove {transferAmount} from bank when only {Bank.Tunar}");
                     return;
                 }
-
                 //remove from bank
                 Bank.RemoveTunar(transferAmount);
 
                 //Add To inventory
                 Inventory.AddTunar(transferAmount);
             }
-
             ServerUpdateBankTunar.UpdateBankTunar(characterSession, Bank.Tunar);
             ServerUpdatePlayerTunar.UpdatePlayerTunar(characterSession, Inventory.Tunar);
         }
@@ -98,17 +89,13 @@ namespace ReturnHome.Server.EntityObject.Player
                 if (Inventory.RemoveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
                     ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, qtyToTransfer, clientIndex);
-
                     //unequip item
                     equippedGear.Remove(item);
-
                     //Deposit into bank
                     Bank.AddItem(item);
-
                     ServerAddBankItemQuantity.AddBankItemQuantity(characterSession, item);
                 }
             }
-
             //Pull from bank
             else if (giveOrTake == 1)
             {
@@ -116,10 +103,8 @@ namespace ReturnHome.Server.EntityObject.Player
                 if (Bank.RemoveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
                     ServerRemoveBankItemQuantity.RemoveBankItemQuantity(characterSession, item, clientIndex);
-
                     //Deposit into inventory
                     Inventory.AddItem(item);
-
                     ServerAddInventoryItemQuantity.AddInventoryItemQuantity(characterSession, item);
                 }
             }
@@ -128,9 +113,9 @@ namespace ReturnHome.Server.EntityObject.Player
         //TODO: Flawed logic involved with stackable items and rearranging inventory, fix
         public void SellItem(byte itemSlot, int itemQty, uint targetNPC)
         {
-            if(Inventory.Exists(itemSlot))
+            if (Inventory.Exists(itemSlot))
             {
-                if(Inventory.UpdateQuantity(itemSlot, itemQty, out Item item))
+                if (Inventory.UpdateQuantity(itemSlot, itemQty, out Item item))
                 {
                     //TODO: Flawed Tunar logic? Seem to be getting less then we spent back
                     Inventory.AddTunar((int)(item.Maxhp == 0 ? item.ItemCost * itemQty : item.ItemCost * (item.RemainingHP / item.Maxhp) * itemQty));
@@ -141,17 +126,15 @@ namespace ReturnHome.Server.EntityObject.Player
                     {
                         if (Inventory.RemoveItem(itemSlot, out Item item2, out byte clientIndex))
                             ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, itemQty, clientIndex);
-
                         return;
                     }
-
                     ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(characterSession, itemQty, item.ClientIndex);
                 }
             }
         }
 
         public static void AddQuestLog(Session session, uint questNumber, string questText)
-        {        
+        {
             ServerAddQuestLog.AddQuestLog(session, questNumber, questText);
         }
 

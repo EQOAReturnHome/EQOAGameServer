@@ -12,21 +12,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
     {
         public static void ClientProcessAttack(Session session, PacketMessage ClientPacket)
         {
+            Console.WriteLine("Found Attack");
+
             BufferReader reader = new(ClientPacket.Data.Span);
             uint targetID = reader.Read<uint>();
             if (EntityManager.QueryForEntity(targetID, out Entity npc))
             {
                 npc.takeDamage(500);
-                /*if (npc.Inventory != null)
-                {
-                    foreach (Item entry in npc.Inventory.itemContainer.Values)
-                    {
-                        Console.WriteLine(entry.ItemName);
-                        Console.WriteLine(entry.StackLeft);
-
-                        
-                    }
-                }*/
+                
                 //Blacksmith starts on 0x0008, 0x0018
 
                 if (npc.CurrentHP <= 0)

@@ -128,38 +128,6 @@ namespace ReturnHome.Server.EntityObject.Items
         {
             Item item = (Item)MemberwiseClone();
             item.StackLeft = qty;
-
-            /*Console.WriteLine("StacksLeft: " + item.StackLeft);
-            Console.WriteLine("RemainingHP: " + item.RemainingHP);
-            Console.WriteLine("Charges: " + item.Charges);
-            Console.WriteLine("EquipLocation: " + item.EquipLocation);
-            Console.WriteLine("Location: " + item.Location);
-            Console.WriteLine("ServerKey: " + item.ServerKey);
-            Console.WriteLine("ItemID: " + item.ItemID);
-            Console.WriteLine("ItemCost: " + item.ItemCost);
-            Console.WriteLine("Unk1: " + item.Unk1);
-            Console.WriteLine("ItemIcon:" + item.ItemIcon);
-            Console.WriteLine("Unk2: " + item.Unk2);
-            Console.WriteLine("itemSlot: " + item.itemSlot);
-            Console.WriteLine("Unk3: " + item.Unk3);
-            Console.WriteLine("Trade:" + item.Trade);
-            Console.WriteLine("Rent: " + item.Rent);
-            Console.WriteLine("Unk4: " + item.Unk4);
-            Console.WriteLine("Attacktype: " + item.Attacktype);
-            Console.WriteLine("Weapondamage: " + item.Weapondamage);
-            Console.WriteLine("Unk5: " + item.Unk5);
-            Console.WriteLine("Levelreq: " + item.Levelreq);
-            Console.WriteLine("Maxstack: " + item.Maxstack);
-            Console.WriteLine("Maxhp: " + item.Maxhp);
-            Console.WriteLine("Duration: " + item.Duration);
-            Console.WriteLine("Classuse: " + item.Classuse);
-            Console.WriteLine("Raceuse: " + item.Raceuse);
-            Console.WriteLine("Procanim: " + item.Procanim);
-            Console.WriteLine("Lore: " + item.Lore);
-            Console.WriteLine("Unk6: " + item.Unk6);
-            Console.WriteLine("Craft: " + item.Craft);
-            Console.WriteLine("ItemName: " + item.ItemName);
-            Console.WriteLine("ItemDesc: " + item.ItemDesc);*/
             return item;
         }
 

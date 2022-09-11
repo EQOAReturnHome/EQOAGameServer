@@ -43,7 +43,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.UpdateTrainingPoints, ClientProcessTrainingPoints.ProcessTrainingPoints },
             { GameOpcode.ClassMastery, ClientClassMastery.ProcessClassMastery },
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
-            { GameOpcode.Attack, ClientFaction.ProcessClientFaction },
+            { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
             { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
             { GameOpcode.WhoList, ClientWhoListRequest.ProcessWhoList },
             { GameOpcode.GroupInvite, ClientGroup.AddCharacterToGroup },
