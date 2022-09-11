@@ -33,10 +33,10 @@ namespace ReturnHome.Server.Managers
 
         public static void UpdateQuantity(Session mySession, int itemID, int qty)
         {
-            if (Character.CheckIfItemInInventory(mySession, itemID, out Item newItem))
+            if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))
             {
                 Console.WriteLine($"Checking Inventory for ItemID {itemID} with quantity {qty}");
-                mySession.MyCharacter.Inventory.UpdateQuantity(newItem.ClientIndex, qty, out Item updatedItem);
+                mySession.MyCharacter.Inventory.UpdateQuantity(key, qty, out Item updatedItem);
                 ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(mySession, updatedItem.StackLeft, updatedItem.ClientIndex);
             }
 

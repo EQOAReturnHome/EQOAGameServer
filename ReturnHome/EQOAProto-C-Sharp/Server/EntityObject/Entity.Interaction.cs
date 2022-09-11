@@ -449,17 +449,19 @@ namespace ReturnHome.Server.EntityObject
             return false;
         }
 
-        public static bool CheckIfItemInInventory(Session session, int itemID, out Item item)
+        public static bool CheckIfItemInInventory(Session session, int itemID, out byte key, out Item item)
         { 
             Console.WriteLine("Checking Item Inventory");
             item = default;
+            key = 0;
             ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
-            foreach (Item itm in temp.Values)
+            foreach (KeyValuePair<byte, Item> itm in temp)
             {
-                Console.WriteLine(itm.ItemID);
-                if (itm.ItemID == itemID)
+                Console.WriteLine(itm.Value.ItemID);
+                if (itm.Value.ItemID == itemID)
                 {
-                    item = itm;
+                    item = itm.Value;
+                    key = itm.Key;
                     return true;
                 }
             }
