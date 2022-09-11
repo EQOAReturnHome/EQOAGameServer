@@ -13,7 +13,6 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.Opcodes.Chat;
 
 using NLua;
-using Newtonsoft.Json;
 using ReturnHome.Server.EntityObject.Items;
 using System.Collections.Concurrent;
 

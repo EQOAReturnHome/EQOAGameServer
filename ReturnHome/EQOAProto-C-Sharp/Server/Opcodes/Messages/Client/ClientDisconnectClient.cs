@@ -1,4 +1,5 @@
-﻿using ReturnHome.Database.SQL;
+﻿using System.Text.Json;
+using ReturnHome.Database.SQL;
 using ReturnHome.Server.Network;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client
@@ -12,7 +13,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             CharacterSQL savePlayerData = new();
 
             //Call the mysql update query to save player data
-            savePlayerData.SavePlayerData(session.MyCharacter, (string)Newtonsoft.Json.JsonConvert.SerializeObject(session.MyCharacter.playerFlags));
+            savePlayerData.SavePlayerData(session.MyCharacter, (string)JsonSerializer.Serialize(session.MyCharacter.playerFlags));
             //Actually drop the player's session
             session.DropSession();
         }

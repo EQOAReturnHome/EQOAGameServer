@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Stats;
 using System;
+using System.Text.Json;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -29,6 +29,8 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> MyQuests = new List<Quest> { };
+        public Dictionary<int, Quest> activeQuests = new Dictionary<int, Quest>();
+        public Dictionary<int, Quest> completedQuests = new Dictionary<int, Quest>();
         public Dialogue MyDialogue = new Dialogue();
         public Dictionary<string, string> playerFlags = new Dictionary<string, string>();
 
@@ -37,7 +39,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public World ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
-        
+
 
         public int XPEarnedInThisLevel;
         public long TotalXP = 0;
@@ -196,7 +198,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             if (playerFlags != null)
             {
-                this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, string>>(playerFlags);
+                this.playerFlags = JsonSerializer.Deserialize<Dictionary<string, string>>(playerFlags);
             }
             //CurrentPower2 = currentPower2;
             //BasePower = basePower;

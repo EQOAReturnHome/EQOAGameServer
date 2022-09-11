@@ -28,7 +28,6 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.4" />
     <PackageReference Include="MySqlConnector" Version="0.69.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NLua" Version="1.6.0" />
     <PackageReference Include="QuadTrees" Version="1.0.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
@@ -38,6 +37,9 @@
     <Content Include="$(ProjectDir)\Scripts\**\*;$(ProjectDir)\Scripts\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Scripts\freeport\FreeportQuestText.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Scripts\wyndhaven\coachman_brumley.lua" />
@@ -52,6 +54,7 @@
   <ItemGroup>
     <Content Include="Scripts\bobble_by_water\Delwin_Stitchfinger.lua" />
     <Content Include="Scripts\dirTest.lua" />
+    <Content Include="Scripts\freeport\FreeportQuestText.cs" />
     <Content Include="Scripts\freeport\Magician_start.lua" />
     <Content Include="Scripts\ports.lua" />
     <Content Include="Scripts\Temby\Dagget_Klem.lua" />

@@ -1020,8 +1020,7 @@ namespace ReturnHome.Database.SQL
             {
                 { "NewPlayerIntro", "0" }
             };
-            string serializedPlayerFlags = Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
-            Console.WriteLine(serializedPlayerFlags);
+            string serializedPlayerFlags = (string)JsonSerializer.Serialize(charCreation.playerFlags);
 
             //Create second command using second connection and char insert query string
             using var SecondCmd = new MySqlCommand("CreateCharacter", con);

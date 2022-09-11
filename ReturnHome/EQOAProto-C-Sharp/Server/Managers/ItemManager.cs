@@ -35,7 +35,6 @@ namespace ReturnHome.Server.Managers
         {
             if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))
             {
-                Console.WriteLine($"Checking Inventory for ItemID {itemID} with quantity {qty}");
                 mySession.MyCharacter.Inventory.UpdateQuantity(key, qty, out Item updatedItem);
                 ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(mySession, updatedItem.StackLeft, updatedItem.ClientIndex);
             }
