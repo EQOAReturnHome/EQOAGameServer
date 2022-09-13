@@ -341,3 +341,8 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# admin web interface
+web-admin/venv*
+web-admin/venv/*
+.vscode
