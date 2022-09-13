@@ -1,11 +1,22 @@
 version: "3.8"
-
+networks:
+  webadmin:
 services:
-  app:
+  backend:
     build: .
     env_file:
       - .env
     ports:
       - "8000:8000"
-
-
+    networks:
+      - webadmin
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    networks:
+      - webadmin
