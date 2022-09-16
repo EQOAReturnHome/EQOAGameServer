@@ -14,7 +14,7 @@
         [0] = {log = "Return two cracked ant pincers to Kellina"},
         [1] = {
             xp = 6900,
-            rewards = {{item=8373, qty=1}},
+            rewards = {{item = 8373, qty = 1}},
             requirements = {{4866, 2}}
         }
     },
@@ -49,16 +49,22 @@
     [10016] = {
         [0] = {log = "Guard Sareken is in need of assistance. Please find him at the north entrance of Freeport."},
         [1] = {log = "Return to Guard Sareken with 147 tunar and three tough pike scales."},
-        [2] = {log = "Go investigate the old house north of Freeport for the orc ransacker, destroy it and bring Guard Sareken its club as proof."},
+        [2] = {
+            log = "Go investigate the old house north of Freeport for the orc ransacker, destroy it and bring Guard Sareken its club as proof."
+        },
         [3] = {xp = 556753}
     },
     [10017] = {
         [0] = {log = "See Ilenar in the Shining Shield guild hall."},
-        [1] = {log = "Travel north along the river until you reach Bobble-by-Water. Find Delwin Stitchfinger, and have him repair the robe."},
+        [1] = {
+            log = "Travel north along the river until you reach Bobble-by-Water. Find Delwin Stitchfinger, and have him repair the robe."
+        },
         [2] = {log = "Go see Grocer Fritz, purchase some fine chocolate and return to Delwin Stitchfinger."},
-        [3] = {log = "Return to Delwin after a little while"}
+        [3] = {log = "Return to Delwin after a little while"},
         [4] = {log = "Return the robe to Ilenar Crelwin."},
-        [5] = {log = "Give the special poisoned chocolate to Delwin Stitchfinger. Be sure to let him know Ilenar says thanks."},
+        [5] = {
+            log = "Give the special poisoned chocolate to Delwin Stitchfinger. Be sure to let him know Ilenar says thanks."
+        },
         [6] = {log = "Return to Ilenar Crelwin. Tell him of Delwin's fate."},
         [7] = {xp = 550698}
     },
