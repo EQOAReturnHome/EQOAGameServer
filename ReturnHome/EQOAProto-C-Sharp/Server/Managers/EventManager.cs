@@ -38,11 +38,14 @@ namespace ReturnHome.Server.Managers
             //Create handles for the lua script to access some c# variables and methods
             lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
             lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
+            lua["AddQuest"] = Quest.AddQuest;
+            lua["DeleteQuest"] = Quest.DeleteQuest;
             lua["SendDialogue"] = mySession.MyCharacter.SendDialogue;
             lua["SendMultiDialogue"] = mySession.MyCharacter.SendMultiDialogue;
             lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
-            lua["AddQuestLog"] = Character.AddQuestLog;
-            lua["DeleteQuestLog"] = Character.DeleteQuest;
+            lua["StartQuest"] = Quest.StartQuest;
+            lua["ContinueQuest"] = Quest.ContinueQuest;
+            lua["CompleteQuest"] = Quest.CompleteQuest;
             lua["CheckQuestItem"] = Character.CheckIfQuestItemInInventory;
             lua["mySession"] = mySession;
             lua["GenerateChatMessage"] = Opcodes.Chat.ChatMessage.GenerateClientSpecificChat;
@@ -52,9 +55,12 @@ namespace ReturnHome.Server.Managers
             lua["GetRace"] = Utility_Funcs.GetEnumObjectByValue<Race>;
             lua["GetHumanType"] = Utility_Funcs.GetEnumObjectByValue<HumanType>;
             lua["UpdateAnim"] = Entity.UpdateAnim;
+            //wont actually return npc object to update, only npcid
             lua["thisNPC"] = mySession.MyCharacter.Target;
             lua["GrantItem"] = ItemManager.GrantItem;
             lua["TurnInItem"] = ItemManager.UpdateQuantity;
+            lua["RemoveTunar"] = Entity.RemoveTunar;
+            lua["AddTunar"] = Entity.AddTunar;
 
 
             lua["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);

@@ -449,7 +449,7 @@ namespace ReturnHome.Server.EntityObject
         }
 
         public static bool CheckIfItemInInventory(Session session, int itemID, out byte key, out Item item)
-        { 
+        {
             Console.WriteLine("Checking Item Inventory");
             item = default;
             key = 0;
@@ -519,16 +519,23 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public static void ModifyTunar(Session session, int tunar)
+        public static void AddTunar(Session session, int tunar)
         {
-            if (tunar > 0)
-            {
-                session.MyCharacter.Inventory.AddTunar(tunar);
-            }
-            else if (tunar < 0)
-            {
-                session.MyCharacter.Inventory.RemoveTunar(tunar);
-            }
+
+            int currentTunar = session.MyCharacter.Inventory.GetTunar();
+            int newTunar = currentTunar += tunar;
+            session.MyCharacter.Inventory.AddTunar(tunar);
+            ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
+
+        }
+
+        public static void RemoveTunar(Session session, int tunar)
+        {
+            int currentTunar = session.MyCharacter.Inventory.GetTunar();
+            int newTunar = currentTunar -= tunar;
+            session.MyCharacter.Inventory.RemoveTunar(tunar);
+            ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
+
         }
     }
 }

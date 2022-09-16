@@ -23,6 +23,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             charDump.GetPlayerHotkeys(session);
             charDump.GetPlayerWeaponHotbar(session);
             charDump.GetPlayerSpells(session);
+            charDump.GetPlayerQuests(session);
 
             //Toss opcode in
             writer.Write(message.Opcode);
@@ -41,10 +42,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write(0);
 
             //Quest Count
-            writer.Write(session.MyCharacter.MyQuests.Count);
+            writer.Write(session.MyCharacter.activeQuests.Count);
 
             //Iterate over quest data and append (Should be 0 for now...)
-            foreach (Quest q in session.MyCharacter.MyQuests)
+            foreach (Quest q in session.MyCharacter.activeQuests)
                 q.DumpQuest(ref writer);
 
             //Get Inventory Item count

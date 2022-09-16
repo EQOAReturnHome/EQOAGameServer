@@ -95,7 +95,7 @@ namespace ReturnHome.Server.EntityObject
             get {  return _humType; }
             set
             {
-                if(value >= HumanType.Other && value <= HumanType.Qeynos)
+                if(value >= HumanType.Other && value <= HumanType.Western)
                 {
                     _humType = value;
                 }

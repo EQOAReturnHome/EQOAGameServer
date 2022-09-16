@@ -1,5 +1,6 @@
 -- coachman ronks
 local coaches = require('Scripts/ports')
+local quests = require('Scripts/FreeportQuests')
 local playerCoaches = {
    highpass_coach = "Get me a horse to Highpass.",
    bobble_coach = "Get me a horse to Bobble By Water.",
@@ -20,25 +21,19 @@ if((GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011")) ==
         "Coachman Ronks: Without that record, they cannot offer you passage. If you do, then one of their horses will take you to your destination.",
         "Coachman Ronks: All you need to do is talk to the coachman of the stable and he will add you to his ledger. I'll add you to mine now.",
         "Coachman Ronks: Ok, I've done my duty. You may return to your masters now. Be sure to tell them how much I appreciate the business." }
-        DeleteQuestLog(mySession, 0)
-        if(GetPlayerFlags(mySession, "10011") == "2") then
-            SetPlayerFlags(mySession, "10011", "3")
-            questText = "Go Speak to Malsis."
-        elseif(GetPlayerFlags(mySession, "12011") == "2") then
-            SetPlayerFlags(mySession, "12011", "3")
-            questText = "Go Speak to Azlynn."    
-        end
-        AddQuestLog(mySession, 0, questText)
-        SetPlayerFlags(mySession, "freeport_coach", "true")
         SendMultiDialogue(mySession, multiDialogue)
+        if(GetPlayerFlags(mySession, "10011") == "2") then
+            ContinueQuest(mySession, 10011, quests[10011][2].log)
+        elseif(GetPlayerFlags(mySession, "12011") == "2") then
+            ContinueQuest(mySession, 12011, quests[12011][2].log)
+        end
+        SetPlayerFlags(mySession, "freeport_coach", "true")
         npcDialogue = ""
         elseif(ch:find("Nothing")) then
         npcDialogue = "Coachman Ronks: Well don't just stand around here, I have work to do!"
         diagOptions = {}
         end
-        --if(npcDialogue ~= "") then
         SendDialogue(mySession, npcDialogue, diagOptions)
-        --end
 
 SetPlayerFlags(mySession, "admin", "true")
 elseif(GetPlayerFlags(mySession, "10011") ~= "1") then

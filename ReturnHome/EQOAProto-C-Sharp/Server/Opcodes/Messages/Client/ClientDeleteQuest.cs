@@ -1,4 +1,5 @@
-﻿using ReturnHome.Server.EntityObject.Player;
+﻿using System;
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
@@ -10,10 +11,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
         {
             BufferReader reader = new(clientPacket.Data.Span);
 
-            byte unknownSection = reader.Read<byte>();
-            byte questNumber = reader.Read<byte>();
+            uint unknownSection2 = reader.Read<uint>();
+            int questIndex = (int)reader.Read7BitEncodedInt64();
 
-            Character.DeleteQuest(session, questNumber);
+            Quest.DeleteQuest(session, questIndex);
         }
     }
 }

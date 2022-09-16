@@ -44,6 +44,11 @@ namespace ReturnHome.Server.EntityObject
             _tunar -= tunar;
         }
 
+        public int GetTunar()
+        {
+            return _tunar;
+        }
+
         public bool Exists(byte key)
         {
             return _itemContainer.ContainsKey(key);

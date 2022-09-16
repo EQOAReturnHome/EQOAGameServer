@@ -3,6 +3,8 @@ function event_say()
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
+    local quests = require('Scripts/FreeportQuests')
+
     if (GetPlayerFlags(mySession, "10016") == "1") then
         if (ch:find("am")) then
             multiDialogue = {
@@ -14,15 +16,12 @@ function event_say()
                 "You have received a quest!"
             }
             SendMultiDialogue(mySession, multiDialogue)
-            DeleteQuestLog(mySession, 0)
-            SetPlayerFlags(mySession, "10016", "2")
-            questText = "Return to Guard Sareken with 147 tunar and three tough pike scales."
-            AddQuestLog(mySession, 0, questText)
+            ContinueQuest(mySession, 10016, quests[10016][1].log)
         elseif(ch:find("mean")) then
             multiDialogue = {"Guard Sareken: Oh, that's too bad. We really could have used the help."}
             SendMultiDialogue(mySession, multiDialogue)
         else
-            diagOptions = {"That I am.", "I don’t know what you mean..."}
+            diagOptions = {"That I am.", "I don't know what you mean..."}
             npcDialogue = "Ah yes, are you the assistant that Kellina has sent?"
             SendDialogue(mySession, npcDialogue, diagOptions)
         end
@@ -45,11 +44,8 @@ function event_say()
                 }
                 SendMultiDialogue(mySession, multiDialogue)
                 TurnInItem(mySession, 8333, 3)
-                ModifyTunar(mySession, -147)
-                DeleteQuestLog(mySession, 0)
-                questText = "Go investigate the old house north of Freeport for the orc ransacker, destroy it and bring Guard Sareken its club as proof."
-                AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10016", "3")
+                RemoveTunar(mySession, 147)
+                ContinueQuest(mySession, 10016, quests[10016][2].log)
             else
                 npcDialogue = "Have you returned with the supplies already"
                 diagOptions = {"Yes. I have it all right here.", "Whoops, not yet."}
@@ -76,13 +72,10 @@ function event_say()
                 SendMultiDialogue(mySession, multiDialogue)
                 TurnInItem(mySession, 8448, 1)
                 GrantItem(mySession, 8449,1)
-                GrantXP(mySession, 556753)
-                DeleteQuestLog(mySession, 0)
-                SetPlayerFlags(mySession, "10016", "99")
-                SetPlayerFlags(mySession, "10017", "0")
+                CompleteQuest(mySession, 10016, quests[10016][3].xp)
             else
                 npcDialogue = "Do you have the club?"
-                diagOptions = {"It wasn’t easy, but yes.", "I don't think so…"}
+                diagOptions = {"It wasn't easy, but yes.", "I don't think so..."}
             end
         else
             npcDialogue =

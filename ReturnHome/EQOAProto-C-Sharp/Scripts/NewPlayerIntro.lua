@@ -5,7 +5,7 @@ function event_say()
    local npcDialogue = ""
 --Human
 if(race == "Human")then
-    if(humanType == "Freeport")then
+    if(humanType == "Eastern")then
         if(class == "Magician")then
     multiDialogue = { "Welcome to Freeport young magician. This is the city of trade and the eastern home of the humans.",
     "As a new magician you been invited to join the Academy of Arcane Science. They are the Magician's guild here in Freeport.",
@@ -57,9 +57,10 @@ if(race == "Human")then
        "Before we get too far, do you need instructions on how to use the basic controls?" }
      npcDialogue = "Then you are ready to move on to your first quest. Speak to Sivrendesh, he is the guildmaster standing before you."
        end
+     SetPlayerFlags(mySession, "NewPlayerIntro", "1")
+
     end
 end
     SendMultiDialogue(mySession, multiDialogue)
     SendDialogue(mySession, npcDialogue, diagOptions)
-    SetPlayerFlags(mySession, "NewPlayerIntro", "1")
 end

@@ -9,8 +9,8 @@ namespace ReturnHome.Utilities
         public static readonly Dictionary<int, string> HumTypeDict = new Dictionary<int, string>
         {
             {0, "Other" },
-            {1, "Freeport" },
-            {2, "Qeynos" }
+            {1, "Eastern" },
+            {2, "Western" }
         };
 
         //Dictionary mapping the client value to the string value expected in the DB for Player Class

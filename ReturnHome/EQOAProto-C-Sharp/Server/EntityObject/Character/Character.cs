@@ -28,9 +28,8 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Spell> MySpells = new List<Spell> { };
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
-        public List<Quest> MyQuests = new List<Quest> { };
-        public Dictionary<int, Quest> activeQuests = new Dictionary<int, Quest>();
-        public Dictionary<int, Quest> completedQuests = new Dictionary<int, Quest>();
+        public List<Quest> activeQuests = new List<Quest>();
+        public List<Quest> completedQuests = new List<Quest>();
         public Dialogue MyDialogue = new Dialogue();
         public Dictionary<string, string> playerFlags = new Dictionary<string, string>();
 
@@ -113,7 +112,7 @@ namespace ReturnHome.Server.EntityObject.Player
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, string playerFlags, Session MySession) : base(true, level)
         {
             Speed = speed;
-            //playerFlags.Add("Freeport", true);
+            //playerFlags.Add("Eastern", true);
             Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;

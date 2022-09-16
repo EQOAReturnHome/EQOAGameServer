@@ -31,6 +31,8 @@ namespace ReturnHome.Server.Managers
             ServerAddInventoryItemQuantity.AddInventoryItemQuantity(mySession, newItem);
         }
 
+
+        //Really should be called remove quantity
         public static void UpdateQuantity(Session mySession, int itemID, int qty)
         {
             if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))

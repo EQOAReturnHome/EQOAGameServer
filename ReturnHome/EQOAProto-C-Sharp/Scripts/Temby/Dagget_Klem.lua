@@ -3,22 +3,20 @@ function event_say()
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
+    local quests = require("Scripts/FreeportQuests")
     if (GetPlayerFlags(mySession, "10018") == "1") then
         if (ch:find("nightworm")) then
             multiDialogue = {
                 "Dagget Klem: Ah yes, Ilenar. One of my best customers. Those roots are not easy to pull from the swamps. But I happen to have a shipment for sale.",
                 "Dagget Klem: The only problem is, these bloody sharks are making it impossible for ships to dock here.",
-                "Dagget Klem: It’s a new species of shark, they're called bloodfins. And they've been using the coast as a spawning ground.",
+                "Dagget Klem: It's a new species of shark, they're called bloodfins. And they've been using the coast as a spawning ground.",
                 "Dagget Klem: If you could kill a mother bloodfin, I could get a boat through. To lure a mother out, you'll have to kill the smaller bloodfin sharks in great numbers.",
                 "Dagget Klem: Once you've killed a bloodfin mother, bring me one of its teeth as proof and 260 tunar, then I can help.",
                 "You have finished a quest!",
                 "You have received a quest!"
             }
             SendMultiDialogue(mySession, multiDialogue)
-            SetPlayerFlags(mySession, "10018", "2")
-            questText = "Kill a bloodfin mother, bring Dagget Klem one of its teeth as proof and 260 tunar."
-            DeleteQuestLog(mySession, 0)
-            AddQuestLog(mySession, 0, questText)
+            ContinueQuest(mySession, 10018, quests[10018][1].log)
         elseif (ch:find("ate")) then
             multiDialogue = {"Dagget Klem: More for me then, I suppose."}
             SendMultiDialogue(mySession,multiDialogue)
@@ -31,7 +29,7 @@ function event_say()
     ---Needs bloodfin tooth
         if (CheckQuestItem(mySession, 8339, 1)) then
             multiDialogue = {
-                "Dagget Klem: You look a bit doused, but it seems you’ve managed to take out a mother bloodfin. Impressive! Lets see that tooth...",
+                "Dagget Klem: You look a bit doused, but it seems you've managed to take out a mother bloodfin. Impressive! Lets see that tooth...",
                 "Dagget Klem: Very nice. Well, I'll be able to get that ship docked here shortly. We will get you that shipment of nightworm roots you asked for.",
                 "Dagget Klem: Come back and see me later on and we I will take good care you.",
                 "You have finished a quest!",
@@ -39,10 +37,8 @@ function event_say()
                 "You have received a quest!"
                 }
             SendMultiDialogue(mySession, multiDialogue)
-            SetPlayerFlags(mySession, "10018", "3")
-            questText = "Return to Dagget Klem to buy your case of nightworm root."
-            DeleteQuestLog(mySession, 0)
-            AddQuestLog(mySession, 0, questText)
+            TurnInItem(mySession, 8339, 1)
+            ContinueQuest(mySession, 10018, quests[10018][2].log)
         else
             multiDialogue = "Dagget Klem: Bring these items to me as soon as you possibly can. I'll need 260 Tunar to complete our transaction."
             SendMultiDialogue(mySession, multiDialogue)
@@ -58,12 +54,9 @@ function event_say()
                     "You have received a case of nightworm roots."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                SetPlayerFlags(mySession, "10018", "4")
-                DeleteQuestLog(mySession, 0)
-                questText = "Return to Ilenar Crelwin."
-                AddQuestLog(mySession, 0, questText)
-                ModifyTunar(mySession, -260)
-                --GrantItem(mySession, 8340,1)
+                RemoveTunar(mySession, 260)
+                GrantItem(mySession, 8340,1)
+                ContinueQuest(mySession, 10018, quests[10018][3].log)
             elseif(ch:find("yet")) then
                 multiDialogue = {"Dagget Klem: Well, I can't wait around for all day. Figure it out and let's get this deal done."}
                 SendMultiDialogue(mySession, multiDialogue)

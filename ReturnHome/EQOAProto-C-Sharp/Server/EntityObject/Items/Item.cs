@@ -141,7 +141,7 @@ namespace ReturnHome.Server.EntityObject.Items
             writer.Write(Location);
             writer.Write<int>(ServerKey);
             writer.Write7BitEncodedInt64(ItemID);
-            writer.Write7BitEncodedUInt64(ItemCost);
+            writer.Write7BitEncodedInt64((int)ItemCost);
             writer.Write7BitEncodedInt64(Unk1);
             writer.Write7BitEncodedInt64(ItemIcon);
             writer.Write7BitEncodedInt64(Unk2);

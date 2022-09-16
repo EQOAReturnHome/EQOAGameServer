@@ -596,7 +596,6 @@ namespace ReturnHome.Database.SQL
             }
 
             SecondRdr.Close();
-            //foreach (Character character in characterData.OrderBy(newCharacter => newCharacter.CharName)) Console.WriteLine(character);
 
             //return Character Data with characters and gear.
             return characterData;
@@ -782,23 +781,23 @@ namespace ReturnHome.Database.SQL
                       //Proc Animation
                       SecondRdr.GetInt32(25),
                       new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
+                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
                       },
                       //Model
                       SecondRdr.GetInt32(44),
@@ -825,6 +824,38 @@ namespace ReturnHome.Database.SQL
 
             //return Character Data with characters and gear.
             return selectedCharacter;
+        }
+
+        public void GetPlayerQuests(Session session)
+        {
+
+            //Second SQL command and reader
+            using var cmd = new MySqlCommand("GetPlayerQuests", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("cServerID", session.MyCharacter.ServerID);
+            using MySqlDataReader Rdr = cmd.ExecuteReader();
+
+            //Use second reader to iterate through character gear and assign to character attributes
+            while (Rdr.Read())
+            {
+                //Hold charactervalue so we have names to compare against 
+                int serverID = Rdr.GetInt32(0);
+
+                Quest thisQuest = new Quest(
+                  //QuestID
+                  Rdr.GetInt32(1),
+                  //questIndex
+                  Rdr.GetInt32(2),
+                  //questStep
+                  Rdr.GetInt32(3),
+                  Rdr.GetString(4));
+
+                session.MyCharacter.activeQuests.Add(thisQuest);
+                Console.WriteLine(thisQuest.questID);
+            }
+
+            Rdr.Close();
+
         }
 
         public void GetPlayerSpells(Session session)
@@ -1017,9 +1048,9 @@ namespace ReturnHome.Database.SQL
         public void CreateCharacter(Session session, Character charCreation)
         {
             charCreation.playerFlags = new Dictionary<string, string>()
-            {
-                { "NewPlayerIntro", "0" }
-            };
+{
+{ "NewPlayerIntro", "0" }
+};
             string serializedPlayerFlags = (string)JsonSerializer.Serialize(charCreation.playerFlags);
 
             //Create second command using second connection and char insert query string

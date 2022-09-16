@@ -1,4 +1,5 @@
 local ch = tostring(choice)
+local quests = require('Scripts/FreeportQuests')
 function event_say()
     local diagOptions = {}
     local questText = ""
@@ -12,9 +13,7 @@ function event_say()
                 "Kellina: Now be off. I've wasted enough of my time with you."
             }
             SendMultiDialogue(mySession, multiDialogue)
-            SetPlayerFlags(mySession, "10012", "1")
-            questText = "Return two cracked ant pincers to Kellina."
-            AddQuestLog(mySession, 0, questText)
+            StartQuest(mySession, 10012, quests[10012][0].log)
         else
             diagOptions = {"Actually, Malsis sent me."}
             npcDialogue = "Kellina: I don't have time for chit chat, dear."
@@ -36,12 +35,9 @@ function event_say()
                     "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                GrantXP(mySession, 6900)
                 TurnInItem(mySession, 4866, 2)
                 GrantItem(mySession, 8373, 1)
-                DeleteQuestLog(mySession, 0)
-                SetPlayerFlags(mySession, "10012", "99")
-                SetPlayerFlags(mySession, "10013", "0")
+                CompleteQuest(mySession, 10012, quests[10012][1].xp)
             else
                 npcDialogue = "I don't remember calling for you."
                 diagOptions = {"I apologize Lady, but I have the pincers.", "Yes, but...I...nevermind, sorry."}
@@ -73,8 +69,7 @@ function event_say()
                 SendMultiDialogue(mySession, multiDialogue)
                 questText =
                     "Kellina needs a plain robe from Merchant Yulia, a silk cord from Merchant Yesam, and a ruined bat wing."
-                AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10013", "1")
+                StartQuest(mySession, 10013, quests[10013][0].log)
             else
                 npcDialogue = "I don't have time for chit chat, dear."
                 diagOptions = {"I wish to continue my apprenticeship."}
@@ -106,14 +101,11 @@ function event_say()
                     "Kellina: If you visit a blacksmith they will repair your weapons and armor for a price."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                GrantXP(mySession, 17000)
                 TurnInItem(mySession, 5002, 1)
                 TurnInItem(mySession, 8314, 1)
                 TurnInItem(mySession, 4891, 1)
                 GrantItem(mySession, 4927, 1)
-                DeleteQuestLog(mySession, 0)
-                SetPlayerFlags(mySession, "10013", "99")
-                SetPlayerFlags(mySession, "10014", "0")
+                CompleteQuest(mySession, 10013, quests[10013][1].xp)
             else
                 npcDialogue = "Have you collected the components?"
                 diagOptions = {"I have.", "No."}
@@ -149,10 +141,7 @@ function event_say()
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                questText =
-                    "Travel west from Freeport to find the highwaymen and retrieve from them the stolen goods. Return to Kellina."
-                AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10014", "1")
+                StartQuest(mySession, 10014, quests[10014][0].log)
             else
                 npcDialogue = "I don’t have time for chit chat, dear."
                 diagOptions = {"I am ready for my next task."}
@@ -179,12 +168,9 @@ function event_say()
                     "You have received Motivate."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                GrantXP(mySession, 36500)
                 TurnInItem(mySession, 8321, 1)
                 GrantItem(mySession, 8445, 1)
-                DeleteQuestLog(mySession, 0)
-                SetPlayerFlags(mySession, "10014", "99")
-                SetPlayerFlags(mySession, "10015", "0")
+                CompleteQuest(mySession, 10014, quests[10014][1].xp)
             else
                 npcDialogue = "Have you retrieved the stolen goods?"
                 diagOptions = {"I have. Here they are...", "Not quite yet."}
@@ -210,10 +196,7 @@ function event_say()
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                questText =
-                    "Bring Kellina a chichan eel venom sac. You will find it north of Freeport, along the river."
-                AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10015", "1")
+                StartQuest(mySession, 10015, quests[10015][0].log)
             else
                 npcDialogue = "I am quite busy, what could you possibly need?"
                 diagOptions = {"I am ready for my next assignment.", "Nothing, really."}
@@ -239,13 +222,10 @@ function event_say()
                     "You have finished a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                GrantXP(mySession, 157474)
                 TurnInItem(mySession, 8332, 1)
                 GrantItem(mySession, 8446, 1)
                 GrantItem(mySession, 8447, 1)
-                DeleteQuestLog(mySession, 0)
-                SetPlayerFlags(mySession, "10015", "99")
-                SetPlayerFlags(mySession, "10016", "0")
+                CompleteQuest(mySession, 10015, quests[10015][1].xp)
             else
                 npcDialogue = "Do you have the venom sac?"
                 diagOptions = {"It is right here.", "Oh sorry, not yet."}
@@ -269,9 +249,7 @@ function event_say()
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                questText = "Guard Sareken is in need of assistance. Please find him at the north entrance of Freeport."
-                AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10016", "1")
+                StartQuest(mySession, 10016, quests[10016][0].log)
             else
                 npcDialogue = "Please tell me you are here to help..."
                 diagOptions = {"I am.", "Maybe later..."}
@@ -290,18 +268,16 @@ function event_say()
             elseif (ch:find("returned")) then
                 multiDialogue = {
                     "Kellina: Yes of course, I can use you to...Oh nevermind that.",
-                    "Kellina: It is good you have returned. A colleague of mine has returned to Freeport. To be honest, I cant stand him. He's had a bit of a mishap, and needs our…your help.",
+                    "Kellina: It is good you have returned. A colleague of mine has returned to Freeport. To be honest, I cant stand him. He's had a bit of a mishap, and needs our...your help.",
                     "Kellina: See to him at once. I must warn you, he can be a bit...demanding. See to it that his wishes are fulfilled.",
                     "Kellina: You can find Ilenar in the Shining Shield Guild Hall. Head out through the midroad, and to the southeast a little, head through the Smiling Serpent Inn.",
                     "Kellina: To the east of the inn is the Shining Shield Mercenaries. Watch your step there...",
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                questText = "See Ilenar in the Shining Shield guild hall."
-                AddQuestLog(mySession, 0, questText)
-                SetPlayerFlags(mySession, "10017", "1")
+                StartQuest(mySession, 10017, quests[10017][0].log)
             else
-                npcDialogue = "What do you want? I really can't.."
+                npcDialogue = "What do you want? I really can't..."
                 diagOptions = {"I have returned to learn more.", "Oh nevermind..."}
             end
         else
@@ -309,7 +285,6 @@ function event_say()
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
     elseif (GetPlayerFlags(mySession, "10018") == "6") then
-        GrantXP(mySession, 883791)
         multiDialogue = {"Kellina: I've received word that the venerable Ilenar Crelwin is pleased with your work as of late. You have proved yourself a worthy agent.",
         "Kellina: For all of your accomplishments, it is time you wore something befitting of your rank. I therefore award you with a Summoners Garb.",
         "Kellina: I also award you with this Endure Fire Scroll. May these things protect you, in dangerous places.",
@@ -318,12 +293,10 @@ function event_say()
         "You have received Endure Fire.",
         "You have received a summoners garb."
         }
-        DeleteQuestLog(mySession,0)
+        SendMultiDialogue(mySession, multiDialogue)
         GrantItem(mySession, 8451, 1)
         GrantItem(mySession, 8452, 1)
-        SetPlayerFlags(mySession, "10018", "99")
-        SetPlayerFlags(mySession, "10019", "0")
-
+        CompleteQuest(mySession, 10018, quests[10018][6].xp)
     else
         npcDialogue = "I am quite busy with my students right now. Are you sure you're in the right place?"
     end
