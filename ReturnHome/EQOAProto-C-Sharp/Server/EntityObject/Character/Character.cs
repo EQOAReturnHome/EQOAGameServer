@@ -249,7 +249,11 @@ namespace ReturnHome.Server.EntityObject.Player
                 return "noFlags";
 
             if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+            {
                 return mySession.MyCharacter.playerFlags[flagKey];
+            }
+
+
 
             else
                 return "noFlags";

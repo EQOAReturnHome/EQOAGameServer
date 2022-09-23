@@ -25,7 +25,7 @@ SetPlayerFlags(mySession, "admin", true)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if ((GetPlayerFlags(mySession, "admin")  or GetPlayerFlags(mySession, coach)) == "true") then
                table.insert(dialogueOptions, diag)
             end
          end

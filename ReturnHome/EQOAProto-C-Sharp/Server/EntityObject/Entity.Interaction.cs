@@ -15,6 +15,7 @@ using ReturnHome.Server.Opcodes.Chat;
 using NLua;
 using ReturnHome.Server.EntityObject.Items;
 using System.Collections.Concurrent;
+using ReturnHome.Server.EntityObject.Actors;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -164,6 +165,10 @@ namespace ReturnHome.Server.EntityObject
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
         public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
         {
+            if (dialogue != null)
+            {
+                dialogue = dialogue.Replace("playerName", session.MyCharacter.CharName);
+            }
 
             if (dialogue == "")
             {
@@ -248,7 +253,9 @@ namespace ReturnHome.Server.EntityObject
             {
                 foreach (KeyValuePair<object, object> k in dialogue)
                 {
-                    multiDialogue.Add(k.Value.ToString());
+                    string repString = k.Value.ToString();
+                    repString = repString.Replace("playerName", session.MyCharacter.CharName);
+                    multiDialogue.Add(repString);
 
                 }
             }
@@ -488,8 +495,9 @@ namespace ReturnHome.Server.EntityObject
             session.MyCharacter.Inventory.AddItem(default);
         }
 
-        public void takeDamage(int dmg)
+        public void TakeDamage(uint playerID, int dmg)
         {
+
             if (CurrentHP > 0)
             {
                 if (dmg > this.CurrentHP)
@@ -501,6 +509,7 @@ namespace ReturnHome.Server.EntityObject
                     this.CurrentHP -= dmg;
                 }
             }
+            ((Actor)this).EvaluateAggro(dmg, playerID);
         }
 
         public static void UpdateAnim(uint ServerID, AnimationState animation)
@@ -536,6 +545,41 @@ namespace ReturnHome.Server.EntityObject
             session.MyCharacter.Inventory.RemoveTunar(tunar);
             ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
 
+        }
+
+        //Handles turning NPC to player when they interact.
+        public void TurnToPlayer(int serverID)
+        {
+            if (EntityManager.QueryForEntityByServerID(Target, out Entity e))
+            {
+                byte newFacing = (byte)Lerp(e.Facing, Facing - (255 / 2), 1f);
+
+
+                //Probably need to use quaternions but lerping for now just to make them turn correctly.
+                /*Quaternion newPlayerRotation = new Quaternion(x, y, z, Facing);
+                Quaternion newNPCRotation = new Quaternion(e.x, e.y, e.z, MathF.Round(e.FacingF) * MathF.PI / 128.0f);
+                Quaternion qSlerp = Quaternion.Slerp(newPlayerRotation, newNPCRotation, 1);
+                e.Facing = (byte)MathF.Round(qSlerp.W * 128.0f / MathF.PI);*/
+                e.Facing = newFacing;
+
+
+                //disabling until FSM is built and/or can make them stop "shuffling"
+                /*if (newFacing > e.Facing)
+                {
+                    e.Animation = (byte)AnimationState.TurningInPlaceRight;
+                }
+                else
+                {
+                    e.Animation = (byte)AnimationState.TurningInPlaceLeft;
+                }*/
+
+                //basic lerp function
+                float Lerp(float firstFloat, float secondFloat, float by)
+                {
+                    return firstFloat * (1 - by) + secondFloat * by;
+                }
+
+            }
         }
     }
 }

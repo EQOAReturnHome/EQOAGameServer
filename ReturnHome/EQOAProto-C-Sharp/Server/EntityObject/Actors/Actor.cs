@@ -1,14 +1,18 @@
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
-
+using ReturnHome.Server.Managers;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace ReturnHome.Server.EntityObject.Actors
 {
-  public class Actor : Entity
-  {
+    public class Actor : Entity
+    {
         public long killtime = 0;
         public int Tunar = 0;
+        public Dictionary<uint, int> aggroTable = new Dictionary<uint, int>();
+
         public Actor() : base(false, 0)
         {
 
@@ -50,5 +54,57 @@ namespace ReturnHome.Server.EntityObject.Actors
             //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
             //Inventory = new(3000);
         }
-  }
+
+        public async void AttackPlayer(int damage, uint targetID)
+        {
+
+            if(PlayerManager.QueryForPlayer(targetID, out Character player))
+            {
+                Console.WriteLine($"Found player to attack: {player.CharName}");
+                player.Animation = 0x2b;
+                player.CurrentHP -= 5;
+            }
+
+            this.Animation = 0x17;
+            this.Animation = 0x22;
+
+
+
+        }
+
+        public void EvaluateAggro(int damage, uint playerID)
+        {
+
+            int mostAggro = damage;
+            int aggro = 0;
+            uint targetPlayer = 0;
+            aggro += damage;
+
+            if (aggroTable.ContainsKey(playerID))
+            {
+                aggroTable[playerID] += damage;
+                Console.WriteLine($"Aggro table already contains playerID {playerID}");
+            }
+            else
+            {
+                aggroTable.Add(playerID, damage);
+                Console.WriteLine($"Adding player with playerID {playerID} to aggro Table.");
+            }
+
+
+            foreach (KeyValuePair<uint, int> player in aggroTable)
+            {
+                Console.WriteLine(player.Value);
+                if (player.Value > mostAggro)
+                {
+                    mostAggro = player.Value;
+                    targetPlayer = player.Key;
+                    //Console.WriteLine($"{player.Key} has {mostAggro} aggro.");
+                }
+            }
+
+            AttackPlayer(damage, playerID);
+
+        }
+    }
 }

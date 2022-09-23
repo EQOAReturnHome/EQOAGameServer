@@ -69,26 +69,28 @@ function event_say()
             SendDialogue(mySession, npcDialogue, diagOptions)
         end
     elseif (GetPlayerFlags(mySession, "10018") == "0") then
-        if (ch:find("back")) then
-            multiDialogue = {
-                "Ilenar Crelwin: You served me well before, so I will forgive your tardiness, but don’t let it happen again.",
-                "Ilenar Crelwin: I am working on a new spell, something never before attempted. But I need some rare ingredients.",
-                "Ilenar Crelwin: Nightworm roots are banned in most cities. It is a rare plant that grows only in the fetid marshes of the south, and their poisonous properties make them illegal.",
-                "Ilenar Crelwin: Fortunately I have a contact, Dagget Klem, who can get some. Klem runs a smuggling ring in a small fishing village called Temby, along the coast not far north of Freeport.",
-                "Ilenar Crelwin: Journey to Temby and arrange for the roots through Dagget Klem. Return to me when you have them.",
-                "You have received a quest!"
-            }
-            SendMultiDialogue(mySession, multiDialogue)
-            StartQuest(mySession, 10018, quests[10018][0].log)
-        elseif (ch:find("rather")) then
-            multiDialogue = {
-                "Ilenar Crelwin: If you think you can escape my command, I assure you, I will have you hunted, and brought to justice. My justice."
-            }
-            SendMultiDialogue(mySession, multiDialogue)
-        else
-            diagOptions = {"I am back for another mission.", "Actually, I'd rather not talk to you right now..."}
-            npcDialogue = "So you finally decided to grace me with your presence?"
-            SendDialogue(mySession, npcDialogue, diagOptions)
+        if (level >= 15) then
+            if (ch:find("back")) then
+                multiDialogue = {
+                    "Ilenar Crelwin: You served me well before, so I will forgive your tardiness, but don’t let it happen again.",
+                    "Ilenar Crelwin: I am working on a new spell, something never before attempted. But I need some rare ingredients.",
+                    "Ilenar Crelwin: Nightworm roots are banned in most cities. It is a rare plant that grows only in the fetid marshes of the south, and their poisonous properties make them illegal.",
+                    "Ilenar Crelwin: Fortunately I have a contact, Dagget Klem, who can get some. Klem runs a smuggling ring in a small fishing village called Temby, along the coast not far north of Freeport.",
+                    "Ilenar Crelwin: Journey to Temby and arrange for the roots through Dagget Klem. Return to me when you have them.",
+                    "You have received a quest!"
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+                StartQuest(mySession, 10018, quests[10018][0].log)
+            elseif (ch:find("rather")) then
+                multiDialogue = {
+                    "Ilenar Crelwin: If you think you can escape my command, I assure you, I will have you hunted, and brought to justice. My justice."
+                }
+                SendMultiDialogue(mySession, multiDialogue)
+            else
+                diagOptions = {"I am back for another mission.", "Actually, I'd rather not talk to you right now..."}
+                npcDialogue = "So you finally decided to grace me with your presence?"
+                SendDialogue(mySession, npcDialogue, diagOptions)
+            end
         end
     elseif (GetPlayerFlags(mySession, "10018") == "4") then
         if (CheckQuestItem(mySession, 8340, 1)) then

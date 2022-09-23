@@ -97,7 +97,7 @@ namespace ReturnHome.Server.Network
                 MapManager.Add(Mysession.MyCharacter);
 
                 Mysession.inGame = true;
-                //This is just a shim for the player intro. Only supports magician until I come up witih something else.
+                //This is just a shim for the player intro.
                 if (Mysession.MyCharacter.GetPlayerFlags(Mysession, "NewPlayerIntro") == "0")
                 {
                     Mysession.MyCharacter.MyDialogue.npcName = "NewPlayerIntro";

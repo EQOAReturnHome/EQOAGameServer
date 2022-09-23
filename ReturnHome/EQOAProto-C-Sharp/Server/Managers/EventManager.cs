@@ -76,6 +76,7 @@ namespace ReturnHome.Server.Managers
             {
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = lua.GetFunction("event_say");
+                mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
                 callFunction.Call();
             }
         }
