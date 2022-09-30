@@ -135,23 +135,22 @@ namespace ReturnHome.Server.EntityObject
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
 
-                npc.Inventory.RetrieveItem(itemSlot, out Item item);
-                if (Inventory.Tunar < item.ItemCost)
+                if (npc.Inventory.TryRetrieveItem(itemSlot, out Item item, out byte index))
                 {
-                    ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
-                }
-                else
-                {
-                    Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
+                    if (Inventory.Tunar < item.ItemCost)
+                        ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
 
-                    //Adjust player tunar
-                    ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
+                    else
+                    {
+                        Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
 
-                    Item newItem = item.AcquireItem(itemQty);
+                        //Adjust player tunar
+                        ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
 
-                    Inventory.AddItem(newItem);
+                        Item newItem = item.AcquireItem(itemQty);
 
-                    ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
+                        Inventory.AddItem(newItem);
+                    }
                 }
             }
         }
@@ -440,18 +439,10 @@ namespace ReturnHome.Server.EntityObject
         //Not the most efficent, but works..
         public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
-            ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
-            //for (byte i = 0; i < temp.Count; i++)
-            foreach (Item item in temp.Values)
-                if (item.ItemID == itemID)
-                {
-                    if (item.StackLeft >= itemQty)
-                    {
+            for(int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID)
+                    if (session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
                         return true;
-                    }
-
-
-                }
             return false;
         }
 
@@ -460,17 +451,14 @@ namespace ReturnHome.Server.EntityObject
             Console.WriteLine("Checking Item Inventory");
             item = default;
             key = 0;
-            ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
-            foreach (KeyValuePair<byte, Item> itm in temp)
-            {
-                Console.WriteLine(itm.Value.ItemID);
-                if (itm.Value.ItemID == itemID)
+
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID)
                 {
-                    item = itm.Value;
-                    key = itm.Key;
+                    item = session.MyCharacter.Inventory.itemContainer[i].item;
+                    key = session.MyCharacter.Inventory.itemContainer[i].key;
                     return true;
                 }
-            }
 
             return false;
         }
@@ -478,11 +466,12 @@ namespace ReturnHome.Server.EntityObject
         //Not the most efficent, but works..
         public static bool RemoveQuestItemFromPlayerInventory(Session session, int itemID, int itemQty)
         {
-            ConcurrentDictionary<byte, Item> temp = session.MyCharacter.Inventory.itemContainer;
-            for (byte i = 0; i < temp.Count; i++)
-                if (temp[i].ItemID == itemID && temp[i].StackLeft >= itemQty)
-                    if (session.MyCharacter.Inventory.UpdateQuantity(temp[i].ServerKey, itemQty, out _))
-                        return true;
+            for (byte i = 0; i < session.MyCharacter.Inventory.Count; i++)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID && session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
+                {
+                    session.MyCharacter.Inventory.UpdateQuantity(session.MyCharacter.Inventory.itemContainer[i].key, itemQty);
+                    return true;
+                }
 
             return false;
         }

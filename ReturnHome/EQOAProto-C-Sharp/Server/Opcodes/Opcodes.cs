@@ -75,10 +75,11 @@
         AuctionStuff = 0x1206,
         DisconnectNoError = 0x0777,//Disconnects client with no error message
         AdministratorShutdown = 0x07C1,
-        Something = 0x0774,
+        Something2 = 0x0774,
         RemoveGroupMember = 0x069A, //0 removes from group, no message //1 Group leader ejected you //2 Group disbanded //3 not invited to this group //4 Group is full //5 no message, not in group
         ServerDisbandGroup = 0x062F,
         Loot = 0x0018, //24
+        LootOptions = 0x85, //1 Corpse being looted by another player 2 entity not lootable 3 Corpse belongs to another player/group
 
 
         //From client
@@ -112,6 +113,7 @@
         DeclineGroupInvite = 0x0624,
         ClientCloseLoot = 0x0016,
         ClientLoot = 0x0019,
+        LootBoxRequest  = 0x15,
     }
 
     public static class GameVersions

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes.Messages.Server;
 
-namespace ReturnHome.Server.EntityObject.Group
+namespace ReturnHome.Server.EntityObject.Grouping
 {
     public class Group
     {

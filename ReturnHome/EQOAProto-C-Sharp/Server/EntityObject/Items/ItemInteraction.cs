@@ -7,15 +7,15 @@ namespace ReturnHome.Server.EntityObject.Items
     public static class ItemInteraction
     {
         //Needs work here for equipping/unequipping gear/using items and checks against it
-        public static bool EquipItem(Entity e, Item i)
+        public static bool EquipItem(Entity e, Item item, byte index)
         {
             if (e.isPlayer)
             {
-                if ((((i.Classuse >> (byte)e.EntityClass) & 1) == 1) && (((i.Raceuse >> (byte)e.EntityRace) & 1) == 1) && e.Level >= i.Levelreq)
+                if ((((item.Classuse >> (byte)e.EntityClass) & 1) == 1) && (((item.Raceuse >> (byte)e.EntityRace) & 1) == 1) && e.Level >= item.Levelreq)
                 {
-                    e.equippedGear.Add(i);
+                    e.equippedGear.Add(item);
                     if (e.isPlayer)
-                        ServerEquipItem.ProcessServerEquipItem(((Character)e).characterSession, i);
+                        ServerEquipItem.ProcessServerEquipItem(((Character)e).characterSession, item, index);
                     return true;
                 }
                 return false;
@@ -37,7 +37,7 @@ namespace ReturnHome.Server.EntityObject.Items
             return false;
         }
 
-        public static void InteractItem(Entity e, uint index, byte interactionType)
+        public static void InteractItem(Entity e, uint key, byte interactionType)
         {
             if (interactionType != 0)
             {
@@ -45,15 +45,15 @@ namespace ReturnHome.Server.EntityObject.Items
                 return;
             }
 
-            e.Inventory.RetrieveItem((byte)index, out Item i);
+            e.Inventory.TryRetrieveItem((byte)key, out Item item, out byte index);
 
             //unequip item if true
-            if (i.EquipLocation != EquipSlot.NotEquipped && i.itemSlot != ItemSlot.NotEquipped)
-                UnequipItem(e, i);
+            if (item.EquipLocation != EquipSlot.NotEquipped && item.itemSlot != ItemSlot.NotEquipped)
+                UnequipItem(e, item);
 
             //Equip the item if true
-            else if (i.EquipLocation == EquipSlot.NotEquipped && i.itemSlot != ItemSlot.NotEquipped)
-                EquipItem(e, i);
+            else if (item.EquipLocation == EquipSlot.NotEquipped && item.itemSlot != ItemSlot.NotEquipped)
+                EquipItem(e, item, index);
 
             //If we are then interacting with an item that is not equipable, must be a consumable item?
             else

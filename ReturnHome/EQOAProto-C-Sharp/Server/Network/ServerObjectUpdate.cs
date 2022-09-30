@@ -109,7 +109,7 @@ namespace ReturnHome.Server.Network
                     CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, _baseXOR.Slice(1, 0xC8), 0xC8);
                     _currentXORResults.Add(MessageCounter, temp);
                     _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
-                    MessageCounter++;
+                    ++MessageCounter;
                 }
             }
         }
@@ -124,7 +124,7 @@ namespace ReturnHome.Server.Network
 
             _currentXORResults.Add(MessageCounter, temp);
             _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
-            MessageCounter++;
+            ++MessageCounter;
         }
 
         public void UpdateBaseXor(ushort msgCounter)

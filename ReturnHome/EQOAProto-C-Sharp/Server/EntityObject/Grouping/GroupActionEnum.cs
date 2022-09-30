@@ -1,4 +1,4 @@
-﻿namespace ReturnHome.Server.EntityObject.Group
+﻿namespace ReturnHome.Server.EntityObject.Grouping
 {
     public enum GroupActionEnum : byte
     {

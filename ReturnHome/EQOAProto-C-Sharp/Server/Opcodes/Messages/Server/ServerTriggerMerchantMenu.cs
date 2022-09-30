@@ -25,12 +25,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write(npc.Inventory == null ? 0 : npc.Inventory.Count);
             if (npc.Inventory != null)
             {
-                foreach (Item entry in npc.Inventory.itemContainer.Values)
+                for( int i = 0; i < npc.Inventory.Count; ++i )
                 {
-                    Console.WriteLine(entry.ItemName);
-
-                    entry.DumpItem(ref writer);
-                        }
+                    npc.Inventory.itemContainer[i].item.DumpItem(ref writer, npc.Inventory.itemContainer[i].key);
+                }
             }
             message.Size = writer.Position;
             session.sessionQueue.Add(message);

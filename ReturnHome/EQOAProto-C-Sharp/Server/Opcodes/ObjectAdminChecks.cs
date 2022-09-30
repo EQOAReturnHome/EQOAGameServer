@@ -78,7 +78,7 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                     case "unk2":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.ObjectUpdateUnknown2(ushort.Parse(changes[2]));
+                        c.ObjectUpdateUnknown2(byte.Parse(changes[2]));
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 

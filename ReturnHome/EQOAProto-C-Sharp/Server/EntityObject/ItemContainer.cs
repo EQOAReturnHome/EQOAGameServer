@@ -1,5 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
 using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -7,7 +9,7 @@ namespace ReturnHome.Server.EntityObject
     public class ItemContainer
     {
         private Entity _e;
-        private ConcurrentDictionary<byte, Item> _itemContainer;
+        private List<ClientItemWrapper> _itemContainer;
         private byte _counter = 0;
         private int _tunar;
 
@@ -20,7 +22,7 @@ namespace ReturnHome.Server.EntityObject
 
         public int Count => _itemContainer.Count;
 
-        public ConcurrentDictionary<byte, Item> itemContainer => _itemContainer;
+        public List<ClientItemWrapper> itemContainer => _itemContainer;
 
         public ItemContainer(int tunar, Entity e, bool inventory = true)
         {
@@ -34,51 +36,39 @@ namespace ReturnHome.Server.EntityObject
                 type = 2;
         }
 
-        public void AddTunar(int tunar)
-        {
-            _tunar += tunar;
-        }
+        public void AddTunar(int tunar) => _tunar += tunar;
 
-        public void RemoveTunar(int tunar)
-        {
-            _tunar -= tunar;
-        }
+        public void RemoveTunar(int tunar) => _tunar -= tunar;
 
-        public int GetTunar()
-        {
-            return _tunar;
-        }
+        public int GetTunar() => _tunar;
 
         public bool Exists(byte key)
         {
-            return _itemContainer.ContainsKey(key);
+            for(int i = 0; i < _itemContainer.Count; ++i)
+                if (_itemContainer[i].key == key)
+                    return true;
+            return false;
         }
 
-        public bool AddItem(Item itemToBeAdded)
+        //TODO: Need to add check's in place for item's like "Lore", where we can only have 1 in our inventory at a time.
+        public bool AddItem(Item itemToBeAdded, bool loot = false)
         {
-            if (_itemContainer.TryAdd(_counter, itemToBeAdded))
+            if (_itemContainer.Count < 40)
             {
-                itemToBeAdded.ServerKey = _counter;
+                //if(itemToBeAdded.Lore == true)
+
+                _itemContainer.Add(new ClientItemWrapper(itemToBeAdded, _counter++));
                 itemToBeAdded.Location = type;
-                itemToBeAdded.ClientIndex = (byte)(_itemContainer.Count - 1);
+                itemToBeAdded.ClientIndex = (byte)_itemContainer.Count;
+                if (_e.isPlayer && !loot)
+                    if (((Character)_e).characterSession.inGame)
+                    {
+                        if (Inventory)
+                            ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)_e).characterSession, itemToBeAdded);
 
-                _counter++;
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool RemoveItem(byte index, out Item item, out byte clientIndex)
-        {
-            item = default;
-            clientIndex = 0;
-            if (_itemContainer.TryRemove(index, out item))
-            {
-                clientIndex = item.ClientIndex;
-
-                //Adjust Client index's for items
-                AdjustClientIndex(clientIndex);
+                        else
+                            ServerAddBankItemQuantity.AddBankItemQuantity(((Character)_e).characterSession, itemToBeAdded);
+                    }
 
                 return true;
             }
@@ -86,20 +76,23 @@ namespace ReturnHome.Server.EntityObject
             return false;
         }
 
-        public bool UpdateQuantity(byte index, int quantityToDestroy, out Item item)
+        public bool RemoveItem(byte key)
         {
-            item = default;
-            if (_itemContainer.TryGetValue(index, out Item temp))
+            for( int i = 0; i < _itemContainer.Count; ++i)
             {
-                if (temp.StackLeft >= quantityToDestroy)
+                if (_itemContainer[i].key == key)
                 {
-                    if(temp.StackLeft == quantityToDestroy)
-                        RemoveItem(index, out _, out _);
+                    Item item = _itemContainer[i].item;
+                    _itemContainer.RemoveAt(i);
+                    if (_e.isPlayer)
+                        if (((Character)_e).characterSession.inGame)
+                        {
+                            if (Inventory)
+                                ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(((Character)_e).characterSession, item.StackLeft, (byte)i);
 
-                    else
-                        temp.StackLeft -= quantityToDestroy;
-
-                    item = temp;
+                            else
+                                ServerRemoveBankItemQuantity.RemoveBankItemQuantity(((Character)_e).characterSession, item.StackLeft, (byte)i);
+                        }
                     return true;
                 }
             }
@@ -107,82 +100,82 @@ namespace ReturnHome.Server.EntityObject
             return false;
         }
 
-        public bool ArrangeItems(byte itemSlot1, byte itemSlot2, out byte clientItem1, out byte clientItem2)
+        public void UpdateQuantity(byte key, int quantityToDestroy)
         {
-            clientItem1 = 0;
-            clientItem2 = 0;
+            for(int i = 0; i < _itemContainer.Count; ++i)
+            {
+                if (_itemContainer[i].key == key)
+                {
+                    if (_itemContainer[i].item.StackLeft >= quantityToDestroy)
+                    {
+                        if (_itemContainer[i].item.StackLeft == quantityToDestroy)
+                            RemoveItem(key);
+
+                        else
+                        {
+                            _itemContainer[i].item.StackLeft -= quantityToDestroy;
+                            if (_e.isPlayer)
+                                if (((Character)_e).characterSession.inGame)
+                                {
+                                    if (Inventory)
+                                        ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(((Character)_e).characterSession, _itemContainer[i].item.StackLeft, (byte)i);
+
+                                    else
+                                        ServerRemoveBankItemQuantity.RemoveBankItemQuantity(((Character)_e).characterSession, _itemContainer[i].item.StackLeft, (byte)i);
+                                }
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool ArrangeItems(byte key1, byte key2)
+        {
             //If both item's exist...
-            if (_itemContainer.ContainsKey(itemSlot1) && _itemContainer.ContainsKey(itemSlot2))
+            for(byte i = 0; i < _itemContainer.Count; ++i)
             {
                 //Get both client index's
-                if (_itemContainer.TryGetValue(itemSlot1, out Item temp) && _itemContainer.TryGetValue(itemSlot2, out Item temp2))
+                if (_itemContainer[i].key == key1)
                 {
-                    //Client1 old index
-                    clientItem1 = temp.ClientIndex;
-                    //New index
-                    clientItem2 = temp2.ClientIndex;
+                    for(byte j = 0; j < _itemContainer.Count; ++j)
+                    {
+                        if(_itemContainer[j].key == key2)
+                        {
+                            ClientItemWrapper temp = _itemContainer[i];
+                            _itemContainer.RemoveAt(i);
+                            _itemContainer.Insert(j, temp);
 
-                    AdjustClientIndex(clientItem1, clientItem2);
+                            if (_e.isPlayer)
+                                if (((Character)_e).characterSession.inGame)
+                                    ServerInventoryItemArrange.InventoryItemArrange(((Character)_e).characterSession, i, j);
 
+                            return true;
+                        }
+                    }
+                    //if we found one item, but not the other break out and return false?
+                    break;
+                }
+            }
+
+            return false;
+        }
+
+        //Retrieve's our object reference
+        public bool TryRetrieveItem(byte key, out Item item, out byte index)
+        {
+            for (byte i = 0; i < _itemContainer.Count; ++i)
+            {
+                if (_itemContainer[i].key == key)
+                {
+                    item = _itemContainer[i].item;
+                    index = i;
                     return true;
                 }
             }
 
+            item = default ;
+            index = 0xFF;
             return false;
-        }
-
-        public bool RetrieveItem(byte itemToTransfer, out Item item)
-        {
-            if (_itemContainer.TryGetValue(itemToTransfer, out Item temp))
-            {
-                item = temp;
-                return true;
-            }
-
-            item = default;
-            return false;
-        }
-
-        private void AdjustClientIndex(byte clientIndexToAdjust, byte newIndex = 0xFF)
-        {
-            //Means we deleted an item, and reorganize
-            if (newIndex == 0xFF)
-            {
-                foreach (var item in _itemContainer.Values)
-                {
-                    //Lower index value by 1
-                    if (item.ClientIndex > clientIndexToAdjust)
-                        item.ClientIndex--;
-                }
-            }
-
-            //Need to shuffle items around to fit an arrange
-            else
-            {
-                if (clientIndexToAdjust > newIndex)
-                {
-                    foreach (var item in _itemContainer.Values)
-                    {
-                        if (item.ClientIndex == clientIndexToAdjust)
-                            item.ClientIndex = newIndex;
-
-                        else if (item.ClientIndex >= newIndex && item.ClientIndex < clientIndexToAdjust)
-                            item.ClientIndex++;
-                    }
-                }
-
-                else
-                {
-                    foreach (var item in _itemContainer.Values)
-                    {
-                        if (item.ClientIndex == clientIndexToAdjust)
-                            item.ClientIndex = newIndex;
-
-                        else if (item.ClientIndex <= newIndex && item.ClientIndex > clientIndexToAdjust)
-                            item.ClientIndex--;
-                    }
-                }
-            }
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
@@ -25,12 +27,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                     npc.Animation = 0x0e;
 
                     npc.KillTime = 1;
-                    ServerLoot.ServerLootBox(session, npc);
                 }
-
-                
-
-
             }
         }
     }

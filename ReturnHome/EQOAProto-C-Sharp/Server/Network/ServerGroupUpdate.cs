@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ReturnHome.Server.EntityObject.Group;
+using ReturnHome.Server.EntityObject.Grouping;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network

@@ -1,4 +1,4 @@
-using ReturnHome.Server.EntityObject.Player;
+ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
 using System;
@@ -11,6 +11,7 @@ namespace ReturnHome.Server.EntityObject.Actors
     {
         public long killtime = 0;
         public int Tunar = 0;
+        public Corpse corpse;
         public Dictionary<uint, int> aggroTable = new Dictionary<uint, int>();
 
         public Actor() : base(false, 0)
@@ -45,11 +46,13 @@ namespace ReturnHome.Server.EntityObject.Actors
             Legs = (byte)legs;
             Boots = (byte)feet;
             Helm = (byte)head;
-            HPFlag = true;
             CurrentStats.Add(StatModifiers.STA, 300);
+            HPFlag = true;
             Target = 0xFFFFFFFF;
             NPCType = (ushort)npcType;
             ServerID = serverID;
+
+            corpse = new(this);
 
             //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
             //Inventory = new(3000);

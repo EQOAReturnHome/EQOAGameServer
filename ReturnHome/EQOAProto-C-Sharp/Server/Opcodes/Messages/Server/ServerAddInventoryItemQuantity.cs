@@ -12,7 +12,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);
-            item.DumpItem(ref writer);
+            item.DumpItem(ref writer, item.ClientIndex);
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);

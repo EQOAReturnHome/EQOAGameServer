@@ -14,7 +14,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             writer.Write(message.Opcode);
 
-            item.DumpItem(ref writer);
+            item.DumpItem(ref writer, item.ClientIndex);
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);

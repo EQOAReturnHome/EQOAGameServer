@@ -52,8 +52,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write7BitEncodedInt64(session.MyCharacter.Inventory.Count);
             writer.Write(session.MyCharacter.Inventory.Count);
 
-            foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Inventory.itemContainer)
-                entry.Value.DumpItem(ref writer);
+            for(int i = 0; i < session.MyCharacter.Inventory.Count; i++)
+                session.MyCharacter.Inventory.itemContainer[i].item.DumpItem(ref writer, session.MyCharacter.Inventory.itemContainer[i].key);
 
             foreach (WeaponHotbar wb in session.MyCharacter.WeaponHotbars)
                 wb.DumpWeaponHotbar(ref writer);
@@ -61,8 +61,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             //Get Bank Item count
             writer.Write7BitEncodedInt64(session.MyCharacter.Bank.Count);
             writer.Write(session.MyCharacter.Bank.Count);
-            foreach (KeyValuePair<byte, Item> entry in session.MyCharacter.Bank.itemContainer)
-                entry.Value.DumpItem(ref writer);
+            for (int i = 0; i < session.MyCharacter.Bank.Count; i++)
+                session.MyCharacter.Bank.itemContainer[i].item.DumpItem(ref writer, session.MyCharacter.Inventory.itemContainer[i].key);
 
             // end of bank? or could be something else for memory dump
             writer.Write((byte)0);
@@ -84,15 +84,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             //Collect Character Stats
             //DefaultCharacter.DefaultCharacterDict.TryGetValue((session.MyCharacter.EntityRace, session.MyCharacter.EntityClass, session.MyCharacter.EntityHumanType, session.MyCharacter.EntitySex), out Character defaultCharacter);
-            foreach (KeyValuePair<byte, Item> kv in session.MyCharacter.Inventory.itemContainer)
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; i++)
             {
-                if ((sbyte)kv.Value.EquipLocation != -1)
+                if ((sbyte)session.MyCharacter.Inventory.itemContainer[i].item.EquipLocation != -1)
                 {
-                    if (ItemInteraction.EquipItem(session.MyCharacter, kv.Value))
-                        Console.WriteLine($"{session.MyCharacter.CharName} successfully equipped {kv.Value.ItemName}");
+                    if (ItemInteraction.EquipItem(session.MyCharacter, session.MyCharacter.Inventory.itemContainer[i].item, (byte)i))
+                        Console.WriteLine($"{session.MyCharacter.CharName} successfully equipped {session.MyCharacter.Inventory.itemContainer[i].item.ItemName}");
 
                     else
-                        Console.WriteLine($"{session.MyCharacter.CharName} could not equip {kv.Value.ItemName}");
+                        Console.WriteLine($"{session.MyCharacter.CharName} could not equip {session.MyCharacter.Inventory.itemContainer[i].item.ItemName}");
                 }
             }
             //Not entirely known what this is at this time

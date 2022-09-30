@@ -1,11 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Actors;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
@@ -14,18 +10,26 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientLoot
     {
+        public static void ClientOpenLootMenu(Session session, PacketMessage clientPacket)
+        {
+            BufferReader reader = new(clientPacket.Data.Span);
+
+            uint target = reader.Read<uint>();
+
+            if (session.MyCharacter.Target == target)
+                if(EntityManager.QueryForEntity(target, out Entity temp))
+                    ((Actor)temp).corpse.LootCorpse(session);
+        }
 
         public static void ClientLootItem(Session session, PacketMessage clientPacket)
         {
             BufferReader reader = new(clientPacket.Data.Span);
 
-            byte itemSlot = (byte)reader.Read<int>();
+            byte key = (byte)reader.Read<int>();
             int itemQty = reader.Read<int>();
 
-            Console.WriteLine(itemQty);
-
-            ServerLoot.ServerLootItem(session, itemSlot, itemQty);
-
+            if (EntityManager.QueryForEntity(session.MyCharacter.Target, out Entity temp))
+                ((Actor)temp).corpse.LootItems(session, key, itemQty);
         }
 
         public static void ClientLootClose(Session session, PacketMessage clientPacket)

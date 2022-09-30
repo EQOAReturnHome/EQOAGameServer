@@ -212,14 +212,6 @@ namespace ReturnHome.Database.SQL
                       SecondRdr.GetInt32(12),
                       //MaxHP of item 
                       SecondRdr.GetInt32(13),
-                      //Tradeable?
-                      SecondRdr.GetInt32(14),
-                      //Rentable
-                      SecondRdr.GetInt32(15),
-                      //Craft Item
-                      SecondRdr.GetInt32(16),
-                      //Lore item 
-                      SecondRdr.GetInt32(17),
                       //Level requirement 
                       SecondRdr.GetInt32(18),
                       //Max stack of item 
@@ -258,7 +250,8 @@ namespace ReturnHome.Database.SQL
                       //Model
                       SecondRdr.GetInt32(44),
                       //Color
-                      SecondRdr.GetUInt32(45));
+                      SecondRdr.GetUInt32(45),
+                      (SecondRdr.GetInt32(14) == 1 ? ItemFlags.NoTrade : 0) | (SecondRdr.GetInt32(15) == 0 ? ItemFlags.NoRent : 0) | (SecondRdr.GetInt32(16) == 1 ? ItemFlags.Craft : 0) | (SecondRdr.GetInt32(17) == 1 ? ItemFlags.Lore : 0));
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
@@ -310,14 +303,6 @@ namespace ReturnHome.Database.SQL
                       rdr.GetInt32(5),
                       //MaxHP of item 
                       rdr.GetInt32(6),
-                      //Tradeable?
-                      rdr.GetInt32(7),
-                      //Rentable
-                      rdr.GetInt32(8),
-                      //Craft Item
-                      rdr.GetInt32(9),
-                      //Lore item 
-                      rdr.GetInt32(10),
                       //Level requirement 
                       rdr.GetInt32(11),
                       //Max stack of item 
@@ -356,7 +341,8 @@ namespace ReturnHome.Database.SQL
                       //Model
                       rdr.GetInt32(37),
                       //Color
-                      rdr.GetUInt32(38));
+                      rdr.GetUInt32(38),
+                      (rdr.GetInt32(7) == 1 ? ItemFlags.NoTrade : 0) | (rdr.GetInt32(8) == 0 ? ItemFlags.NoRent : 0) | (rdr.GetInt32(9) == 1 ? ItemFlags.Craft : 0) | (rdr.GetInt32(10) == 1 ? ItemFlags.Lore : 0));
 
                 itemPatterns.Add(item);
             }
@@ -527,14 +513,6 @@ namespace ReturnHome.Database.SQL
                   SecondRdr.GetInt32(12),
                   //MaxHP of item 
                   SecondRdr.GetInt32(13),
-                  //Tradeable?
-                  SecondRdr.GetInt32(14),
-                  //Rentable
-                  SecondRdr.GetInt32(15),
-                  //Craft Item
-                  SecondRdr.GetInt32(16),
-                  //Lore item 
-                  SecondRdr.GetInt32(17),
                   //Level requirement 
                   SecondRdr.GetInt32(18),
                   //Max stack of item 
@@ -573,7 +551,8 @@ namespace ReturnHome.Database.SQL
                   //Model
                   SecondRdr.GetInt32(44),
                   //Color
-                  SecondRdr.GetUInt32(45));
+                  SecondRdr.GetUInt32(45),
+                  (SecondRdr.GetInt32(14) == 1 ? ItemFlags.NoTrade : 0) | (SecondRdr.GetInt32(15) == 0 ? ItemFlags.NoRent : 0) | (SecondRdr.GetInt32(16) == 1 ? ItemFlags.Craft : 0) | (SecondRdr.GetInt32(17) == 1 ? ItemFlags.Lore : 0));
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
@@ -756,14 +735,6 @@ namespace ReturnHome.Database.SQL
                       SecondRdr.GetInt32(12),
                       //MaxHP of item 
                       SecondRdr.GetInt32(13),
-                      //Tradeable?
-                      SecondRdr.GetInt32(14),
-                      //Rentable
-                      SecondRdr.GetInt32(15),
-                      //Craft Item
-                      SecondRdr.GetInt32(16),
-                      //Lore item 
-                      SecondRdr.GetInt32(17),
                       //Level requirement 
                       SecondRdr.GetInt32(18),
                       //Max stack of item 
@@ -802,7 +773,8 @@ namespace ReturnHome.Database.SQL
                       //Model
                       SecondRdr.GetInt32(44),
                       //Color
-                      SecondRdr.GetUInt32(45));
+                      SecondRdr.GetUInt32(45),
+                      (rdr.GetInt32(14) == 1 ? ItemFlags.NoTrade : 0) | (rdr.GetInt32(15) == 0 ? ItemFlags.NoRent : 0) | (rdr.GetInt32(16) == 1 ? ItemFlags.Craft : 0) | (rdr.GetInt32(17) == 1 ? ItemFlags.Lore : 0));
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)

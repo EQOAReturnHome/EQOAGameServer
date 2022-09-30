@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using ReturnHome.Server.EntityObject.Group;
+using ReturnHome.Server.EntityObject.Grouping;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;

@@ -33,11 +33,13 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateKillTime() => MemoryMarshal.Write(ObjectUpdate.Span[17..], ref _killTime);
 
-        public void ObjectUpdateHPFlag() => ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)0;
+        public void ObjectUpdateHPFlag() => ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)3;
 
         public void ObjectUpdateHPBar()
         {
             ObjectUpdate.Span[26] = (byte)(255f * CurrentHP / HPMax);
+            if (ObjectUpdate.Span[26] == 0)
+                HPFlag = false;
         }
 
         public void ObjectUpdateModelID() => MemoryMarshal.Write(ObjectUpdate.Span[27..], ref _modelID);
@@ -98,9 +100,9 @@ namespace ReturnHome.Server.EntityObject
             MemoryMarshal.Write(ObjectUpdate.Span[62..], ref temp);
         }
 
-        public void ObjectUpdateUnknown2(ushort temp = 0x0105)
+        public void ObjectUpdateUnknown2(byte temp = 0x01)
         {
-            MemoryMarshal.Write(ObjectUpdate.Span[64..], ref temp);
+            MemoryMarshal.Write(ObjectUpdate.Span[189..], ref temp);
         }
 
         public void ObjectUpdatePrimary() => MemoryMarshal.Write(ObjectUpdate.Span[66..], ref _primary);

@@ -54,6 +54,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.DeclineGroupInvite, ClientGroup.DeclineGroupInvite },
             { GameOpcode.LeaveGroup, ClientGroup.LeaveGroup },
             { GameOpcode.BootGroupMember, ClientGroup.BootGroupMember },
+            { GameOpcode.LootBoxRequest, ClientLoot.ClientOpenLootMenu },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

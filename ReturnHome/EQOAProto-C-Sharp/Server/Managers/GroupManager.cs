@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ReturnHome.Server.EntityObject;
-using ReturnHome.Server.EntityObject.Group;
+using ReturnHome.Server.EntityObject.Grouping;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Chat;

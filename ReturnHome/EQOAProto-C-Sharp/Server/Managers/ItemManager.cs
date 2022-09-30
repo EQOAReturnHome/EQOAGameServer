@@ -28,7 +28,6 @@ namespace ReturnHome.Server.Managers
             Item myItem = itemList.Find(item => item.ItemID == itemID);
             Item newItem = myItem.AcquireItem(qty);
             mySession.MyCharacter.Inventory.AddItem(newItem);
-            ServerAddInventoryItemQuantity.AddInventoryItemQuantity(mySession, newItem);
         }
 
 
@@ -36,10 +35,7 @@ namespace ReturnHome.Server.Managers
         public static void UpdateQuantity(Session mySession, int itemID, int qty)
         {
             if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))
-            {
-                mySession.MyCharacter.Inventory.UpdateQuantity(key, qty, out Item updatedItem);
-                ServerRemoveInventoryItemQuantity.RemoveInventoryItemQuantity(mySession, updatedItem.StackLeft, updatedItem.ClientIndex);
-            }
+                mySession.MyCharacter.Inventory.UpdateQuantity(key, qty);
 
 
 
