@@ -57,13 +57,13 @@ namespace ReturnHome.Server.Network
             float z = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
 
             float Velx = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
-            float Vely = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
+            float Vely = 3.0f * 2 * reader.Read<short>() / 0xffff - 84.5f;
             float Velz = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
 
-            float Velx2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[10..]) / 0xffff - 15.3f;
+            /*float Velx2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[10..]) / 0xffff - 15.3f;
             float Vely2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[12..]) / 0xffff - 15.3f;
             float Velz2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[14..]) / 0xffff - 15.3f;
-
+            */
             //Skip 6 bytes...
             reader.Position += 6;
             byte Facing = reader.Read<byte>();
@@ -84,7 +84,7 @@ namespace ReturnHome.Server.Network
             Mysession.MyCharacter.UpdatePosition(x, y, z);
             Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
-            Mysession.MyCharacter.UpdateVelocity(Velx, 0, Velz);
+            Mysession.MyCharacter.UpdateVelocity(Velx, Vely, Velz);
             //Mysession.MyCharacter.Target = Target;
             Mysession.objectUpdate = true;
 

@@ -89,10 +89,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 if ((sbyte)session.MyCharacter.Inventory.itemContainer[i].item.EquipLocation != -1)
                 {
                     if (ItemInteraction.EquipItem(session.MyCharacter, session.MyCharacter.Inventory.itemContainer[i].item, (byte)i))
-                        Console.WriteLine($"{session.MyCharacter.CharName} successfully equipped {session.MyCharacter.Inventory.itemContainer[i].item.ItemName}");
+                        Console.WriteLine($"{session.MyCharacter.CharName} successfully equipped {session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemName}");
 
                     else
-                        Console.WriteLine($"{session.MyCharacter.CharName} could not equip {session.MyCharacter.Inventory.itemContainer[i].item.ItemName}");
+                        Console.WriteLine($"{session.MyCharacter.CharName} could not equip {session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemName}");
                 }
             }
             //Not entirely known what this is at this time

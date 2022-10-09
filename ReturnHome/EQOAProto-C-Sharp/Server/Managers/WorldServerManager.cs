@@ -3,13 +3,10 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject.Actors;
-using ReturnHome.Server.EntityObject;
-using QuadTrees;
-
 using ReturnHome.Server.Network.Managers;
-using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.Managers
@@ -29,18 +26,22 @@ namespace ReturnHome.Server.Managers
         {
             //Creates NPC List
             CharacterSQL npcList = new();
+            List<ItemPattern> myItemPatterns = npcList.ItemPatterns();
+            npcList.CloseConnection();
+
+            Console.WriteLine("Total Item Pattern's Acquired: " + myItemPatterns.Count);
+
+            Console.WriteLine("Adding Item Patterns...");
+            for (int i = 0; i < myItemPatterns.Count; ++i)
+                ItemManager.AddItem(myItemPatterns[i]);
+
+            npcList = new();
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
-            List<Item> myItemPatterns = npcList.ItemPatterns();
-            Console.WriteLine(myItemPatterns.Count);
             //Closing DB connection
             npcList.CloseConnection();
             MapManager.Initialize();
-            Console.WriteLine("Adding Item Patterns...");
-            foreach(Item myItem in myItemPatterns)
-            {
-                ItemManager.AddItem(myItem);
-            }
+
             Console.WriteLine("Done.");
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");

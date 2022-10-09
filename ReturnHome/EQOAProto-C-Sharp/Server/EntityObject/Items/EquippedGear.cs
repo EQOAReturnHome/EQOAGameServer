@@ -1,8 +1,7 @@
-﻿using ReturnHome.Server.EntityObject.Stats;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
+using ReturnHome.Server.EntityObject.Stats;
 
 namespace ReturnHome.Server.EntityObject.Items
 {
@@ -10,7 +9,7 @@ namespace ReturnHome.Server.EntityObject.Items
     {
         private Entity _entity;
         //Used to translate from Itemslot to EquipSlot
-        private readonly static Dictionary<ItemSlot, EquipSlot> ItemSlotToEquipSlots = new Dictionary<ItemSlot, EquipSlot>()
+        private readonly static Dictionary<ItemSlot, EquipSlot> ItemSlotToEquipSlots = new()
         {
             { ItemSlot.NotEquipped, EquipSlot.NotEquipped },
             { ItemSlot.Hand, EquipSlot.Hand },
@@ -51,7 +50,7 @@ namespace ReturnHome.Server.EntityObject.Items
         public void Add(Item item)
         {
             //Find appropriate slot
-            EquipSlot equipSlot = ItemSlotToEquipSlots[item.itemSlot];
+            EquipSlot equipSlot = ItemSlotToEquipSlots[item.Pattern.itemSlot];
 
             //Add To Dictionary/Equip item
             EquipItem(equipSlot, item);
@@ -69,8 +68,8 @@ namespace ReturnHome.Server.EntityObject.Items
         {
             try
             {
-                foreach (KeyValuePair<StatModifiers, int> s in item.Stats)
-                    _entity.CurrentStats.Add(s.Key, s.Value);
+                for( int i = 0; i < item.Pattern.Stats.Length; ++i)
+                    _entity.CurrentStats.Add((StatModifiers)i, item.Pattern.Stats[i]);
             }
 
             catch
@@ -85,8 +84,8 @@ namespace ReturnHome.Server.EntityObject.Items
         {
             try
             {
-                foreach (KeyValuePair<StatModifiers, int> s in item.Stats)
-                    _entity.CurrentStats.Remove(s.Key, s.Value);
+                for (int i = 0; i < item.Pattern.Stats.Length; ++i)
+                    _entity.CurrentStats.Remove((StatModifiers)i, item.Pattern.Stats[i]);
             }
 
             catch
@@ -207,8 +206,8 @@ namespace ReturnHome.Server.EntityObject.Items
                         Remove(_equippedItems[equipSlot]);
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Robe = item.Model;
-                    _entity.RobeColor = item.Color;
+                    _entity.Robe = item.Pattern.Model;
+                    _entity.RobeColor = item.Pattern.Color;
                     break;
 
                 case EquipSlot.Head:
@@ -216,8 +215,8 @@ namespace ReturnHome.Server.EntityObject.Items
                         Remove(_equippedItems[equipSlot]);
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Helm = (byte)item.Model;
-                    _entity.HelmColor = item.Color;
+                    _entity.Helm = (byte)item.Pattern.Model;
+                    _entity.HelmColor = item.Pattern.Color;
                     break;
 
                 case EquipSlot.Chest:
@@ -225,8 +224,8 @@ namespace ReturnHome.Server.EntityObject.Items
                         Remove(_equippedItems[equipSlot]);
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.ChestColor = item.Color;
-                    _entity.Chest = (byte)item.Model;
+                    _entity.ChestColor = item.Pattern.Color;
+                    _entity.Chest = (byte)item.Pattern.Model;
                     break;
 
                 case EquipSlot.Bracers:
@@ -245,8 +244,8 @@ namespace ReturnHome.Server.EntityObject.Items
 
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Bracer = (byte)item.Model;
-                    _entity.BracerColor = item.Color;
+                    _entity.Bracer = (byte)item.Pattern.Model;
+                    _entity.BracerColor = item.Pattern.Color;
                     break;
 
                 //If bracers are equipped, remove them and stats, first bracelet is always right, left always changes.
@@ -281,8 +280,8 @@ namespace ReturnHome.Server.EntityObject.Items
                         Remove(_equippedItems[equipSlot]);
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Gloves = (byte)item.Model;
-                    _entity.GloveColor = item.Color;
+                    _entity.Gloves = (byte)item.Pattern.Model;
+                    _entity.GloveColor = item.Pattern.Color;
                     break;
 
                 case EquipSlot.Leg:
@@ -290,8 +289,8 @@ namespace ReturnHome.Server.EntityObject.Items
                         Remove(_equippedItems[equipSlot]);
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.LegColor = item.Color;
-                    _entity.Legs = (byte)item.Model;
+                    _entity.LegColor = item.Pattern.Color;
+                    _entity.Legs = (byte)item.Pattern.Model;
                     break;
 
                 case EquipSlot.Feet:
@@ -299,8 +298,8 @@ namespace ReturnHome.Server.EntityObject.Items
                         Remove(_equippedItems[equipSlot]);
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Boots = (byte)item.Model;
-                    _entity.BootsColor = item.Color;
+                    _entity.Boots = (byte)item.Pattern.Model;
+                    _entity.BootsColor = item.Pattern.Color;
                     break;
 
                 case EquipSlot.RightRing:
@@ -391,7 +390,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Primary = item.Model;
+                    _entity.Primary = item.Pattern.Model;
                     break;
 
                 //If a primary is equipped, secondary is always in secondary
@@ -415,7 +414,7 @@ namespace ReturnHome.Server.EntityObject.Items
                     {
                         _equippedItems[EquipSlot.Primary] = item;
                         item.EquipLocation = EquipSlot.Primary;
-                        _entity.Primary = item.Model;
+                        _entity.Primary = item.Pattern.Model;
                     }
 
                     else
@@ -443,7 +442,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
                         _equippedItems[equipSlot] = item;
                         item.EquipLocation = equipSlot;
-                        _entity.Secondary = item.Model;
+                        _entity.Secondary = item.Pattern.Model;
                     }
                     break;
 
@@ -485,7 +484,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
                     item.EquipLocation = equipSlot;
                     _equippedItems[equipSlot] = item;
-                    _entity.Shield = item.Model;
+                    _entity.Shield = item.Pattern.Model;
                     break;
 
                 case EquipSlot.Held:
@@ -508,7 +507,7 @@ namespace ReturnHome.Server.EntityObject.Items
                     {
                         _equippedItems[EquipSlot.Held] = item;
                         item.EquipLocation = EquipSlot.Held;
-                        _entity.Primary = item.Model;
+                        _entity.Primary = item.Pattern.Model;
                     }
 
                     else
@@ -536,7 +535,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
                         _equippedItems[EquipSlot.Held2] = item;
                         item.EquipLocation = EquipSlot.Held2;
-                        _entity.Secondary = item.Model;
+                        _entity.Secondary = item.Pattern.Model;
                     }
                     break;
 
@@ -593,7 +592,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
                     _equippedItems[equipSlot] = item;
                     item.EquipLocation = equipSlot;
-                    _entity.Primary = item.Model;
+                    _entity.Primary = item.Pattern.Model;
                     break;
             }
         }

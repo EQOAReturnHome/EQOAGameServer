@@ -201,9 +201,7 @@ namespace ReturnHome.Server.Network
 
             ///Trigger Server Select with this?
             else if ((connectionData.lastReceivedMessageSequence == 0x02) && (clientID == (_session.InstanceID & 0xFFFF)))
-            {
                 ServerListManager.AddSession(_session);
-            }
         }
 
 

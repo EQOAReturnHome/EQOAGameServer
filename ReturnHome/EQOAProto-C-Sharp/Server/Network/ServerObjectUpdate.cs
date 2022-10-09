@@ -138,6 +138,7 @@ namespace ReturnHome.Server.Network
             //xor base against this message
             CoordinateConversions.Xor_data(_baseXOR, tempMemory, 0xC9);
 
+            //Logger.Log(entity.CharName, _baseXOR);
             //Clear Dictionary
             _currentXORResults.Clear();
 

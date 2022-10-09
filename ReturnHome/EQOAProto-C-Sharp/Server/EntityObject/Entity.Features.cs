@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
-using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject
@@ -452,7 +449,7 @@ namespace ReturnHome.Server.EntityObject
             for (int i = 0; i < character.Inventory.Count; ++i)
             {
                 Item item = character.Inventory.itemContainer[i].item;
-                if ((sbyte)item.itemSlot == -1)
+                if ((sbyte)item.EquipLocation == -1)
                     return;
 
                 ///Use a switch to sift through item and add them properly
@@ -460,49 +457,49 @@ namespace ReturnHome.Server.EntityObject
                 {
                     ///Helm
                     case 0:
-                        Helm = (byte)item.Model;
-                        HelmColor = item.Color;
+                        Helm = (byte)item.Pattern.Model;
+                        HelmColor = item.Pattern.Color;
                         break;
 
                     ///Robe
                     case 21:
-                        Robe = (byte)item.Model;
-                        RobeColor = item.Color;
+                        Robe = (byte)item.Pattern.Model;
+                        RobeColor = item.Pattern.Color;
                         break;
 
                     ///Gloves
                     case 1:
-                        Gloves = (byte)item.Model;
-                        GloveColor = item.Color;
+                        Gloves = (byte)item.Pattern.Model;
+                        GloveColor = item.Pattern.Color;
                         break;
 
                     ///Chest
                     case 5:
-                        Chest = (byte)item.Model;
-                        ChestColor = item.Color;
+                        Chest = (byte)item.Pattern.Model;
+                        ChestColor = item.Pattern.Color;
                         break;
 
                     ///Bracers
                     case 8:
-                        Bracer = (byte)item.Model;
-                        BracerColor = item.Color;
+                        Bracer = (byte)item.Pattern.Model;
+                        BracerColor = item.Pattern.Color;
                         break;
 
                     ///Legs
                     case 12:
-                        Legs = (byte)item.Model;
-                        LegColor = item.Color;
+                        Legs = (byte)item.Pattern.Model;
+                        LegColor = item.Pattern.Color;
                         break;
 
                     ///Feet
                     case 13:
-                        Boots = (byte)item.Model;
-                        BootsColor = item.Color;
+                        Boots = (byte)item.Pattern.Model;
+                        BootsColor = item.Pattern.Color;
                         break;
 
                     ///Primary
                     case 14:
-                        Primary = item.Model;
+                        Primary = item.Pattern.Model;
                         break;
 
                     ///Secondary
@@ -511,29 +508,29 @@ namespace ReturnHome.Server.EntityObject
                         ///If we have a secondary equipped already, puts next secondary into primary slot
                         if (Secondary > 0)
                         {
-                            Primary = item.Model;
+                            Primary = item.Pattern.Model;
                         }
 
                         ///If no secondary, add to secondary slot
                         else
                         {
-                            Secondary = item.Model;
+                            Secondary = item.Pattern.Model;
                         }
                         break;
 
                     ///2 Hand
                     case 16:
-                        Primary = item.Model;
+                        Primary = item.Pattern.Model;
                         break;
 
                     ///Shield
                     case 17:
-                        Shield = item.Model;
+                        Shield = item.Pattern.Model;
                         break;
 
                     ///Bow
                     case 18:
-                        Primary = item.Model;
+                        Primary = item.Pattern.Model;
                         break;
 
                     ///Held
@@ -542,13 +539,13 @@ namespace ReturnHome.Server.EntityObject
                         ///If we have a secondary equipped already, puts next secondary into primary slot
                         if (Secondary > 0)
                         {
-                            Primary = item.Model;
+                            Primary = item.Pattern.Model;
                         }
 
                         ///If no secondary, add to secondary slot
                         else
                         {
-                            Secondary = item.Model;
+                            Secondary = item.Pattern.Model;
                         }
                         break;
 

@@ -51,7 +51,6 @@ function event_say()
                 "Ilenar Crelwin: Ah yes. The sweet taste of revenge. These moments must be savored, you know. They wont come often enough.",
                 "Ilenar Crelwin: You have pleased me for now. I will let Kellina know of my satisfaction.",
                 "Ilenar Crelwin: I will have more work for you after I've sorted a few things out, so check back with me later. For your reward, take this powerful scroll.",
-                "Ilenar Crelwin: Travel north along the river until you reach Bobble-by-Water. Find Delwin Stitchfinger, and have him repair the robe. Make haste and return to me.",
                 "You have finished a quest!",
                 "You have received Lava Wind."
             }

@@ -38,6 +38,7 @@ namespace ReturnHome.Server.EntityObject
         public void ObjectUpdateHPBar()
         {
             ObjectUpdate.Span[26] = (byte)(255f * CurrentHP / HPMax);
+            HPFlag = true;
             if (ObjectUpdate.Span[26] == 0)
                 HPFlag = false;
         }
@@ -50,31 +51,27 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVelocityX()
         {
-            /*
             sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
             if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
             if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);*/
+            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);
         }
 
         public void ObjectUpdateVelocityY()
         {
-            /*
-            //Don't need to adjust Y, for now
             sbyte svy = (sbyte)Math.Round(VelocityY * _speedAdjust);
             if (svy > 127) { Console.WriteLine("WARNING: svx=" + svy); svy = 127; }
             if (svy < -128) { Console.WriteLine("WARNING: svx=" + svy); svy = -128; }
             MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svy);
-            */
+            
         }
 
         public void ObjectUpdateVelocityZ()
         {
-            /*
             sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
             if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
             if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);*/
+            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);
         }
 
         public void ObjectUpdateEastWest() => ObjectUpdate.Span[44] = EastToWest;
