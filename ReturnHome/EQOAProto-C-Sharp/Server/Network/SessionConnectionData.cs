@@ -66,6 +66,8 @@ namespace ReturnHome.Server.Network
             clientStatUpdate = new(_session, (byte)MessageType.StatUpdate);
             serverGroupUpdate = new(_session, (byte)MessageType.GroupUpdate);
             serverObjects = new Memory<ServerObjectUpdate>(new ServerObjectUpdate[0x17]);
+
+            //TODO: Prioritize channels for group member's and pet's, 3 group member's and a pet max possible
             Span<ServerObjectUpdate> tempSpan = serverObjects.Span;
 
             for (int i = 0; i < tempSpan.Length; i++)

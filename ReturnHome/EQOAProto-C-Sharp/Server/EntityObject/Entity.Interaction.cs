@@ -144,9 +144,6 @@ namespace ReturnHome.Server.EntityObject
                     {
                         Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
 
-                        //Adjust player tunar
-                        ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
-
                         Item newItem = item.AcquireItem(itemQty);
 
                         Inventory.AddItem(newItem);
@@ -517,24 +514,9 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public static void AddTunar(Session session, int tunar)
-        {
+        public static void AddTunar(Session session, int tunar) => session.MyCharacter.Inventory.AddTunar(tunar);
 
-            int currentTunar = session.MyCharacter.Inventory.GetTunar();
-            int newTunar = currentTunar += tunar;
-            session.MyCharacter.Inventory.AddTunar(tunar);
-            ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
-
-        }
-
-        public static void RemoveTunar(Session session, int tunar)
-        {
-            int currentTunar = session.MyCharacter.Inventory.GetTunar();
-            int newTunar = currentTunar -= tunar;
-            session.MyCharacter.Inventory.RemoveTunar(tunar);
-            ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
-
-        }
+        public static void RemoveTunar(Session session, int tunar) => session.MyCharacter.Inventory.RemoveTunar(tunar);
 
         //Handles turning NPC to player when they interact.
         public void TurnToPlayer(int serverID)

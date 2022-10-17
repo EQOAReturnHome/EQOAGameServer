@@ -28,8 +28,7 @@ namespace ReturnHome.Server.EntityObject.Grouping
                 c.GroupID = GroupID;
             }
 
-            foreach (Character c in charList)
-                ServerGroup.CreateGroup(c.characterSession, this);
+            UpdatePlayerList();
         }
 
         public bool AddMember(Entity e)
@@ -39,8 +38,8 @@ namespace ReturnHome.Server.EntityObject.Grouping
                 charList.Add(e);
                 ((Character)e).characterSession.rdpCommIn.connectionData.serverGroupUpdate.AddObject(this);
                 ((Character)e).GroupID = GroupID;
-                foreach (Character c in charList)
-                    ServerGroup.CreateGroup(c.characterSession, this);
+                UpdatePlayerList();
+
                 return true;
             }
             return false;

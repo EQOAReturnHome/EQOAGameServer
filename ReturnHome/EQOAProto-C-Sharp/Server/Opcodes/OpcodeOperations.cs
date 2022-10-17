@@ -55,6 +55,8 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.LeaveGroup, ClientGroup.LeaveGroup },
             { GameOpcode.BootGroupMember, ClientGroup.BootGroupMember },
             { GameOpcode.LootBoxRequest, ClientLoot.ClientOpenLootMenu },
+            { GameOpcode.LootMessages, ClientOptions.ClientMessageOptions },
+            { GameOpcode.FactionMessages, ClientOptions.ClientMessageOptions },
         };
 
         public static void ProcessOpcodes(Session MySession, PacketMessage message)

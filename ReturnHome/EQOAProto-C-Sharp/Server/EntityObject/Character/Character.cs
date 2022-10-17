@@ -11,6 +11,12 @@ namespace ReturnHome.Server.EntityObject.Player
 {
     public partial class Character : Entity
     {
+        //default to true, only opcode reading from client should be writing here.
+        public bool LootMessages = true;
+        public bool DamageNumberMessages = true;
+        public bool FactionMessages = true;
+
+
         public int CMCounter = 1;
         public int CMPercentage = 0;
         public int SpentCMs = 0;

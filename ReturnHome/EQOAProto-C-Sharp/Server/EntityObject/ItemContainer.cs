@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.EntityObject
@@ -18,7 +19,16 @@ namespace ReturnHome.Server.EntityObject
 
         private byte type = 0;
 
-        public int Tunar => _tunar;
+        public int Tunar
+        {
+            get { return _tunar; }
+            private set
+            {
+                _tunar = value;
+                if (_e.isPlayer)
+                    ServerUpdateTunar.UpdateTunar(((Character)_e).characterSession, Inventory ? GameOpcode.PlayerTunar : GameOpcode.DepositBankTunar, _tunar);
+            }
+        }
 
         public int Count => _itemContainer.Count;
 
@@ -39,8 +49,6 @@ namespace ReturnHome.Server.EntityObject
         public void AddTunar(int tunar) => _tunar += tunar;
 
         public void RemoveTunar(int tunar) => _tunar -= tunar;
-
-        public int GetTunar() => _tunar;
 
         public bool Exists(byte key)
         {

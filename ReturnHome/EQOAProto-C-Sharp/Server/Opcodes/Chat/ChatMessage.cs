@@ -19,6 +19,9 @@ namespace ReturnHome.Server.Opcodes.Chat
             int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[0..]);
             string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[4..(4 + messageLength * 2)]);
 
+            if (messageLength == 0)
+                return;
+
             //Admin command of sorts, possibly temporary
             if (message[0] == '!')
                 ProcessCommands(MySession, message);

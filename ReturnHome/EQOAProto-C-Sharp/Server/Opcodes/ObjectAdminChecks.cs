@@ -1,5 +1,4 @@
-﻿using System;
-using ReturnHome.Server.EntityObject;
+﻿using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -120,19 +119,19 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                     case "vy":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.VelocityY = float.Parse(changes[2]);
+                        c.VelocityY = ushort.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
                     case "vx":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.VelocityX = float.Parse(changes[2]);
+                        c.VelocityX = ushort.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
                     case "vz":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.VelocityZ = float.Parse(changes[2]);
+                        c.VelocityZ = ushort.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 

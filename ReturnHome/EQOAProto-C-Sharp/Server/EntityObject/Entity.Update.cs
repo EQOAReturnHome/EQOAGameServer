@@ -7,7 +7,7 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-        private static float _speedAdjust = 6.25f;
+        private static float _speedAdjust = 6.4f;
 
         public void ObjectUpdateObjectID() => MemoryMarshal.Write(ObjectUpdate.Span[0..], ref _objectID);
 
@@ -51,27 +51,24 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVelocityX()
         {
-            sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
-            if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
-            if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);
+            ushort svx = VelocityX;
+            MemoryMarshal.Write(ObjectUpdate.Span[39..], ref svx);
         }
 
         public void ObjectUpdateVelocityY()
         {
+            /*
             sbyte svy = (sbyte)Math.Round(VelocityY * _speedAdjust);
             if (svy > 127) { Console.WriteLine("WARNING: svx=" + svy); svy = 127; }
             if (svy < -128) { Console.WriteLine("WARNING: svx=" + svy); svy = -128; }
             MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svy);
-            
+            */
         }
 
         public void ObjectUpdateVelocityZ()
         {
-            sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
-            if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
-            if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);
+            ushort svz = VelocityZ;
+            MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svz);
         }
 
         public void ObjectUpdateEastWest() => ObjectUpdate.Span[44] = EastToWest;
