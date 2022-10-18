@@ -106,7 +106,7 @@ namespace ReturnHome.Server.EntityObject.Actors
                 }
             }
 
-            AttackPlayer(damage, playerID);
+            //AttackPlayer(damage, playerID);
 
         }
     }

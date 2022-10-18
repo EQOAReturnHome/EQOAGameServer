@@ -6,6 +6,7 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Utilities;
+using System;
 
 namespace ReturnHome.Server.Managers
 {
@@ -79,6 +80,41 @@ namespace ReturnHome.Server.Managers
                 mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
                 callFunction.Call();
             }
+        }
+
+        public static string GetMerchantDialogue(Session session, Entity npc)
+        {
+            string myString = " ";
+            //Strip white spaces from NPC name and replace with Underscores
+            string npcNameSearch = npc.CharName.Replace(" ", "_");
+            //Find Lua script recursively through scripts directory by zone
+            //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
+            string[] file = Directory.GetFiles("../../../Scripts", npcNameSearch + ".lua", SearchOption.AllDirectories);
+            //TODO: work around for a npc with no scripts etc? Investigate more eventually
+            if (file.Length < 1 || file == null) {
+                Console.Write(myString);
+                return myString;
+            }
+
+            //Create new lua object
+            Lua lua = new Lua();
+            //load lua CLR library 
+            lua.LoadCLRPackage();
+            lua.DoFile(file[0]);
+
+            myString = (string)lua["merchantDialogue"];
+
+            if(String.IsNullOrEmpty(myString))
+            {
+                myString = " ";
+            }
+
+            if (myString != null)
+            {
+                myString = myString.Replace("playerName", session.MyCharacter.CharName);
+            }
+
+            return myString;
         }
     }
 }

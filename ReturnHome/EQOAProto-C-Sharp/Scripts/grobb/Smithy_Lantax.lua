@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "If you nimble enough"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "If you nimble enough, you can use my spears and daggers. Very fun to use against slimy Froglok."

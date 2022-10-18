@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "Dees drinks not only keep your power up all night long"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "Dees drinks not only keep your power up all night long, dey taste best because ub my special herb. Don't ask what it is..."

@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "Troll attack from far away"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "Troll attack from far away, need bow and arrow. Keelgud have dem for you."

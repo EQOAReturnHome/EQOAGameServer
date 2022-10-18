@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "If troll tinks stabbing frogloks is best"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "If troll tinks stabbing frogloks is best, troll buys my spears and daggers. You look here!"

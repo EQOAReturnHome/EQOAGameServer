@@ -16,6 +16,7 @@ using NLua;
 using ReturnHome.Server.EntityObject.Items;
 using System.Collections.Concurrent;
 using ReturnHome.Server.EntityObject.Actors;
+using System.Text.RegularExpressions;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -173,6 +174,18 @@ namespace ReturnHome.Server.EntityObject
             {
                 return;
             }
+            else if (dialogue.Length > 217)
+            {
+                string splitRegex = @"(?<=[.?!]\s)";
+                string[] newDialogue = Regex.Split(dialogue, splitRegex);
+                foreach (string s in newDialogue)
+                {
+                    Console.WriteLine("New Sentence\n" + s);
+                    SendDialogue(session, s, diagOptions);
+                }
+                return;
+
+            }
             //Clear player's previous dialogue options before adding new ones.
             session.MyCharacter.MyDialogue.diagOptions.Clear();
 
@@ -217,6 +230,10 @@ namespace ReturnHome.Server.EntityObject
 
             //set player dialogue to the incoming dialogue
             session.MyCharacter.MyDialogue.dialogue = dialogue;
+
+            if (dialogue.Length > 217)
+            {
+            }
             //create variable memory span for sending out dialogue
             Message message = Message.Create(MessageType.ReliableMessage, dialogueType);
             BufferWriter writer = new BufferWriter(message.Span);
@@ -439,7 +456,7 @@ namespace ReturnHome.Server.EntityObject
         //Not the most efficent, but works..
         public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
-            for(int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
                 if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID)
                     if (session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
                         return true;

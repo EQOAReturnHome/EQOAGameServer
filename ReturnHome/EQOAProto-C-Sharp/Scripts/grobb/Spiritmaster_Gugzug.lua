@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Gugzug bind you here now"
+    npcDialogue = "Gugzug bind playerName here now, ok?"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

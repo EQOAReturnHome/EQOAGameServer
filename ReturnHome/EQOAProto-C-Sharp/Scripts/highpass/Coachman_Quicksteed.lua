@@ -7,7 +7,7 @@ local playerCoaches = {
 }
 local coaches = require('Scripts/ports')
 local ch = tostring(choice)
-SetPlayerFlags(mySession, "admin", true)
+SetPlayerFlags(mySession, "admin", "true")
 function event_say()
    local dialogueOptions = {}
    if(GetPlayerFlags(mySession, "highpass_coach")) then
@@ -48,7 +48,6 @@ function event_say()
          coaches.rivervale.facing
          )
          elseif (ch:find("Darvar")) then
-         SendDialogue(mySession, npcDialogue, dialogueOptions)
          TeleportPlayer(
          mySession,
          GetWorld(coaches.darvar_manor.world),
@@ -69,7 +68,7 @@ function event_say()
    else
    if (ch:find("Yes")) then
       npcDialogue = "Excellent, you can now use this coach any time."
-      SetPlayerFlags(mySession, "highpass_coach", true)
+      SetPlayerFlags(mySession, "highpass_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
 
    elseif (ch:find("No")) then

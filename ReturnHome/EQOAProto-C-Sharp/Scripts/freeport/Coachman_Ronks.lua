@@ -7,6 +7,7 @@ local playerCoaches = {
     tea_garden_coach = "Get me a horse to Muniel's Tea Garden.",
     neriak_coach = "Get me a horse to the dark city of Neriak."
 }
+SetPlayerFlags(mySession, "admin", "true")
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
