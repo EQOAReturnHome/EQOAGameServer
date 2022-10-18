@@ -51,21 +51,16 @@ namespace ReturnHome.Server.EntityObject.Player
 
 
             if (session.MyCharacter.activeQuests.Count > 0)
-            {
                 newQuest.questIndex = session.MyCharacter.activeQuests.Count;
-            }
+
             else
-            {
                 newQuest.questIndex = 0;
-            }
 
             Console.WriteLine($"New quest created: \n Quest ID: {questID} \n Quest Text: {questText}" +
     $"\n Quest Index: {newQuest.questIndex} \n Quest Step: {newQuest.questStep}");
 
             foreach (Quest quest in session.MyCharacter.activeQuests)
-            {
                 Console.WriteLine($"{quest.questID} has quest index {quest.questIndex}");
-            }
 
             //convert to logger
             Console.WriteLine($"Quest {questID}, step {newQuest.questStep} started by {session.MyCharacter.CharName}");
@@ -85,13 +80,10 @@ namespace ReturnHome.Server.EntityObject.Player
             ServerDeleteQuest.DeleteQuest(session, quest.questIndex);
 
             if (session.MyCharacter.activeQuests.Count > 0)
-            {
                 quest.questIndex = session.MyCharacter.activeQuests.Count + 1;
-            }
+
             else
-            {
                 quest.questIndex = 0;
-            }
 
             //convert to logger
             Console.WriteLine($"Quest {questID}, step {quest.questStep} started by {session.MyCharacter.CharName}");
@@ -123,13 +115,12 @@ namespace ReturnHome.Server.EntityObject.Player
             int questIndex = 0;
 
             for (int i = 0; i < session.MyCharacter.activeQuests.Count; i++)
-            {
                 if (session.MyCharacter.activeQuests[i].questID == questID)
                 {
                     thisQuest = session.MyCharacter.activeQuests[i];
                     questIndex = i;
                 }
-            }
+
             thisQuest = session.MyCharacter.activeQuests.Find(i => Equals(i.questID, questID));
 
             if (thisQuest != null)
@@ -139,9 +130,7 @@ namespace ReturnHome.Server.EntityObject.Player
                 session.MyCharacter.SetPlayerFlag(session, questID.ToString(), "99");
                 session.MyCharacter.SetPlayerFlag(session, (++questID).ToString(), "0");
                 if (questXP > 0)
-                {
                     Entity.GrantXP(session, questXP);
-                }
 
                 ServerDeleteQuest.DeleteQuest(session, questIndex);
 
@@ -159,13 +148,11 @@ namespace ReturnHome.Server.EntityObject.Player
             newQuest.log = questText;
 
             if (session.MyCharacter.activeQuests.Count > 0)
-            {
                 newQuest.questIndex = session.MyCharacter.activeQuests.Count + 1;
-            }
+
             else
-            {
                 newQuest.questIndex = 0;
-            }
+
             //convert to logger
             Console.WriteLine($"Quest {questID} started by {session.MyCharacter.CharName}");
             session.MyCharacter.activeQuests.Add(newQuest);

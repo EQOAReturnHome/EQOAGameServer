@@ -11,7 +11,7 @@ namespace ReturnHome.Server.EntityObject.Items
         {
             if (e.isPlayer)
             {
-                if ((((item.Classuse >> (byte)e.EntityClass) & 1) == 1) && (((item.Raceuse >> (byte)e.EntityRace) & 1) == 1) && e.Level >= item.Levelreq)
+                if ((((item.Pattern.Classuse >> (byte)e.EntityClass) & 1) == 1) && (((item.Pattern.Raceuse >> (byte)e.EntityRace) & 1) == 1) && e.Level >= item.Pattern.Levelreq)
                 {
                     e.equippedGear.Add(item);
                     if (e.isPlayer)
@@ -48,11 +48,11 @@ namespace ReturnHome.Server.EntityObject.Items
             e.Inventory.TryRetrieveItem((byte)key, out Item item, out byte index);
 
             //unequip item if true
-            if (item.EquipLocation != EquipSlot.NotEquipped && item.itemSlot != ItemSlot.NotEquipped)
+            if (item.EquipLocation != EquipSlot.NotEquipped && item.Pattern.itemSlot != ItemSlot.NotEquipped)
                 UnequipItem(e, item);
 
             //Equip the item if true
-            else if (item.EquipLocation == EquipSlot.NotEquipped && item.itemSlot != ItemSlot.NotEquipped)
+            else if (item.EquipLocation == EquipSlot.NotEquipped && item.Pattern.itemSlot != ItemSlot.NotEquipped)
                 EquipItem(e, item, index);
 
             //If we are then interacting with an item that is not equipable, must be a consumable item?

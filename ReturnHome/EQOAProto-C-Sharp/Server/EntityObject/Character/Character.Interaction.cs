@@ -15,9 +15,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public void AddItem(Item itemToBeAdded)
         {
             if (Inventory.AddItem(itemToBeAdded))
-            {
-                Console.WriteLine($"{itemToBeAdded.ItemName} added.");
-            }
+                Console.WriteLine($"{itemToBeAdded.Pattern.ItemName} added.");
         }
 
         //Method for withdrawing and depositing bank tunar
@@ -50,8 +48,6 @@ namespace ReturnHome.Server.EntityObject.Player
                 //Add To inventory
                 Inventory.AddTunar(transferAmount);
             }
-            ServerUpdateBankTunar.UpdateBankTunar(characterSession, Bank.Tunar);
-            ServerUpdatePlayerTunar.UpdatePlayerTunar(characterSession, Inventory.Tunar);
         }
 
         public void TransferItem(byte giveOrTake, byte itemToTransfer, int qtyToTransfer)
@@ -90,9 +86,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
                 Inventory.UpdateQuantity(itemSlot, itemQty);
                 //TODO: Flawed Tunar logic? Seem to be getting less then we spent back
-                Inventory.AddTunar((int)(item.Maxhp == 0 ? item.ItemCost * itemQty : item.ItemCost * (item.RemainingHP / item.Maxhp) * itemQty));
-
-                ServerUpdatePlayerTunar.UpdatePlayerTunar(characterSession, Inventory.Tunar);
+                Inventory.AddTunar((int)(item.Pattern.Maxhp == 0 ? item.Pattern.ItemCost * itemQty : item.Pattern.ItemCost * (item.RemainingHP / item.Pattern.Maxhp) * itemQty));
             }
         }
     }

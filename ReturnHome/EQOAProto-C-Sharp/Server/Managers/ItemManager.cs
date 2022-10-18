@@ -1,37 +1,28 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
-using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Managers
 {
     public static class ItemManager
     {
 
-        private static readonly List<Item> itemList = new();
+        private static readonly ConcurrentDictionary<int, ItemPattern> itemList = new();
 
-        public static void AddItem(Item item)
-        {
-            itemList.Add(item);
-        }
+        public static void AddItem(ItemPattern item) => itemList.TryAdd(item.ItemID, item);
 
         public static void GrantItem(Session mySession, int itemID, int qty)
         {
-            Item myItem = itemList.Find(item => item.ItemID == itemID);
-            Item newItem = myItem.AcquireItem(qty);
+            ItemPattern itemPattern = itemList[itemID];
+            Item newItem = new(qty, itemPattern.Maxhp ,0, (int)EquipSlot.NotEquipped, 0, 0, itemPattern);
             mySession.MyCharacter.Inventory.AddItem(newItem);
         }
 
+        public static ItemPattern GetItemPattern(int itemID) => itemList[itemID];
 
         //Really should be called remove quantity
+        //What is this?
         public static void UpdateQuantity(Session mySession, int itemID, int qty)
         {
             if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))

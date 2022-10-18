@@ -18,9 +18,9 @@ namespace ReturnHome.Server.EntityObject
         public float y;
         public float z;
         public Map map;
-        private float _velocityX = 0.0f;
-        private float _velocityY = 0.0f;
-        private float _velocityZ = 0.0f;
+        private ushort _velocityX = 0;
+        private ushort _velocityY = 0;
+        private ushort _velocityZ = 0;
 
         //Set position to waypoint after initial position is set, should waypoint be assigned by the client update? Seems logical
         public Vector3 waypoint;
@@ -64,7 +64,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public float VelocityX
+        public ushort VelocityX
         {
             get { return _velocityX; }
             set
@@ -77,7 +77,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public float VelocityY
+        public ushort VelocityY
         {
             get { return _velocityY; }
             set
@@ -90,7 +90,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public float VelocityZ
+        public ushort VelocityZ
         {
             get { return _velocityZ; }
             set
@@ -281,7 +281,7 @@ namespace ReturnHome.Server.EntityObject
         }
         */
 
-        public void UpdateVelocity(float velocityX, float velocityY, float velocityZ)
+        public void UpdateVelocity(ushort velocityX, ushort velocityY, ushort velocityZ)
         {
             VelocityX = velocityX;
             VelocityY = velocityY;

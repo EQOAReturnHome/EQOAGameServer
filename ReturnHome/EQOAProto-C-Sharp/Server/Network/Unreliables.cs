@@ -56,14 +56,11 @@ namespace ReturnHome.Server.Network
             float y = CoordinateConversions.ConvertYToFloat(reader.ReadUint24());
             float z = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
 
-            float Velx = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
-            float Vely = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
-            float Velz = 15.3f * 2 * reader.Read<short>() / 0xffff - 15.3f;
-
-            float Velx2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[10..]) / 0xffff - 15.3f;
-            float Vely2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[12..]) / 0xffff - 15.3f;
-            float Velz2 = 15.3f * 2 * BinaryPrimitives.ReadInt16BigEndian(vs[14..]) / 0xffff - 15.3f;
-
+            //TODO: Figure out how these value's translate into the values for client updates to show proper movement distribution
+            ushort Velx = (ushort)(reader.Read<ushort>() ^ 0x80);
+            ushort Vely = reader.Read<ushort>();
+            ushort Velz = (ushort)(reader.Read<ushort>() ^ 0x80);
+            
             //Skip 6 bytes...
             reader.Position += 6;
             byte Facing = reader.Read<byte>();
@@ -84,7 +81,7 @@ namespace ReturnHome.Server.Network
             Mysession.MyCharacter.UpdatePosition(x, y, z);
             Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
-            Mysession.MyCharacter.UpdateVelocity(Velx, 0, Velz);
+            Mysession.MyCharacter.UpdateVelocity(Velx, Vely, Velz);
             //Mysession.MyCharacter.Target = Target;
             Mysession.objectUpdate = true;
 

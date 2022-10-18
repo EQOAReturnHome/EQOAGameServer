@@ -30,7 +30,7 @@ namespace ReturnHome.Utilities
 
             ///Writes lists into logs for us
             writer.Write($"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")} :");
-            for(int i = 0; i < logMessage.Length; i++)
+            for (int i = 0; i < logMessage.Length; i++)
             {
                 writer.Write($" {logMessage[i].ToString("X")}");
             }
@@ -43,8 +43,8 @@ namespace ReturnHome.Utilities
         {
             ///Writes lists into logs for us
             writer.Write($"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")} :");
-            for( int i = 0; i < logMessage.Count(); i++)
-            { 
+            for (int i = 0; i < logMessage.Count(); i++)
+            {
                 writer.Write($" {logMessage[i].ToString("X")}");
             }
 
@@ -79,6 +79,15 @@ namespace ReturnHome.Utilities
             }
 
             errwriter.WriteLine($"{DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss.fff tt")} : {errMessage}");
+        }
+
+        public static void Log(string name, Memory<byte> temp)
+        {
+            using (StreamWriter objectwriter = new("C:\\Users\\devin\\source\\repos\\EQOAGameServer\\ReturnHome\\EQOAProto-C-Sharp\\bin\\Debug\\net6.0\\object.log", true))
+            {
+                objectwriter.WriteLine($"{name}: " + BitConverter.ToString(temp.Span.ToArray()));
+                objectwriter.Close();
+            }
         }
     }
 }

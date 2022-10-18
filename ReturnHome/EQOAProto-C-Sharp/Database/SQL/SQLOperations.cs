@@ -12,6 +12,7 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Database.SQL
 {
@@ -199,65 +200,11 @@ namespace ReturnHome.Database.SQL
                       //Location in inventory
                       SecondRdr.GetByte(6),
                       //ItemID
-                      SecondRdr.GetInt32(7),
-                      //Item cost 
-                      SecondRdr.GetUInt32(8),
-                      //ItemIcon
-                      SecondRdr.GetInt32(9),
-                      //Itempattern equipslot
-                      SecondRdr.GetInt32(10),
-                      //Attack Type 
-                      SecondRdr.GetInt32(11),
-                      //WeaponDamage
-                      SecondRdr.GetInt32(12),
-                      //MaxHP of item 
-                      SecondRdr.GetInt32(13),
-                      //Level requirement 
-                      SecondRdr.GetInt32(18),
-                      //Max stack of item 
-                      SecondRdr.GetInt32(19),
-                      //ItemName
-                      SecondRdr.GetString(20),
-                      //Item Description
-                      SecondRdr.GetString(21),
-                      //Duration
-                      SecondRdr.GetInt32(22),
-                      //useable classes
-                      SecondRdr.GetInt32(23),
-                      //useable races
-                      SecondRdr.GetInt32(24),
-                      //Proc Animation
-                      SecondRdr.GetInt32(25),
-                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                                                                   },
-                      //Model
-                      SecondRdr.GetInt32(44),
-                      //Color
-                      SecondRdr.GetUInt32(45),
-                      (SecondRdr.GetInt32(14) == 1 ? ItemFlags.NoTrade : 0) | (SecondRdr.GetInt32(15) == 0 ? ItemFlags.NoRent : 0) | (SecondRdr.GetInt32(16) == 1 ? ItemFlags.Craft : 0) | (SecondRdr.GetInt32(17) == 1 ? ItemFlags.Lore : 0));
+                      ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
-                    {
                         thisActor.Inventory.AddItem(ThisItem);
-                    }
                 }
             }
 
@@ -266,9 +213,9 @@ namespace ReturnHome.Database.SQL
             return npcData;
         }
 
-        public List<Item> ItemPatterns()
+        public List<ItemPattern> ItemPatterns()
         {
-            List<Item> itemPatterns = new();
+            List<ItemPattern> itemPatterns = new();
 
             using var cmd = new MySqlCommand("GetItemPatterns", con);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -276,19 +223,7 @@ namespace ReturnHome.Database.SQL
 
             while (rdr.Read())
             {
-                Item item = new Item(
-                    //StackLeft
-                    1,
-                    //RemainingHP
-                    rdr.GetInt32(6),
-                    //Charges
-                    0,
-                    //Equipment Location
-                    -1,
-                    //Location(inventory/bank)
-                    1,
-                    //InventoryNumber
-                    0,
+                ItemPattern item = new(
                       //ItemID
                       rdr.GetInt32(0),
                       //Item cost 
@@ -319,25 +254,9 @@ namespace ReturnHome.Database.SQL
                       rdr.GetInt32(17),
                       //Proc Animation
                       rdr.GetInt32(18),
-                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, rdr.GetInt32(19)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, rdr.GetInt32(20)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, rdr.GetInt32(21)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, rdr.GetInt32(22)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, rdr.GetInt32(23)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, rdr.GetInt32(24)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, rdr.GetInt32(25)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, rdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, rdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, rdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, rdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, rdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, rdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, rdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, rdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, rdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, rdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, rdr.GetInt32(36))
-                                                                   },
+                      new int[28] { rdr.GetInt32(19), rdr.GetInt32(20), rdr.GetInt32(21), rdr.GetInt32(22), rdr.GetInt32(23), rdr.GetInt32(24), rdr.GetInt32(25),
+                                    0, rdr.GetInt32(26), 0, rdr.GetInt32(27), 0, rdr.GetInt32(28),  rdr.GetInt32(29), rdr.GetInt32(30), 0, 0, 0, 0, 0, 0, 0,
+                                    rdr.GetInt32(31),  rdr.GetInt32(32), rdr.GetInt32(33), rdr.GetInt32(34), rdr.GetInt32(35), rdr.GetInt32(36) },
                       //Model
                       rdr.GetInt32(37),
                       //Color
@@ -500,78 +419,21 @@ namespace ReturnHome.Database.SQL
                   //Location in inventory
                   SecondRdr.GetByte(6),
                   //ItemID
-                  SecondRdr.GetInt32(7),
-                  //Item cost 
-                  SecondRdr.GetUInt32(8),
-                  //ItemIcon
-                  SecondRdr.GetInt32(9),
-                  //Itempattern equipslot
-                  SecondRdr.GetInt32(10),
-                  //Attack Type 
-                  SecondRdr.GetInt32(11),
-                  //WeaponDamage
-                  SecondRdr.GetInt32(12),
-                  //MaxHP of item 
-                  SecondRdr.GetInt32(13),
-                  //Level requirement 
-                  SecondRdr.GetInt32(18),
-                  //Max stack of item 
-                  SecondRdr.GetInt32(19),
-                  //ItemName
-                  SecondRdr.GetString(20),
-                  //Item Description
-                  SecondRdr.GetString(21),
-                  //Duration
-                  SecondRdr.GetInt32(22),
-                  //useable classes
-                  SecondRdr.GetInt32(23),
-                  //useable races
-                  SecondRdr.GetInt32(24),
-                  //Proc Animation
-                  SecondRdr.GetInt32(25),
-                  new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                  },
-                  //Model
-                  SecondRdr.GetInt32(44),
-                  //Color
-                  SecondRdr.GetUInt32(45),
-                  (SecondRdr.GetInt32(14) == 1 ? ItemFlags.NoTrade : 0) | (SecondRdr.GetInt32(15) == 0 ? ItemFlags.NoRent : 0) | (SecondRdr.GetInt32(16) == 1 ? ItemFlags.Craft : 0) | (SecondRdr.GetInt32(17) == 1 ? ItemFlags.Lore : 0));
+                  ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
                 if (ThisItem.Location == 1)
-                {
                     thisChar.Inventory.AddItem(ThisItem);
-                }
 
 
                 //If this is 2, it needs to go to the Bank
                 else if (ThisItem.Location == 2)
-                {
                     thisChar.Bank.AddItem(ThisItem);
-                }
+
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
                 else if (ThisItem.Location == 4)
-                {
                     thisChar.AuctionItems.Add(ThisItem);
-                }
             }
 
             SecondRdr.Close();
@@ -722,59 +584,7 @@ namespace ReturnHome.Database.SQL
                       //Location in inventory
                       SecondRdr.GetByte(6),
                       //ItemID
-                      SecondRdr.GetInt32(7),
-                      //Item cost 
-                      SecondRdr.GetUInt32(8),
-                      //ItemIcon
-                      SecondRdr.GetInt32(9),
-                      //Itempattern equipslot
-                      SecondRdr.GetInt32(10),
-                      //Attack Type 
-                      SecondRdr.GetInt32(11),
-                      //WeaponDamage
-                      SecondRdr.GetInt32(12),
-                      //MaxHP of item 
-                      SecondRdr.GetInt32(13),
-                      //Level requirement 
-                      SecondRdr.GetInt32(18),
-                      //Max stack of item 
-                      SecondRdr.GetInt32(19),
-                      //ItemName
-                      SecondRdr.GetString(20),
-                      //Item Description
-                      SecondRdr.GetString(21),
-                      //Duration
-                      SecondRdr.GetInt32(22),
-                      //useable classes
-                      SecondRdr.GetInt32(23),
-                      //useable races
-                      SecondRdr.GetInt32(24),
-                      //Proc Animation
-                      SecondRdr.GetInt32(25),
-                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                      },
-                      //Model
-                      SecondRdr.GetInt32(44),
-                      //Color
-                      SecondRdr.GetUInt32(45),
-                      (rdr.GetInt32(14) == 1 ? ItemFlags.NoTrade : 0) | (rdr.GetInt32(15) == 0 ? ItemFlags.NoRent : 0) | (rdr.GetInt32(16) == 1 ? ItemFlags.Craft : 0) | (rdr.GetInt32(17) == 1 ? ItemFlags.Lore : 0));
+                      ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)

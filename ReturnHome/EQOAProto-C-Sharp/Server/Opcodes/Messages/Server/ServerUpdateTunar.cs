@@ -3,11 +3,11 @@ using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
-    public static class ServerUpdatePlayerTunar
+    public static class ServerUpdateTunar
     {
-		public static void UpdatePlayerTunar(Session session, int tunar)
+		public static void UpdateTunar(Session session, GameOpcode OpcodeType, int tunar)
         {
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.PlayerTunar);
+            Message message = Message.Create(MessageType.ReliableMessage, OpcodeType);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);

@@ -83,9 +83,9 @@
 
 
         //From client
-        ClientSayChat = 0x000B, //11 - Normal say message from client
+        ClientSayChat = 0xB, //11 - Normal say message from client
         ClientShout = 0x0C01, //3073 - Shout message from client
-        ChangeChatMode = 0x000E, //14 - Client requests change to "permanant" chat mode
+        ChangeChatMode = 0xE, //14 - Client requests change to "permanant" chat mode
         Authenticate = 0x0904, ///2308
         Authenticate2 = 0x01, ///1
         Interact = 0x04, //4
@@ -114,6 +114,9 @@
         ClientCloseLoot = 0x0016,
         ClientLoot = 0x0019,
         LootBoxRequest  = 0x15,
+        LootMessages = 0xCA, //0 = on, 1 = off
+        FactionMessages = 0xC9, //0 = on, 1 = off
+        CharacterInWorld = 0x14,
     }
 
     public static class GameVersions

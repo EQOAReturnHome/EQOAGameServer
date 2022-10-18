@@ -1,4 +1,6 @@
-﻿namespace ReturnHome.Server.EntityObject.Grouping
+﻿using ReturnHome.Server.Opcodes.Messages.Server;
+
+namespace ReturnHome.Server.EntityObject.Grouping
 {
     public struct GroupInvite
     {

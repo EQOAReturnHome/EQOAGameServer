@@ -138,15 +138,12 @@ namespace ReturnHome.Server.EntityObject
 
                 if (npc.Inventory.TryRetrieveItem(itemSlot, out Item item, out byte index))
                 {
-                    if (Inventory.Tunar < item.ItemCost)
+                    if (Inventory.Tunar < item.Pattern.ItemCost)
                         ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
 
                     else
                     {
-                        Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
-
-                        //Adjust player tunar
-                        ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
+                        Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
 
                         Item newItem = item.AcquireItem(itemQty);
 
@@ -456,8 +453,8 @@ namespace ReturnHome.Server.EntityObject
         //Not the most efficent, but works..
         public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
-            for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
-                if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID)
+            for(int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID)
                     if (session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
                         return true;
             return false;
@@ -470,7 +467,7 @@ namespace ReturnHome.Server.EntityObject
             key = 0;
 
             for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
-                if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID)
                 {
                     item = session.MyCharacter.Inventory.itemContainer[i].item;
                     key = session.MyCharacter.Inventory.itemContainer[i].key;
@@ -484,7 +481,7 @@ namespace ReturnHome.Server.EntityObject
         public static bool RemoveQuestItemFromPlayerInventory(Session session, int itemID, int itemQty)
         {
             for (byte i = 0; i < session.MyCharacter.Inventory.Count; i++)
-                if (session.MyCharacter.Inventory.itemContainer[i].item.ItemID == itemID && session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID && session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
                 {
                     session.MyCharacter.Inventory.UpdateQuantity(session.MyCharacter.Inventory.itemContainer[i].key, itemQty);
                     return true;
@@ -534,24 +531,9 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public static void AddTunar(Session session, int tunar)
-        {
+        public static void AddTunar(Session session, int tunar) => session.MyCharacter.Inventory.AddTunar(tunar);
 
-            int currentTunar = session.MyCharacter.Inventory.GetTunar();
-            int newTunar = currentTunar += tunar;
-            session.MyCharacter.Inventory.AddTunar(tunar);
-            ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
-
-        }
-
-        public static void RemoveTunar(Session session, int tunar)
-        {
-            int currentTunar = session.MyCharacter.Inventory.GetTunar();
-            int newTunar = currentTunar -= tunar;
-            session.MyCharacter.Inventory.RemoveTunar(tunar);
-            ServerUpdatePlayerTunar.UpdatePlayerTunar(session, currentTunar);
-
-        }
+        public static void RemoveTunar(Session session, int tunar) => session.MyCharacter.Inventory.RemoveTunar(tunar);
 
         //Handles turning NPC to player when they interact.
         public void TurnToPlayer(int serverID)
