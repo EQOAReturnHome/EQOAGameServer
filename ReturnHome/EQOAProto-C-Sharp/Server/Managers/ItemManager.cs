@@ -7,22 +7,22 @@ namespace ReturnHome.Server.Managers
 {
     public static class ItemManager
     {
-
+        //TODO: Add a field to our Item Pattern class to hold a... "standard" quatity for item's? So merchant consumable's would come in qwuantities of 3?
         private static readonly ConcurrentDictionary<int, ItemPattern> itemList = new();
 
         public static void AddItem(ItemPattern item) => itemList.TryAdd(item.ItemID, item);
 
         public static void GrantItem(Session mySession, int itemID, int qty)
         {
-            ItemPattern itemPattern = itemList[itemID];
-            Item newItem = new(qty, itemPattern.Maxhp ,0, (int)EquipSlot.NotEquipped, 0, 0, itemPattern);
+            Item newItem = CreateItem(itemID, qty);
             mySession.MyCharacter.Inventory.AddItem(newItem);
         }
+
+        public static Item CreateItem(int itemID, int qty) => new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, 1, 0, itemList[itemID]);
 
         public static ItemPattern GetItemPattern(int itemID) => itemList[itemID];
 
         //Really should be called remove quantity
-        //What is this?
         public static void UpdateQuantity(Session mySession, int itemID, int qty)
         {
             if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))
