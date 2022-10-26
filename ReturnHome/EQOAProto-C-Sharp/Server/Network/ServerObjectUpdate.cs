@@ -102,10 +102,10 @@ namespace ReturnHome.Server.Network
                 }
 
                 //See if character and current message has changed
-                if (!CompareObjects(_baseXOR.Slice(1, 0xC8), entity.ObjectUpdate))
+                if (!_baseXOR.Slice(1, 0xC8).Span.SequenceEqual(entity.ObjectUpdate.Span))
                 {
                     Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-                    temp.Span[0] = _isActive & (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
+                    temp.Span[0] = _isActive && (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                     CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, _baseXOR.Slice(1, 0xC8), 0xC8);
                     _currentXORResults.Add(MessageCounter, temp);
                     _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
@@ -144,24 +144,6 @@ namespace ReturnHome.Server.Network
 
             //Ensure this is new base
             BaseMessageCounter = msgCounter;
-        }
-
-        private static bool CompareObjects(Memory<byte> first, Memory<byte> second)
-        {
-            if (first.Length != second.Length)
-                return false;
-
-            Span<byte> firstTemp = first.Span;
-            Span<byte> secondTemp = second.Span;
-
-            for (int i = 0; i < first.Length; i++)
-            {
-                if (firstTemp[i] == secondTemp[i])
-                    continue;
-                else
-                    return false;
-            }
-            return true;
         }
     }
 }
