@@ -9,10 +9,9 @@ local playerCoaches = {
 }
 
 local ch = tostring(choice)
-SetPlayerFlags(mySession, "admin", "true")
 function event_say()
    dialogueOptions = {}
-   if(GetPlayerFlags(mySession, "bobble_by_water_coach")) then
+   if(GetPlayerFlags(mySession, "bobble_by_water_coach") == "true") then
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
@@ -55,7 +54,7 @@ function event_say()
 
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "bobble_by_water_coach", true)
+         SetPlayerFlags(mySession, "bobble_by_water_coach", "true")
                SendDialogue(mySession, npcDialogue, dialogueOptions)
 
       elseif (ch:find("No")) then

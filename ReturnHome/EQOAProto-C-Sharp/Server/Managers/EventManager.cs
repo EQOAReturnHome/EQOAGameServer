@@ -7,6 +7,9 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Utilities;
 using System;
+using System.Text.Json;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace ReturnHome.Server.Managers
 {
@@ -14,14 +17,32 @@ namespace ReturnHome.Server.Managers
     {
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
+            if (mySession.MyCharacter.activeQuests != null)
+            {
+                //var opt = new JsonSerializerOptions() {  WriteIndented = true };
+                string testJson = JsonSerializer.Serialize<List<Quest>>(mySession.MyCharacter.activeQuests);
+                Console.WriteLine(testJson);
+            }
+
+            string[] file;
+            EntityManager.QueryForEntity(mySession.MyCharacter.Target, out Entity targetNPC);
             //Strip white spaces from NPC name and replace with Underscores
             mySession.MyCharacter.MyDialogue.npcName = mySession.MyCharacter.MyDialogue.npcName.Replace(" ", "_");
             //Find Lua script recursively through scripts directory by zone
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
-            string[] file = Directory.GetFiles("../../../Scripts", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+            if (targetNPC != null && FileExistsRecursive("../../../Scripts", mySession.MyCharacter.MyDialogue.npcName + "_" + targetNPC.ServerID + ".lua"))
+            {
+                file = Directory.GetFiles("../../../Scripts", mySession.MyCharacter.MyDialogue.npcName + "_" + targetNPC.ServerID + ".lua", SearchOption.AllDirectories);
+
+            }
+            else
+            {
+                file = Directory.GetFiles("../../../Scripts", mySession.MyCharacter.MyDialogue.npcName + ".lua", SearchOption.AllDirectories);
+                if (file.Length < 1 || file == null)
+                    return;
+            }
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
-            if (file.Length < 1 || file == null)
-                return;
+
 
             //Create new lua object
             Lua lua = new Lua();
@@ -91,7 +112,8 @@ namespace ReturnHome.Server.Managers
             //May rewrite later if this proves slow. Probably needs exception catching in case it doesn't find it
             string[] file = Directory.GetFiles("../../../Scripts", npcNameSearch + ".lua", SearchOption.AllDirectories);
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
-            if (file.Length < 1 || file == null) {
+            if (file.Length < 1 || file == null)
+            {
                 Console.Write(myString);
                 return myString;
             }
@@ -104,7 +126,7 @@ namespace ReturnHome.Server.Managers
 
             myString = (string)lua["merchantDialogue"];
 
-            if(String.IsNullOrEmpty(myString))
+            if (String.IsNullOrEmpty(myString))
             {
                 myString = " ";
             }
@@ -115,6 +137,20 @@ namespace ReturnHome.Server.Managers
             }
 
             return myString;
+        }
+
+        public static bool FileExistsRecursive(string rootPath, string filename)
+        {
+            if (File.Exists(Path.Combine(rootPath, filename)))
+                return true;
+
+            foreach (string subDir in Directory.GetDirectories(rootPath))
+            {
+                if (FileExistsRecursive(subDir, filename))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

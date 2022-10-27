@@ -177,7 +177,6 @@ namespace ReturnHome.Server.EntityObject
                 string[] newDialogue = Regex.Split(dialogue, splitRegex);
                 foreach (string s in newDialogue)
                 {
-                    Console.WriteLine("New Sentence\n" + s);
                     SendDialogue(session, s, diagOptions);
                 }
                 return;
@@ -193,7 +192,6 @@ namespace ReturnHome.Server.EntityObject
             {
                 foreach (KeyValuePair<object, object> k in diagOptions)
                     session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
-
                 //If it's not a yes/no choice then sort alphabetically.
                 //This forces it to return choices the same every time.
                 if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
@@ -212,8 +210,9 @@ namespace ReturnHome.Server.EntityObject
             {
                 choiceCounter = (uint)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //Length of choices
-                foreach (string choice in session.MyCharacter.MyDialogue.diagOptions)
+                foreach (string choice in session.MyCharacter.MyDialogue.diagOptions) { 
                     choicesLength += (uint)choice.Length;
+                    }
 
                 //count the number of textOptions
                 textOptions = (byte)session.MyCharacter.MyDialogue.diagOptions.Count;
@@ -228,9 +227,6 @@ namespace ReturnHome.Server.EntityObject
             //set player dialogue to the incoming dialogue
             session.MyCharacter.MyDialogue.dialogue = dialogue;
 
-            if (dialogue.Length > 217)
-            {
-            }
             //create variable memory span for sending out dialogue
             Message message = Message.Create(MessageType.ReliableMessage, dialogueType);
             BufferWriter writer = new BufferWriter(message.Span);

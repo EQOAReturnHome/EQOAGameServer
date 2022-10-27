@@ -49,7 +49,7 @@ namespace ReturnHome.Database.SQL
             }
         }
 
-        public void SavePlayerData(Character player, string playerFlags)
+        public void SavePlayerData(Character player)
         {
             //Create new sql connection calling stored proc to update data
             using var SecondCmd = new MySqlCommand("UpdatePlayerData", con);
@@ -90,7 +90,11 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newLightningr", player.LightningResist);
             SecondCmd.Parameters.AddWithValue("newArcaner", player.ArcaneResist);
             SecondCmd.Parameters.AddWithValue("newFishing", player.Fishing);
-            SecondCmd.Parameters.AddWithValue("playerFlags", playerFlags);
+            SecondCmd.Parameters.AddWithValue("playerFlags", (string)JsonSerializer.Serialize(player.playerFlags));
+            SecondCmd.Parameters.AddWithValue("completedQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.completedQuests));
+            SecondCmd.Parameters.AddWithValue("activeQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.activeQuests));
+
+
 
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
@@ -294,10 +298,10 @@ namespace ReturnHome.Database.SQL
                 //Instantiate character object
                 Character newCharacter = new Character
                 (
-                    //charName 1
-                    rdr.GetString(0),
-                    //serverid 2
-                    rdr.GetInt32(1),
+                    //serverid 1
+                    rdr.GetString(1),
+                    //charName 2
+                    rdr.GetInt32(0),
                     //modelid 3
                     rdr.GetInt32(2),
                     //tclass 4
@@ -379,8 +383,13 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(41),
                     //flags 41
                     rdr.GetString(42),
+                    //activeQuests
+                    rdr.GetString(43),
+                    //completedQuests
+                    rdr.GetString(44),
                     //58
                     session);
+
 
 
                 //Add character attribute data to charaterData List
@@ -458,15 +467,15 @@ namespace ReturnHome.Database.SQL
             //Read through results from query populating character data needed for character select
             while (rdr.Read())
             {
-                if (rdr.GetInt32(1) == serverID)
+                if (rdr.GetInt32(0) == serverID)
                 {
                     //Instantiate character object
                     selectedCharacter = new Character
                     (
                         //charName 1
-                        rdr.GetString(0),
+                        rdr.GetString(1),
                         //serverid 2
-                        rdr.GetInt32(1),
+                        rdr.GetInt32(0),
                         //modelid 3
                         rdr.GetInt32(2),
                         //tclass 4
@@ -549,6 +558,10 @@ namespace ReturnHome.Database.SQL
                         rdr.GetInt32(41),
                         //flags 41
                         rdr.GetString(42),
+                        //activeQuests
+                        rdr.GetString(43),
+                        //completedQuests
+                        rdr.GetString(44),
                         //58
                         session);
                     break;
@@ -831,7 +844,8 @@ namespace ReturnHome.Database.SQL
         {
             charCreation.playerFlags = new Dictionary<string, string>()
 {
-{ "NewPlayerIntro", "0" }
+{ "NewPlayerIntro", "0" },
+                {"admin", "true" }
 };
             string serializedPlayerFlags = (string)JsonSerializer.Serialize(charCreation.playerFlags);
 

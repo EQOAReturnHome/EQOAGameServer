@@ -14,12 +14,12 @@ namespace ReturnHome.Server.EntityObject.Player
 {
     public class Quest
     {
-        public int questID;
-        public int questNPCID;
-        public int questIndex;
-        public string log;
-        public int questStep;
-        public int questXP;
+        public int questID { get; set; }
+        public int questNPCID { get; set; }
+        public int questIndex { get; set; }
+        public string log { get; set; }
+        public int questStep { get; set; }
+        public int questXP { get; set; }
 
         public Quest()
         {
@@ -47,24 +47,22 @@ namespace ReturnHome.Server.EntityObject.Player
             newQuest.questStep = 1;
             newQuest.log = questText;
 
-
-
-
             if (session.MyCharacter.activeQuests.Count > 0)
                 newQuest.questIndex = session.MyCharacter.activeQuests.Count;
 
             else
                 newQuest.questIndex = 0;
 
-            Console.WriteLine($"New quest created: \n Quest ID: {questID} \n Quest Text: {questText}" +
-    $"\n Quest Index: {newQuest.questIndex} \n Quest Step: {newQuest.questStep}");
+            //Console.WriteLine($"New quest created: \n Quest ID: {questID} \n Quest Text: {questText}" +
+    //$"\n Quest Index: {newQuest.questIndex} \n Quest Step: {newQuest.questStep}");
 
-            foreach (Quest quest in session.MyCharacter.activeQuests)
-                Console.WriteLine($"{quest.questID} has quest index {quest.questIndex}");
+
 
             //convert to logger
-            Console.WriteLine($"Quest {questID}, step {newQuest.questStep} started by {session.MyCharacter.CharName}");
+            Logger.Info(($"Quest {questID}, step {newQuest.questStep} started by {session.MyCharacter.CharName}"));
             session.MyCharacter.activeQuests.Add(newQuest);
+            foreach (Quest quest in session.MyCharacter.activeQuests)
+                Console.WriteLine($"{quest.questID} has quest index {quest.questIndex}");
             session.MyCharacter.SetPlayerFlag(session, questID.ToString(), newQuest.questStep.ToString());
             ServerAddQuestLog.AddQuestLog(session, (uint)newQuest.questIndex, newQuest.log);
         }

@@ -12,7 +12,7 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-   if(GetPlayerFlags(mySession, "darvar_manor_coach")) then
+   if(GetPlayerFlags(mySession, "darvar_manor_coach") == "true") then
       if (ch:find("Forkwatch")) then
          TeleportPlayer(mySession,GetWorld(coaches.forkwatch.world),coaches.forkwatch.x,coaches.forkwatch.y,coaches.forkwatch.z,coaches.forkwatch.facing)
       elseif (ch:find("Highpass")) then
@@ -33,7 +33,7 @@ function event_say()
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "darvar_manor_coach", true)
+         SetPlayerFlags(mySession, "darvar_manor_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."

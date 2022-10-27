@@ -12,8 +12,7 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "qeynos_coach")) then
+   if(GetPlayerFlags(mySession, "qeynos_coach") == "true") then
       if (ch:find("Highbourne")) then
          TeleportPlayer(mySession,GetWorld(coaches.highbourne.world),coaches.highbourne.x,coaches.highbourne.y,coaches.highbourne.z,coaches.highbourne.facing)
       elseif (ch:find("Wyndhaven")) then
@@ -21,7 +20,7 @@ SetPlayerFlags(mySession, "admin", true)
       elseif (ch:find("Forkwatch")) then
          TeleportPlayer(mySession,GetWorld(coaches.forkwatch.world),coaches.forkwatch.x,coaches.forkwatch.y,coaches.forkwatch.z,coaches.forkwatch.facing)
       elseif (ch:find("Surefall")) then
-        TeleportPlayer(mySession,GetWorld(coaches.surefall.world),coaches.surefall.x,coaches.surefall.y,coaches.surefall.z,coaches.surefall.facing)
+        TeleportPlayer(mySession,GetWorld(coaches.surefall_glade.world),coaches.surefall_glade.x,coaches.surefall_glade.y,coaches.surefall_glade.z,coaches.surefall_glade.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
@@ -34,7 +33,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "qeynos_coach", true)
+         SetPlayerFlags(mySession, "qeynos_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."

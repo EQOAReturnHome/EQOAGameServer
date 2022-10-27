@@ -13,7 +13,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             CharacterSQL savePlayerData = new();
 
             //Call the mysql update query to save player data
-            savePlayerData.SavePlayerData(session.MyCharacter, (string)JsonSerializer.Serialize(session.MyCharacter.playerFlags));
+            savePlayerData.SavePlayerData(session.MyCharacter);
             //Actually drop the player's session
             session.DropSession();
         }

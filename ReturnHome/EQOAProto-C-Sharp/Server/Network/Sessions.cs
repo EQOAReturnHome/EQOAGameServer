@@ -7,6 +7,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network
 {
@@ -94,7 +95,8 @@ namespace ReturnHome.Server.Network
         //TODO Put this somewhere else
         public void TargetUpdate()
         {
-            string message = $"Targeting ObjectID: {MyCharacter.Target}";
+            EntityManager.QueryForEntity(MyCharacter.Target, out Entity targetNPC);
+            string message = $"Targeting Object with ServerID: {targetNPC.ServerID}";
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 

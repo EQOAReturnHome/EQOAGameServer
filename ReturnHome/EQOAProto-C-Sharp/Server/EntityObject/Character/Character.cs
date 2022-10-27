@@ -115,7 +115,7 @@ namespace ReturnHome.Server.EntityObject.Player
         //Need instantiation, but needs some review because it's so big... 
         public Character(string charName, int serverID, int modelID, int tClass, int race, int humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int sex, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
                          float speed, int world, float xCoord, float yCoord, float zCoord, float facing, int tpStrength, int tpStamina, int tpAgility, int tpDexterity, int tpWisdom, int tpIntelligence, int tpCharisma, int currentHP, int currentPower, int aC,
-                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, string playerFlags, Session MySession) : base(true, level)
+                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, string playerFlags, string completedQuests, string activeQuests, Session MySession) : base(true, level)
         {
             Speed = speed;
             //playerFlags.Add("Eastern", true);
@@ -204,6 +204,16 @@ namespace ReturnHome.Server.EntityObject.Player
             if (playerFlags != null)
             {
                 this.playerFlags = JsonSerializer.Deserialize<Dictionary<string, string>>(playerFlags);
+            }
+
+            if(completedQuests != null)
+            {
+                this.completedQuests = JsonSerializer.Deserialize<List<Quest>>(completedQuests);
+            }
+
+            if(activeQuests != null)
+            {
+                this.activeQuests = JsonSerializer.Deserialize<List<Quest>>(activeQuests);
             }
             //CurrentPower2 = currentPower2;
             //BasePower = basePower;
