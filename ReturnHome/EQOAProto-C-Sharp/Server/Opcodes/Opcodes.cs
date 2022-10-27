@@ -80,6 +80,7 @@
         ServerDisbandGroup = 0x062F,
         Loot = 0x0018, //24
         LootOptions = 0x85, //1 Corpse being looted by another player 2 entity not lootable 3 Corpse belongs to another player/group
+        CharacterDied = 0x5E,
 
 
         //From client

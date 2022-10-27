@@ -68,7 +68,7 @@ namespace ReturnHome.Server.Network
         public void GenerateUpdate()
         {
             //See if character and current message has changed
-            if (!CompareObjects(_baseXOR, _session.MyCharacter.StatUpdate))
+            if (!_baseXOR.Span.SequenceEqual(_session.MyCharacter.StatUpdate.Span))
             {
                 Memory<byte> temp = new Memory<byte>(new byte[0xEC]);
                 CoordinateConversions.Xor_data(temp, _session.MyCharacter.StatUpdate, _baseXOR, 0xEC);
@@ -94,24 +94,6 @@ namespace ReturnHome.Server.Network
 
             //Ensure this is new base
             BaseMessageCounter = msgCounter;
-        }
-
-        private static bool CompareObjects(Memory<byte> first, Memory<byte> second)
-        {
-            if (first.Length != second.Length)
-                return false;
-
-            Span<byte> firstTemp = first.Span;
-            Span<byte> secondTemp = second.Span;
-
-            for (int i = 0; i < first.Length; i++)
-            {
-                if (firstTemp[i] == secondTemp[i])
-                    continue;
-                else
-                    return false;
-            }
-            return true;
         }
     }
 }

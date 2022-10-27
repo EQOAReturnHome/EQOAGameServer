@@ -110,7 +110,7 @@ namespace ReturnHome.Utilities
         /// <param name="count" />
         public void WriteSize(int size)
         {
-            if(size > 255)
+            if(size >= 255)
             {
                 Write((byte)0xFF);
                 Write((ushort)size);

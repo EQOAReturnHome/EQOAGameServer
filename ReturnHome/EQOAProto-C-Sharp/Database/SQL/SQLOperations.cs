@@ -190,21 +190,7 @@ namespace ReturnHome.Database.SQL
                     if (thisActor.Inventory == null)
                         thisActor.Inventory = new(0, thisActor);
 
-                    Item ThisItem = new Item(
-                      //Stacksleft
-                      SecondRdr.GetInt32(1),
-                      //RemainingHP
-                      SecondRdr.GetInt32(2),
-                      //Charges
-                      SecondRdr.GetInt32(3),
-                      //Equipment Location
-                      SecondRdr.GetInt32(4),
-                      //Location (Bank, self, auction etc)
-                      SecondRdr.GetByte(5),
-                      //Location in inventory
-                      SecondRdr.GetByte(6),
-                      //ItemID
-                      ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
+                    Item ThisItem = ItemManager.CreateItem(SecondRdr.GetInt32(7), SecondRdr.GetInt32(1));
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)

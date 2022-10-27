@@ -1,8 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Threading.Tasks;
 using ReturnHome.Server.EntityObject;
-using ReturnHome.Server.EntityObject.Actors;
-using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -16,6 +13,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
         {
             BufferReader reader = new(ClientPacket.Data.Span);
             uint targetID = reader.Read<uint>();
+
+            
             if (EntityManager.QueryForEntity(targetID, out Entity npc))
             {
                 npc.TakeDamage((uint)session.MyCharacter.ServerID, 500);

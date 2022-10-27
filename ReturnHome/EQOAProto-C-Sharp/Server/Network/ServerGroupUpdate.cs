@@ -102,7 +102,7 @@ namespace ReturnHome.Server.Network
                 }
 
                 //See if character and current message has changed
-                if (!CompareObjects(_baseXOR, _session.MyCharacter.GroupUpdate))
+                if (!_baseXOR.Span.SequenceEqual(_session.MyCharacter.GroupUpdate.Span))
                 {
                     Memory<byte> temp = new Memory<byte>(new byte[0x27]);
                     CoordinateConversions.Xor_data(temp, _session.MyCharacter.GroupUpdate, _baseXOR, 0x27);
