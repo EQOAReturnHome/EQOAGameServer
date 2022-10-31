@@ -55,6 +55,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             Logger.Info(($"Quest {questID}, step {newQuest.questStep} started by {session.MyCharacter.CharName}"));
             session.MyCharacter.activeQuests.Add(newQuest);
+
             session.MyCharacter.SetPlayerFlag(session, questID.ToString(), newQuest.questStep.ToString());
             ServerAddQuestLog.AddQuestLog(session, (uint)newQuest.questIndex, newQuest.log);
         }
@@ -87,8 +88,12 @@ namespace ReturnHome.Server.EntityObject.Player
             if (thisQuest != null)
             {
                 Logger.Info($"Quest with questIndex {thisQuest.questIndex} deleted for player {session.MyCharacter.CharName}.");
-                session.MyCharacter.completedQuests.Add(thisQuest);
+                if (session.MyCharacter.playerFlags.ContainsKey(thisQuest.questID.ToString()))
+                {
+                    session.MyCharacter.playerFlags[thisQuest.questID.ToString()] = "0";
+                }
                 session.MyCharacter.activeQuests.Remove(thisQuest);
+
             }
 
             ServerDeleteQuest.DeleteQuest(session, questIndex);

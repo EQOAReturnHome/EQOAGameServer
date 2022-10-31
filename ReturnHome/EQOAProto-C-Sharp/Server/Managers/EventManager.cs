@@ -17,7 +17,7 @@ namespace ReturnHome.Server.Managers
     {
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
-            if (mySession.MyCharacter.activeQuests != null)
+                        if (mySession.MyCharacter.activeQuests != null)
             {
                 //var opt = new JsonSerializerOptions() {  WriteIndented = true };
                 string testJson = JsonSerializer.Serialize<List<Quest>>(mySession.MyCharacter.activeQuests);
