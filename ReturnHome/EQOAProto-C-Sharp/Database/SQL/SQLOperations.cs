@@ -370,9 +370,9 @@ namespace ReturnHome.Database.SQL
                     //flags 41
                     rdr.GetString(42),
                     //activeQuests
-                    rdr.GetString(43),
-                    //completedQuests
                     rdr.GetString(44),
+                    //completedQuests
+                    rdr.GetString(43),
                     //58
                     session);
 
@@ -545,9 +545,9 @@ namespace ReturnHome.Database.SQL
                         //flags 41
                         rdr.GetString(42),
                         //activeQuests
-                        rdr.GetString(43),
-                        //completedQuests
                         rdr.GetString(44),
+                        //completedQuests
+                        rdr.GetString(43),
                         //58
                         session);
                     break;
@@ -607,37 +607,7 @@ namespace ReturnHome.Database.SQL
             return selectedCharacter;
         }
 
-        public void GetPlayerQuests(Session session)
-        {
-
-            //Second SQL command and reader
-            using var cmd = new MySqlCommand("GetPlayerQuests", con);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("cServerID", session.MyCharacter.ServerID);
-            using MySqlDataReader Rdr = cmd.ExecuteReader();
-
-            //Use second reader to iterate through character gear and assign to character attributes
-            while (Rdr.Read())
-            {
-                //Hold charactervalue so we have names to compare against 
-                int serverID = Rdr.GetInt32(0);
-
-                Quest thisQuest = new Quest(
-                  //QuestID
-                  Rdr.GetInt32(1),
-                  //questIndex
-                  Rdr.GetInt32(2),
-                  //questStep
-                  Rdr.GetInt32(3),
-                  Rdr.GetString(4));
-
-                session.MyCharacter.activeQuests.Add(thisQuest);
-                Console.WriteLine(thisQuest.questID);
-            }
-
-            Rdr.Close();
-
-        }
+      
 
         public void GetPlayerSpells(Session session)
         {
@@ -886,6 +856,8 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("ArcaneR", 40);
             SecondCmd.Parameters.AddWithValue("Fishing", 0);
             SecondCmd.Parameters.AddWithValue("playerFlags", serializedPlayerFlags);
+            SecondCmd.Parameters.AddWithValue("completedQuests", "[]");
+            SecondCmd.Parameters.AddWithValue("activeQuests", "[]");
             //Execute parameterized statement entering it into the DB
             SecondCmd.ExecuteNonQuery();
 

@@ -118,7 +118,6 @@ namespace ReturnHome.Server.EntityObject.Player
                          int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, string playerFlags, string completedQuests, string activeQuests, Session MySession) : base(true, level)
         {
             Speed = speed;
-            //playerFlags.Add("Eastern", true);
             Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;
@@ -215,10 +214,7 @@ namespace ReturnHome.Server.EntityObject.Player
             {
                 this.activeQuests = JsonSerializer.Deserialize<List<Quest>>(activeQuests);
             }
-            //CurrentPower2 = currentPower2;
-            //BasePower = basePower;
-            //HealOT2 = healOT2;
-            //PowerOT2 = powerOT2;
+
             characterSession = MySession;
         }
 
@@ -287,7 +283,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
                 mySession.MyCharacter.playerFlags[flagKey] = flagValue;
-            Console.WriteLine(mySession.MyCharacter.playerFlags[flagKey]);
+            Logger.Info($"Flag {mySession.MyCharacter.playerFlags[flagKey]} set for {mySession.MyCharacter.CharName}");
         }
 
         public Character Copy() => (Character)MemberwiseClone();

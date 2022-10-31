@@ -23,7 +23,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             charDump.GetPlayerHotkeys(session);
             charDump.GetPlayerWeaponHotbar(session);
             charDump.GetPlayerSpells(session);
-            charDump.GetPlayerQuests(session);
 
             //Toss opcode in
             writer.Write(message.Opcode);

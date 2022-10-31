@@ -76,8 +76,12 @@
         [4] = {log = "Find madmen at ruins south of Freeport. Return to Ilenar Crelwin with some of their blood."},
         [5] = {log = "Return to Kellina."},
         [6] = {xp = 883791}
-    }
+    },
     --Enchanter(12) Human(0) Freeport(1)
+        [12010] = {
+        [0] = {log = "You must purchase Bronze Ring from Merchant Yulia, then return to Azlynn."},
+        [1] = {xp = 430}
+        }
 }
 
 return quests

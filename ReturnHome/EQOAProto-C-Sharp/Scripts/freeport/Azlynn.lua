@@ -1,10 +1,12 @@
 local ch = tostring(choice)
+local quests = require('Scripts/FreeportQuests')
+
 function event_say()
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
     if
-        (class == "Enchanter" and race == "Human" and humanType == "Freeport" and
+        (class == "Enchanter" and race == "Human" and humanType == "Eastern" and
             GetPlayerFlags(mySession, "12010") == "noFlags")
      then
         SetPlayerFlags(mySession, "12010", "0")
@@ -17,9 +19,7 @@ function event_say()
             "Azlynn: When you have the Bronze Ring return to me and I'll send you on your second task.",
             "You have received a quest!" }
             SendMultiDialogue(mySession, multiDialogue)
-            SetPlayerFlags(mySession, "12010", "1")
-            questText = "You must purchase Bronze Ring from Merchant Yulia, then return to Azlynn."
-            AddQuestLog(mySession, 0, questText)
+            StartQuest(mySession, 12010, quests[12010][0].log)
         else
             npcDialogue = "What brings you to this house of magic?"
             diagOptions = {"I wish to be a enchanter of The Academy of Arcane Science."}
@@ -32,10 +32,7 @@ function event_say()
                 multiDialogue = { "Azlynn: It's going to take more than running errands to learn this power. We are going to have to test your wit and your will…",
                 "Azlynn: I will have your next task ready in a few moments. Don’t wander off now…" }
                 SendMultiDialogue(mySession, multiDialogue)
-                GrantXP(mySession, 430)
-                DeleteQuestLog(mySession, 0)
-                SetPlayerFlags(mySession, "12010", "99")
-                SetPlayerFlags(mySession, "12011", "0")
+                CompleteQuest(mySession, 12010, quests[12010][1].xp)
             else
                 npcDialogue = "You have much to learn about making an entrance."
                 diagOptions = {"I have the ring.", "Oh, nevermind."}

@@ -53,16 +53,8 @@ namespace ReturnHome.Server.EntityObject.Player
             else
                 newQuest.questIndex = 0;
 
-            //Console.WriteLine($"New quest created: \n Quest ID: {questID} \n Quest Text: {questText}" +
-    //$"\n Quest Index: {newQuest.questIndex} \n Quest Step: {newQuest.questStep}");
-
-
-
-            //convert to logger
             Logger.Info(($"Quest {questID}, step {newQuest.questStep} started by {session.MyCharacter.CharName}"));
             session.MyCharacter.activeQuests.Add(newQuest);
-            foreach (Quest quest in session.MyCharacter.activeQuests)
-                Console.WriteLine($"{quest.questID} has quest index {quest.questIndex}");
             session.MyCharacter.SetPlayerFlag(session, questID.ToString(), newQuest.questStep.ToString());
             ServerAddQuestLog.AddQuestLog(session, (uint)newQuest.questIndex, newQuest.log);
         }
@@ -70,11 +62,9 @@ namespace ReturnHome.Server.EntityObject.Player
         //Potentially part of new Quest framework, still being worked on.
         public static void ContinueQuest(Session session, int questID, string questText)
         {
-            Console.WriteLine("Continuing Quest");
             Quest quest = session.MyCharacter.activeQuests.Find(x => x.questID == questID);
             quest.questStep++;
             quest.log = questText;
-            Console.WriteLine(quest.questIndex);
             ServerDeleteQuest.DeleteQuest(session, quest.questIndex);
 
             if (session.MyCharacter.activeQuests.Count > 0)
@@ -84,7 +74,7 @@ namespace ReturnHome.Server.EntityObject.Player
                 quest.questIndex = 0;
 
             //convert to logger
-            Console.WriteLine($"Quest {questID}, step {quest.questStep} started by {session.MyCharacter.CharName}");
+            Logger.Info($"Quest {questID}, step {quest.questStep} started by {session.MyCharacter.CharName}");
             session.MyCharacter.SetPlayerFlag(session, quest.questID.ToString(), quest.questStep.ToString());
             ServerAddQuestLog.AddQuestLog(session, (uint)quest.questIndex, quest.log);
         }
@@ -96,7 +86,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             if (thisQuest != null)
             {
-                Console.WriteLine($"Quest with questIndex {thisQuest.questIndex} deleted for player {session.MyCharacter.CharName}.");
+                Logger.Info($"Quest with questIndex {thisQuest.questIndex} deleted for player {session.MyCharacter.CharName}.");
                 session.MyCharacter.completedQuests.Add(thisQuest);
                 session.MyCharacter.activeQuests.Remove(thisQuest);
             }
@@ -133,8 +123,7 @@ namespace ReturnHome.Server.EntityObject.Player
                 ServerDeleteQuest.DeleteQuest(session, questIndex);
 
                 //convert to logger
-                Console.WriteLine($"Quest with {thisQuest.questID}, step {thisQuest.questStep} completed by player {session.MyCharacter.CharName}");
-                Console.WriteLine($"Able to accept Quest with {thisQuest.questID++}, step {thisQuest.questStep}");
+                Logger.Info($"Quest with {thisQuest.questID}, step {thisQuest.questStep} completed by player {session.MyCharacter.CharName}");
 
             }
         }
@@ -152,7 +141,7 @@ namespace ReturnHome.Server.EntityObject.Player
                 newQuest.questIndex = 0;
 
             //convert to logger
-            Console.WriteLine($"Quest {questID} started by {session.MyCharacter.CharName}");
+            Logger.Info($"Quest {questID} started by {session.MyCharacter.CharName}");
             session.MyCharacter.activeQuests.Add(newQuest);
             ServerAddQuestLog.AddQuestLog(session, (uint)newQuest.questIndex, newQuest.log);
         }
