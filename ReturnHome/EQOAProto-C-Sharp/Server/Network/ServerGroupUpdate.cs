@@ -15,33 +15,10 @@ namespace ReturnHome.Server.Network
 
         //This is when the client ack's a specific message, we then set this to that ack'd message # to help generate our xor
         private ushort _baseMessageCounter = 0;
-        public ushort BaseMessageCounter
-        {
-            get { return _baseMessageCounter; }
-            set
-            {
-                if (value > _baseMessageCounter)
-                    _baseMessageCounter = value;
-
-                else
-                    Console.WriteLine($"Error setting base message counter. Setting {value} Expected: {_baseMessageCounter}");
-            }
-        }
 
         //Simple message counter
         private ushort _messageCounter = 1;
-        public ushort MessageCounter
-        {
-            get { return _messageCounter; }
-            set
-            {
-                if (value > _messageCounter)
-                    _messageCounter = value;
 
-                else
-                    Console.WriteLine($"Error setting message counter. Setting: {value} Expected: {_messageCounter}");
-            }
-        }
         //May not be needed
         private byte _objectChannel;
 
@@ -106,9 +83,9 @@ namespace ReturnHome.Server.Network
                 {
                     Memory<byte> temp = new Memory<byte>(new byte[0x27]);
                     CoordinateConversions.Xor_data(temp, _session.MyCharacter.GroupUpdate, _baseXOR, 0x27);
-                    _currentXORResults.Add(MessageCounter, temp);
-                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
-                    MessageCounter++;
+                    _currentXORResults.Add(_messageCounter, temp);
+                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
+                    _messageCounter++;
                 }
             }
         }
@@ -121,9 +98,9 @@ namespace ReturnHome.Server.Network
 
             Memory<byte> temp = new Memory<byte>(new byte[0x27]);
             CoordinateConversions.Xor_data(temp, _session.MyCharacter.GroupUpdate, _baseXOR, 0x27);
-            _currentXORResults.Add(MessageCounter, temp);
-            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
-            MessageCounter++;
+            _currentXORResults.Add(_messageCounter, temp);
+            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
+            _messageCounter++;
         }
 
         public void UpdateBaseXor(ushort msgCounter)
@@ -141,25 +118,7 @@ namespace ReturnHome.Server.Network
             _currentXORResults.Clear();
 
             //Ensure this is new base
-            BaseMessageCounter = msgCounter;
-        }
-
-        private static bool CompareObjects(Memory<byte> first, Memory<byte> second)
-        {
-            if (first.Length != second.Length)
-                return false;
-
-            Span<byte> firstTemp = first.Span;
-            Span<byte> secondTemp = second.Span;
-
-            for (int i = 0; i < first.Length; i++)
-            {
-                if (firstTemp[i] == secondTemp[i])
-                    continue;
-                else
-                    return false;
-            }
-            return true;
+            _baseMessageCounter = msgCounter;
         }
     }
 }

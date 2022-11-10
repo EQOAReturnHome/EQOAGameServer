@@ -74,6 +74,7 @@ namespace ReturnHome.Server.Network
                 tempSpan[i] = new(_session, (byte)i);
         }
 
+        //Need to define a way to prioritize group members, and eventually pet's for c9 applications
         public void AddChannelObjects(List<Entity> charList)
         {
             Span<ServerObjectUpdate> temp = serverObjects.Span;
