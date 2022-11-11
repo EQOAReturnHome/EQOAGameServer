@@ -25,19 +25,21 @@ namespace ReturnHome.Server.Managers
         public static void Initialize()
         {
             //Creates NPC List
+            Console.WriteLine("Collecting Item Patterns...");
             CharacterSQL npcList = new();
+
             List<ItemPattern> myItemPatterns = npcList.ItemPatterns();
             npcList.CloseConnection();
-
             Console.WriteLine("Total Item Pattern's Acquired: " + myItemPatterns.Count);
-
             Console.WriteLine("Adding Item Patterns...");
             for (int i = 0; i < myItemPatterns.Count; ++i)
                 ItemManager.AddItem(myItemPatterns[i]);
 
             npcList = new();
+            Console.WriteLine("Collecting Actors...");
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
+
             //Closing DB connection
             npcList.CloseConnection();
             MapManager.Initialize();
@@ -45,12 +47,14 @@ namespace ReturnHome.Server.Managers
             Console.WriteLine("Done.");
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");
+
             foreach (Actor myActor in myNpcList)
             {
                 EntityManager.AddEntity(myActor);
                 MapManager.Add(myActor);
 
             }
+
             Console.WriteLine("Done.");
 
             Console.WriteLine("Loading Default character options");
