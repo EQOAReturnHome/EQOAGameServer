@@ -10,6 +10,9 @@ using System;
 using System.Text.Json;
 using System.Collections;
 using System.Collections.Generic;
+using ReturnHome.Database.SQL;
+using System.Data;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.Managers
 {
@@ -17,12 +20,11 @@ namespace ReturnHome.Server.Managers
     {
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
-                        if (mySession.MyCharacter.activeQuests != null)
-            {
-                //var opt = new JsonSerializerOptions() {  WriteIndented = true };
-                string testJson = JsonSerializer.Serialize<List<Quest>>(mySession.MyCharacter.activeQuests);
-                Console.WriteLine(testJson);
-            }
+
+            //CharacterSQL sql = new CharacterSQL();
+            //sql.SavePlayerItems(mySession.MyCharacter);
+
+
 
             string[] file;
             EntityManager.QueryForEntity(mySession.MyCharacter.Target, out Entity targetNPC);
@@ -151,6 +153,25 @@ namespace ReturnHome.Server.Managers
             }
 
             return false;
+        }
+
+        public static void printDataTable(DataTable tbl)
+        {
+            string line = "";
+            foreach (DataColumn item in tbl.Columns)
+            {
+                line += item.ColumnName + "   ";
+            }
+            line += "\n";
+            foreach (DataRow row in tbl.Rows)
+            {
+                for (int i = 0; i < tbl.Columns.Count; i++)
+                {
+                    line += row[i].ToString() + "   ";
+                }
+                line += "\n";
+            }
+            Console.WriteLine(line);
         }
     }
 }

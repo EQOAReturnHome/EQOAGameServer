@@ -13,6 +13,7 @@ using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
+using MySqlDataAdapter = MySql.Data.MySqlClient.MySqlDataAdapter;
 
 namespace ReturnHome.Database.SQL
 {
@@ -94,11 +95,53 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("completedQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.completedQuests));
             SecondCmd.Parameters.AddWithValue("activeQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.activeQuests));
 
-
-
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
             SecondCmd.ExecuteNonQuery();
+
+            SavePlayerItems(player);
+        }
+
+        public void SavePlayerItems(Character player)
+        {
+
+            DataTable dt = new DataTable("charInv");
+            dt.Clear();
+            dt.Columns.Add("serverID");
+            dt.Columns.Add("stackLeft");
+            dt.Columns.Add("remainHP");
+            dt.Columns.Add("remainCharge");
+            dt.Columns.Add("patternID");
+            dt.Columns.Add("equipLoc");
+            dt.Columns.Add("location");
+            dt.Columns.Add("listNumber");
+            DataRow dr = null;
+            int auto = 17;
+            foreach (ClientItemWrapper item in player.Inventory.itemContainer)
+            {
+                dr = dt.NewRow();
+                dr["serverID"] = player.ServerID;
+                dr["stackLeft"] = item.item.StackLeft;
+                dr["remainHP"] = item.item.RemainingHP;
+                dr["remainCharge"] = item.item.Charges;
+                dr["patternID"] = item.item.Pattern.ItemID;
+                dr["equiploc"] = (byte)item.item.EquipLocation;
+                dr["location"] = item.item.Location;
+                dr["listNumber"] = item.item.ClientIndex;
+                dt.Rows.Add(dr);
+            }
+
+            printDataTable(dt);
+
+
+            MySqlDataAdapter da = new MySqlDataAdapter("Select * from charInventory", con);
+            MySqlCommandBuilder cb = new MySqlCommandBuilder(da);
+            //da.Fill(dt);
+            DataTable changes = dt.GetChanges();
+            da.Update(changes);
+            dt.AcceptChanges();
+            da.Dispose();
+
         }
 
         //Queries NPC database to populate world lists
@@ -443,8 +486,6 @@ namespace ReturnHome.Database.SQL
             Character selectedCharacter = null;
 
             //Queries DB for all characters and their necessary attributes  to generate character select
-            //Later should convert to a SQL stored procedure if possible.
-            //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetAccountCharacters", con);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
@@ -607,7 +648,7 @@ namespace ReturnHome.Database.SQL
             return selectedCharacter;
         }
 
-      
+
 
         public void GetPlayerSpells(Session session)
         {
@@ -866,6 +907,25 @@ namespace ReturnHome.Database.SQL
 
             //Send Fresh Character Listing
             ServerCreateCharacterList.CreateCharacterList(MyCharacterList, session);
+        }
+
+        public static void printDataTable(DataTable tbl)
+        {
+            string line = "";
+            foreach (DataColumn item in tbl.Columns)
+            {
+                line += item.ColumnName + "   ";
+            }
+            line += "\n";
+            foreach (DataRow row in tbl.Rows)
+            {
+                for (int i = 0; i < tbl.Columns.Count; i++)
+                {
+                    line += row[i].ToString() + "   ";
+                }
+                line += "\n";
+            }
+            Console.WriteLine(line);
         }
     }
 }
