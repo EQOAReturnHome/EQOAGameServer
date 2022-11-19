@@ -21,6 +21,8 @@ namespace ReturnHome.Server.Network
 
         //May not be needed
         private byte _objectChannel;
+        //Currently only send base data on first packet till client ack's a message
+        private bool _sendBaseData = false;
 
         //Place to hold all of our XOR result's till client acks. We then xor that against the baseXOR to get new base object update, clear list once a message is ack'd by client
         private Dictionary<ushort, Memory<byte>> _currentXORResults = new Dictionary<ushort, Memory<byte>>();
@@ -59,6 +61,7 @@ namespace ReturnHome.Server.Network
         {
             _session = session;
             _objectChannel = objectChannel;
+            _sendBaseData = true;
         }
 
         public void AddObject(Entity e)
@@ -85,7 +88,7 @@ namespace ReturnHome.Server.Network
                     temp.Span[0] = _isActive && (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                     CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, _baseXOR.Slice(1, 0xC8), 0xC8);
                     _currentXORResults.Add(_messageCounter, temp);
-                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
+                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _sendBaseData ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
                     ++_messageCounter;
                 }
             }
@@ -95,11 +98,12 @@ namespace ReturnHome.Server.Network
         {
             //No need to verify if entity is null or not, disabling channel anyway
             Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
+
             //Since we are deactivating the channel, all we need to do is modify the first byte
             temp.Span[0] = (_baseXOR.Span[0] == 1) ? (byte)1 : (byte)0;
 
             _currentXORResults.Add(_messageCounter, temp);
-            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
+            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _sendBaseData ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
             ++_messageCounter;
         }
 
