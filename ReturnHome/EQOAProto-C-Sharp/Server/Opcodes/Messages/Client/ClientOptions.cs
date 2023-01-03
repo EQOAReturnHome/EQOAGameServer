@@ -6,15 +6,15 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientOptions
     {
-        public static void ClientMessageOptions(Session session, PacketMessage ClientPacket)
+        public static void ClientMessageOptions(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             byte state = reader.Read<byte>();
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.LootMessages)
+            if (ClientPacket.Opcode == GameOpcode.LootMessages)
                 session.MyCharacter.LootMessages = state == 0;
 
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.FactionMessages)
+            if (ClientPacket.Opcode == GameOpcode.FactionMessages)
                 session.MyCharacter.FactionMessages = state == 0;
         }
     }

@@ -11,7 +11,7 @@ namespace ReturnHome.Server.EntityObject.Items
         public int RemainingHP { get; set; }
         public int Charges { get; set; }
         public EquipSlot EquipLocation { get; set; }
-        public byte Location { get; set; } //inventory, bank auction etc
+        public sbyte Location { get; set; } //inventory, bank auction etc
         public byte ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
 
         public ItemPattern Pattern { get; private set; }
@@ -19,7 +19,7 @@ namespace ReturnHome.Server.EntityObject.Items
         //Constructor object for armour and weapons
         //Alot of this could be managed by scripting as there is a huge portion that is static
         //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
-        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, ItemPattern itemPattern)
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, sbyte thisLocation, byte thisInventoryNumber, ItemPattern itemPattern)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -47,7 +47,7 @@ namespace ReturnHome.Server.EntityObject.Items
             writer.Write7BitEncodedInt64(RemainingHP);
             writer.Write7BitEncodedInt64(Charges);
             writer.Write7BitEncodedInt64((sbyte)EquipLocation);
-            writer.Write(Location);
+            writer.Write7BitEncodedInt64(Location);
             writer.Write(key);
             writer.Write7BitEncodedInt64(Pattern.ItemID);
             writer.Write7BitEncodedInt64((int)Pattern.ItemCost);

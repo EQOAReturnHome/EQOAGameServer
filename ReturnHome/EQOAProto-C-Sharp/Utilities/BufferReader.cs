@@ -151,6 +151,11 @@ namespace ReturnHome.Utilities
             return result;
         }
 
+        /// <summary>
+        /// Reads a 3 byte  <see langword="uint" /> value from the <see cref="BufferReader" /> and advances its position.
+        /// </summary>
+        /// <returns><see langword="uint" /></returns>
+        /// <exception cref="InvalidOperationException" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUint24()
         {
@@ -160,6 +165,13 @@ namespace ReturnHome.Utilities
             return (uint)(_buffer[_position++] << 16 | _buffer[_position++] << 8 | _buffer[_position++]);
         }
 
+        /// <summary>
+        /// Reads a string based on encoding <see langword="Encoding" /> value from the <see cref="BufferReader" /> and advances its position.
+        /// </summary>
+        /// <returns><see langword="string" /></returns>
+        /// <exception cref="InvalidOperationException" />
+        /// <exception cref="ArgumentNullException" />
+        /// <exception cref="ArgumentOutOfRangeException" />
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string ReadString(Encoding encoding, int size)
         {
@@ -185,6 +197,21 @@ namespace ReturnHome.Utilities
 
             Advance(size);
             return result;
+        }
+
+        /// <summary>
+        /// Reads a message size from the <see cref="BufferReader" /> and advances its position.
+        /// </summary>
+        /// <returns><see langword="int" /></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int ReadSize()
+        {
+            int t = Read<byte>();
+            if (t == 0xFF)
+                return Read<ushort>();
+
+            else
+                return t;
         }
 
         /// <summary>

@@ -12,11 +12,7 @@ namespace ReturnHome.Server.EntityObject.Player
         //Rearranges item inventory for player, move item 1 to slot of item2 and reorder
         public void ArrangeItem(byte itemSlot1, byte itemSlot2) => Inventory.ArrangeItems(itemSlot1, itemSlot2);
 
-        public void AddItem(Item itemToBeAdded)
-        {
-            if (Inventory.AddItem(itemToBeAdded))
-                Console.WriteLine($"{itemToBeAdded.Pattern.ItemName} added.");
-        }
+        public void AddItem(Item itemToBeAdded) => Inventory.AddItem(itemToBeAdded);
 
         //Method for withdrawing and depositing bank tunar
         public void BankTunar(uint targetNPC, uint giveOrTake, int transferAmount)

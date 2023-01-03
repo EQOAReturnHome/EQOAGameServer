@@ -13,10 +13,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
     class ClientCreateCharacter
     {
         //Method to create new character when new character opcode is received
-        public static void CreateCharacter(Session session, PacketMessage ClientPacket)
+        public static void CreateCharacter(Session session, Message ClientPacket)
         {
             CharacterSQL createCharacter = new CharacterSQL();
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             //Get length of characters name expected in packet
             int nameLength = reader.Read<int>();
@@ -88,9 +88,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                     createCharacter.CloseConnection();
 
                 }
-
-                else
-                    Console.WriteLine($"Character creation failed, couldn't find a default with Race: {Race} Class: {Class} HumanType: {HumType} Sex: {Gender}");
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Items
 {
@@ -41,7 +42,7 @@ namespace ReturnHome.Server.EntityObject.Items
         {
             if (interactionType != 0)
             {
-                Console.WriteLine("Received a non-zero interaction type!!!! Look into this");
+                Logger.Err("Received a non-zero interaction type!!!! Look into this");
                 return;
             }
 

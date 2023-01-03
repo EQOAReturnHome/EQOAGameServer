@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Buffers;
 
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.Opcodes;
@@ -10,7 +10,6 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Opcodes.Messages.Server;
-using System.Buffers;
 
 namespace ReturnHome.Server.Network
 {
@@ -21,7 +20,7 @@ namespace ReturnHome.Server.Network
     {
         public readonly SessionConnectionData connectionData;
 
-        private readonly ConcurrentDictionary<ushort, ReadOnlyMemory<byte>> _outOfOrderMessages = new();
+        //private readonly List<Message> _outOfOrderMessages = new();
 
         private readonly Session _session;
         private readonly SessionQueue _sessionQueue;
@@ -55,131 +54,105 @@ namespace ReturnHome.Server.Network
                 TimeoutTick = DateTime.UtcNow.AddSeconds(45).Ticks;
             _session.ResetPing();
             //Let's make sure this isn't a delayed packet etc.
-            if (packet.Header.ClientBundleNumber <= connectionData.lastReceivedPacketSequence)
+            if (packet.segmentBody.arrival_number <= connectionData.lastReceivedPacketSequence)
                 //If this bundle number is 0x0000, we are just recycling through the counter, so don't return
-                if (!(packet.Header.ClientBundleNumber == 0x0000))
+                if (!(packet.segmentBody.flush_ack == 0x0000))
                     return;
 
+            connectionData.lastReceivedPacketSequence = packet.segmentBody.arrival_number;
 
-            connectionData.lastReceivedPacketSequence = packet.Header.ClientBundleNumber;
-
-            if (packet.Header.RDPReport)
+            if ((packet.segmentBody.bodyFlags & SegmentBodyFlags.guaranted_ack) != 0)
                 ProcessRdpReport(packet);
 
-            if (packet.Header.ProcessMessage)
-                ProcessMessageBundle(packet);
+            //Always process messages, even if there is none we will just flow over the code
+            ProcessMessageBundle(packet);
 
-            if (packet.Header.SessionAck)
+            if ((packet.segmentBody.bodyFlags & SegmentBodyFlags.sessionAck) != 0)
                 ProcessSessionAck(packet);
         }
 
         public void ProcessMessageBundle(ClientPacket packet)
         {
-            //Check to see if packet contains next message #, if it doesn't... add them to out of order?
-            //Will need to check against unreliables first
-            if (packet.Messages.ContainsKey((ushort)(connectionData.lastReceivedMessageSequence + 1)))
+            foreach( Message m in packet.segmentBody.messages)
             {
-                while (true)
+                if ((m.Messagetype == MessageType.PingMessage) || (m.Messagetype == MessageType.ReliableMessage) || (m.Messagetype == MessageType.SegmentReliableMessage))
                 {
-                    if (packet.Messages.TryRemove((ushort)(connectionData.lastReceivedMessageSequence + 1), out PacketMessage message))
+                    if (m.Sequence != (connectionData.lastReceivedMessageSequence + 1))
                     {
-                        connectionData.lastReceivedMessageSequence++;
-                        Logger.Info($"Working with message {message.Header.MessageNumber}");
-
-                        switch (message.Header.messageType)
-                        {
-                            case (byte)MessageType.PingMessage:
-                                ProcessOpcode.ProcessPingRequest(_session, message);
-                                break;
-
-                            case (byte)MessageType.ReliableMessage:
-                                ProcessOpcode.ProcessOpcodes(_session, message);
-                                break;
-
-                            case (byte)MessageType.UnreliableMessage:
-                                Logger.Info("!!!Received FC type message from client!!!");
-                                break;
-
-                            default:
-                                Console.WriteLine("Placing Client update into stack");
-                                connectionData.ClientUpdateStack.Push(message);
-                                //Logger.Info("Processing Object update messages");
-                                //ProcessUnreliable.ProcessUnreliables(_session, message);
-                                //Do stuff to process 0x40 type messages from client
-                                break;
-                        }
+                        //Just ignore out of order reliables for now
+                        //_outOfOrderMessages.Add(m);
+                        Message.Return(m);
+                        continue;
                     }
 
-                    //Add remaining messages to out of order since
-                    else
-                    {
-                        foreach (var i in packet.Messages)
-                            _outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
-
-                        //Should be done working with messages now
-                        break;
-                    }
-
-                    if (packet.Messages.Count == 0)
-                        break;
+                    connectionData.lastReceivedMessageSequence++;
                 }
-            }
-            //Add all of these messages to out of order list
-            else
-            {
-                foreach (var i in packet.Messages)
-                    _outOfOrderMessages.TryAdd(i.Key, i.Value.Data);
-            }
 
-            if (packet.Header.ChannelAcks != null)
-            {
-                byte temp2;
-                Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;
-                foreach (KeyValuePair<byte, ushort> ack in packet.Header.ChannelAcks)
+                Logger.Info($"Working with message {m.Sequence}");
+
+                switch (m.Messagetype)
                 {
-                    temp2 = ack.Key;
+                    case MessageType.PingMessage:
+                        ProcessOpcode.ProcessPingRequest(_session, m);
+                        break;
 
-                    if (temp2 >= 0 && temp2 <= 0x17)
-                        temp[temp2].UpdateBaseXor(ack.Value);
+                    case MessageType.ReliableMessage:
+                        ProcessOpcode.ProcessOpcodes(_session, m);
+                        break;
 
-                    else if (temp2 == (byte)MessageType.StatUpdate)
-                        connectionData.clientStatUpdate.UpdateBaseXor(ack.Value);
+                    case MessageType.UnreliableMessage:
+                        Logger.Info("!!!Received FC type message from client!!!");
+                        break;
 
-                    else if (temp2 == (byte)MessageType.GroupUpdate)
-                        connectionData.serverGroupUpdate.UpdateBaseXor(ack.Value);
-                    else
-                        Console.WriteLine($"Received Channel {temp2}, not implemented yet or processing error on channel processing");
+                    default:
+                        Logger.Info("Processing State Channel from Client");
+                        ProcessUnreliable.ProcessUnreliables(_session, m);
+                        break;
                 }
+
+                Message.Return(m);
             }
 
-            //Check client update message
-            if (packet.clientUpdate != null)
-            {
-                Logger.Info("Processing Object update messages");
-                ProcessUnreliable.ProcessUnreliables(_session, packet.clientUpdate);
-            }
-            Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Done processing messages in packet");
+
             ///Should we just initiate responses to clients through here for now?
             ///Ultimately we want to have a seperate thread with a server tick, 
-            ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's
+            ///that may handle initiating sending messages at timed intervals, and initiating data collection such as C9's*/
         }
 
         private void ProcessRdpReport(ClientPacket packet)
         {
             //Update our connection data object
             //Let's make sure the ack > current saved ack
-            if (connectionData.clientLastReceivedMessage < packet.Header.ClientMessageAck)
-                connectionData.clientLastReceivedMessage = packet.Header.ClientMessageAck;
+            if (connectionData.clientLastReceivedMessage <= packet.segmentBody.guaranteed_ack)
+                connectionData.clientLastReceivedMessage = packet.segmentBody.guaranteed_ack;
 
             //Logging an old ack that was received here... should something else happen?
             else
             {
-                Logger.Info($"Received an old ack, Expected: {connectionData.lastReceivedMessageSequence} Received: {packet.Header.ClientMessageAck}");
+                Logger.Info($"Received an old ack, Expected: {connectionData.clientLastReceivedMessage} Received: {packet.segmentBody.guaranteed_ack}");
                 return;
             }
 
             //Check reliable resend queue
             _sessionQueue.RemoveReliables();
+
+            if ((packet.segmentBody.bodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
+            {
+                Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;
+                foreach ( StateAcks s in packet.segmentBody.stateAcks)
+                {
+                    if (s.Channel >= 0 && s.Channel <= 0x17)
+                        temp[s.Channel].UpdateBaseXor(s.Ack);
+
+                    else if (s.Channel == (byte)MessageType.StatUpdate)
+                        connectionData.clientStatUpdate.UpdateBaseXor(s.Ack);
+
+                    else if (s.Channel == (byte)MessageType.GroupUpdate)
+                        connectionData.serverGroupUpdate.UpdateBaseXor(s.Ack);
+                    else
+                        Console.WriteLine($"Received Channel {s.Channel}, not implemented yet or processing error on channel processing");
+                }
+            }
 
             ///Triggers Character select, after client soft ack's the 2nd message we sent.
             if ((connectionData.clientLastReceivedMessage == 0x02) && _session.didServerInitiate)
@@ -207,7 +180,7 @@ namespace ReturnHome.Server.Network
 
         private void ProcessSessionAck(ClientPacket packet)
         {
-            if (_session.InstanceID == packet.Header.SessionAckID)
+            if (_session.InstanceID == packet.segmentBody.instance_local)
                 //Session has been ack'd and no longer new
                 _session.Instance = false;
 
@@ -235,14 +208,15 @@ namespace ReturnHome.Server.Network
 
         public void PrepPackets()
         {
-            if (_session.sessionQueue.CheckQueue() || _session.PacketBodyFlags.RdpReport || _session.PacketBodyFlags.clientUpdateAck)
+            if (_session.sessionQueue.CheckQueue() || (_session.segmentBodyFlags & SegmentBodyFlags.guaranted_ack) != 0 || (_session.segmentBodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
             {
                 //Take this instance for processing, probablky need to introduce some locking mechanism on this
-                SegmentBodyFlags segmentBodyFlags = _session.PacketBodyFlags;
+                SegmentBodyFlags segmentBodyFlags = _session.segmentBodyFlags | SegmentBodyFlags.rdpMessage;
 
                 //Replace with a new instance for next packet
-                _session.PacketBodyFlags = new();
+                _session.segmentBodyFlags = new();
 
+                segmentBodyFlags |= (SegmentBodyFlags.guaranted_ack & segmentBodyFlags) != 0 ? SegmentBodyFlags.flushAck : 0;
                 Memory<byte> packet = _memoryPool.Rent(0x0530).Memory;
                 BufferWriter writer = new(packet.Span);
                 // 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
@@ -268,14 +242,9 @@ namespace ReturnHome.Server.Network
                 ///Add session ack here if it has not been done yet
                 ///Lets client know we acknowledge session
                 ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
-                if (segmentBodyFlags.SessionAck)
-                {
-                    //Change this to false then process
-                    segmentBodyFlags.SessionAck = false;
-
+                if ((segmentBodyFlags & SegmentBodyFlags.sessionAck) != 0)
                     ///To ack session, we just repeat session information as an ack
                     AddSessionAck(ref writer);
-                }
 
                 AddRDPReport(ref writer, segmentBodyFlags);
 
@@ -332,73 +301,43 @@ namespace ReturnHome.Server.Network
             //Utilize this to get size for header info
             _size = headerLength - 3;
 
-            if (segmentBodyFlags.SessionAck)
+            if ((segmentBodyFlags & SegmentBodyFlags.sessionAck) != 0)
                 headerLength += 4;
 
-            if (segmentBodyFlags.RdpReport)
+            if ((segmentBodyFlags & SegmentBodyFlags.guaranted_ack) != 0)
                 headerLength += 4;
 
-            if (segmentBodyFlags.clientUpdateAck)
+            if ((segmentBodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
                 headerLength += 4;
 
             return headerLength;
         }
 
-        private void AddMessages(ref BufferWriter packet, List<ReadOnlyMemory<byte>> messageList)
-        {
-            foreach (ReadOnlyMemory<byte> message in messageList)
-                packet.Write(message.Span);
-        }
-
         ///Identifies if full RDPReport is needed or just the current bundle #
-        private void AddRDPReport(ref BufferWriter packet, SegmentBodyFlags segmentFlags)
+        private void AddRDPReport(ref BufferWriter packet, SegmentBodyFlags segmentBodyFlags)
         {
             packet.Write(_session.rdpCommIn.connectionData.lastSentPacketSequence++);
             ///If RDP Report == True, Current bundle #, Last Bundle received # and Last message received #
-            if (segmentFlags.RdpReport)
+            if ((segmentBodyFlags & SegmentBodyFlags.guaranted_ack) != 0)
             {
                 Logger.Info("Full RDP Report");
-                if (_session.rdpCommIn.connectionData.lastReceivedPacketSequence == 0)
-                    throw new Exception("wtf");
                 packet.Write(_session.rdpCommIn.connectionData.lastReceivedPacketSequence);
                 packet.Write(_session.rdpCommIn.connectionData.lastReceivedMessageSequence);
+
             }
 
             //include 4029 ack's as needed
-            if (segmentFlags.clientUpdateAck)
+            if ((segmentBodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
             {
                 packet.Write((byte)0x40);
-                packet.Write(_session.rdpCommIn.connectionData.client.BaseXorMessage);
+                packet.Write(_session.rdpCommIn.connectionData.client.SeqNum);
                 packet.Write((byte)0xF8);
             }
         }
 
         ///Add our bundle type
         ///Consideration for in world or "certain packet" # is needed during conversion. For now something basic will work
-        private void AddBundleType(ref BufferWriter packet, SegmentBodyFlags segmentBodyFlags)
-        {
-            byte segBody = 0;
-
-            //Always has this
-            segBody |= 0x20;
-
-            if (segmentBodyFlags.RdpReport)
-            {
-                segBody |= 0x03;
-            }
-
-            if (segmentBodyFlags.clientUpdateAck)
-            {
-                segBody |= 0x10;
-            }
-
-            if (segmentBodyFlags.SessionAck)
-            {
-                segBody |= 0x40;
-            }
-
-            packet.Write(segBody);
-        }
+        private void AddBundleType(ref BufferWriter packet, SegmentBodyFlags segmentBodyFlags) => packet.Write((byte)segmentBodyFlags);
 
         ///Add a session ack to send to client
         private void AddSession(ref BufferWriter packet)

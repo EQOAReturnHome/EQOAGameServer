@@ -13,11 +13,11 @@ Bankers are 0x02. So most likely 0x82 for unattackable and banker
 Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
 */
 
-        public static void InteractActor(Session session, PacketMessage clientPacket)
+        public static void InteractActor(Session session, Message clientPacket)
         {
-            BufferReader reader = new(clientPacket.Data.Span);
+            BufferReader reader = new(clientPacket.message.Span);
 
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.ArrangeItem)
+            if (clientPacket.Opcode == GameOpcode.ArrangeItem)
             {
                 byte itemSlot1 = (byte)reader.Read<uint>();
                 byte itemSlot2 = (byte)reader.Read<uint>();
@@ -25,7 +25,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             }
 
             //Merchant Buy
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantBuy)
+            if (clientPacket.Opcode == GameOpcode.MerchantBuy)
             {
                 byte itemSlot = (byte)reader.Read7BitEncodedInt64();
                 int itemQty = (int)reader.Read7BitEncodedInt64();
@@ -34,7 +34,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             }
 
             //Merchant Sell
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantSell)
+            if (clientPacket.Opcode == GameOpcode.MerchantSell)
             {
                 byte itemSlot = (byte)reader.Read<int>();
                 int itemQty = (int)reader.Read7BitEncodedInt64();
@@ -45,7 +45,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             }
 
             //Merchant popup window
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantDiag)
+            if (clientPacket.Opcode == GameOpcode.MerchantDiag)
             {
                 uint targetNPC = reader.Read<uint>();
                 session.MyCharacter.TriggerMerchantMenu(targetNPC);
@@ -53,7 +53,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
 
 
             //Bank popup window
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankUI)
+            if (clientPacket.Opcode == GameOpcode.BankUI)
             {
                 Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.BankUI);
                 BufferWriter writer = new BufferWriter(message.Span);
@@ -64,7 +64,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             }
 
             //Deposit and Withdraw Bank Tunar
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.DepositBankTunar)
+            if (clientPacket.Opcode == GameOpcode.DepositBankTunar)
             {
 
                 uint targetNPC = reader.Read<uint>();
@@ -75,7 +75,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             }
 
             //Deposit and Withdraw Bank item
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankItem)
+            if (clientPacket.Opcode == GameOpcode.BankItem)
             {
 
                 uint targetNPC = reader.Read<uint>();
@@ -87,7 +87,7 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             }
 
             //Dialogue and Quest Interaction
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact || clientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
+            if (clientPacket.Opcode == GameOpcode.Interact || clientPacket.Opcode == GameOpcode.DialogueBoxOption)
             {
                 session.MyCharacter.ProcessDialogue(session, reader, clientPacket);
             }

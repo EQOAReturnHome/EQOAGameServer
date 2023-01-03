@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network
@@ -15,7 +13,7 @@ namespace ReturnHome.Server.Network
         public ushort lastSentPacketSequence { get; set; }
         public ushort clientLastReceivedMessage { get; set; }
         public ushort clientLastReceivedMessageFinal { get; set; }
-        public ConcurrentStack<PacketMessage> ClientUpdateStack;
+        //public ConcurrentStack<PacketMessage> ClientUpdateStack;
 
         //This property will trigger the rdpreport bool when it increments
         public ushort lastReceivedMessageSequence
@@ -26,7 +24,7 @@ namespace ReturnHome.Server.Network
                 if (_lastReceivedMessageSequence <= value)
                 {
                     _lastReceivedMessageSequence = value;
-                    _session.PacketBodyFlags.RdpReport = true;
+                    _session.segmentBodyFlags |= SegmentBodyFlags.guaranted_ack;
                 }
             }
         }
@@ -48,7 +46,6 @@ namespace ReturnHome.Server.Network
         public SessionConnectionData(Session session)
         {
             _session = session;
-            ClientUpdateStack = new();
             lastReceivedPacketSequence = 0;
 
             //Client last soft ack of message's received.

@@ -7,9 +7,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientDeleteQuest
     {
-        public static void DeleteQuest(Session session, PacketMessage clientPacket)
+        public static void DeleteQuest(Session session, Message clientPacket)
         {
-            BufferReader reader = new(clientPacket.Data.Span);
+            BufferReader reader = new(clientPacket.message.Span);
 
             uint unknownSection2 = reader.Read<uint>();
             int questIndex = (int)reader.Read7BitEncodedInt64();

@@ -14,42 +14,42 @@ namespace ReturnHome.Server.Network
 {
     public static class ProcessUnreliable
     {
-        public static void ProcessUnreliables(Session Mysession, PacketMessage message)
+        public static void ProcessUnreliables(Session Mysession, Message message)
         {
-            if (message.Header.messageType == UnreliableTypes.ClientActorUpdate)
-            {
+            if (message.Messagetype == MessageType.ClientUpdate)
                 ProcessUnreliableClientUpdate(Mysession, message);
-            }
         }
 
         //Uncompress and process update
-        private static void ProcessUnreliableClientUpdate(Session Mysession, PacketMessage message)
+        private static void ProcessUnreliableClientUpdate(Session Mysession, Message message)
         {
+            //This needs to happen via an opcode... I forget which but last unknown logging in
             Mysession.characterInWorld = true;
 
-            //If xorByte > 0, make sure it isn't an outdated update.
-            //If message# - xorbyte < last ack'd, drop it
-            if (message.Header.XorByte != 0)
+            //If xorbyte is 0, we need to take this as the new base message, if it is not 0, need to xor base to update
+            if (message.XORByte != 0)
             {
-                //If this fails, client did not get ack so drop message and resend ack
-                if (Mysession.rdpCommIn.connectionData.client.BaseXorMessage > (message.Header.MessageNumber - message.Header.XorByte))
+                if (message.XORByte >= 0x20)
                 {
-                    //ensure client got ack by resending it
-                    Mysession.PacketBodyFlags.clientUpdateAck = true;
+                    Logger.Err($"{Mysession.AccountID}: Received an XOR byte > 32, dropping as an error");
                     return;
                 }
+
+                if (Mysession.rdpCommIn.connectionData.client.GetBaseClientArray((ushort)(message.Sequence - message.XORByte), out Memory<byte> temp))
+                    CoordinateConversions.Xor_data(message.message, temp, message.Size);
+                Mysession.rdpCommIn.connectionData.client.seqnum_remove_thru((ushort)(message.Sequence - message.XORByte));
             }
 
-            //Change Memory<byte to be initialized with 0x29 size in ClientObjectUpdate
-            Memory<byte> MyPacket = MemoryMarshal.AsMemory(message.Data);
+            //Means XOR should be 0?
+            else
+                Mysession.rdpCommIn.connectionData.client.seqnum_remove_thru((ushort)(message.Sequence - 0x20));
 
-            //If xorbyte is 0, we need to take this as the new base message, if it is not 0, need to xor base to update
-            if (message.Header.XorByte != 0)
-                CoordinateConversions.Xor_data(MyPacket, Mysession.rdpCommIn.connectionData.client.GetBaseClientArray(), message.Header.Size);
+            Mysession.rdpCommIn.connectionData.client.SeqNum = message.Sequence;
 
-            Mysession.rdpCommIn.connectionData.client.BaseXorMessage = message.Header.MessageNumber;
-            BufferReader reader = new(MyPacket.Span);
-            Span<byte> vs = MyPacket.Span;
+            //Tells us we need to tell client we ack this message
+            Mysession.segmentBodyFlags |= SegmentBodyFlags.clientUpdateAck;
+
+            BufferReader reader = new(message.message.Span);
             Mysession.MyCharacter.World = (World)reader.Read<byte>();
 
             float x = CoordinateConversions.ConvertXZToFloat(reader.ReadUint24());
@@ -76,8 +76,8 @@ namespace ReturnHome.Server.Network
 
             uint Target = reader.Read<uint>();
 
-            //Update Base array for client update object, then update character object
-            Mysession.rdpCommIn.connectionData.client.UpdateBaseClientArray(MyPacket);
+            //Add Base array for client update object, then update character object
+            Mysession.rdpCommIn.connectionData.client.AddBaseClientArray(message.message, message.Sequence);
             Mysession.MyCharacter.UpdatePosition(x, y, z);
             Mysession.MyCharacter.Animation = Animation;
             Mysession.MyCharacter.UpdateFacing(Facing, Turning);
@@ -104,9 +104,6 @@ namespace ReturnHome.Server.Network
 
             else
                 MapManager.UpdatePosition(Mysession.MyCharacter);
-
-            //Tells us we need to tell client we ack this message
-            Mysession.PacketBodyFlags.clientUpdateAck = true;
         }
     }
 }

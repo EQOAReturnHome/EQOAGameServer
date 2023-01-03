@@ -9,9 +9,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientWhoListRequest
     {
-        public static void ProcessWhoList(Session session, PacketMessage ClientPacket)
+        public static void ProcessWhoList(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
             byte temp1 = reader.Read<byte>();
             byte temp2 = reader.Read<byte>();
 

@@ -37,16 +37,35 @@ namespace ReturnHome.Server.Network
 		
         public async Task StartServer()
         {
-            SocketReceiveFromResult result;
+            SocketReceiveFromResult result = new();
             while (true)
             {
-                result = await socket.ReceiveFromAsync(
-                    new ArraySegment<byte>(_buffer, 0, _buffSize), SocketFlags.None, new IPEndPoint(IPAddress.Any, 0));
-                byte[] buffer = result.ReceivedBytes < _buffSize ? _buffer.AsSpan(0, result.ReceivedBytes).ToArray() : _buffer;
+                byte[] buffer= null;
+                try
+                {
+                    result = await socket.ReceiveFromAsync(
+                        new ArraySegment<byte>(_buffer, 0, _buffSize), SocketFlags.None, new IPEndPoint(IPAddress.Any, 0));
+                    buffer = result.ReceivedBytes < _buffSize ? _buffer.AsSpan(0, result.ReceivedBytes).ToArray() : _buffer;
+                }
+                catch (SocketException e)
+                {
+                    Logger.Err("Wat??");
+                }
+                catch (ObjectDisposedException e)
+                {
+                    Logger.Err("This socket is closed!!");
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    Logger.Err("This is < -1");
+                }
 
-		    	ClientPacket clientPacket = new();
-                if(clientPacket.ProcessPacket(new ReadOnlyMemory<byte>(buffer)))
-				    SessionManager.ProcessPacket(this, clientPacket, (IPEndPoint)result.RemoteEndPoint);
+                if (buffer != null)
+                {
+                    ClientPacket clientPacket = new();
+                    if (clientPacket.ProcessPacket(new Memory<byte>(buffer)))
+                        SessionManager.ProcessPacket(this, clientPacket, (IPEndPoint)result.RemoteEndPoint);
+                }
             }
         }
     }

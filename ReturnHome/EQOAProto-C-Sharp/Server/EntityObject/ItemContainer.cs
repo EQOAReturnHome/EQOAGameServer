@@ -17,7 +17,7 @@ namespace ReturnHome.Server.EntityObject
         //Indicates if inventory or bank
         public bool Inventory;
 
-        private byte type = 0;
+        private sbyte type = 0;
 
         public int Tunar
         {
@@ -26,7 +26,7 @@ namespace ReturnHome.Server.EntityObject
             {
                 _tunar = value;
                 if (_e.isPlayer)
-                    ServerUpdateTunar.UpdateTunar(((Character)_e).characterSession, Inventory ? GameOpcode.PlayerTunar : GameOpcode.DepositBankTunar, _tunar);
+                    ServerUpdateTunar.UpdateTunar(((Character)_e).characterSession, Inventory ? GameOpcode.PlayerTunar : GameOpcode.ConfirmBankTunar, Tunar);
             }
         }
 
@@ -41,14 +41,14 @@ namespace ReturnHome.Server.EntityObject
             _itemContainer = new();
             Inventory = inventory;
             if (inventory)
-                type = 1;
+                type = -1;
             else
-                type = 2;
+                type = 1;
         }
 
-        public void AddTunar(int tunar) => _tunar += tunar;
+        public void AddTunar(int tunar) => Tunar += tunar;
 
-        public void RemoveTunar(int tunar) => _tunar -= tunar;
+        public void RemoveTunar(int tunar) => Tunar -= tunar;
 
         public bool Exists(byte key)
         {

@@ -40,7 +40,7 @@ namespace ReturnHome.Server.EntityObject
                     //Keep a reference to our current target on hand
                     EntityManager.QueryForEntity(_target, out _ourTarget);
                     if (_ourTarget != null)
-                        Console.WriteLine($"{CharName} targeting {_ourTarget.CharName} at X: {_ourTarget.x} Y: {_ourTarget.y} Z: {_ourTarget.z} XVel:{_ourTarget.VelocityX} VelY: {_ourTarget.VelocityY} VelZ: {_ourTarget.VelocityZ}");
+                        //Console.WriteLine($"{CharName} targeting {_ourTarget.CharName} at X: {_ourTarget.x} Y: {_ourTarget.y} Z: {_ourTarget.z} XVel:{_ourTarget.VelocityX} VelY: {_ourTarget.VelocityY} VelZ: {_ourTarget.VelocityZ}");
 
                     if (isPlayer && ObjectID != 0)
                     {
@@ -288,16 +288,16 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public void ProcessDialogue(Session session, BufferReader reader, PacketMessage ClientPacket)
+        public void ProcessDialogue(Session session, BufferReader reader, Message ClientPacket)
         {
             uint interactTarget = 0;
             //Read the incoming message and get the objectID that was interacted with
 
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            if (ClientPacket.Opcode == GameOpcode.Interact)
                 interactTarget = reader.Read<uint>();
 
             //if option choice incoming
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
+            if (ClientPacket.Opcode == GameOpcode.DialogueBoxOption)
             {
                 //try to pull the option counter and players choice out of message
                 try
@@ -323,15 +323,15 @@ namespace ReturnHome.Server.EntityObject
             Dialogue dialogue = session.MyCharacter.MyDialogue;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if a diag option choice incoming set outgoing to diag box option
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
+            if (ClientPacket.Opcode == GameOpcode.DialogueBoxOption)
                 dialogueType = GameOpcode.DialogueBoxOption;
 
             //else this is just a regular interaction with only dialogue
-            else if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            else if (ClientPacket.Opcode == GameOpcode.Interact)
                 dialogueType = GameOpcode.DialogueBox;
 
             //Gets NPC name from ObjectID
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            if (ClientPacket.Opcode == GameOpcode.Interact)
             {
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
                     dialogue.npcName = npc.CharName;
@@ -458,7 +458,6 @@ namespace ReturnHome.Server.EntityObject
 
         public static bool CheckIfItemInInventory(Session session, int itemID, out byte key, out Item item)
         {
-            Console.WriteLine("Checking Item Inventory");
             item = default;
             key = 0;
 

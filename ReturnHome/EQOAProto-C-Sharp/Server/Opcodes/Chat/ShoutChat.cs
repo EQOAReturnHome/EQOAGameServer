@@ -52,11 +52,12 @@ namespace ReturnHome.Server.Opcodes.Chat
             }
         }
 
-        public static void ProcessShout(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessShout(Session MySession, Message ClientPacket)
         {
             //First byte seems to always be 2? can skip it for now
-            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[1..]);
-            string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[5..(5 + messageLength * 2)]);
+            //TODO: Utilize BufferReader Here
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.message.Span[1..]);
+            string message = Encoding.Unicode.GetString(ClientPacket.message.Span[5..(5 + messageLength * 2)]);
 
             //Maybe need some checks here?
             ProcessShout(MySession, message);

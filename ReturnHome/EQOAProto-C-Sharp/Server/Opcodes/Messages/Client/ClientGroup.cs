@@ -8,22 +8,22 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientGroup
     {
-        public static void DisbandGroup(Session session, PacketMessage ClientPacket) => GroupManager.DisbandGroup(session);
+        public static void DisbandGroup(Session session, Message ClientPacket) => GroupManager.DisbandGroup(session);
 
-        public static void LeaveGroup(Session session, PacketMessage ClientPacket) => GroupManager.RemoveGroupMember(session, GroupActionEnum.LeaveGroup);
+        public static void LeaveGroup(Session session, Message ClientPacket) => GroupManager.RemoveGroupMember(session, GroupActionEnum.LeaveGroup);
 
-        public static void AcceptGroupInvite(Session session, PacketMessage ClientPacket)
+        public static void AcceptGroupInvite(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             uint playerID = reader.Read<uint>();
 
             GroupManager.AcceptInviteToGroup(session, playerID);
         }
 
-        public static void AddCharacterToGroup(Session session, PacketMessage ClientPacket)
+        public static void AddCharacterToGroup(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             uint playerID = reader.Read<uint>();
             string name = reader.ReadString(Encoding.UTF8, reader.Read<int>());
@@ -31,9 +31,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             GroupManager.InviteCharacterToGroup(session, playerID, name);
         }
 
-        public static void DeclineGroupInvite(Session session, PacketMessage ClientPacket)
+        public static void DeclineGroupInvite(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             uint playerID = reader.Read<uint>();
             byte action = reader.Read<byte>();
@@ -41,9 +41,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             GroupManager.PlayerDeclinedInvite(session, playerID, action);
         }
 
-        public static void BootGroupMember(Session session, PacketMessage ClientPacket)
+        public static void BootGroupMember(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             uint PlayerIDToBoot = reader.Read<uint>();
 

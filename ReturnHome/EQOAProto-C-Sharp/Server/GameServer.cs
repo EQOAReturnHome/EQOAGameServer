@@ -3,6 +3,7 @@ using System.Timers;
 
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
+using ReturnHome.Server.Opcodes.Messages.Client;
 
 namespace ReturnHome.Server
 {
@@ -16,7 +17,10 @@ namespace ReturnHome.Server
         {
             Console.WriteLine("Starting Server...");
 			//Load config for ServerListManager and start it
-			ServerListManager.ReadConfig(); 
+			ServerListManager.ReadConfig();
+
+            //Initialize Password stuff if 
+            ClientAuthenticate.Initialize();
 			Timer t = new(5000);
             t.AutoReset = true;
             t.Elapsed += new ElapsedEventHandler((_, _) => ServerListManager.DistributeServerList());

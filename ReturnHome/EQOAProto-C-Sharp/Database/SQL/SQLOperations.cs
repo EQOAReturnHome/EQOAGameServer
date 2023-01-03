@@ -419,10 +419,6 @@ namespace ReturnHome.Database.SQL
                     //58
                     session);
 
-
-
-                //Add character attribute data to charaterData List
-                //Console.WriteLine(newCharacter.CharName);
                 characterData.Add(newCharacter);
             }
             //Close first reader
@@ -453,7 +449,7 @@ namespace ReturnHome.Database.SQL
                   //Equipment Location
                   SecondRdr.GetInt32(4),
                   //Location (Bank, self, auction etc)
-                  SecondRdr.GetByte(5),
+                  SecondRdr.GetSByte(5),
                   //Location in inventory
                   SecondRdr.GetByte(6),
                   //ItemID
@@ -461,16 +457,16 @@ namespace ReturnHome.Database.SQL
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
-                if (ThisItem.Location == 1)
+                if (ThisItem.Location == -1)
                     thisChar.Inventory.AddItem(ThisItem);
 
 
                 //If this is 2, it needs to go to the Bank
-                else if (ThisItem.Location == 2)
+                else if (ThisItem.Location == 1)
                     thisChar.Bank.AddItem(ThisItem);
 
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                else if (ThisItem.Location == 4)
+                else if (ThisItem.Location == 2)
                     thisChar.AuctionItems.Add(ThisItem);
             }
 
@@ -620,7 +616,7 @@ namespace ReturnHome.Database.SQL
                       //Equipment Location
                       SecondRdr.GetInt32(4),
                       //Location (Bank, self, auction etc)
-                      SecondRdr.GetByte(5),
+                      SecondRdr.GetSByte(5),
                       //Location in inventory
                       SecondRdr.GetByte(6),
                       //ItemID
@@ -925,7 +921,6 @@ namespace ReturnHome.Database.SQL
                 }
                 line += "\n";
             }
-            Console.WriteLine(line);
         }
     }
 }

@@ -1,9 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
+﻿using System;
 using System.Buffers.Binary;
 using System.Text;
+using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -14,10 +12,10 @@ namespace ReturnHome.Server.Opcodes.Chat
     public static class ChatMessage
     {
 
-        public static void ProcessClientChat(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessClientChat(Session MySession, Message ClientPacket)
         {
-            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.Data.Span[0..]);
-            string message = Encoding.Unicode.GetString(ClientPacket.Data.Span[4..(4 + messageLength * 2)]);
+            int messageLength = BinaryPrimitives.ReadInt32LittleEndian(ClientPacket.message.Span[0..]);
+            string message = Encoding.Unicode.GetString(ClientPacket.message.Span[4..(4 + messageLength * 2)]);
 
             if (messageLength == 0)
                 return;
@@ -70,8 +68,7 @@ namespace ReturnHome.Server.Opcodes.Chat
             if (message[0..3] == "!xp")
             {
                 int xp = int.Parse(message.Substring(3, message.Length - 3));
-                Console.WriteLine(xp);
-                Character.GrantXP(MySession, xp);
+                Entity.GrantXP(MySession, xp);
             }
 
             //Add a check here to verify account has admin privileges?
@@ -139,22 +136,22 @@ namespace ReturnHome.Server.Opcodes.Chat
             }
         }
 
-        public static void ProcessShoutChat(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessShoutChat(Session MySession, Message ClientPacket)
         {
             //Would Process shout chat, and query the quad tree for the range to distribute the chat too
         }
 
-        public static void ProcessTells(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessTells(Session MySession, Message ClientPacket)
         {
             //Would take client message designated for a specific player, sending them a message if they are online
         }
 
-        public static void ProcessGuildChat(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessGuildChat(Session MySession, Message ClientPacket)
         {
             //Processes client chat bound for their guild
         }
 
-        public static void ProcessGroupChat(Session MySession, PacketMessage ClientPacket)
+        public static void ProcessGroupChat(Session MySession, Message ClientPacket)
         {
             //Processes client messages bound for group chat
         }

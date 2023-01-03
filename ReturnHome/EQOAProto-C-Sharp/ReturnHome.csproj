@@ -70,4 +70,7 @@
     <Content Include="Scripts\Temby\Dagget_Klem.lua" />
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\EQOAGameServer\AuthenticationServer\AuthenticationServer.csproj" />
+  </ItemGroup>
 </Project>

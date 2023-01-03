@@ -6,13 +6,12 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Opcodes.Messages.Client;
 using ReturnHome.Server.Managers;
-using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Opcodes
 {
     public static class ProcessOpcode
     {
-        public static readonly Dictionary<GameOpcode, Action<Session, PacketMessage>> OpcodeDictionary = new()
+        public static readonly Dictionary<GameOpcode, Action<Session, Message>> OpcodeDictionary = new()
         {
             { GameOpcode.DiscVersion, ClientDiscVersion.DiscVersion },
             { GameOpcode.Authenticate, ClientAuthenticate.Authenticate },
@@ -59,34 +58,34 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.FactionMessages, ClientOptions.ClientMessageOptions },
         };
 
-        public static void ProcessOpcodes(Session MySession, PacketMessage message)
+        public static void ProcessOpcodes(Session MySession, Message message)
         {
 
             //Logger.Info($"Message Length: {ClientPacket.Length}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
             try
             {
-                OpcodeDictionary[(GameOpcode)message.Header.Opcode].Invoke(MySession, message);
+                OpcodeDictionary[message.Opcode].Invoke(MySession, message);
             }
 
             catch
             {
-                ClientOpcodeUnknown(MySession, message.Header.Opcode);
+                ClientOpcodeUnknown(MySession, message.Opcode);
             }
         }
 
-        public static void ClientOpcodeUnknown(Session MySession, ushort opcode)
+        public static void ClientOpcodeUnknown(Session MySession, GameOpcode opcode)
         {
             if (MySession.unkOpcode)
             {
-                string message = $"Unknown Opcode: {opcode.ToString("X")}";
+                string message = $"Unknown Opcode: {((byte)opcode).ToString("X")}";
 
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
             }
         }
 
-        public static void ProcessPingRequest(Session MySession, PacketMessage message)
+        public static void ProcessPingRequest(Session MySession, Message message)
         {
-            if (message.Data.Span[0] == 0x12)
+            if (message.message.Span[0] == 0x12)
             {
                 Logger.Info("Processed Ping Request");
                 //int offset1 = 0;
@@ -99,7 +98,7 @@ namespace ReturnHome.Server.Opcodes
             }
         }
 
-        public static void EnableChannel(Session MySession, PacketMessage message)
+        public static void EnableChannel(Session MySession, Message message)
         {
             //Activate client channel
             MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);

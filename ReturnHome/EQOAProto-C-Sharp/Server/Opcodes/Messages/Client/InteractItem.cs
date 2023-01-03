@@ -7,9 +7,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class InteractItem
     {
-        public static void ProcessItemInteraction(Session session, PacketMessage ClientPacket)
+        public static void ProcessItemInteraction(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             uint itemIndex = reader.Read<uint>();
             uint target = reader.Read<uint>();

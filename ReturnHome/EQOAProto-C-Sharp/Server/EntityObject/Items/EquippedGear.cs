@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Items
 {
@@ -74,7 +75,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
             catch
             {
-                Console.WriteLine($"Issue adding stats for {_entity.CharName}");
+                Logger.Err($"Issue adding stats for {_entity.CharName}");
             }
         }
 
@@ -90,7 +91,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
             catch
             {
-                Console.WriteLine($"Issue removing stats for {_entity.CharName}");
+                Logger.Err($"Issue removing stats for {_entity.CharName}");
             }
         }
 

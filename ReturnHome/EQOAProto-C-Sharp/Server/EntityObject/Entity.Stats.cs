@@ -170,7 +170,6 @@ namespace ReturnHome.Server.EntityObject
                     if(!isPlayer)
                         if(Inventory != null)
                             ((Actor)this).corpse.UpdateCorpseOnDeath(Inventory.itemContainer);
-                    Console.WriteLine($"{CharName} died.");
                 }
 
                 //Update HP for stat message

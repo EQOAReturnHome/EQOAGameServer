@@ -9,9 +9,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientAttack
     {
-        public static void ClientProcessAttack(Session session, PacketMessage ClientPacket)
+        public static void ClientProcessAttack(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
             uint targetID = reader.Read<uint>();
 
             

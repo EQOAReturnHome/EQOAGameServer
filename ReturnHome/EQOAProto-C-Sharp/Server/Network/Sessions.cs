@@ -46,7 +46,7 @@ namespace ReturnHome.Server.Network
         public bool BundleTypeTransition = false;
 
         public bool serverSelect;
-        public SegmentBodyFlags PacketBodyFlags = new();
+        public SegmentBodyFlags segmentBodyFlags = new();
         public bool characterInWorld = false;
         public bool inGame = false;
         public bool objectUpdate = false;
@@ -117,14 +117,6 @@ namespace ReturnHome.Server.Network
             }
         }
 
-        public void UpdateClientStatus()
-        {
-            if(rdpCommIn.connectionData.ClientUpdateStack.TryPop(out PacketMessage result))
-                ProcessUnreliable.ProcessUnreliables(this, result);
-
-            //Always clear the stack
-            rdpCommIn.connectionData.ClientUpdateStack.Clear();
-        }
         /// <summary>
         /// This will send outgoing packets as well as the final logoff message.
         /// </summary>
@@ -161,7 +153,7 @@ namespace ReturnHome.Server.Network
         //Optional override for dropping the session, currently simplifies for removing a character when they log out
         public void DropSession(bool Override = false)
         {
-            if (!PendingTermination) return;
+            if (!PendingTermination || !Override) return;
 
             MapManager.RemoveObject(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
