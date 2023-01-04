@@ -28,7 +28,7 @@
     <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
+	<PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.4" />
     <PackageReference Include="MySqlConnector" Version="0.69.4" />
     <PackageReference Include="NLua" Version="1.6.0" />
@@ -71,6 +71,6 @@
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\EQOAGameServer\AuthenticationServer\AuthenticationServer.csproj" />
+    <ProjectReference Include="..\..\AuthenticationServer\Authserver.csproj" />
   </ItemGroup>
 </Project>
