@@ -68,7 +68,7 @@ Prerequisites:
 -   The `app.config` and `dnsmasq.conf` file must be modified with your local server's ip address.
 
 Steps:
-Run the following command (`docker-compose up -d`) in the project's directory to spin up a cluster with the following containers
+Run the following command (`docker-compose up -d`) in the project's directory to spin up a cluster in detached mode with the following containers
 
 -   returnhome server
 -   authentication server
@@ -86,6 +86,8 @@ If you are running into any issues with your Docker setup, and want to start fro
 -   Rebuilding your local images (if a file change isn't being picked up) : `docker-compose build`
 -   Restarting a specific service in Docker Compose : `docker-compose restart <service name>`
 -   See the running status of all of your services : `docker-compose ps`
+-   Viewing all container logs: `docker-compose logs`
+-   Viewing process specific logs and following output: `docker-compose logs -f <service-name>` 
 -   Kill a single service : Collect the ID using `docker ps`, run `docker kill <id>`
 -   Removing all local images from your machine (fresh start, make sure you have composed down) : `docker system prune -af`
 -   Remove all docker volumes (good idea if you are having issues with a data volume) : `docker volume prune -f`
