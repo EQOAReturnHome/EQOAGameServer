@@ -457,6 +457,7 @@ namespace ReturnHome.Database.SQL
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
+                //TODO:Add a enum? for Item Location to represent inventory, bank, auction
                 if (ThisItem.Location == -1)
                     thisChar.Inventory.AddItem(ThisItem);
 
@@ -623,15 +624,16 @@ namespace ReturnHome.Database.SQL
                       ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
 
                     //If this is 1, it needs to go to inventory
-                    if (ThisItem.Location == 1)
+                    //TODO:Add a enum? for Item Location to represent inventory, bank, auction
+                    if (ThisItem.Location == -1)
                         selectedCharacter.Inventory.AddItem(ThisItem);
 
                     //If this is 2, it needs to go to the Bank
-                    else if (ThisItem.Location == 2)
+                    else if (ThisItem.Location == 1)
                         selectedCharacter.Bank.AddItem(ThisItem);
 
                     //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                    else if (ThisItem.Location == 4)
+                    else if (ThisItem.Location == 2)
                         selectedCharacter.AuctionItems.Add(ThisItem);
                 }
 

@@ -185,5 +185,23 @@ namespace ReturnHome.Server.EntityObject
             index = 0xFF;
             return false;
         }
+
+        //TODO: Figure out how pulling out items should work. Should we pull the item wrapper out with any item so we can get the relevant key if needed?
+        public bool TryRetrieveItem(byte key, out ClientItemWrapper item, out byte index)
+        {
+            for (byte i = 0; i < _itemContainer.Count; ++i)
+            {
+                if (_itemContainer[i].key == key)
+                {
+                    item = _itemContainer[i];
+                    index = i;
+                    return true;
+                }
+            }
+
+            item = default;
+            index = 0xFF;
+            return false;
+        }
     }
 }

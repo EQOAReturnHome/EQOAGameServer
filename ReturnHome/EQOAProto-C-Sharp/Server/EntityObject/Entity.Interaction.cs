@@ -153,12 +153,6 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public void TriggerMerchantMenu(uint targetNPC)
-        {
-            if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
-                ServerTriggerMerchantMenu.TriggerMerchantMenu(((Character)this).characterSession, npc);
-        }
-
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
         public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
         {
