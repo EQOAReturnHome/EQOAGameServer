@@ -18,7 +18,7 @@ namespace ReturnHome.Server.Managers
             mySession.MyCharacter.Inventory.AddItem(newItem);
         }
 
-        public static Item CreateItem(int itemID, int qty) => new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, 1, 0, itemList[itemID]);
+        public static Item CreateItem(int itemID, int qty) => new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, ItemLocation.Inventory, 0, itemList[itemID]);
 
         public static ItemPattern GetItemPattern(int itemID) => itemList[itemID];
 

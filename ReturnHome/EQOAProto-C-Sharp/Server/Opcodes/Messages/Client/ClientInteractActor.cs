@@ -1,5 +1,6 @@
 ﻿using System;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
@@ -39,16 +40,19 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             {
                 //Merchant popup window, should be trigger some kind of flag if this goes through? Allowing buying/selling?
                 case GameOpcode.MerchantDiag:
-                    ServerTriggerMerchantMenu.TriggerMerchantMenu(session, e);
+                    if((e.NPCType & NPCType.Merchant) == NPCType.Merchant)
+                        ServerTriggerMerchantMenu.TriggerMerchantMenu(session, e);
                     break;
 
                 //Bank popup window
                 case GameOpcode.BankUI:
-                    ServerBankInteract.OpenBankMenu(session);
+                    if((e.NPCType & NPCType.Banker) == NPCType.Banker)
+                        ServerBankInteract.OpenBankMenu(session);
                     break;
 
                 case GameOpcode.BlackSmithMenu:
-                    ServerBlackSmith.ActivateBlackSmithMenu(session);
+                    if((e.NPCType & NPCType.Blacksmith) == NPCType.Blacksmith)
+                        ServerBlackSmith.ActivateBlackSmithMenu(session);
                     break;
 
                 //Dialogue and Quest Interaction

@@ -17,7 +17,7 @@ namespace ReturnHome.Server.EntityObject
         //Indicates if inventory or bank
         public bool Inventory;
 
-        private sbyte type = 0;
+        private ItemLocation _type;
 
         public int Tunar
         {
@@ -41,9 +41,9 @@ namespace ReturnHome.Server.EntityObject
             _itemContainer = new();
             Inventory = inventory;
             if (inventory)
-                type = -1;
+                _type = ItemLocation.Inventory;
             else
-                type = 1;
+                _type = ItemLocation.Bank;
         }
 
         public void AddTunar(int tunar) => Tunar += tunar;
@@ -66,7 +66,7 @@ namespace ReturnHome.Server.EntityObject
                 //if(itemToBeAdded.Lore == true)
 
                 _itemContainer.Add(new ClientItemWrapper(itemToBeAdded, _counter++));
-                itemToBeAdded.Location = type;
+                itemToBeAdded.Location = _type;
                 itemToBeAdded.ClientIndex = (byte)_itemContainer.Count;
                 if (_e.isPlayer && !loot)
                     if (((Character)_e).characterSession.inGame)
