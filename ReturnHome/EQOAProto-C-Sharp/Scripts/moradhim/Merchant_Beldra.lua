@@ -1,1 +1,1 @@
-merchantDialogue = "What're ye buyin'?"
+merchantDialogue = "Care ta see some fine metals we've unearthed?"

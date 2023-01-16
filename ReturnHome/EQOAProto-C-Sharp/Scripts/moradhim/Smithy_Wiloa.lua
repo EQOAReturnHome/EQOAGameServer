@@ -1,1 +1,1 @@
-merchantDialogue = "Lookin' fer a wee bit o' steel, I reckon.  What can I get ya?"
+merchantDialogue = "I'm here ta get you equipped before ya head out. What can I get ya?"

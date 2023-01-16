@@ -99,10 +99,10 @@ namespace ReturnHome.Database.SQL
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
             SecondCmd.ExecuteNonQuery();
 
-            SavePlayerItems(player);
+            //SavePlayerItems(player);
         }
 
-        public void SavePlayerItems(Character player)
+        /*public void SavePlayerItems(Character player)
         {
 
             DataTable dt = new DataTable("charInv");
@@ -141,6 +141,52 @@ namespace ReturnHome.Database.SQL
             da.Update(changes);
             dt.AcceptChanges();
             da.Dispose();
+
+        }*/
+
+        public void AddPlayerItem(Character player, Item item)
+        {
+            //Create new sql connection calling stored proc to update data
+            using var Cmd = new MySqlCommand("AddPlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("playerID", player.ServerID);
+            Cmd.Parameters.AddWithValue("ID", item.ID);
+            Cmd.Parameters.AddWithValue("stack", item.StackLeft);
+            Cmd.Parameters.AddWithValue("remHP", item.RemainingHP);
+            Cmd.Parameters.AddWithValue("remCharge", item.Charges);
+            Cmd.Parameters.AddWithValue("pattern", item.Pattern.ItemID);
+            Cmd.Parameters.AddWithValue("equip_location", (sbyte)item.EquipLocation);
+            Cmd.Parameters.AddWithValue("loc", item.Location);
+            Cmd.Parameters.AddWithValue("listnum", item.ClientIndex);
+
+            Cmd.ExecuteNonQuery();
+        }
+
+        public void UpdatePlayerItem(Character player, int qty, int itemID)
+        {
+            //using var Cmd = new MySqlCommand($"UPDATE charInventory SET stackLeft={qty} WHERE itemID={itemID}", con);
+
+            using var Cmd = new MySqlCommand("UpdatePlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("playerID", player.ServerID);
+            Cmd.Parameters.AddWithValue("stack", qty);
+            Cmd.Parameters.AddWithValue("ID", itemID);
+
+
+            Cmd.ExecuteNonQuery();
+
+        }
+
+        public void DeletePlayerItem(int itemID)
+        {
+            //Create new sql connection calling stored proc to update data
+            using var Cmd = new MySqlCommand("DeletePlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("ID", itemID);
+            Cmd.ExecuteNonQuery();
 
         }
 
@@ -422,7 +468,6 @@ namespace ReturnHome.Database.SQL
 
 
                 //Add character attribute data to charaterData List
-                //Console.WriteLine(newCharacter.CharName);
                 characterData.Add(newCharacter);
             }
             //Close first reader
@@ -457,7 +502,8 @@ namespace ReturnHome.Database.SQL
                   //Location in inventory
                   SecondRdr.GetByte(6),
                   //ItemID
-                  ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
+                  ItemManager.GetItemPattern(SecondRdr.GetInt32(7)),
+                  SecondRdr.GetInt32(46));
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
@@ -472,9 +518,12 @@ namespace ReturnHome.Database.SQL
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
                 else if (ThisItem.Location == 4)
                     thisChar.AuctionItems.Add(ThisItem);
+
             }
 
             SecondRdr.Close();
+
+
 
             //return Character Data with characters and gear.
             return characterData;
@@ -624,7 +673,8 @@ namespace ReturnHome.Database.SQL
                       //Location in inventory
                       SecondRdr.GetByte(6),
                       //ItemID
-                      ItemManager.GetItemPattern(SecondRdr.GetInt32(7)));
+                      ItemManager.GetItemPattern(SecondRdr.GetInt32(7)),
+                      SecondRdr.GetInt32(46));
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == 1)
@@ -643,6 +693,7 @@ namespace ReturnHome.Database.SQL
 
             }
             SecondRdr.Close();
+
 
             //return Character Data with characters and gear.
             return selectedCharacter;
@@ -909,7 +960,8 @@ namespace ReturnHome.Database.SQL
             ServerCreateCharacterList.CreateCharacterList(MyCharacterList, session);
         }
 
-        public static void printDataTable(DataTable tbl)
+        //Probably no longer need this since we're doing all DB saves immediately
+        /*public static void printDataTable(DataTable tbl)
         {
             string line = "";
             foreach (DataColumn item in tbl.Columns)
@@ -926,6 +978,16 @@ namespace ReturnHome.Database.SQL
                 line += "\n";
             }
             Console.WriteLine(line);
+        }*/
+
+        public void GetMaxItemID()
+        {
+            //Set and open SQL con
+            //SQL query to check if a name exists in the DB or not
+            using var GetItemIDCmd = new MySqlCommand("select MAX(itemID) from charInventory;", con);
+            //Executes the SQL reader
+            ItemManager.nextItemID = (int)GetItemIDCmd.ExecuteScalar() + 1;
+            Console.WriteLine($"Next Item ID available: {ItemManager.nextItemID}");
         }
     }
 }

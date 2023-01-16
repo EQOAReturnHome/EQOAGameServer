@@ -24,6 +24,8 @@ namespace ReturnHome.Server.Managers
             //CharacterSQL sql = new CharacterSQL();
             //sql.SavePlayerItems(mySession.MyCharacter);
 
+            //ItemManager.GrantItem(mySession, 31010, 1);
+
 
 
             string[] file;
@@ -116,7 +118,6 @@ namespace ReturnHome.Server.Managers
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
             if (file.Length < 1 || file == null)
             {
-                Console.Write(myString);
                 return myString;
             }
 

@@ -1,1 +1,1 @@
-merchantDialogue = "What can I do fer ye?"
+merchantDialogue = "I must be keepin' m'mind free, fer the trainees o'Serilis be needin' my attentions."

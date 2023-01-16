@@ -84,7 +84,7 @@ namespace ReturnHome.Server.EntityObject.Player
             if (Inventory.TryRetrieveItem(itemSlot, out Item item, out byte index))
             {
 
-                Inventory.UpdateQuantity(itemSlot, itemQty);
+                Inventory.UpdateQuantity(itemSlot, item.StackLeft - itemQty);
                 //TODO: Flawed Tunar logic? Seem to be getting less then we spent back
                 Inventory.AddTunar((int)(item.Pattern.Maxhp == 0 ? item.Pattern.ItemCost * itemQty : item.Pattern.ItemCost * (item.RemainingHP / item.Pattern.Maxhp) * itemQty));
             }

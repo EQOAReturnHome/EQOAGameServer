@@ -14,12 +14,15 @@ namespace ReturnHome.Server.EntityObject.Items
         public byte Location { get; set; } //inventory, bank auction etc
         public byte ServerKey { get; set; } //Location in inventory, would location in List suffice for this?
 
+        public int ID { get; set; }
+
         public ItemPattern Pattern { get; private set; }
 
         //Constructor object for armour and weapons
         //Alot of this could be managed by scripting as there is a huge portion that is static
         //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
-        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, ItemPattern itemPattern)
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, byte thisInventoryNumber, ItemPattern itemPattern,
+            int itemID)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;
@@ -30,6 +33,7 @@ namespace ReturnHome.Server.EntityObject.Items
             RemainingHP = thisRemainingHP;
             EquipLocation = (EquipSlot)thisEquipLocation;
             Pattern = itemPattern;
+            ID = itemID;
         }
 
         public Item AcquireItem(int qty)

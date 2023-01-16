@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "If you've nothing to say, then best be on yer way."
+    npcDialogue = "In the mountain just east of Moradhim, is a temple of siesen monks. Though they may not seem temperamental, they can be quite dangerous if threatened. Don't underestimate a monk without a weapon in his hand, they are often more deadly without them."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

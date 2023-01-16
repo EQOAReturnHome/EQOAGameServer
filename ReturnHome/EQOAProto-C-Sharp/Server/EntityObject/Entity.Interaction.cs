@@ -17,6 +17,7 @@ using ReturnHome.Server.EntityObject.Items;
 using System.Collections.Concurrent;
 using ReturnHome.Server.EntityObject.Actors;
 using System.Text.RegularExpressions;
+using ReturnHome.Database.SQL;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -146,8 +147,11 @@ namespace ReturnHome.Server.EntityObject
                         Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
 
                         Item newItem = item.AcquireItem(itemQty);
+                        newItem.ID = ItemManager.nextItemID;
+                        ItemManager.nextItemID++;
 
                         Inventory.AddItem(newItem);
+                        CharacterSQL sql = new CharacterSQL();
                     }
                 }
             }
@@ -210,9 +214,10 @@ namespace ReturnHome.Server.EntityObject
             {
                 choiceCounter = (uint)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //Length of choices
-                foreach (string choice in session.MyCharacter.MyDialogue.diagOptions) { 
+                foreach (string choice in session.MyCharacter.MyDialogue.diagOptions)
+                {
                     choicesLength += (uint)choice.Length;
-                    }
+                }
 
                 //count the number of textOptions
                 textOptions = (byte)session.MyCharacter.MyDialogue.diagOptions.Count;
@@ -449,7 +454,7 @@ namespace ReturnHome.Server.EntityObject
         //Not the most efficent, but works..
         public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
-            for(int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
                 if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID)
                     if (session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
                         return true;

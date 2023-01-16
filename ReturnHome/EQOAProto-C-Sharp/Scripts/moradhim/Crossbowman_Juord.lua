@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Nothin' escapes our sights!!  We'll shoot em dead before they ever step foot in our city!"
+    npcDialogue = "We get the occasional raid from the Baga Trolls from the south. Vicious creatures they are. You don't want them getting their heavy clubs anywhere near your head, so it's important to not miss as they charge towards the city."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

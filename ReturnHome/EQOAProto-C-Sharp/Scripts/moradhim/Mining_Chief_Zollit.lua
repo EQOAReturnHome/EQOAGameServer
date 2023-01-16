@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "We've got a job to do and we can have ye running about distracting the workers playerName.  Be on yer way."
+    npcDialogue = "Now, ya can't just go mining precious ore with any old pickaxe. I keep a few forged steel pickaxes around for just such an occasion. I know, they look terrible, but I assure you they are 100% reliable."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

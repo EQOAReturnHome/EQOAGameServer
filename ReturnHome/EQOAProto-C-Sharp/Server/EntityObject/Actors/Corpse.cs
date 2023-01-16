@@ -5,6 +5,8 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.EntityObject.Grouping;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Database.SQL;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.EntityObject.Actors
 {
@@ -25,7 +27,7 @@ namespace ReturnHome.Server.EntityObject.Actors
         //When we create the corpse, entity has died and we toss a time stamp to it
         public Corpse(Entity npc) => _npc = npc;
 
-        public void UpdateCorpseOnDeath( List<ClientItemWrapper> loot)
+        public void UpdateCorpseOnDeath(List<ClientItemWrapper> loot)
         {
             Loot = loot;
             _timeOfDeath = DateTime.UtcNow.Millisecond;
@@ -49,21 +51,53 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public void LootItems(Session session, byte key, int itemQty)
         {
-            for(byte i = 0; i < Loot.Count; ++i)
-                if(Loot[i].key == key)
-                    //If Character can add it to Inventory, remove from Corpse
-                    if(session.MyCharacter.Inventory.AddItem(Loot[i].item, true))
+            Item existingItem = null;
+            CharacterSQL sql = new();
+
+
+
+            for (byte i = 0; i < Loot.Count; ++i)
+                if (Loot[i].key == key)
+                {
+                    foreach (ClientItemWrapper invItem in session.MyCharacter.Inventory.itemContainer)
                     {
+                        Console.WriteLine(invItem.item.Pattern.ItemID);
+                        if (invItem.item.Pattern.ItemID == Loot[i].item.Pattern.ItemID)
+                        {
+                            Console.WriteLine($"Found item {invItem.item.Pattern.ItemID} by using {Loot[i].item.Pattern.ItemID}");
+                            existingItem = invItem.item;
+                            break;
+                        }
+                        existingItem = null;
+                    }
+                    //If Character can add it to Inventory, remove from Corpse
+                    if (session.MyCharacter.Inventory.AddItem(Loot[i].item, true))
+                    {
+
+                        if (existingItem != null)
+                        {
+                            Console.WriteLine("Updating item quantity");
+                            sql.UpdatePlayerItem(session.MyCharacter, existingItem.StackLeft + itemQty, existingItem.ID);
+                        }
+                        else
+                        {
+                            //Save the item to the players DB entries immediately
+                            Loot[i].item.ID = ItemManager.nextItemID;
+                            ItemManager.nextItemID++;
+                            sql.AddPlayerItem(session.MyCharacter, Loot[i].item);
+                        }
+
                         Loot.RemoveAt(i);
                         ServerLoot.ServerLootItem(session, i, itemQty);
                     }
+                }
         }
 
         public void ExitCorpse(Session session)
         {
             _lootee = null;
 
-            if(Loot.Count <= 0)
+            if (Loot.Count <= 0)
             {
                 //Destroy corpse somehow
             }

@@ -56,11 +56,17 @@ namespace ReturnHome.Server.Managers
             }
 
             Console.WriteLine("Done.");
+            Console.WriteLine("Getting itemID seed.");
+            CharacterSQL itemIDs = new();
+            itemIDs.GetMaxItemID();
+            itemIDs.CloseConnection();
 
             Console.WriteLine("Loading Default character options");
             CharacterSQL LoadDefaultCharacters = new();
             LoadDefaultCharacters.CollectDefaultCharacters();
             LoadDefaultCharacters.CloseConnection();
+
+
             Console.WriteLine("Done...");
             var thread = new Thread(() =>
             {
