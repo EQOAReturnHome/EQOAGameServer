@@ -30,6 +30,7 @@ namespace ReturnHome.Server.Managers
 
             string[] file;
             EntityManager.QueryForEntity(mySession.MyCharacter.Target, out Entity targetNPC);
+           
             //Strip white spaces from NPC name and replace with Underscores
             mySession.MyCharacter.MyDialogue.npcName = mySession.MyCharacter.MyDialogue.npcName.Replace(" ", "_");
             //Find Lua script recursively through scripts directory by zone

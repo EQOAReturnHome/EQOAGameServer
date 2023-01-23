@@ -21,7 +21,7 @@ namespace ReturnHome.Server.EntityObject.Items
         //Constructor object for armour and weapons
         //Alot of this could be managed by scripting as there is a huge portion that is static
         //Varis: int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, byte thisLocation, int thisInventoryNumber, int thisItemID<- use this in scripting to get right gear?
-        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, ItemLocation thisLocation, byte thisInventoryNumber, ItemPattern itemPattern)
+        public Item(int thisStacksLeft, int thisRemainingHP, int thisCharges, int thisEquipLocation, ItemLocation thisLocation, byte thisInventoryNumber, ItemPattern itemPattern, int itemID)
         {
             StackLeft = thisStacksLeft;
             Charges = thisCharges;

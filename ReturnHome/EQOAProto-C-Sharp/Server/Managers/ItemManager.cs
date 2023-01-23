@@ -4,6 +4,7 @@ using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Database.SQL;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Managers
 {
@@ -18,21 +19,30 @@ namespace ReturnHome.Server.Managers
 
         public static void GrantItem(Session mySession, int itemID, int qty)
         {
-            Item newItem = CreateItem(itemID, qty);
+            Item newItem = CreateItem(itemID, qty, mySession.MyCharacter);
             mySession.MyCharacter.Inventory.AddItem(newItem);
-            CharacterSQL sql = new CharacterSQL();
-            sql.AddPlayerItem(mySession.MyCharacter, newItem);
         }
 
 
-        public static Item CreateItem(int itemID, int qty)
+        public static Item CreateItem(int itemID, int qty, Entity entity)
         {
-            Item newItem = new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, 1, 0, itemList[itemID], nextItemID);
-            nextItemID++;
+            Item newItem;
+            if (entity is Character)
+            {
+                Console.WriteLine($"The itemID is {nextItemID}");
+                newItem = new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, ItemLocation.Inventory, 0, itemList[itemID], nextItemID);
+                nextItemID++;
+
+            }
+
+            //Create npc one here
+            else
+            {
+                newItem = new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, ItemLocation.Inventory, 0, itemList[itemID], 0);
+            }
 
             return newItem;
         }
-
 
         public static ItemPattern GetItemPattern(int itemID) => itemList[itemID];
 

@@ -1,1 +1,1 @@
-merchantDialogue = "See anything that sparks your interest?"
+merchantDialogue = "Jack be nimble, jack be quick, read my scrolls, and learn my trick..."

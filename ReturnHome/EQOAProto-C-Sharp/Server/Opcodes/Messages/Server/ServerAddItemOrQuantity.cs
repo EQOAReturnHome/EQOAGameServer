@@ -5,11 +5,11 @@ using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
-    public static class ServerAddBankItemQuantity
+    public static class ServerAddItemOrQuantity
     {
-		public static void AddBankItemQuantity(Session session, Item item)
+		public static void AddItemOrQuantity(Session session, GameOpcode opcode, Item item)
         {
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.AddBankItem);
+            Message message = Message.Create(MessageType.ReliableMessage, opcode);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);

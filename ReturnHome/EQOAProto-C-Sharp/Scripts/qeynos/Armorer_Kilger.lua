@@ -1,1 +1,1 @@
-merchantDialogue = "Ahh, wanting to add an extra layer or three over that thin skin of yours, I see.  What can I get for you?"
+merchantDialogue = "Step right up. I have the finest chainmail in all the land."

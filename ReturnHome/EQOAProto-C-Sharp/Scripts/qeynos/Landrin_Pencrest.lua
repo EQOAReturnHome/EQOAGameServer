@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Hail, playerName!  I hope your travels here were not difficult.  Feel free to rest as you need here."
+    npcDialogue = "I've just received word about a portal appearing south of Stonehaven village. A mob of goblins was seen pouring through, and invading the land. This will have to be delt with. Perhaps we could spare a paladin or two to seal the portal..."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

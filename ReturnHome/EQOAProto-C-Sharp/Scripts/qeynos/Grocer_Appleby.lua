@@ -1,1 +1,1 @@
-merchantDialogue = "Oh!  A customer!!  How can I help you?"
+merchantDialogue = "Nothing heals the soul like my fresh food. What would you like?"

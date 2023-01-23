@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "I'm sorry but I haven't the time to speak right now."
+    npcDialogue = "Yes, I consider my Air Elementalkin to be my friend. She's witty, curious...and she's loyal. She laughs at funny things, dances when the wind blows, and most of all she keeps me safe. "
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

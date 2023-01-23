@@ -1,1 +1,1 @@
-merchantDialogue = "Anything I can interest you in?"
+merchantDialogue = "Fine metals for sale. Mined by the dwarves of Moradhim."

@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Hail, traveler!  I have stayed many a visits within all of the great cities of Norrath and none compare to the beauty of Qeynos."
+    npcDialogue = "Hunting down were-beasts isn't an easy life. We have to watch our backs, and keep a look out at all times. That is why there are two of us traveling together...We have to sleep sometimes."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

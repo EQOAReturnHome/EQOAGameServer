@@ -32,7 +32,7 @@ namespace ReturnHome.Server.Network.Managers
             catch
             {
                 hosts.Clear();
-                hosts.Add(IPAddress.Parse("192.168.1.62"));
+                hosts.Add(IPAddress.Any);
             }
 
             listeners = new ServerListener[hosts.Count * 2];

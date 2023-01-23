@@ -4,15 +4,16 @@ using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
-    public static class ServerAddInventoryItemQuantity
+    public static class ServerRemoveItemOrQuantity
     {
-		public static void AddInventoryItemQuantity(Session session, Item item)
+		public static void RemoveItemOrQuantity(Session session, GameOpcode opcode, int StackLeft, byte clientIndex)
         {
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.AddInvItem);
+            Message message = Message.Create(MessageType.ReliableMessage, opcode);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);
-            item.DumpItem(ref writer, item.ClientIndex);
+            writer.Write(clientIndex);
+            writer.Write7BitEncodedInt64(StackLeft);
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);

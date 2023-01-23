@@ -51,42 +51,12 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public void LootItems(Session session, byte key, int itemQty)
         {
-            Item existingItem = null;
-            CharacterSQL sql = new();
-
-
-
             for (byte i = 0; i < Loot.Count; ++i)
                 if (Loot[i].key == key)
                 {
-                    foreach (ClientItemWrapper invItem in session.MyCharacter.Inventory.itemContainer)
-                    {
-                        Console.WriteLine(invItem.item.Pattern.ItemID);
-                        if (invItem.item.Pattern.ItemID == Loot[i].item.Pattern.ItemID)
-                        {
-                            Console.WriteLine($"Found item {invItem.item.Pattern.ItemID} by using {Loot[i].item.Pattern.ItemID}");
-                            existingItem = invItem.item;
-                            break;
-                        }
-                        existingItem = null;
-                    }
                     //If Character can add it to Inventory, remove from Corpse
                     if (session.MyCharacter.Inventory.AddItem(Loot[i].item, true))
                     {
-
-                        if (existingItem != null)
-                        {
-                            Console.WriteLine("Updating item quantity");
-                            sql.UpdatePlayerItem(session.MyCharacter, existingItem.StackLeft + itemQty, existingItem.ID);
-                        }
-                        else
-                        {
-                            //Save the item to the players DB entries immediately
-                            Loot[i].item.ID = ItemManager.nextItemID;
-                            ItemManager.nextItemID++;
-                            sql.AddPlayerItem(session.MyCharacter, Loot[i].item);
-                        }
-
                         Loot.RemoveAt(i);
                         ServerLoot.ServerLootItem(session, i, itemQty);
                     }

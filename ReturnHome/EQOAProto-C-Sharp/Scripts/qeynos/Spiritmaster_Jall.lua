@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Would like me to bind your spirit to this location, child?"
+    npcDialogue = "I can bind you here, naturally, if you wish it playerName."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "If you've nothing to report, please be on your way."
+    npcDialogue = "Not lost are you? To the northwest, you'll find Coachman Dudley. Head south, through the tunnel, and you'll find your way out of the city."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

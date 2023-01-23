@@ -73,7 +73,7 @@ namespace ReturnHome.Server.Network
 
         public void ProcessMessageBundle(ClientPacket packet)
         {
-            foreach( Message m in packet.segmentBody.messages)
+            foreach (Message m in packet.segmentBody.messages)
             {
                 if ((m.Messagetype == MessageType.PingMessage) || (m.Messagetype == MessageType.ReliableMessage) || (m.Messagetype == MessageType.SegmentReliableMessage))
                 {
@@ -139,7 +139,7 @@ namespace ReturnHome.Server.Network
             if ((packet.segmentBody.bodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
             {
                 Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;
-                foreach ( StateAcks s in packet.segmentBody.stateAcks)
+                foreach (StateAcks s in packet.segmentBody.stateAcks)
                 {
                     if (s.Channel >= 0 && s.Channel <= 0x17)
                         temp[s.Channel].UpdateBaseXor(s.Ack);
@@ -160,6 +160,7 @@ namespace ReturnHome.Server.Network
                 CharacterSQL charList = new();
                 Logger.Info($"{_session.rdpCommIn.clientID.ToString("X")}: Generating Character Select");
                 List<Character> MyCharacterList = charList.AccountCharacters(_session);
+
 
                 //May need to be fixed up
                 ServerCreateCharacterList.CreateCharacterList(MyCharacterList, _session);

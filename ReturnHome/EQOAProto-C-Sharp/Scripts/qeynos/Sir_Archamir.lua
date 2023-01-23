@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Excuse me, but I am very busy."
+    npcDialogue = "Through love and remembrance, we honor those who paved the way before us."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

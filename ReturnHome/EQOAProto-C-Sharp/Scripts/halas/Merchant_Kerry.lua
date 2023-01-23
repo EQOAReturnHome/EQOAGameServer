@@ -1,1 +1,1 @@
-merchantDialogue = "Anything I can interest you in?"
+merchantDialogue = "Crafting hammers for sale! New shipments each week directly from Fayspires."

@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "Freezebloods storm around surrounding areas.  Best to be sure you're always on your guard."
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "What item were you looking for again? So many sought after wares...I think the voices are starting to get to me."

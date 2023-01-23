@@ -1,1 +1,1 @@
-merchantDialogue = "Greetings, playerName.  If you've come seeking the finest tailoring work in all of Norrath then you've come to the right place."
+merchantDialogue = "Something I can get for you?"

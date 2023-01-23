@@ -146,6 +146,9 @@ namespace ReturnHome.Database.SQL
 
         public void AddPlayerItem(Character player, Item item)
         {
+
+            Console.WriteLine(player.ServerID);
+            Console.WriteLine(item.ID);
             //Create new sql connection calling stored proc to update data
             using var Cmd = new MySqlCommand("AddPlayerItem", con);
             Cmd.CommandType = CommandType.StoredProcedure;
@@ -157,7 +160,7 @@ namespace ReturnHome.Database.SQL
             Cmd.Parameters.AddWithValue("remCharge", item.Charges);
             Cmd.Parameters.AddWithValue("pattern", item.Pattern.ItemID);
             Cmd.Parameters.AddWithValue("equip_location", (sbyte)item.EquipLocation);
-            Cmd.Parameters.AddWithValue("loc", item.Location);
+            Cmd.Parameters.AddWithValue("loc", (sbyte)item.Location);
             Cmd.Parameters.AddWithValue("listnum", item.ClientIndex);
 
             Cmd.ExecuteNonQuery();
@@ -166,6 +169,9 @@ namespace ReturnHome.Database.SQL
         public void UpdatePlayerItem(Character player, int qty, int itemID)
         {
             //using var Cmd = new MySqlCommand($"UPDATE charInventory SET stackLeft={qty} WHERE itemID={itemID}", con);
+            Console.WriteLine($"{player.CharName}");
+            Console.WriteLine($"{qty}");
+            Console.WriteLine($"{itemID}");
 
             using var Cmd = new MySqlCommand("UpdatePlayerItem", con);
             Cmd.CommandType = CommandType.StoredProcedure;
@@ -279,7 +285,7 @@ namespace ReturnHome.Database.SQL
                     if (thisActor.Inventory == null)
                         thisActor.Inventory = new(0, thisActor);
 
-                    Item ThisItem = ItemManager.CreateItem(SecondRdr.GetInt32(7), SecondRdr.GetInt32(1));
+                    Item ThisItem = ItemManager.CreateItem(SecondRdr.GetInt32(7), SecondRdr.GetInt32(1), thisActor);
 
                     //If this is 1, it needs to go to inventory
                     if (ThisItem.Location == ItemLocation.Inventory)
@@ -467,6 +473,7 @@ namespace ReturnHome.Database.SQL
 
                 characterData.Add(newCharacter);
             }
+
             //Close first reader
             rdr.Close();
 
@@ -475,6 +482,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.CommandType = CommandType.StoredProcedure;
             SecondCmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
+
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
@@ -537,6 +545,7 @@ namespace ReturnHome.Database.SQL
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
+
 
             //Read through results from query populating character data needed for character select
             while (rdr.Read())
@@ -981,11 +990,24 @@ namespace ReturnHome.Database.SQL
 
         public void GetMaxItemID()
         {
-            //Set and open SQL con
-            //SQL query to check if a name exists in the DB or not
-            using var GetItemIDCmd = new MySqlCommand("select MAX(itemID) from charInventory;", con);
-            //Executes the SQL reader
-            ItemManager.nextItemID = (int)GetItemIDCmd.ExecuteScalar() + 1;
+            using var CheckItemRows = new MySqlCommand("Select COUNT(*) from charInventory;", con);
+            int result = int.Parse(CheckItemRows.ExecuteScalar().ToString());
+
+            if (result == 0)
+            {
+                Console.WriteLine("No items exist for any characters. Starting at 1.");
+                ItemManager.nextItemID = 1;
+            }
+            else
+            {
+
+                //TODO: Need to figure out a way to track this while still working if there are no existing entries to return max ID of.
+                //Set and open SQL con
+                //SQL query to check if a name exists in the DB or not
+                using var GetItemIDCmd = new MySqlCommand("select MAX(itemID) from charInventory;", con);
+                //Executes the SQL reader
+                ItemManager.nextItemID = (int)GetItemIDCmd.ExecuteScalar() + 1;
+            }
             Console.WriteLine($"Next Item ID available: {ItemManager.nextItemID}");
         }
     }

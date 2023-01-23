@@ -43,11 +43,11 @@ namespace ReturnHome.Server.EntityObject
                     if (_ourTarget != null)
                         //Console.WriteLine($"{CharName} targeting {_ourTarget.CharName} at X: {_ourTarget.x} Y: {_ourTarget.y} Z: {_ourTarget.z} XVel:{_ourTarget.VelocityX} VelY: {_ourTarget.VelocityY} VelZ: {_ourTarget.VelocityZ}");
 
-                    if (isPlayer && ObjectID != 0)
-                    {
-                        //Get target information about the object
-                        TargetInformation(_target);
-                    }
+                        if (isPlayer && ObjectID != 0)
+                        {
+                            //Get target information about the object
+                            TargetInformation(_target);
+                        }
                 }
             }
         }
@@ -136,7 +136,6 @@ namespace ReturnHome.Server.EntityObject
         {
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
-
                 if (npc.Inventory.TryRetrieveItem(itemSlot, out Item item, out byte index))
                 {
                     if (Inventory.Tunar < item.Pattern.ItemCost)
@@ -145,13 +144,8 @@ namespace ReturnHome.Server.EntityObject
                     else
                     {
                         Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
-
                         Item newItem = item.AcquireItem(itemQty);
-                        newItem.ID = ItemManager.nextItemID;
-                        ItemManager.nextItemID++;
-
                         Inventory.AddItem(newItem);
-                        CharacterSQL sql = new CharacterSQL();
                     }
                 }
             }
@@ -287,21 +281,15 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public void ProcessDialogue(Session session, BufferReader reader, Message ClientPacket)
+
+        public void ProcessDialogue(Session session, BufferReader reader, Message ClientPacket, uint interactTarget)
         {
-            uint interactTarget = 0;
-            //Read the incoming message and get the objectID that was interacted with
-
-            if (ClientPacket.Opcode == GameOpcode.Interact)
-                interactTarget = reader.Read<uint>();
-
             //if option choice incoming
             if (ClientPacket.Opcode == GameOpcode.DialogueBoxOption)
             {
                 //try to pull the option counter and players choice out of message
                 try
                 {
-                    uint optionCounter = reader.Read<uint>();
                     session.MyCharacter.MyDialogue.choice = reader.Read<byte>();
                     //if diag message is 255(exit dialogue in client) return immediately without new message
                     //and set choice to incredibly high number to make sure it doesn't retrigger any specific dialogue.

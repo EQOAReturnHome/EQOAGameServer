@@ -1,1 +1,1 @@
-merchantDialogue = "See anything that sparks your interest?"
+merchantDialogue = "Careful, you could easily strike yourself with these wizard spells if you fail to stay focused."

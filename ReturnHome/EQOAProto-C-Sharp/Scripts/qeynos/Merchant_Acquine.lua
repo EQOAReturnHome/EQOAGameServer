@@ -1,1 +1,1 @@
-merchantDialogue = "Are you interested in buying some Cleric spells?"
+merchantDialogue = "When you are ready, perhaps these holiest of all cleric spells may aid you."

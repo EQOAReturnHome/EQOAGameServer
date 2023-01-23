@@ -1,1 +1,1 @@
-merchantDialogue = "What can I get for you?"
+merchantDialogue = "If you can't find it at my shop, you don't need it."
