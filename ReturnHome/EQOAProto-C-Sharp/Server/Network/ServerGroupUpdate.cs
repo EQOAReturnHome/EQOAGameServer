@@ -98,7 +98,7 @@ namespace ReturnHome.Server.Network
 
             Memory<byte> temp = new Memory<byte>(new byte[0x27]);
             CoordinateConversions.Xor_data(temp, _session.MyCharacter.GroupUpdate, _baseXOR, 0x27);
-            _currentXORResults.Add(_messageCounter, temp);
+            _currentXORResults.Add(_messageCounter, temp); Message message = Message.Create((MessageType)_objectChannel, 0);
             _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
             _messageCounter++;
         }

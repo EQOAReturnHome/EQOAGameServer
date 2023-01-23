@@ -6,13 +6,12 @@ using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Chat;
 using ReturnHome.Server.Opcodes.Messages.Client;
 using ReturnHome.Server.Managers;
-using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.Opcodes
 {
     public static class ProcessOpcode
     {
-        public static readonly Dictionary<GameOpcode, Action<Session, PacketMessage>> OpcodeDictionary = new()
+        public static readonly Dictionary<GameOpcode, Action<Session, Message>> OpcodeDictionary = new()
         {
             { GameOpcode.DiscVersion, ClientDiscVersion.DiscVersion },
             { GameOpcode.Authenticate, ClientAuthenticate.Authenticate },
@@ -30,21 +29,21 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.DialogueBoxOption, ClientInteractActor.InteractActor },
             { GameOpcode.BankUI, ClientInteractActor.InteractActor },
             { GameOpcode.MerchantDiag, ClientInteractActor.InteractActor },
-            { GameOpcode.DepositBankTunar, ClientInteractActor.InteractActor },
+            { GameOpcode.DepositBankTunar, ClientBank.DepositOrTakeTunar },
             { GameOpcode.PlayerTunar, ClientInteractActor.InteractActor },
             { GameOpcode.ConfirmBankTunar, ClientInteractActor.InteractActor },
-            { GameOpcode.BankItem, ClientInteractActor.InteractActor },
+            { GameOpcode.BankItem, ClientBank.DepositOrTakeItem },
             { GameOpcode.DeleteQuest, ClientDeleteQuest.DeleteQuest },
-            { GameOpcode.MerchantBuy, ClientInteractActor.InteractActor },
-            { GameOpcode.MerchantSell, ClientInteractActor.InteractActor },
-            { GameOpcode.ArrangeItem, ClientInteractActor.InteractActor },
+            { GameOpcode.MerchantBuy, ClientInteractItem.BuyMerchantItem },
+            { GameOpcode.MerchantSell, ClientInteractItem.MerchantSellItem },
+            { GameOpcode.ArrangeItem, ClientInteractItem.ArrangeItem },
             { GameOpcode.RemoveInvItem, ClientDeleteItem.DeleteItem },
             { GameOpcode.EnableChannel, EnableChannel },
             { GameOpcode.UpdateTrainingPoints, ClientProcessTrainingPoints.ProcessTrainingPoints },
             { GameOpcode.ClassMastery, ClientClassMastery.ProcessClassMastery },
             { GameOpcode.ClientFaction, ClientFaction.ProcessClientFaction },
             { GameOpcode.Attack, ClientAttack.ClientProcessAttack },
-            { GameOpcode.InteractItem, InteractItem.ProcessItemInteraction },
+            { GameOpcode.InteractItem, ClientInteractItem.ProcessItemInteraction },
             { GameOpcode.WhoList, ClientWhoListRequest.ProcessWhoList },
             { GameOpcode.GroupInvite, ClientGroup.AddCharacterToGroup },
             { GameOpcode.AcceptGroupInvite, ClientGroup.AcceptGroupInvite },
@@ -57,36 +56,41 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.LootBoxRequest, ClientLoot.ClientOpenLootMenu },
             { GameOpcode.LootMessages, ClientOptions.ClientMessageOptions },
             { GameOpcode.FactionMessages, ClientOptions.ClientMessageOptions },
+            { GameOpcode.BlackSmithMenu, ClientInteractActor.InteractActor },
+            { GameOpcode.CloseBlacksmithMenu, ClientBlackSmith.CloseBlackSmithMenu },
+            { GameOpcode.RequestRepair, ClientBlackSmith.BlackSmithRepairGear },
+
+
         };
 
-        public static void ProcessOpcodes(Session MySession, PacketMessage message)
+        public static void ProcessOpcodes(Session MySession, Message message)
         {
 
             //Logger.Info($"Message Length: {ClientPacket.Length}; OpcodeType: {MessageTypeOpcode.ToString("X")}; Message Number: {MessageNumber.ToString("X")}; Opcode: {Opcode.ToString("X")}.");
             try
             {
-                OpcodeDictionary[(GameOpcode)message.Header.Opcode].Invoke(MySession, message);
+                OpcodeDictionary[message.Opcode].Invoke(MySession, message);
             }
 
             catch
             {
-                ClientOpcodeUnknown(MySession, message.Header.Opcode);
+                ClientOpcodeUnknown(MySession, message.Opcode);
             }
         }
 
-        public static void ClientOpcodeUnknown(Session MySession, ushort opcode)
+        public static void ClientOpcodeUnknown(Session MySession, GameOpcode opcode)
         {
             if (MySession.unkOpcode)
             {
-                string message = $"Unknown Opcode: {opcode.ToString("X")}";
+                string message = $"Unknown Opcode: {((byte)opcode).ToString("X")}";
 
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
             }
         }
 
-        public static void ProcessPingRequest(Session MySession, PacketMessage message)
+        public static void ProcessPingRequest(Session MySession, Message message)
         {
-            if (message.Data.Span[0] == 0x12)
+            if (message.message.Span[0] == 0x12)
             {
                 Logger.Info("Processed Ping Request");
                 //int offset1 = 0;
@@ -99,7 +103,7 @@ namespace ReturnHome.Server.Opcodes
             }
         }
 
-        public static void EnableChannel(Session MySession, PacketMessage message)
+        public static void EnableChannel(Session MySession, Message message)
         {
             //Activate client channel
             MySession.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(MySession.MyCharacter);

@@ -250,7 +250,7 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(21),
                     //NPC Type
                     //Should be a ushort but throws an overflow error, needs to be looked at eventually, cast to ushort in Actor.cs
-                    rdr.GetUInt32(22),
+                    (NPCType)rdr.GetUInt32(22),
                     //NPC ID
                     rdr.GetInt32(23));
                 //add the created actor to the npcData list
@@ -282,7 +282,7 @@ namespace ReturnHome.Database.SQL
                     Item ThisItem = ItemManager.CreateItem(SecondRdr.GetInt32(7), SecondRdr.GetInt32(1));
 
                     //If this is 1, it needs to go to inventory
-                    if (ThisItem.Location == 1)
+                    if (ThisItem.Location == ItemLocation.Inventory)
                         thisActor.Inventory.AddItem(ThisItem);
                 }
             }
@@ -465,9 +465,6 @@ namespace ReturnHome.Database.SQL
                     //58
                     session);
 
-
-
-                //Add character attribute data to charaterData List
                 characterData.Add(newCharacter);
             }
             //Close first reader
@@ -498,7 +495,7 @@ namespace ReturnHome.Database.SQL
                   //Equipment Location
                   SecondRdr.GetInt32(4),
                   //Location (Bank, self, auction etc)
-                  SecondRdr.GetByte(5),
+                  (ItemLocation)SecondRdr.GetSByte(5),
                   //Location in inventory
                   SecondRdr.GetByte(6),
                   //ItemID
@@ -507,16 +504,17 @@ namespace ReturnHome.Database.SQL
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
-                if (ThisItem.Location == 1)
+                //TODO:Add a enum? for Item Location to represent inventory, bank, auction
+                if (ThisItem.Location == ItemLocation.Inventory)
                     thisChar.Inventory.AddItem(ThisItem);
 
 
                 //If this is 2, it needs to go to the Bank
-                else if (ThisItem.Location == 2)
+                else if (ThisItem.Location == ItemLocation.Bank)
                     thisChar.Bank.AddItem(ThisItem);
 
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                else if (ThisItem.Location == 4)
+                else if (ThisItem.Location == ItemLocation.Auction)
                     thisChar.AuctionItems.Add(ThisItem);
 
             }
@@ -669,7 +667,7 @@ namespace ReturnHome.Database.SQL
                       //Equipment Location
                       SecondRdr.GetInt32(4),
                       //Location (Bank, self, auction etc)
-                      SecondRdr.GetByte(5),
+                      (ItemLocation)SecondRdr.GetSByte(5),
                       //Location in inventory
                       SecondRdr.GetByte(6),
                       //ItemID
@@ -677,15 +675,16 @@ namespace ReturnHome.Database.SQL
                       SecondRdr.GetInt32(46));
 
                     //If this is 1, it needs to go to inventory
-                    if (ThisItem.Location == 1)
+                    //TODO:Add a enum? for Item Location to represent inventory, bank, auction
+                    if (ThisItem.Location == ItemLocation.Inventory)
                         selectedCharacter.Inventory.AddItem(ThisItem);
 
                     //If this is 2, it needs to go to the Bank
-                    else if (ThisItem.Location == 2)
+                    else if (ThisItem.Location == ItemLocation.Bank)
                         selectedCharacter.Bank.AddItem(ThisItem);
 
                     //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                    else if (ThisItem.Location == 4)
+                    else if (ThisItem.Location == ItemLocation.Auction)
                         selectedCharacter.AuctionItems.Add(ThisItem);
                 }
 

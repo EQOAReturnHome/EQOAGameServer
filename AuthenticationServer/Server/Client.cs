@@ -1,10 +1,11 @@
 using System;
-using AuthServer.Utility;
-using AuthServer.Account;
 using System.Net;
 using System.Collections.Generic;
 using System.Buffers;
 using System.Net.Sockets;
+
+using AuthServer.Utility;
+using AuthServer.Account;
 
 namespace AuthServer.Server
 {
@@ -14,19 +15,18 @@ namespace AuthServer.Server
         public List<EQOAClient> EQOAClientList = new List<EQOAClient>();
 
         //Add new connecting clients here
-        public void AddEQOAClient(EQOAClient NewClient) { EQOAClientList.Add(NewClient); }
+        public void AddEQOAClient(EQOAClient NewClient) => EQOAClientList.Add(NewClient);
 
         //Remove Client from connected list
-        public void RemoveEQOAClient(EQOAClient DisconnectedClient) { EQOAClientList.Remove(DisconnectedClient); }
+        public void RemoveEQOAClient(EQOAClient DisconnectedClient) => EQOAClientList.Remove(DisconnectedClient);
 
         //Gets total connected clients
-        public uint ConnectedEQOAClientCount() { return (uint)EQOAClientList.Count; }
+        public uint ConnectedEQOAClientCount() => (uint)EQOAClientList.Count;
     }
 
-    public class EQOAClient : AccountManagement
+    public class EQOAClient
     {
-        private ReadOnlySequence<byte> _buffer;
-        public ReadOnlyMemory<byte> ClientPacket;
+        public Memory<byte> ClientPacket;
         public Memory<byte> ResponsePacket;
         public int offset = 0;
         public int resOffset = 4;
@@ -37,9 +37,10 @@ namespace AuthServer.Server
 
         //Username
         public string Username;
+        public string Email;
 
         //Encryoted Password
-        public string EncPassword;
+        public Memory<byte> EncPassword;
 
         //Socket
         public Socket Handler;
@@ -91,17 +92,17 @@ namespace AuthServer.Server
             {
                 case AccountMessageTypes.LOGIN_REQUEST:
                     //Console.WriteLine("Processing Character Request...");
-                    LoginRequest(this);
+                    AccountManagement.LoginRequest(this);
                     break;
 
                 case AccountMessageTypes.SUBMIT_ACCT_CREATE:
                     //Console.WriteLine("Attempting to create an account...");
-                    CreateAccount(this);
+                    AccountManagement.CreateAccount(this);
                     break;
 
                 case AccountMessageTypes.CHANGE_PASSWORD:
                     //Console.WriteLine("Attempting to change client Password...");
-                    ChangePassword(this);
+                    AccountManagement.ChangePassword(this);
                     break;
 
                 case AccountMessageTypes.CONSUME_GAMECARD:

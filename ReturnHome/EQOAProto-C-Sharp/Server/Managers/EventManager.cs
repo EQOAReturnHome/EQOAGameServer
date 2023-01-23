@@ -129,7 +129,7 @@ namespace ReturnHome.Server.Managers
 
             myString = (string)lua["merchantDialogue"];
 
-            if (String.IsNullOrEmpty(myString))
+            if (string.IsNullOrEmpty(myString))
             {
                 myString = " ";
             }
@@ -172,7 +172,6 @@ namespace ReturnHome.Server.Managers
                 }
                 line += "\n";
             }
-            Console.WriteLine(line);
         }
     }
 }

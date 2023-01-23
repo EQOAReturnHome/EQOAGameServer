@@ -70,7 +70,6 @@ namespace ReturnHome.Server.EntityObject.Grouping
                 if (MemberToRemove == charList[i].ObjectID)
                 {
                     Character c = (Character)charList[i];
-                    Console.WriteLine($"Removing {c.CharName}");
                     DisableGroupForCharacter(c);
                     ServerGroup.RemoveGroupMember(c.characterSession, e);
                     charList.RemoveAt(i);

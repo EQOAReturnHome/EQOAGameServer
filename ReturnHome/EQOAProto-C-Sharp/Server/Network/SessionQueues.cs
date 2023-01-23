@@ -82,7 +82,7 @@ namespace ReturnHome.Server.Network
 
                         //Place segment into resend queue
                         _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
-                        segmentBodyFlags.RdpMessage = true;
+                        segmentBodyFlags |= SegmentBodyFlags.rdpMessage;
                         break;
                     }
 
@@ -102,7 +102,7 @@ namespace ReturnHome.Server.Network
 
                         //Place segment into resend queue
                         _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
-                        segmentBodyFlags.RdpMessage = true;
+                        segmentBodyFlags|= SegmentBodyFlags.rdpMessage;
 
                         //Release original message
                         Message.Return(_segmentMessage);
@@ -158,7 +158,7 @@ namespace ReturnHome.Server.Network
 
                                 //Place into resend queue
                                 _resendMessageQueue.TryAdd(reliableMessage.Sequence, reliableMessage);
-                                segmentBodyFlags.RdpMessage = true;
+                                segmentBodyFlags |= SegmentBodyFlags.rdpMessage;
 
                                 //continue processing
                                 continue;
@@ -182,7 +182,7 @@ namespace ReturnHome.Server.Network
                                 //Place segment into resend queue
                                 _resendMessageQueue.TryAdd(tempMessage.Sequence, tempMessage);
                                 _segmentMessage = reliableMessage;
-                                segmentBodyFlags.RdpMessage = true;
+                                segmentBodyFlags |= SegmentBodyFlags.rdpMessage;
                                 break;
                             }
                         }

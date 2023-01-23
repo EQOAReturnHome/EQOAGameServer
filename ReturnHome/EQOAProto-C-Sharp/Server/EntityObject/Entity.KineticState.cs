@@ -124,7 +124,7 @@ namespace ReturnHome.Server.EntityObject
                 if(true)
                 {
                     _facingF = value;
-                    ObjectUpdateFacingF();
+                    //ObjectUpdateFacingF();
                 }
             }
         }
@@ -142,8 +142,8 @@ namespace ReturnHome.Server.EntityObject
                     z = _position.Z;
                     _point = new PointF(_position.X, _position.Z);
                     ObjectUpdatePosition();
-                    if (isPlayer)
-                        ObjectUpdateCoordY();
+                    //if (isPlayer)
+                        //ObjectUpdateCoordY();
                 }
             }
         }

@@ -1,4 +1,5 @@
 using System;
+using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
@@ -15,7 +16,7 @@ namespace ReturnHome.Server.EntityObject
         private int _level;
         private uint _objectID;
         private long _killTime;
-        private ushort _npcType;
+        private NPCType _npcType = NPCType.None;
         public int ServerID;
 
         public byte chatMode = 0; //Default to 0, say = 0, Shout = 3 NPC's can technically talk in chat too?
@@ -90,7 +91,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public ushort NPCType
+        public NPCType NPCType
         {
             get { return _npcType; }
             set

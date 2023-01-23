@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ReturnHome.Server.EntityObject;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
@@ -13,9 +7,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public class ClientProcessTrainingPoints
     {
-        public static void ProcessTrainingPoints(Session session, PacketMessage ClientPacket)
+        public static void ProcessTrainingPoints(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
             int StrAdd = (int)reader.Read7BitEncodedInt64();
             int StaAdd = (int)reader.Read7BitEncodedInt64();
             int AgiAdd = (int)reader.Read7BitEncodedInt64();

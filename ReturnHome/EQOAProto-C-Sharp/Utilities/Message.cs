@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.ObjectPool;
+
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes;
 
@@ -7,11 +8,10 @@ namespace ReturnHome.Utilities
 {
     public class Message
     {
-        private readonly int MaximumSize;
+        private readonly int MaximumSize = 0x514;
 
         public Message()
         {
-            MaximumSize = 0x514;
             message = new byte[MaximumSize];
         }
 
@@ -29,14 +29,14 @@ namespace ReturnHome.Utilities
 
         private int _size;
 
-        public int HeaderSize() => Messagetype switch 
+        public int HeaderSize() => Messagetype switch
         {
             MessageType.ReliableMessage or MessageType.SegmentReliableMessage or MessageType.PingMessage => Size > 0xFF ? 6 : 4,
             MessageType.UnreliableMessage => Size > 255 ? 4 : 2,
             _ => Size > 255 ? 7 : 5
         };
 
-        
+
         public int Size
         {
             get => _size;
@@ -81,7 +81,7 @@ namespace ReturnHome.Utilities
         {
             Opcode = opcode;
             Messagetype = messageType;
-            if(messageType == MessageType.SegmentReliableMessage)
+            if (messageType == MessageType.SegmentReliableMessage)
                 MaximumSize = ushort.MaxValue;
             else
                 MaximumSize = 0x514;
@@ -101,6 +101,9 @@ namespace ReturnHome.Utilities
 
         public static void Return(Message theMessage)
         {
+            if (theMessage.MaximumSize != 0x514)
+                return;
+
             _messagePool.Return(theMessage);
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject;
+using System.Linq;
 
 namespace ReturnHome.Server.Network
 {
@@ -9,7 +10,7 @@ namespace ReturnHome.Server.Network
     {
         //Holds receiving clients session info
         private Session _session;
-
+        private Dictionary<ushort, Memory<byte>> _baseXORs = new();
         //Stores our base data to xor against
         private Memory<byte> _baseXOR = new Memory<byte>(new byte[0xC9]);
 
@@ -21,6 +22,9 @@ namespace ReturnHome.Server.Network
 
         //May not be needed
         private byte _objectChannel;
+
+        //Currently only send base data on first packet till client ack's a message
+        private bool _sendBaseData = true;
 
         //Place to hold all of our XOR result's till client acks. We then xor that against the baseXOR to get new base object update, clear list once a message is ack'd by client
         private Dictionary<ushort, Memory<byte>> _currentXORResults = new Dictionary<ushort, Memory<byte>>();
@@ -79,8 +83,10 @@ namespace ReturnHome.Server.Network
                 }
 
                 //See if character and current message has changed
-                if (!_baseXOR.Slice(1, 0xC8).Span.SequenceEqual(entity.ObjectUpdate.Span))
-                {
+                if (!_baseXOR.Slice(1, 0xC8).Span.SequenceEqual(entity.ObjectUpdate.Span)) 
+                {/*
+                    if ((_xor!= 0 && _xor < 33) || !_sendBaseData)
+                    {*/
                     Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
                     temp.Span[0] = _isActive && (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                     CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, _baseXOR.Slice(1, 0xC8), 0xC8);
@@ -95,6 +101,7 @@ namespace ReturnHome.Server.Network
         {
             //No need to verify if entity is null or not, disabling channel anyway
             Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
+
             //Since we are deactivating the channel, all we need to do is modify the first byte
             temp.Span[0] = (_baseXOR.Span[0] == 1) ? (byte)1 : (byte)0;
 
@@ -120,6 +127,8 @@ namespace ReturnHome.Server.Network
 
             //Ensure this is new base
             _baseMessageCounter = msgCounter;
+
+            _sendBaseData = false;
         }
     }
 }

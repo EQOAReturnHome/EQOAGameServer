@@ -86,13 +86,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             for (int i = 0; i < session.MyCharacter.Inventory.Count; i++)
             {
                 if ((sbyte)session.MyCharacter.Inventory.itemContainer[i].item.EquipLocation != -1)
-                {
-                    if (ItemInteraction.EquipItem(session.MyCharacter, session.MyCharacter.Inventory.itemContainer[i].item, (byte)i))
-                        Console.WriteLine($"{session.MyCharacter.CharName} successfully equipped {session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemName}");
-
-                    else
-                        Console.WriteLine($"{session.MyCharacter.CharName} could not equip {session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemName}");
-                }
+                    ItemInteraction.EquipItem(session.MyCharacter, session.MyCharacter.Inventory.itemContainer[i].item, (byte)i);
             }
             //Not entirely known what this is at this time
             //Related to stats and CM's possibly. Needs testing, just using data from a pcap of live.

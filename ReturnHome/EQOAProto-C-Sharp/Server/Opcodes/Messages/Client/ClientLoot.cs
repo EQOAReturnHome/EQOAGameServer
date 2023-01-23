@@ -3,16 +3,15 @@ using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
-using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientLoot
     {
-        public static void ClientOpenLootMenu(Session session, PacketMessage clientPacket)
+        public static void ClientOpenLootMenu(Session session, Message clientPacket)
         {
-            BufferReader reader = new(clientPacket.Data.Span);
+            BufferReader reader = new(clientPacket.message.Span);
 
             uint target = reader.Read<uint>();
 
@@ -21,9 +20,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                     ((Actor)temp).corpse.LootCorpse(session);
         }
 
-        public static void ClientLootItem(Session session, PacketMessage clientPacket)
+        public static void ClientLootItem(Session session, Message clientPacket)
         {
-            BufferReader reader = new(clientPacket.Data.Span);
+            BufferReader reader = new(clientPacket.message.Span);
 
             byte key = (byte)reader.Read<int>();
             int itemQty = reader.Read<int>();
@@ -32,9 +31,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                 ((Actor)temp).corpse.LootItems(session, key, itemQty);
         }
 
-        public static void ClientLootClose(Session session, PacketMessage clientPacket)
+        public static void ClientLootClose(Session session, Message clientPacket)
         {
-            //Sends 
             Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ClientCloseLoot);
             BufferWriter writer = new BufferWriter(message.Span);
 

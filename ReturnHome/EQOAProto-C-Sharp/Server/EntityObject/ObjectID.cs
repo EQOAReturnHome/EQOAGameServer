@@ -81,9 +81,7 @@ namespace ReturnHome.Server.EntityObject
 
                     //Shouldn't ever get here hopefully
                     if (temp == 20000)
-                    {
                         Console.WriteLine("An error has occured where we couldn't assign a object ID, please escalate");
-                    }
                 }
             }
 

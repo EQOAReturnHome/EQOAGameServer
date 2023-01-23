@@ -128,13 +128,7 @@ namespace ReturnHome.Server.Managers
 
                 if(g == GroupActionEnum.LeaveGroup)
                     temp.RemoveMember(session.MyCharacter.ObjectID, g);
-
-                else
-                    Console.WriteLine("Member to boot was not a part of expected group");
             }
-
-            else
-                Console.WriteLine("Couldn't boot group Member because requester isn't leader");
         }
 
         public static void DisbandGroup(Session session)

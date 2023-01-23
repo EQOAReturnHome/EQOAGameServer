@@ -20,7 +20,7 @@ namespace ReturnHome.Server.EntityObject
         //Indicates if inventory or bank
         public bool Inventory;
 
-        private byte type = 0;
+        private ItemLocation _type;
 
         public int Tunar
         {
@@ -29,7 +29,7 @@ namespace ReturnHome.Server.EntityObject
             {
                 _tunar = value;
                 if (_e.isPlayer)
-                    ServerUpdateTunar.UpdateTunar(((Character)_e).characterSession, Inventory ? GameOpcode.PlayerTunar : GameOpcode.DepositBankTunar, _tunar);
+                    ServerUpdateTunar.UpdateTunar(((Character)_e).characterSession, Inventory ? GameOpcode.PlayerTunar : GameOpcode.ConfirmBankTunar, Tunar);
             }
         }
 
@@ -44,14 +44,14 @@ namespace ReturnHome.Server.EntityObject
             _itemContainer = new();
             Inventory = inventory;
             if (inventory)
-                type = 1;
+                _type = ItemLocation.Inventory;
             else
-                type = 2;
+                _type = ItemLocation.Bank;
         }
 
-        public void AddTunar(int tunar) => _tunar += tunar;
+        public void AddTunar(int tunar) => Tunar += tunar;
 
-        public void RemoveTunar(int tunar) => _tunar -= tunar;
+        public void RemoveTunar(int tunar) => Tunar -= tunar;
 
         public bool Exists(byte key)
         {
@@ -69,7 +69,7 @@ namespace ReturnHome.Server.EntityObject
                 //if(itemToBeAdded.Lore == true)
 
                 _itemContainer.Add(new ClientItemWrapper(itemToBeAdded, _counter++));
-                itemToBeAdded.Location = type;
+                itemToBeAdded.Location = _type;
                 itemToBeAdded.ClientIndex = (byte)_itemContainer.Count;
                 if (_e.isPlayer && !loot)
                     if (((Character)_e).characterSession.inGame)
@@ -207,5 +207,23 @@ namespace ReturnHome.Server.EntityObject
                 index = 0xFF;
                 return false;
             }
+        }
+
+        //TODO: Figure out how pulling out items should work. Should we pull the item wrapper out with any item so we can get the relevant key if needed?
+        public bool TryRetrieveItem(byte key, out ClientItemWrapper item, out byte index)
+        {
+            for (byte i = 0; i < _itemContainer.Count; ++i)
+            {
+                if (_itemContainer[i].key == key)
+                {
+                    item = _itemContainer[i];
+                    index = i;
+                    return true;
+                }
+            }
+
+            item = default;
+            index = 0xFF;
+            return false;
         }
     }

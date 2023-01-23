@@ -21,7 +21,7 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public Actor(string charName, float xCoord, float yCoord, float zCoord, int facing, int world, int modelid, float size,
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
-            int gloves, int legs, int feet, int head, uint npcType, int serverID) : base(false, level)
+            int gloves, int legs, int feet, int head, NPCType npcType, int serverID) : base(false, level)
         {
 
             CharName = charName;
@@ -49,7 +49,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             CurrentStats.Add(StatModifiers.STA, 300);
             HPFlag = true;
             Target = 0xFFFFFFFF;
-            NPCType = (ushort)npcType;
+            NPCType = npcType;
             ServerID = serverID;
 
             corpse = new(this);
@@ -63,7 +63,7 @@ namespace ReturnHome.Server.EntityObject.Actors
 
             if(PlayerManager.QueryForPlayer(targetID, out Character player))
             {
-                Console.WriteLine($"Found player to attack: {player.CharName}");
+                //Console.WriteLine($"Found player to attack: {player.CharName}");
                 player.Animation = 0x2b;
                 player.CurrentHP -= 5;
             }
@@ -86,23 +86,21 @@ namespace ReturnHome.Server.EntityObject.Actors
             if (aggroTable.ContainsKey(playerID))
             {
                 aggroTable[playerID] += damage;
-                Console.WriteLine($"Aggro table already contains playerID {playerID}");
+                //Console.WriteLine($"Aggro table already contains playerID {playerID}");
             }
             else
             {
                 aggroTable.Add(playerID, damage);
-                Console.WriteLine($"Adding player with playerID {playerID} to aggro Table.");
+                //Console.WriteLine($"Adding player with playerID {playerID} to aggro Table.");
             }
 
 
             foreach (KeyValuePair<uint, int> player in aggroTable)
             {
-                Console.WriteLine(player.Value);
                 if (player.Value > mostAggro)
                 {
                     mostAggro = player.Value;
                     targetPlayer = player.Key;
-                    //Console.WriteLine($"{player.Key} has {mostAggro} aggro.");
                 }
             }
 

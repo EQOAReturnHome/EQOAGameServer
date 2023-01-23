@@ -5,7 +5,9 @@ VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReturnHome", "ReturnHome\EQOAProto-C-Sharp\ReturnHome.csproj", "{88466742-50F4-4ABE-A173-E791DB83C6DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication server", "..\EQOAGameServer\AuthenticationServer\Authentication server.csproj", "{D51A4CD9-3B64-4D74-B9AE-B1BA7DD6857C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthenticationServer", "..\EQOAGameServer\AuthenticationServer\AuthenticationServer.csproj", "{D51A4CD9-3B64-4D74-B9AE-B1BA7DD6857C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EQOACryptoLibrary", "..\EQOACryptoLibrary\EQOACryptoLibrary\EQOACryptoLibrary.csproj", "{1CA09AF1-70CB-4144-B811-6B567CE787FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{D51A4CD9-3B64-4D74-B9AE-B1BA7DD6857C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D51A4CD9-3B64-4D74-B9AE-B1BA7DD6857C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D51A4CD9-3B64-4D74-B9AE-B1BA7DD6857C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CA09AF1-70CB-4144-B811-6B567CE787FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CA09AF1-70CB-4144-B811-6B567CE787FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CA09AF1-70CB-4144-B811-6B567CE787FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CA09AF1-70CB-4144-B811-6B567CE787FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

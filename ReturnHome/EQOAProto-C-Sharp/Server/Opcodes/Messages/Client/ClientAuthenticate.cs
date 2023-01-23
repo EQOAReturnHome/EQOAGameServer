@@ -1,17 +1,34 @@
 ﻿using System;
-using System.Configuration;
 using System.Text;
+using EQOACryptoLibrary;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
+using AuthServer.Account.Database;
+using System.Configuration;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientAuthenticate
     {
-        ///Authentication check
-        public static void Authenticate(Session session, PacketMessage ClientPacket)
+        private static byte[] _aeskey;
+        private static bool _useDecryption;
+        public static void Initialize()
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            _useDecryption = bool.Parse(ConfigurationManager.AppSettings["UseDecryption"]);
+            if (_useDecryption)
+            {
+                string temp = ConfigurationManager.AppSettings["AESkey"];
+                byte[] t = new byte[32];
+                for (int i = 0; i < (temp.Length / 2); ++i)
+                    t[i] = Convert.ToByte(temp.Substring(i * 2, 2), 16);
+                _aeskey = t;
+            }
+
+        }
+        ///Authentication check
+        public static void Authenticate(Session session, Message ClientPacket)
+        {
+            BufferReader reader = new(ClientPacket.message.Span);
 
             Logger.Info("Processing Authentication");
             ///Opcode option? just skip for now
@@ -42,18 +59,29 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                 ReadOnlyMemory<byte> Password = reader.ReadArray<byte>(16);
                 reader.Position += 16;
 
-                ///Uncomment once ready
-                //session.AccountID = 3;
-                session.AccountID = Convert.ToInt32(ConfigurationManager.AppSettings["StaticAccount"]);
+                SQLAccount sql = new SQLAccount();
 
-
-                ///Theoretically we want to verify account # is not 0 here, if it is, drop it.
-                if (session.AccountID == -1)
+                if (_useDecryption)
                 {
-                    //Verifications failed, drop session?
-                    session.DropSession();
-                    return;
+                    if(sql.VerifyAccount(AccountName, new CryptoLibrary(CryptoOptions.AES, _aeskey).Decrypt(Password), out int accountID))
+                        session.AccountID = accountID;
+
+                    else
+                        //Verifications failed, drop session?
+                        session.DropSession();
                 }
+
+                else
+                {
+                    if (sql.AccountExists(AccountName, out int accountID))
+                        session.AccountID = accountID;
+
+                    else
+                        //Verifications failed, drop session?
+                        session.DropSession();
+                }
+
+                sql.CloseConnection();
             }
 
             else

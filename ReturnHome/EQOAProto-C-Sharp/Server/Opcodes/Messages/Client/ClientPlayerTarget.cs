@@ -5,9 +5,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientPlayerTarget
     {
-        public static void PlayerTarget(Session session, PacketMessage clientPacket)
+        public static void PlayerTarget(Session session, Message clientPacket)
         {
-            BufferReader reader = new(clientPacket.Data.Span);
+            BufferReader reader = new(clientPacket.message.Span);
 
             //First 4 bytes is targeting counter, just discarding for now
             _ = reader.Read<uint>();
