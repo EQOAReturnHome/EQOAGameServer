@@ -76,8 +76,6 @@ namespace ReturnHome.Server.EntityObject
                     //Make sure this isn't a freshly created item, if it is, update the itemID before adding to inventory and save it to the players inventory
                     if (itemToBeAdded.ID == 0)
                     {
-                        CharacterSQL sql = new();
-
                         foreach (ClientItemWrapper item in ((Character)_e).characterSession.MyCharacter.Inventory.itemContainer)
                         {
                             Console.WriteLine($"item ID is {item.item.Pattern.ItemID} and item to be added is {itemToBeAdded.Pattern.ItemID}");
@@ -89,16 +87,17 @@ namespace ReturnHome.Server.EntityObject
                                     Console.WriteLine($"The stack to be added is {itemToBeAdded.StackLeft} to the existing stack of {item.item.StackLeft}");
 
                                     //Update internally on an already held item's stack count, we should be adding here
-                                    UpdateQuantity(item.key, itemToBeAdded.StackLeft);
+                                    UpdateQuantity(item.key, itemToBeAdded.StackLeft, true);
                                     itemToBeAdded.StackLeft = 0;
                                 }
-                                else
+
+                                else if(item.item.StackLeft != item.item.Pattern.Maxstack)
                                 {
                                     int qtyToAdd = itemToBeAdded.Pattern.Maxstack - item.item.StackLeft;
                                     Console.WriteLine($"Would be overflow stack, adding {qtyToAdd} to existing stack for a total of {qtyToAdd + itemToBeAdded.StackLeft}.");
 
                                     //Update internally on an already held item's stack count, we should be adding here
-                                    UpdateQuantity(item.key, qtyToAdd);
+                                    UpdateQuantity(item.key, qtyToAdd, true);
 
                                     //Subject the quantity added to currently held stack from new item
                                     itemToBeAdded.StackLeft -= qtyToAdd;
@@ -128,7 +127,7 @@ namespace ReturnHome.Server.EntityObject
                     {
                         CharacterSQL sql = new CharacterSQL();
                         //Do we need a SQL call here to add the item to the database?
-                        ServerAddItemOrQuantity.AddItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.AddInvItem : GameOpcode.AddBankItem, itemToBeAdded);
+                        ServerAddItemOrQuantity.AddItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.AddInvItem : GameOpcode.AddBankItem, itemToBeAdded, itemToBeAdded.StackLeft);
                         sql.AddPlayerItem(((Character)_e).characterSession.MyCharacter, itemToBeAdded);
                     }
                 }
@@ -152,7 +151,7 @@ namespace ReturnHome.Server.EntityObject
                     _itemContainer.RemoveAt(i);
                     if (_e.isPlayer)
                         if (((Character)_e).characterSession.inGame)
-                            ServerRemoveItemOrQuantity.RemoveItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, item.StackLeft, (byte)i);
+                            ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, item.StackLeft, (byte)i);
 
                     return true;
                 }
@@ -167,7 +166,7 @@ namespace ReturnHome.Server.EntityObject
         /// </summary>
         /// 
         /// //TODO: Update references to this method to make sure they are appropriately passing a positive or negative value
-        public void UpdateQuantity(byte key, int quantity)
+        public void UpdateQuantity(byte key, int quantity, bool Add = false)
         {
             for (int i = 0; i < _itemContainer.Count; ++i)
             {
@@ -175,8 +174,8 @@ namespace ReturnHome.Server.EntityObject
                 {
                     CharacterSQL sql = new CharacterSQL(); //Moved to here so we don't needlessly create a sql connection every call incase item doesn't exist?
 
-                    //CVheck if we are subtracting stack and if it will take our total to 0
-                    if ((_itemContainer[i].item.StackLeft + quantity) == 0)
+                    //If not adding items, and rresult will be 0... Remove the item
+                    if (!Add && ((_itemContainer[i].item.StackLeft - quantity) == 0))
                     {
                         Console.WriteLine($"Deleting Item {_itemContainer[i].item.ID}");
                         if (_e.isPlayer)
@@ -187,23 +186,17 @@ namespace ReturnHome.Server.EntityObject
 
                     else
                     {
-                        //We always add quantity here, onus on us as developers to pass a positive or negative value depending on request
-                        _itemContainer[i].item.StackLeft += quantity;
                         if (_e.isPlayer)
                             if (((Character)_e).characterSession.inGame)
                             {
+                                _itemContainer[i].item.StackLeft += Add ? quantity : -1 * quantity;
                                 Console.WriteLine($"Updating item instead of deleting it");
-                                if (quantity < 0)
-                                    ServerRemoveItemOrQuantity.RemoveItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, _itemContainer[i].item.StackLeft, (byte)i);
-                                else
-                                    ServerAddItemOrQuantity.AddItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.AddInvItem : GameOpcode.AddBankItem, _itemContainer[i].item);
+                                //If adding to a stack, we need to * -1, otherwise left the value go through as is for subtraction
+                                ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, Add ? -1 * quantity : quantity, (byte)i);
                                 //Does this method update database to add the quantity, or set the stack to quantity? If last one, need to pass _itemContainer[i].item.StackLeft
-                                sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, quantity, _itemContainer[i].item.ID); //Should this be outside of our if else? See 1.
-
-                                //1. Here?
+                                sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, _itemContainer[i].item.StackLeft, _itemContainer[i].item.ID); //Should this be outside of our if else? See 1.
                             }
                     }
-
                 }
             }
         }
