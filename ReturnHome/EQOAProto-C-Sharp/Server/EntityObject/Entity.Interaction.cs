@@ -138,14 +138,18 @@ namespace ReturnHome.Server.EntityObject
             {
                 if (npc.Inventory.TryRetrieveItem(itemSlot, out Item item, out byte index))
                 {
-                    if (Inventory.Tunar < item.Pattern.ItemCost)
-                        ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
+                    if (Inventory.Tunar < (item.Pattern.ItemCost * itemQty))
+                    {
+                        ChatMessage.ClientErrorMessage(((Character)this).characterSession, $"You can't afford that.");
+                        ServerInventoryFull.InventoryFull(((Character)this).characterSession);
+                    }
 
                     else
                     {
-                        Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
+                        //TODO: Is this logic better? Verified we have the tunar. Try to add it to our inventory, if rejected for any reason, we don't pull the tunar from character
                         Item newItem = item.AcquireItem(itemQty);
-                        Inventory.AddItem(newItem);
+                        if (Inventory.AddItem(newItem))
+                            Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
                     }
                 }
             }

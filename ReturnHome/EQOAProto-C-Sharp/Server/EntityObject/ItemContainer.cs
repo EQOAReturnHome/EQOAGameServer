@@ -6,6 +6,7 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.Managers;
 using System;
+using ReturnHome.Server.Opcodes.Chat;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -76,6 +77,7 @@ namespace ReturnHome.Server.EntityObject
                     //Make sure this isn't a freshly created item, if it is, update the itemID before adding to inventory and save it to the players inventory
                     if (itemToBeAdded.ID == 0)
                     {
+                        bool itemExist = false;
                         foreach (ClientItemWrapper item in ((Character)_e).characterSession.MyCharacter.Inventory.itemContainer)
                         {
                             Console.WriteLine($"item ID is {item.item.Pattern.ItemID} and item to be added is {itemToBeAdded.Pattern.ItemID}");
@@ -90,7 +92,8 @@ namespace ReturnHome.Server.EntityObject
                                     UpdateQuantity(item.key, itemToBeAdded.StackLeft, true);
                                     itemToBeAdded.StackLeft = 0;
                                 }
-
+                                itemExist = true;
+                                /* TODO: Need to figure out how to properly showing multiple stacks of items client side, for time being we only allow 1 maxed stack of any item
                                 else if(item.item.StackLeft != item.item.Pattern.Maxstack)
                                 {
                                     int qtyToAdd = itemToBeAdded.Pattern.Maxstack - item.item.StackLeft;
@@ -101,12 +104,20 @@ namespace ReturnHome.Server.EntityObject
 
                                     //Subject the quantity added to currently held stack from new item
                                     itemToBeAdded.StackLeft -= qtyToAdd;
-                                }
+                                }*/
                             }
 
                             //If at the end of this loop the new items stackleft is 0, let it GC and return
                             if (itemToBeAdded.StackLeft == 0)
                                 return true;
+                        }
+
+                        if(itemExist)
+                        {
+                            //Send a message to client saying you cannot buy/loot anymore of this item due to max stack.
+                            ChatMessage.ClientErrorMessage(((Character)_e).characterSession, $"You cannot buy/loot anymore of this item due to max stack");
+                            ServerInventoryFull.InventoryFull(((Character)_e).characterSession);
+                            return false;
                         }
 
                         //Finished loop, if we still have an item with stacks, give it an ID

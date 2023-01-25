@@ -54,6 +54,23 @@ namespace ReturnHome.Server.Opcodes.Chat
         }
 
         /// <summary>
+        /// This method sends the client an error message to generate in the chat log that is red.
+        /// </summary>
+        public static void ClientErrorMessage(Session session, string chatMessage)
+        {
+            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.ErrorMessage);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+            writer.WriteString(Encoding.Unicode, chatMessage);
+
+            message.Size = writer.Position;
+
+            //Send Message
+            session.sessionQueue.Add(message);
+        }
+
+        /// <summary>
         /// This method processes client Commands
         /// </summary>
         public static void ProcessCommands(Session MySession, string message)
