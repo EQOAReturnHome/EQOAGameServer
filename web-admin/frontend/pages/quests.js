@@ -343,7 +343,7 @@ const Quests = () => {
                     <Select options={type} />
                 </Form.Item>
                 <Form.Item>
-                    <Generate finalStatus=$finalStatus />
+                    {/* <Generate finalStatus=$finalStatus /> */}
                 </Form.Item>
             </Form>
         </div>
