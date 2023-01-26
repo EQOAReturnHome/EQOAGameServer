@@ -184,7 +184,7 @@ namespace ReturnHome.Server.EntityObject
                             if (((Character)_e).characterSession.inGame)
                             {
                                 _itemContainer[i].item.StackLeft += Add ? quantity : -1 * quantity;
-                                sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, _itemContainer[i].item.StackLeft, _itemContainer[i].item.ID);
+                                sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, _itemContainer[i].item);
                                 if (!loot)
                                     //If adding to a stack, we need to * -1, otherwise left the value go through as is for subtraction
                                     ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, Add ? -1 * quantity : quantity, (byte)i);
