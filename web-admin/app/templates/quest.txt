@@ -1,0 +1,25 @@
+    if (GetPlayerFlags(mySession, "{{ quest_full_id }}") == "{{ step }}") then
+        if (ch:find("nightworm")) then
+            multiDialogue = {
+                {% for dialog in multi_dialog %}
+                "{{ npc }}: {dialog}",
+                {% endfor %}
+                "You have finished a quest!",
+                "You have received a quest!"
+            }
+            SendMultiDialogue(mySession, multiDialogue)
+            ContinueQuest(mySession, {{ quest_full_id }}, quests[{{ quest_full_id }}][{{ step }}].log)
+        elseif (ch:find("ate")) then
+            multiDialogue = {
+                {% for dialog in multi_dialog2 %}
+                "{{ npc }}: {dialog}"},
+                {% endfor %}
+            SendMultiDialogue(mySession,multiDialogue)
+        else
+            diagOptions = { 
+                {% for option in options_dialog %}
+                "{option}",
+                {% endfor %}}
+            npcDialogue = "{{ npc_dialog }}"
+            SendDialogue(mySession, npcDialogue, diagOptions)
+        end

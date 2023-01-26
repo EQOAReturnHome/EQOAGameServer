@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.routes import base
+from app.routes.v1 import quests
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -10,7 +11,7 @@ def get_application():
 
     _app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -22,3 +23,4 @@ def get_application():
 app = get_application()
 
 app.include_router(base.router)
+app.include_router(quests.router)
