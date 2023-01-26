@@ -164,14 +164,18 @@ namespace ReturnHome.Database.SQL
             Cmd.ExecuteNonQuery();
         }
 
-        public void UpdatePlayerItem(Character player, int qty, int itemID)
+        public void UpdatePlayerItem(Character player, Item item)
         {
             using var Cmd = new MySqlCommand("UpdatePlayerItem", con);
             Cmd.CommandType = CommandType.StoredProcedure;
 
             Cmd.Parameters.AddWithValue("playerID", player.ServerID);
-            Cmd.Parameters.AddWithValue("stack", qty);
-            Cmd.Parameters.AddWithValue("ID", itemID);
+            Cmd.Parameters.AddWithValue("stack", item.StackLeft);
+            Cmd.Parameters.AddWithValue("remHP", item.RemainingHP);
+            Cmd.Parameters.AddWithValue("remCharge", item.Charges);
+            Cmd.Parameters.AddWithValue("equip_location", (sbyte)item.EquipLocation);
+            Cmd.Parameters.AddWithValue("ID", item.ID);
+            Cmd.Parameters.AddWithValue("loc", (sbyte)item.Location);
 
 
             Cmd.ExecuteNonQuery();
