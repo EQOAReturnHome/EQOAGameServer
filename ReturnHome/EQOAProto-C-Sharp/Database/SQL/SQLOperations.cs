@@ -147,8 +147,6 @@ namespace ReturnHome.Database.SQL
         public void AddPlayerItem(Character player, Item item)
         {
 
-            Console.WriteLine(player.ServerID);
-            Console.WriteLine(item.ID);
             //Create new sql connection calling stored proc to update data
             using var Cmd = new MySqlCommand("AddPlayerItem", con);
             Cmd.CommandType = CommandType.StoredProcedure;
@@ -168,11 +166,6 @@ namespace ReturnHome.Database.SQL
 
         public void UpdatePlayerItem(Character player, int qty, int itemID)
         {
-            //using var Cmd = new MySqlCommand($"UPDATE charInventory SET stackLeft={qty} WHERE itemID={itemID}", con);
-            Console.WriteLine($"{player.CharName}");
-            Console.WriteLine($"{qty}");
-            Console.WriteLine($"{itemID}");
-
             using var Cmd = new MySqlCommand("UpdatePlayerItem", con);
             Cmd.CommandType = CommandType.StoredProcedure;
 

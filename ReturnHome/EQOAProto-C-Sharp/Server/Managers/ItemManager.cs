@@ -29,7 +29,6 @@ namespace ReturnHome.Server.Managers
             Item newItem;
             if (entity is Character)
             {
-                Console.WriteLine($"The itemID is {nextItemID}");
                 newItem = new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, ItemLocation.Inventory, 0, itemList[itemID], nextItemID);
                 nextItemID++;
 
