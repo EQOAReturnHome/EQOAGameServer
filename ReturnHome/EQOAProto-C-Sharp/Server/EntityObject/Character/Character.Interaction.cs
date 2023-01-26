@@ -54,11 +54,11 @@ namespace ReturnHome.Server.EntityObject.Player
                 //Remove item from Inventory
                 if (Inventory.TryRetrieveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
-                    Inventory.RemoveItem(itemToTransfer);
+                    Inventory.RemoveItem(itemToTransfer, true);
                     //unequip item
                     equippedGear.Remove(item);
                     //Deposit into bank
-                    Bank.AddItem(item);
+                    Bank.AddItem(item, false, true);
                 }
             }
             //Pull from bank
@@ -67,9 +67,9 @@ namespace ReturnHome.Server.EntityObject.Player
                 //Remove item from bank
                 if (Bank.TryRetrieveItem(itemToTransfer, out Item item, out byte clientIndex))
                 {
-                    Bank.RemoveItem(itemToTransfer);
+                    Bank.RemoveItem(itemToTransfer, true);
                     //Deposit into inventory
-                    Inventory.AddItem(item);
+                    Inventory.AddItem(item, false, true);
                 }
             }
         }

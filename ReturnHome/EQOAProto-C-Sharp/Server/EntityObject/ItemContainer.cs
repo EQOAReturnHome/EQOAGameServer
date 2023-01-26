@@ -7,6 +7,7 @@ using ReturnHome.Database.SQL;
 using ReturnHome.Server.Managers;
 using System;
 using ReturnHome.Server.Opcodes.Chat;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -63,7 +64,7 @@ namespace ReturnHome.Server.EntityObject
         }
 
         //TODO: Need to add check's in place for item's like "Lore", where we can only have 1 in our inventory at a time.
-        public bool AddItem(Item itemToBeAdded, bool loot = false)
+        public bool AddItem(Item itemToBeAdded, bool loot = false, bool transfer = false)
         {
             if (_itemContainer.Count < 40)
             {
@@ -103,6 +104,7 @@ namespace ReturnHome.Server.EntityObject
                             if (itemToBeAdded.StackLeft == 0)
                                 return true;
                         }
+
                         if (itemExist)
                         {
                             //Send a message to client saying you cannot buy/loot anymore of this item due to max stack.
@@ -123,21 +125,22 @@ namespace ReturnHome.Server.EntityObject
                 itemToBeAdded.ClientIndex = (byte)_itemContainer.Count;
                 if (_e.isPlayer)
                 {
-
-                    if (((Character)_e).characterSession.inGame)
-                    {
-                        CharacterSQL sql = new CharacterSQL();
+                    CharacterSQL sql = new CharacterSQL();
+                    if (((Character)_e).characterSession.inGame && !transfer)
                         sql.AddPlayerItem(((Character)_e).characterSession.MyCharacter, itemToBeAdded);
-                        if (!loot)
-                            ServerAddItemOrQuantity.AddItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.AddInvItem : GameOpcode.AddBankItem, itemToBeAdded, itemToBeAdded.StackLeft);
-                    }
+
+                    else if(((Character)_e).characterSession.inGame && transfer)
+                        sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, itemToBeAdded);
+
+                    if (((Character)_e).characterSession.inGame && !loot)
+                        ServerAddItemOrQuantity.AddItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.AddInvItem : GameOpcode.AddBankItem, itemToBeAdded, itemToBeAdded.StackLeft);
                 }
                 return true;
             }
             return false;
         }
 
-        public bool RemoveItem(byte key)
+        public bool RemoveItem(byte key, bool transfer = false)
         {
             for (int i = 0; i < _itemContainer.Count; ++i)
             {
@@ -147,8 +150,15 @@ namespace ReturnHome.Server.EntityObject
                     _itemContainer.RemoveAt(i);
                     if (_e.isPlayer)
                         if (((Character)_e).characterSession.inGame)
-                            ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, item.StackLeft, (byte)i);
+                        {
+                            if (!transfer)
+                            {
+                                CharacterSQL sql = new CharacterSQL();
+                                sql.DeletePlayerItem(_itemContainer[i].item.ID);//Should this be moved to RemoveItem? Other classes/Methods call remove Item outside of UpdateQuantity
+                            }
 
+                            ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, item.StackLeft, (byte)i);
+                        }
                     return true;
                 }
             }
@@ -168,21 +178,15 @@ namespace ReturnHome.Server.EntityObject
             {
                 if (_itemContainer[i].key == key)
                 {
-                    CharacterSQL sql = new CharacterSQL(); //Moved to here so we don't needlessly create a sql connection every call incase item doesn't exist?
-                                                           //If not adding items, and rresult will be 0... Remove the item
                     if (!Add && ((_itemContainer[i].item.StackLeft - quantity) == 0))
-                    {
-                        if (_e.isPlayer)
-                            sql.DeletePlayerItem(_itemContainer[i].item.ID);//Should this be moved to RemoveItem? Other classes/Methods call remove Item outside of UpdateQuantity
-
                         RemoveItem(key);
-                    }
 
                     else
                     {
                         if (_e.isPlayer)
                             if (((Character)_e).characterSession.inGame)
                             {
+                                CharacterSQL sql = new CharacterSQL();
                                 _itemContainer[i].item.StackLeft += Add ? quantity : -1 * quantity;
                                 sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, _itemContainer[i].item);
                                 if (!loot)
