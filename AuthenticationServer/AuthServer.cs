@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using AuthServer.Account;
 using AuthServer.Server;
 
 namespace AuthServer
@@ -10,6 +11,8 @@ namespace AuthServer
         {
             EQOAClientTracker eqoaClientTracker = new();
             //Start TCP Server
+
+            AccountManagement.Initialize();
 
             AsynchronousSocketListener TcpServer = new(eqoaClientTracker);
             await TcpServer.StartListener();

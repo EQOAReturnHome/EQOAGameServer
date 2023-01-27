@@ -11,8 +11,8 @@ namespace AuthServer.Server
 
     public class AsynchronousSocketListener
     {
-        private readonly int _buffSize = 300;
-        private byte[] _buffer = new byte[300];
+        private readonly int _buffSize = 500;
+        private byte[] _buffer = new byte[500];
         private readonly EQOAClientTracker _eqoaClientTracker;
         private readonly Socket _listener = new(SocketType.Stream, ProtocolType.Tcp);
 
