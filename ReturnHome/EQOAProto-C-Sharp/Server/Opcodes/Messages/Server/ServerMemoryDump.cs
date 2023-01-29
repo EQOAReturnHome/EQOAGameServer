@@ -61,7 +61,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write7BitEncodedInt64(session.MyCharacter.Bank.Count);
             writer.Write(session.MyCharacter.Bank.Count);
             for (int i = 0; i < session.MyCharacter.Bank.Count; i++)
-                session.MyCharacter.Bank.itemContainer[i].item.DumpItem(ref writer, session.MyCharacter.Inventory.itemContainer[i].key);
+                session.MyCharacter.Bank.itemContainer[i].item.DumpItem(ref writer, session.MyCharacter.Bank.itemContainer[i].key);
 
             // end of bank? or could be something else for memory dump
             writer.Write((byte)0);
