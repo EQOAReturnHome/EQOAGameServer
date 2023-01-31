@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Keep out of trouble and you'll keep out of a burial."
+    npcDialogue = "The Temple of Marr is along the coastline northeast from here. Odd folk, those temple people are."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

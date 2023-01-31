@@ -1,1 +1,1 @@
-merchantDialogue = "I seem to 'ave misplaced my inventory. It was around here somewhere..."
+merchantDialogue = "May I interest you in some of my jeweler's kits?"

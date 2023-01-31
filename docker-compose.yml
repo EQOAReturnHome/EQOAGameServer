@@ -52,6 +52,7 @@ services:
     hostname: mariadb
     container_name: mariadb
     image: mariadb:10.2
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci', '--lower_case_table_names=1']
     environment:
       MARIADB_ROOT_PASSWORD: foobar
       MARIADB_DATABASE: eqoabase

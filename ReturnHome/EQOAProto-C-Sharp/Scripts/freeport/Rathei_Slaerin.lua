@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "There's much to be done, and so little time to do it.  You should be on your way."
+    npcDialogue = "You are too weak and feeble to be useful for my purposes. Be gone with you, and don't come back unless you wish to become one of my pets."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

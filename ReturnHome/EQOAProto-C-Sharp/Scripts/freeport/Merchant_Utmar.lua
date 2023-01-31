@@ -1,1 +1,1 @@
-merchantDialogue = "Would you be interested in buying some Shadowknight scrolls?"
+merchantDialogue = "Would you be interested in buying some cleric scrolls?"

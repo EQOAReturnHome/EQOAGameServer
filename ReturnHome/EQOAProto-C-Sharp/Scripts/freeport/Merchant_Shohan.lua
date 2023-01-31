@@ -1,1 +1,1 @@
-merchantDialogue = "Looking to buy some ores?"
+merchantDialogue = "Care to look at my supplies?"

@@ -1,1 +1,1 @@
-merchantDialogue = "Interested in some of my finer works?"
+merchantDialogue = "Interested in some of my woolen armor?"
