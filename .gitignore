@@ -341,7 +341,3 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
-/ReturnHome/EQOAProto-C-Sharp/app.config
-/AuthenticationServer/app.config
-/dnsmasq.conf
-/nuget.config
