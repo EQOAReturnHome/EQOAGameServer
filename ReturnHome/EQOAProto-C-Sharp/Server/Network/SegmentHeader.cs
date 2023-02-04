@@ -21,7 +21,7 @@ namespace ReturnHome.Server.Network
             flags = (SegmentHeaderFlags)(flags_len & 0xfffff800);
             size = (int)(flags_len & 0x7ff);
             if ((flags & SegmentHeaderFlags.HasInstance) != 0) instance = reader.Read<uint>();
-            if ((flags & SegmentHeaderFlags.data_0x40000) != 0) data_0x40000 = reader.Read<int>();
+            //if ((flags & SegmentHeaderFlags.data_0x40000) != 0) data_0x40000 = reader.Read<int>();
             //if ((flags & SegmentHeaderFlags.NewInstance) != 0) src_addr = reader.Read<uint>();
             if ((flags & SegmentHeaderFlags.ResetConnection) != 0) local_endpoint = reader.Read<uint>();
             if ((flags & SegmentHeaderFlags.IsRemote) == 0) remote_endpoint = dst_addr;

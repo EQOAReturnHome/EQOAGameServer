@@ -153,12 +153,15 @@ namespace ReturnHome.Server.Network
         //Optional override for dropping the session, currently simplifies for removing a character when they log out
         public void DropSession(bool Override = false)
         {
-            if (!PendingTermination || !Override) return;
+            if (!PendingTermination && !Override) return;
 
             MapManager.RemoveObject(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             EntityManager.RemoveEntity(MyCharacter);
-            SessionManager.SessionHash.TryRemove(this);
+            if (SessionManager.SessionHash.TryRemove(this))
+                return;
+            else
+                Console.WriteLine($"Couldn't remove Session: {ClientEndpoint} IP: {MyIPEndPoint}");
         }
     }
 }

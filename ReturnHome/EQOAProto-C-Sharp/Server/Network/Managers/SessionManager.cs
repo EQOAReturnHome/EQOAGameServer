@@ -195,6 +195,5 @@ namespace ReturnHome.Server.Network.Managers
 			
             return sessionCount;
         }
-		
     }
 }

@@ -147,6 +147,9 @@ namespace ReturnHome.Server.EntityObject
                 if (_itemContainer[i].key == key)
                 {
                     Item item = _itemContainer[i].item;
+                    if (item.EquipLocation != EquipSlot.NotEquipped)
+                        _e.equippedGear.Remove(item);
+
                     _itemContainer.RemoveAt(i);
                     if (_e.isPlayer)
                         if (((Character)_e).characterSession.inGame)
@@ -154,7 +157,7 @@ namespace ReturnHome.Server.EntityObject
                             if (!transfer)
                             {
                                 CharacterSQL sql = new CharacterSQL();
-                                sql.DeletePlayerItem(_itemContainer[i].item.ID);//Should this be moved to RemoveItem? Other classes/Methods call remove Item outside of UpdateQuantity
+                                sql.DeletePlayerItem(item.ID);//Should this be moved to RemoveItem? Other classes/Methods call remove Item outside of UpdateQuantity
                             }
 
                             ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, item.StackLeft, (byte)i);
