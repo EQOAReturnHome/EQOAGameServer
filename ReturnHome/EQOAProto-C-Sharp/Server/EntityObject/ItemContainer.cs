@@ -134,6 +134,7 @@ namespace ReturnHome.Server.EntityObject
 
                     if (((Character)_e).characterSession.inGame && !loot)
                         ServerAddItemOrQuantity.AddItemOrQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.AddInvItem : GameOpcode.AddBankItem, itemToBeAdded, itemToBeAdded.StackLeft);
+                    sql.CloseConnection();
                 }
                 return true;
             }

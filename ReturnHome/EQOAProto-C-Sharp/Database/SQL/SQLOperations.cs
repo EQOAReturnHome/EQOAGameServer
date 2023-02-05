@@ -659,7 +659,7 @@ namespace ReturnHome.Database.SQL
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
-            {
+            {            
                 //Hold character value so we have names to compare against 
                 if (SecondRdr.GetString(0) == selectedCharacter.CharName)
                 {

@@ -3,6 +3,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Stats;
+using Z.EntityFramework.Plus;
 
 namespace ReturnHome.Server.Opcodes.Chat
 {
@@ -19,6 +20,8 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                 message = $"Found character: {c.CharName}";
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
+                if (changes.Length < 3)
+                    return false;
 
                 switch(changes[1])
                 {
@@ -208,6 +211,9 @@ namespace ReturnHome.Server.Opcodes.Chat
                         break;
 
                     case "stat":
+                        if (changes.Length < 4)
+                            return false;
+
                         switch(changes[2])
                         {
                             case "basestrength":

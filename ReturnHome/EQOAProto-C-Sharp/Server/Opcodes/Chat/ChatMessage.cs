@@ -75,23 +75,21 @@ namespace ReturnHome.Server.Opcodes.Chat
         /// </summary>
         public static void ProcessCommands(Session MySession, string message)
         {
-            
+            string[] temp = message.Split(' ');
 
-            if (message[0..2] == "!c")
-            {
+            if (temp[0] == "!c")
                 MySession.CoordinateUpdate();
-            }
 
-            if (message[0..3] == "!xp")
+            if (temp[0] == "!xp" && temp.Length > 1)
             {
-                int xp = int.Parse(message.Substring(3, message.Length - 3));
+                int xp = int.Parse(temp[1]);
                 Entity.GrantXP(MySession, xp);
             }
 
             //Add a check here to verify account has admin privileges?
-            if (message[0..2] == "!t")
+            if (temp[0] == "!t")
             {
-                if (ObjectAdminChecks.ProcessChanges(MySession, message.Split(' ')))
+                if (ObjectAdminChecks.ProcessChanges(MySession, temp))
                 {
                     message = "Completed processing request";
                     GenerateClientSpecificChat(MySession, message);
@@ -104,47 +102,36 @@ namespace ReturnHome.Server.Opcodes.Chat
                 }
             }
 
-            if (message[0..2] == "!a")
-            {
+            if (temp[0] == "!a")
                 MySession.MyCharacter.ArrangeItem(0, 1);
-            }
 
-            if (message[0..2] == "!d")
-            {
+            if (temp[0] == "!d")
                 MySession.MyCharacter.DestroyItem(0, 1);
-            }
 
-            if (message[0..4] == "!oid")
-            {
+            if (temp[0] == "!oid")
                 MySession.TargetUpdate();
-            }
 
-            if (message[0..2] == "!o")
+            if (temp[0] == "!o")
             {
                 MySession.unkOpcode ^= true;
                 if (MySession.unkOpcode)
-                {
                     message = "Unknown opcode display is now on.";
-                }
 
                 else
-                {
                     message = "Unknown opcode display is now off.";
-                }
 
                 GenerateClientSpecificChat(MySession, message);
             }
 
             //Should this require admin? I don' think thats important till live
-            if (message[0..2] == "!s")
+            if (temp[0] == "!s" && temp.Length > 1)
             {
                 float speed;
                 try
                 {
-                    speed = float.Parse(message.Substring(3, message.Length - 3));
+                    speed = float.Parse(temp[1]);
                     ServerPlayerSpeed.PlayerSpeed(MySession, speed);
                 }
-
                 catch
                 {
                     message = "Not a valid value for speed, please enter XX.X or XX. Suggest speed being less then 50";

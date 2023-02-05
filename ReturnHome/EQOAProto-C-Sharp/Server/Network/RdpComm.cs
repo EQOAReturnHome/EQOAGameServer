@@ -195,10 +195,6 @@ namespace ReturnHome.Server.Network
         private static MemoryPool<byte> _memoryPool = MemoryPool<byte>.Shared;
         private readonly Session _session;
         public readonly ServerListener _listener;
-        private List<ReadOnlyMemory<byte>> _messageList = new();
-        private int _size = 0;
-        private int _crcPosition = 0;
-        private int _value = 0;
         public static int maxSize = 0x530;
 
         public RdpCommOut(Session session, ServerListener listener)
@@ -218,100 +214,44 @@ namespace ReturnHome.Server.Network
                 _session.segmentBodyFlags = new();
 
                 segmentBodyFlags |= (SegmentBodyFlags.guaranted_ack & segmentBodyFlags) != 0 ? SegmentBodyFlags.flushAck : 0;
-                Memory<byte> packet = _memoryPool.Rent(0x0530).Memory;
-                BufferWriter writer = new(packet.Span);
-                // 4 bytes for endpoints,  , if has instance + 4, if RemoteMaster true + 3? Depends how we handle sessionID's, for now 3 works 
-                writer.Position = GetHeaderLength(segmentBodyFlags);
+                Memory<byte> packetBody = _memoryPool.Rent(0x0530).Memory;
+                BufferWriter writerBody = new(packetBody.Span);
 
-                _session.sessionQueue.WriteMessages(ref writer, segmentBodyFlags);
-
-                //Reset writer to write session data
-                //Actual size...
-                _size = writer.Position - _size;
-                _crcPosition = writer.Position;
-                writer.Position = 0;
-
-                //Add session header data
-                AddSessionHeader(ref writer);
-
-                ///Add Session Information
-                AddSession(ref writer);
+                Memory<byte> packetHeader = _memoryPool.Rent(0x530).Memory;
+                BufferWriter writerHeader = new(packetHeader.Span);
 
                 //Add bundle type first
-                AddBundleType(ref writer, segmentBodyFlags);
+                AddBundleType(ref writerBody, segmentBodyFlags);
 
-                ///Add session ack here if it has not been done yet
-                ///Lets client know we acknowledge session
-                ///Making sure remoteMaster is 1 (client) makes sure we have them ack our session
                 if ((segmentBodyFlags & SegmentBodyFlags.sessionAck) != 0)
                     ///To ack session, we just repeat session information as an ack
-                    AddSessionAck(ref writer);
+                    AddSessionAck(ref writerBody);
 
-                AddRDPReport(ref writer, segmentBodyFlags);
+                AddRDPReport(ref writerBody, segmentBodyFlags);
 
-                writer.Position = _crcPosition;
+                _session.sessionQueue.WriteMessages(ref writerBody, segmentBodyFlags);
 
-                //_ = packet.Length - 4 != 0 ? throw new Exception("Error occured with PAcket Length") : true;
+                //Add session header data
+                AddSessionHeader(ref writerHeader, writerBody.Position);
+
+                ///Add Session Information
+                AddSession(ref writerHeader);
+
+                //Merge Memory's together
+                writerHeader.Write(packetBody.Span[0.. writerBody.Position]);
 
                 //Add CRC
-                writer.Write(CRC.calculateCRC(writer.Span[0..writer.Position]));
+                writerHeader.Write(CRC.calculateCRC(writerHeader.Span[0..writerHeader.Position]));
 
                 SocketAsyncEventArgs args = new();
                 args.RemoteEndPoint = _session.MyIPEndPoint;
-                args.SetBuffer(packet.Slice(0, writer.Position));
+                args.SetBuffer(packetHeader.Slice(0, writerHeader.Position));
 
                 //Send Packet
                 _listener.socket.SendToAsync(args);
 
-                _messageList.Clear();
-                _value = 0;
-                _crcPosition = 0;
-                _size = 0;
                 _session.Instance = false;
             }
-        }
-
-        private int GetHeaderLength(SegmentBodyFlags segmentBodyFlags)
-        {
-            //endpoints
-            int headerLength = 4;
-
-            if (_session.Instance) //When server initiates instance with the client, it will use this
-                _value |= 0x80000;
-
-            if (_session.didServerInitiate) // Purely a guess.... Something is 0x4000 in this and seems to correspond the initator of the session
-            {
-                //This needs to be more dynamic, technically the sessionID length can vary when packed but 3 is super common
-                headerLength += 3;
-                _value |= 0x04000;
-            }
-
-            else // Server is not master, seems to always have this when not in control
-                _value |= 0x01000;
-
-            if (_session.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
-            {
-                headerLength += 4;
-                _value |= 0x02000;
-            }
-
-            //If _value is over 0x3000, means the header info should be 3 bytes. is _value is 0, header will be the packet length using variable length integer.... So will have to rethink this a little bit eventually
-            byte temp = Utility_Funcs.VariableUIntLength((ulong)_value);
-            headerLength += temp + 3;
-
-            //Utilize this to get size for header info
-            _size = headerLength - 3;
-
-            if ((segmentBodyFlags & SegmentBodyFlags.sessionAck) != 0)
-                headerLength += 4;
-
-            if ((segmentBodyFlags & SegmentBodyFlags.guaranted_ack) != 0)
-                headerLength += 4;
-
-            if ((segmentBodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
-                headerLength += 4;
-
-            return headerLength;
         }
 
         ///Identifies if full RDPReport is needed or just the current bundle #
@@ -351,20 +291,29 @@ namespace ReturnHome.Server.Network
                 packet.Write7BitEncodedUInt64(_session.SessionID);
         }
 
-        private void AddSessionAck(ref BufferWriter packet)
-        {
-            packet.Write(_session.InstanceID);
-        }
+        private void AddSessionAck(ref BufferWriter packet) => packet.Write(_session.InstanceID);
 
-        private void AddSessionHeader(ref BufferWriter packet)
+        private void AddSessionHeader(ref BufferWriter packet, int size)
         {
             Logger.Info($"{_session.ClientEndpoint.ToString("X")}: Adding Session Header");
-
+            int value = 0;
             packet.Write(_session.rdpCommIn.serverID);
             packet.Write(_session.rdpCommIn.clientID);
 
+            if (_session.Instance) //When server initiates instance with the client, it will use this
+                value |= 0x80000;
+
+            if (_session.didServerInitiate) // Purely a guess.... Something is 0x4000 in this and seems to correspond the initator of the session
+                value |= 0x04000;
+
+            else // Server is not master, seems to always have this when not in control
+                value |= 0x01000;
+
+            if (_session.hasInstance) // Server always has instance ID, atleast untill we are in world awhile, then it can drop this and the 4 byte instance ID
+                value |= 0x02000;
+
             //Subtract CRC length from total count also
-            packet.Write7BitEncodedUInt64((uint)(_value + _size));
+            packet.Write7BitEncodedUInt64((uint)(value + size));
         }
     }
 }
