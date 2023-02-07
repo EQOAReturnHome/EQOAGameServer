@@ -41,10 +41,11 @@ namespace ReturnHome.Server.Network
             int body_start = reader.Position;
             bodyFlags = (SegmentBodyFlags)reader.Read<byte>();
 
+            if ((bodyFlags & SegmentBodyFlags.sessionAck) != 0) instance_local = reader.Read<int>();
+
             arrival_positive = true;
             arrival_number = reader.Read<ushort>();
 
-            if ((bodyFlags & SegmentBodyFlags.sessionAck) != 0) instance_local = reader.Read<int>();
             if ((bodyFlags & SegmentBodyFlags.flushAck) == 0)
             { }
             else

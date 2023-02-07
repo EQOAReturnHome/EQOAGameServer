@@ -135,7 +135,7 @@ namespace ReturnHome.Server.Network
 
             //Check reliable resend queue
             _sessionQueue.RemoveReliables();
-
+            
             if ((packet.segmentBody.bodyFlags & SegmentBodyFlags.clientUpdateAck) != 0)
             {
                 Span<ServerObjectUpdate> temp = connectionData.serverObjects.Span;

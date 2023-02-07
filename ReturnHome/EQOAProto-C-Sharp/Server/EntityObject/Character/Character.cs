@@ -57,7 +57,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public int Teleportcounter { get; internal set; } = 0;
 
         //Used to create our Default characters stored on the server to either reference values, or deep copy for entirely new characters
-        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp) : base(true, 1)
+        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp, List<Hotkey> hotkeys) : base(true, 1)
         {
             Speed = speed;
             EntityRace = (Race)race;
@@ -67,7 +67,7 @@ namespace ReturnHome.Server.EntityObject.Player
             //Default characters start with 20 total and 20 unused TP's
             PlayerTrainingPoints = new(20, 20);
             Level = 1;
-            Inventory = new(5000, this);
+            Inventory = new(50000000, this);
             Bank = new(0, this, false);
             x = X;
             y = Y;
@@ -75,7 +75,7 @@ namespace ReturnHome.Server.EntityObject.Player
             FacingF = facing;
             World = (World)world;
             ModelID = modelID;
-
+            MyHotkeys= hotkeys;
             //Base HPFactor calculated in Character
             switch (EntityClass)
             {

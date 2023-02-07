@@ -20,7 +20,7 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                 message = $"Found character: {c.CharName}";
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
-                if (changes.Length < 3)
+                if (changes.Length < 2)
                     return false;
 
                 switch(changes[1])

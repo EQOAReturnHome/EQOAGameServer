@@ -12,10 +12,10 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 
             byte state = reader.Read<byte>();
             if (ClientPacket.Opcode == GameOpcode.LootMessages)
-                session.MyCharacter.LootMessages = state == 0;
+                session.MyCharacter.LootMessages = (state == 0);
 
-            if (ClientPacket.Opcode == GameOpcode.FactionMessages)
-                session.MyCharacter.FactionMessages = state == 0;
+            if (ClientPacket.Opcode == GameOpcode.FactionMessages) ;
+                //session.MyCharacter.FactionMessages = state == 0;
         }
     }
 }

@@ -498,6 +498,7 @@ namespace ReturnHome.Server.EntityObject
                     this.CurrentHP -= dmg;
                 }
             }
+            //TODO: We have Character entities here causing casting exceptions
             ((Actor)this).EvaluateAggro(dmg, playerID);
         }
 
