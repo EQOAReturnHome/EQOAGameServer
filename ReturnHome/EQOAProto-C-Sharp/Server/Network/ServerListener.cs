@@ -31,6 +31,10 @@ namespace ReturnHome.Server.Network
 			serverName = ServerName;
 			socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
+        //Specifically helps to prevent ICMP's causing a socket exception special to windows..
+#if Windows
+            socket.IOControl((IOControlCode)(-1744830452), new byte[] { 0, 0, 0, 0 }, null);
+#endif
             socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
             socket.Bind(new IPEndPoint(IP, Port));
 		}

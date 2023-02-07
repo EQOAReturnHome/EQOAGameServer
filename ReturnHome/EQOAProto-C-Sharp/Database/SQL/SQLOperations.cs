@@ -22,31 +22,68 @@ namespace ReturnHome.Database.SQL
     {
         public void CollectDefaultCharacters()
         {
-            using var cmd = new MySqlCommand("GetDefaultCharacters", con);
+            List<Hotkey> hotkeys = new List<Hotkey>();
+            //Get Default hotkey here
+            using var cmd = new MySqlCommand("GetCharHotkeys", con);
             cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("charID", 1);
             using MySqlDataReader rdr = cmd.ExecuteReader();
+
             while (rdr.Read())
             {
+                //Instantiate new character object, not to be confused with a newly created character
+                Hotkey thisHotkey = new Hotkey
+                (
+                     //direction
+                     rdr.GetString(0),
+                     //Nlabel
+                     rdr.GetString(1),
+                     //Nmessage
+                     rdr.GetString(2),
+                     //Wlabel
+                     rdr.GetString(3),
+                     //Wmessage
+                     rdr.GetString(4),
+                     //Elabel
+                     rdr.GetString(5),
+                     //Emessage
+                     rdr.GetString(6),
+                     //Slabel
+                     rdr.GetString(7),
+                     //Smessage
+                     rdr.GetString(8)
+                );
+
+                //Add these spells to player book
+                hotkeys.Add(thisHotkey);
+            }
+            rdr.Close();
+
+            using var cmd2 = new MySqlCommand("GetDefaultCharacters", con);
+            cmd2.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr2 = cmd2.ExecuteReader();
+            while (rdr2.Read())
+            {
                 List<KeyValuePair<StatModifiers, int>> temp = new();
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTR, rdr.GetInt32(11)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTA, rdr.GetInt32(12)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseAGI, rdr.GetInt32(13)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseDEX, rdr.GetInt32(14)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseWIS, rdr.GetInt32(15)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseINT, rdr.GetInt32(16)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseCHA, rdr.GetInt32(17)));
-                DefaultCharacter.DefaultCharacterDict.TryAdd(((Race)rdr.GetInt32(0), (Class)rdr.GetInt32(1), (HumanType)rdr.GetInt32(2), (Sex)rdr.GetInt32(3)), new Character(rdr.GetInt32(0),
-                                                                                                                                                                             rdr.GetInt32(1),
-                                                                                                                                                                             rdr.GetInt32(2),
-                                                                                                                                                                             rdr.GetInt32(3),
-                                                                                                                                                                             rdr.GetFloat(4),
-                                                                                                                                                                             rdr.GetFloat(5),
-                                                                                                                                                                             rdr.GetFloat(6),
-                                                                                                                                                                             rdr.GetFloat(7),
-                                                                                                                                                                             rdr.GetFloat(8),
-                                                                                                                                                                             rdr.GetInt32(9),
-                                                                                                                                                                             rdr.GetInt32(10),
-                                                                                                                                                                             temp));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTR, rdr2.GetInt32(11)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTA, rdr2.GetInt32(12)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseAGI, rdr2.GetInt32(13)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseDEX, rdr2.GetInt32(14)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseWIS, rdr2.GetInt32(15)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseINT, rdr2.GetInt32(16)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseCHA, rdr2.GetInt32(17)));
+                DefaultCharacter.DefaultCharacterDict.TryAdd(((Race)rdr2.GetInt32(0), (Class)rdr2.GetInt32(1), (HumanType)rdr2.GetInt32(2), (Sex)rdr2.GetInt32(3)), new Character(rdr2.GetInt32(0),
+                                                                                                                                                                             rdr2.GetInt32(1),
+                                                                                                                                                                             rdr2.GetInt32(2),
+                                                                                                                                                                             rdr2.GetInt32(3),
+                                                                                                                                                                             rdr2.GetFloat(4),
+                                                                                                                                                                             rdr2.GetFloat(5),
+                                                                                                                                                                             rdr2.GetFloat(6),
+                                                                                                                                                                             rdr2.GetFloat(7),
+                                                                                                                                                                             rdr2.GetFloat(8),
+                                                                                                                                                                             rdr2.GetInt32(9),
+                                                                                                                                                                             rdr2.GetInt32(10),
+                                                                                                                                                                             temp, hotkeys));
             }
         }
 
@@ -775,7 +812,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharHotkeys", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ObjectID);
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ServerID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -957,6 +994,46 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("activeQuests", "[]");
             //Execute parameterized statement entering it into the DB
             SecondCmd.ExecuteNonQuery();
+
+            using var cmd = new MySqlCommand("GetAccountCharacters", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            //string to hold local charcter Name
+            int serverID = 0;
+
+            //Read through results from query populating character data needed for character select
+            while (rdr.Read())
+            {
+                if(rdr.GetString(1) == charCreation.CharName)
+                    serverID = rdr.GetInt32(0);
+            }
+            rdr.Close();
+
+            if (serverID == 0)
+            {
+                Console.WriteLine("Character Creation Failed");
+                return;
+            }
+
+            using var ThirdCmd = new MySqlCommand("CreateHotkeys", con);
+            ThirdCmd.CommandType = CommandType.StoredProcedure;
+            for(int i = 0; i < charCreation.MyHotkeys.Count; i++)
+            {
+                ThirdCmd.Parameters.Clear();
+                ThirdCmd.Parameters.AddWithValue("Serverid", serverID);
+                ThirdCmd.Parameters.AddWithValue("Direction", charCreation.MyHotkeys[i].Direction);
+                ThirdCmd.Parameters.AddWithValue("nlabel", charCreation.MyHotkeys[i].NLabel);
+                ThirdCmd.Parameters.AddWithValue("nmessage", charCreation.MyHotkeys[i].NMessage);
+                ThirdCmd.Parameters.AddWithValue("wlabel", charCreation.MyHotkeys[i].WLabel);
+                ThirdCmd.Parameters.AddWithValue("wmessage", charCreation.MyHotkeys[i].WMessage);
+                ThirdCmd.Parameters.AddWithValue("elabel", charCreation.MyHotkeys[i].ELabel);
+                ThirdCmd.Parameters.AddWithValue("emessage", charCreation.MyHotkeys[i].EMessage);
+                ThirdCmd.Parameters.AddWithValue("slabel", charCreation.MyHotkeys[i].SLabel);
+                ThirdCmd.Parameters.AddWithValue("smessage", charCreation.MyHotkeys[i].SMessage);
+                ThirdCmd.ExecuteNonQuery();
+            }
 
             //Don't close connection because we have character list generated next
             List<Character> MyCharacterList = AccountCharacters(session);

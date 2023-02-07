@@ -159,6 +159,7 @@ namespace ReturnHome.Server.EntityObject
                             {
                                 CharacterSQL sql = new CharacterSQL();
                                 sql.DeletePlayerItem(item.ID);//Should this be moved to RemoveItem? Other classes/Methods call remove Item outside of UpdateQuantity
+                                sql.CloseConnection();
                             }
 
                             ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, item.StackLeft, (byte)i);
@@ -193,6 +194,7 @@ namespace ReturnHome.Server.EntityObject
                                 CharacterSQL sql = new CharacterSQL();
                                 _itemContainer[i].item.StackLeft += Add ? quantity : -1 * quantity;
                                 sql.UpdatePlayerItem(((Character)_e).characterSession.MyCharacter, _itemContainer[i].item);
+                                sql.CloseConnection();
                                 if (!loot)
                                     //If adding to a stack, we need to * -1, otherwise left the value go through as is for subtraction
                                     ServerRemoveItemOrUpdateQuantity.RemoveItemOrUpdateQuantity(((Character)_e).characterSession, Inventory ? GameOpcode.RemoveInvItem : GameOpcode.RemoveBankItem, Add ? -1 * quantity : quantity, (byte)i);
