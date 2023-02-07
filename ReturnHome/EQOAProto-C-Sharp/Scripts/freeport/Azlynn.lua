@@ -52,17 +52,14 @@ function event_say()
             SendMultiDialogue(mySession, multiDialogue)
             SetPlayerFlags(mySession, "12011", "1")
             questText = "Go speak to Spiritmaster Alshan."
-            AddQuestLog(mySession, 0, questText)
+            StartQuest(mySession, 12011, quests[12011][0].log)
         else
             npcDialogue = "Are you ready for what is next?"
             diagOptions = {"I am."}
         end
     elseif (GetPlayerFlags(mySession, "12011") == "3") then
         if (ch:find("done")) then
-            GrantXP(mySession, 2200)
-            DeleteQuestLog(mySession, 0)
-            SetPlayerFlags(mySession, "12012", "0")
-            SetPlayerFlags(mySession, "12011", "99")
+            CompleteQuest(mySession, 12011, quests[12011][3].xp)
             multiDialogue = {
                 "Azlynn: Ahh, wonderful. Be sure to have yourself bound often. It is quite inconvenient to be defeated far from your last binding.",
                 "Azlynn: Now that you've completed that, I have another task for you. Go see Opanheim, he will assist you.",

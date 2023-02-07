@@ -78,10 +78,21 @@
         [6] = {xp = 883791}
     },
     --Enchanter(12) Human(0) Freeport(1)
-        [12010] = {
+    [12010] = {
         [0] = {log = "You must purchase Bronze Ring from Merchant Yulia, then return to Azlynn."},
         [1] = {xp = 430}
-        }
+    },
+    --Necromancer(11) Human(0) Freeport(1)
+    [11010] = {
+        [0] = {log = "You must purchase Bone Earring from Merchant Gilgash, then return to Corious Slaerin."},
+        [1] = {xp = 430}
+    },
+    [11011] = {
+        [0] = {log = "Go speak to Spiritmaster Keika."},
+        [1] = {log = "Go speak to Coachman Ronks at the Stable."},
+        [2] = {log = "Return to Corious Slaerin."},
+        [3] = {xp = 2200}
+    }
 }
 
 return quests

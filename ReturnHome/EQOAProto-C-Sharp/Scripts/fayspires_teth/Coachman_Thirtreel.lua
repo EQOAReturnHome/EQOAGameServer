@@ -3,7 +3,7 @@
 local coaches = require('Scripts/ports')
 
 local playerCoaches = {
-   klick_anon_coach = "Get me a horse to Klick'Anon'.",
+   klick_anon_coach = "Get me a horse to Klick'Anon.",
    moradhim_coach = "Get me a horse to Moradhim.",
    tethelin_coach = "Get me a horse to Tethelin.",
    rivervale_coach = "Get me a horse to Rivervale."

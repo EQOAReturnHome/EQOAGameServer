@@ -11,8 +11,7 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "wyndhaven_coach")) then
+   if(GetPlayerFlags(mySession, "wyndhaven_coach") == "true") then
       if (ch:find("Murnf")) then
          TeleportPlayer(mySession,GetWorld(coaches.murnf.world),coaches.murnf.x,coaches.murnf.y,coaches.murnf.z,coaches.murnf.facing)
       elseif (ch:find("Qeynos")) then
@@ -31,7 +30,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "wyndhaven_coach", true)
+         SetPlayerFlags(mySession, "wyndhaven_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."

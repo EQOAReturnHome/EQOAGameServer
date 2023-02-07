@@ -4,7 +4,7 @@ local coaches = require('Scripts/ports')
 
 local playerCoaches = {
    freeport_coach = "Get me a horse to Freeport.",
-   klick_coach = "Get me a horse to Klick'Anon'.",
+   klick_coach = "Get me a horse to Klick'Anon.",
    rivervale_coach = "Get me a horse to Rivervale."
 }
 

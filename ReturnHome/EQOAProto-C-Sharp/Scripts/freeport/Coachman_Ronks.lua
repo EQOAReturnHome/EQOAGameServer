@@ -11,6 +11,7 @@ SetPlayerFlags(mySession, "admin", "true")
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
+--
     if ((GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011")) == "2") then
         npcDialogue = "What do you want?"
         diagOptions = {"Spiritmaster Alshan sent me.", "Nothing"}

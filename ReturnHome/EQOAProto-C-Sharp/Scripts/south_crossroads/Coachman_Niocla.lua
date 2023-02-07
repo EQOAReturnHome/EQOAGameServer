@@ -12,8 +12,7 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "south_crossroads_coach")) then
+   if(GetPlayerFlags(mySession, "south_crossorads_coach") == "true") then
       if (ch:find("Highpass")) then
          TeleportPlayer(mySession,GetWorld(coaches.highpass.world),coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
       elseif (ch:find("Honjour")) then
@@ -34,7 +33,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "south_crossorads_coach", true)
+         SetPlayerFlags(mySession, "south_crossorads_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."

@@ -63,7 +63,7 @@ function event_say()
             SendMultiDialogue(mySession, multiDialogue)
             CompleteQuest(mySession, 10011, quests[10011][3].xp)
         elseif (ch:find("sorry")) then
-            npcDialogue = ""
+            npcDialogue = "Don't stand around wasting my time"
         else
             npcDialogue = "Malsis: Didn't I send you to do something for me?"
             diagOptions = {"Yes, it is completed.", "Yes, sorry. I'll be on my way"}

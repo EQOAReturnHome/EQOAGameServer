@@ -72,4 +72,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\AuthenticationServer\Authserver.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Scripts\NewFolder\" />
+  </ItemGroup>
 </Project>
