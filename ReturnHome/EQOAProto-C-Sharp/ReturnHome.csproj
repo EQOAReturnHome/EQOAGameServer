@@ -19,15 +19,15 @@
   <ItemGroup>
     <Compile Remove="Database\SQL\Character\**" />
     <Compile Remove="Scripts\forkwatch\**" />
-    <Compile Remove="Scripts\NewFolder\**" />
+    <compile Remove="Server\NewFolder\**" />
     <Compile Remove="Server\NewFolder1\**" />
     <EmbeddedResource Remove="Database\SQL\Character\**" />
     <EmbeddedResource Remove="Scripts\forkwatch\**" />
-    <EmbeddedResource Remove="Scripts\NewFolder\**" />
+    <EmbeddedResource Remove="Server\NewFolder\**" />
     <EmbeddedResource Remove="Server\NewFolder1\**" />
     <None Remove="Database\SQL\Character\**" />
     <None Remove="Scripts\forkwatch\**" />
-    <None Remove="Scripts\NewFolder\**" />
+    <None Remove="Server\NewFolder\**" />
     <None Remove="Server\NewFolder1\**" />
   </ItemGroup>
   <ItemGroup>
