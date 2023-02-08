@@ -5,15 +5,15 @@ local coaches = require('Scripts/ports')
 local playerCoaches = {
    grobb_coach = "Get me a horse to grobb.",
    oggok_coach = "Get me a horse to oggok.",
-   south_crossroads_coach = "Get me a horse to da south crossroads.",
+   south_crossroads_coach = "Get me a horse to da dark solace.",
 }
 
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
    if(GetPlayerFlags(mySession, "kerplunk_coach") == "true") then
-      if (ch:find("south crossroads")) then
-         TeleportPlayer(mySession,GetWorld(coaches.south_crossroads.world),coaches.south_crossroads.x,coaches.south_crossroads.y,coaches.south_crossroads.z,coaches.south_crossroads.facing)
+      if (ch:find("solace")) then
+         TeleportPlayer(mySession,GetWorld(coaches.dark_solace.world),coaches.dark_solace.x,coaches.dark_solace.y,coaches.dark_solace.z,coaches.dark_solace.facing)
       elseif (ch:find("grobb")) then
          TeleportPlayer(mySession,GetWorld(coaches.grobb.world),coaches.grobb.x,coaches.grobb.y,coaches.grobb.z,coaches.grobb.facing)
       elseif (ch:find("oggok")) then

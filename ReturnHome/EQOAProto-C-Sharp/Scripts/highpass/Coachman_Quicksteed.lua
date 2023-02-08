@@ -1,16 +1,15 @@
 local playerCoaches = {
-   darvar_coach = "Get me a horse to Darvar Manor.",
-   seriak_coach = "Get me a horse to Ft. Seriak.",
+   darvar_manor_coach = "Get me a horse to Darvar Manor.",
+   fort_seriak_coach = "Get me a horse to Ft. Seriak.",
    freeport_coach = "Get me a horse to Freeport.",
-   solace_coach = "Get me a horse to the city of Dark Solace.",
+   dark_solace_coach = "Get me a horse to the city of Dark Solace.",
    rivervale_coach = "Get me a horse to the halfling home of Rivervale"
 }
 local coaches = require('Scripts/ports')
 local ch = tostring(choice)
-SetPlayerFlags(mySession, "admin", "true")
 function event_say()
    local dialogueOptions = {}
-   if(GetPlayerFlags(mySession, "highpass_coach")) then
+   if(GetPlayerFlags(mySession, "highpass_coach") == "true") then
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
