@@ -19,12 +19,15 @@
   <ItemGroup>
     <Compile Remove="Database\SQL\Character\**" />
     <Compile Remove="Scripts\forkwatch\**" />
+    <Compile Remove="Scripts\NewFolder\**" />
     <Compile Remove="Server\NewFolder1\**" />
     <EmbeddedResource Remove="Database\SQL\Character\**" />
     <EmbeddedResource Remove="Scripts\forkwatch\**" />
+    <EmbeddedResource Remove="Scripts\NewFolder\**" />
     <EmbeddedResource Remove="Server\NewFolder1\**" />
     <None Remove="Database\SQL\Character\**" />
     <None Remove="Scripts\forkwatch\**" />
+    <None Remove="Scripts\NewFolder\**" />
     <None Remove="Server\NewFolder1\**" />
   </ItemGroup>
   <ItemGroup>
@@ -56,11 +59,13 @@
     <None Remove="Scripts\freeport\FreeportQuests.lua" />
     <None Remove="Scripts\freeport\Magician_start.lua" />
     <None Remove="Scripts\freeport\Quests.json" />
+    <None Remove="Scripts\hazinak\coachman_zelik.lua" />
     <None Remove="Scripts\ports.lua" />
     <None Remove="Scripts\QuestHelper.lua" />
     <None Remove="Scripts\Quests.json" />
     <None Remove="Scripts\Temby\Dagget_Klem.lua" />
     <None Remove="Scripts\wyndhaven\coachman_brumley.lua" />
+    <None Remove="Scripts\zentars_keep\coachman_skeel.lua" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bobble_by_water\Delwin_Stitchfinger.lua" />
@@ -68,15 +73,14 @@
     <Content Include="Scripts\freeport\FreeportQuests.lua" />
     <Content Include="Scripts\freeport\Magician_start.lua" />
     <Content Include="Scripts\freeport\Quests.json" />
+    <Content Include="Scripts\hazinak\coachman_zelik.lua" />
     <Content Include="Scripts\ports.lua" />
     <Content Include="Scripts\QuestHelper.lua" />
     <Content Include="Scripts\Temby\Dagget_Klem.lua" />
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />
+    <Content Include="Scripts\zentars_keep\coachman_skeel.lua" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\AuthenticationServer\Authserver.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Scripts\NewFolder\" />
   </ItemGroup>
 </Project>
