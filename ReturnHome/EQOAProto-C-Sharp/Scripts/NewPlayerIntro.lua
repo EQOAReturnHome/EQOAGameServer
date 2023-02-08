@@ -223,7 +223,7 @@ function event_say()
     elseif (race == "Elf") then
     --Elves
         npcDialogue = "Welcome to Fayspires playerName. This is the last bastion of hope for the Highborne elves of Tunaria."
-        if (class == "Rogue" or "Ranger" or "Druid" or "Bard") then
+        if (class == "Rogue" or class == "Ranger" or class == "Druid" or class == "Bard") then
            npcDialogue = "Welcome to Tethelin playerName. This is the home of the woodland elves, here in Tunaria."
         end
         if (class == "Rogue") then
@@ -277,7 +277,7 @@ function event_say()
                 "Then you are ready to move on to your first quest. Speak to Lyriam Kaelean, he is the guildmaster standing before you."
             }
         end
-    elseif (race == "Highbourne") then
+    elseif (race == "Erudite") then
     --Highbourne
         npcDialogue = "Welcome to Highbourne playerName. This is the beautiful home of the Erudite, here on Tunaria."
         if (class == "Alchemist") then
@@ -310,7 +310,7 @@ function event_say()
                 "As a new paladin, you have been invited to join The Peacekeepers. They are the paladin's guild here in Highbourne.",
                 "Then you are ready to move on to your first quest. Speak to Zulan Sunshield, she is the guildmaster standing before you."
             }
-        elseif (class == "Shadowknight") then
+        elseif (class == "ShadowKnight") then
             multiDialogue = {
                 "As a new shadowknight, you have been invited to join The Hidden. They are the shadowknight's guild here in Highbourne.",
                 "Then you are ready to move on to your first quest. Speak to Desh the Harvester, he is the guildmaster standing before you."
