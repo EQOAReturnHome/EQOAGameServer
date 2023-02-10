@@ -30,12 +30,12 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             if(session.MyCharacter.Inventory.TryRetrieveItem(itemSlot, out ClientItemWrapper i, out byte t))
             {
                 Item item = i.item;
-                int repairCost = (int)(i.item.Pattern.ItemCost - Math.Ceiling((item.RemainingHP * 1.0f) / item.Pattern.Maxhp * item.Pattern.ItemCost));
+                uint repairCost = (uint)(i.item.Pattern.ItemCost - Math.Ceiling((item.RemainingHP * 1.0f) / item.Pattern.Maxhp * item.Pattern.ItemCost));
 
-                if(repairCost <= session.MyCharacter.Inventory.Tunar)
+                if (repairCost <= session.MyCharacter.Inventory.Tunar)
                 {
                     //remove repair costs from tunar
-                    session.MyCharacter.Inventory.RemoveTunar(repairCost);
+                    session.MyCharacter.Inventory.RemoveTunar((int)repairCost);
 
                     //repair the item
                     //TODO: Create Server method to repair gear, adjust items currenr gp

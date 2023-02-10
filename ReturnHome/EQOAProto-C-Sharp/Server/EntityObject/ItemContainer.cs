@@ -138,6 +138,9 @@ namespace ReturnHome.Server.EntityObject
                 }
                 return true;
             }
+            if (_e.isPlayer)
+                ServerInventoryFull.InventoryFull(((Character)_e).characterSession);
+
             return false;
         }
 
