@@ -84,8 +84,8 @@ namespace AuthServer.Server
             if (buffer.Length == 0)
                 return;
 
-            int MessageLength = BinaryPrimitiveWrapper.GetBEInt(this);
-            uint MessageType = (uint)BinaryPrimitiveWrapper.GetBEInt(this);
+            MessageLength = (uint)BinaryPrimitiveWrapper.GetBEInt(this);
+            MessageType = (uint)BinaryPrimitiveWrapper.GetBEInt(this);
             //Console.WriteLine($"Received Message with Length {MessageLength} and Message Type {MessageType}");
 
             switch (MessageType)

@@ -57,7 +57,7 @@ namespace AuthServer.Account
             //Console.WriteLine($"Password: {Client.EncPassword}");
 
             int unknown3 = BinaryPrimitiveWrapper.GetBEInt(Client);
-
+            Client.MessageType = AccountMessageTypes.LOGIN_RESPONSE;
             //Assuming next 60 bytes are saved for other game types? Unsure but works for now.
             string GameID = Utilities.ReturnString(Client, 60);
 
@@ -111,6 +111,7 @@ namespace AuthServer.Account
                 break;
             }
 
+            Client.MessageType = AccountMessageTypes.ACCT_CREATE_RESPONSE;
             //Check database for username
             //If it exists
             SQLAccount sql = new SQLAccount();
@@ -145,6 +146,7 @@ namespace AuthServer.Account
             //If old Password checks out against database, replace it with new password
             string NewPassword = Utilities.ReturnString(Client, 32); //Encrypted New Password
 
+            Client.MessageType = AccountMessageTypes.CHANGE_PASSWORD_RESPONSE;
             Console.WriteLine($"Attempting to change Client Password. Old encrypted Password: {OldPassword}, New Encrypted Password: {NewPassword}");
 
             //Success
