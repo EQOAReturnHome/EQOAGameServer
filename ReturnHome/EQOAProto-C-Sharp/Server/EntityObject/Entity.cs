@@ -1,9 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Generic;
-using System.Security.Policy;
-using ReturnHome.Server.EntityObject.Actors;
-using ReturnHome.Server.EntityObject.Combat;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
@@ -21,7 +16,7 @@ namespace ReturnHome.Server.EntityObject
         private int _level;
         private uint _objectID;
         private long _killTime;
-        private NPCType _npcType = NPCType.None;
+        private EntityType _npcType = 0;
         public int ServerID;
         public AIContainer aiContainer;
 
@@ -98,7 +93,7 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public NPCType NPCType
+        public EntityType EntityType
         {
             get { return _npcType; }
             set

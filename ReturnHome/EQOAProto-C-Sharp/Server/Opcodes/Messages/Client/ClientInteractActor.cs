@@ -41,18 +41,18 @@ Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
             {
                 //Merchant popup window, should be trigger some kind of flag if this goes through? Allowing buying/selling?
                 case GameOpcode.MerchantDiag:
-                    if ((e.NPCType & NPCType.Merchant) == NPCType.Merchant)
+                    if ((e.EntityType & EntityType.Merchant) == EntityType.Merchant)
                         ServerTriggerMerchantMenu.TriggerMerchantMenu(session, e);
                     break;
 
                 //Bank popup window
                 case GameOpcode.BankUI:
-                    if ((e.NPCType & NPCType.Banker) == NPCType.Banker)
+                    if ((e.EntityType & EntityType.Banker) == EntityType.Banker)
                         ServerBankInteract.OpenBankMenu(session);
                     break;
 
                 case GameOpcode.BlackSmithMenu:
-                    if ((e.NPCType & NPCType.Blacksmith) == NPCType.Blacksmith)
+                    if ((e.EntityType & EntityType.Blacksmith) == EntityType.Blacksmith)
                         ServerBlackSmith.ActivateBlackSmithMenu(session);
                     break;
 

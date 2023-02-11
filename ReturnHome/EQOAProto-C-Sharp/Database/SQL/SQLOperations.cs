@@ -290,7 +290,7 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(21),
                     //NPC Type
                     //Should be a ushort but throws an overflow error, needs to be looked at eventually, cast to ushort in Actor.cs
-                    (NPCType)rdr.GetUInt32(22),
+                    (EntityType)rdr.GetUInt32(22),
                     //NPC ID
                     rdr.GetInt32(23));
                 //add the created actor to the npcData list
