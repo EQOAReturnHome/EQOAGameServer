@@ -33,6 +33,8 @@ const items = [
         <GithubOutlined />
     ),
     getItem(<Link href="#">Docker Logs</Link>, "6", <LineChartOutlined />),
+    getItem(<Link href="/npc_editor">NPC Editor</Link>, "7"),
+    getItem(<Link href="/item_editor">Item Editor</Link>, "8"),
 ];
 
 const MainLayout = ({ children }) => {
