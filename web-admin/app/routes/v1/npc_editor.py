@@ -1,12 +1,33 @@
-from fastapi import APIRouter
-from typing import Optional
 from jinja2 import Environment, FileSystemLoader
 from logging import Logger
+from sqlalchemy.orm import Session
+from typing import List, Optional
+from fastapi import APIRouter, Depends, FastAPI, HTTPException
+from app.core.sql_app import models, schemas, crud
+from app.core.sql_app.database import engine, SessionLocal
 
 log = Logger("logger")
 
 router = APIRouter()
 
+models.Base.metadata.create_all(bind=engine)
+
+# Dependency
+
+def get_db():
+    db = None
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
+
+@router.post("/npc", response_model=schemas.NPCInfo)
+def create_npc(npc: schemas.CreateNPC, db: Session = Depends(get_db)):
+    new_npc = crud.get_npc_by_name(db, npc_name=npc.npc_name)
+    if new_npc:
+        raise HTTPException(status_code=400, detail="NPC already exists")
+    return crud.create_npc(db=db, npc=npc)
 
 @router.get("/npc_editor")
 async def generate(
