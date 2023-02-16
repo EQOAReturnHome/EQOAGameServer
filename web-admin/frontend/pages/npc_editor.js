@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button, Form, Input, Select, Space } from "antd";
 import React from "react";
 
+
 const race = [
     {
         label: "Human",
@@ -63,6 +64,34 @@ const Quests = () => {
         });
     };
 
+
+ async function postData(url = '', data = {}) {
+    
+    const response = await fetch(url, {
+        method: 'POST',
+	headers: {
+		'Accept': 'application/json',
+		'Content-Type': 'application/json'
+	},
+	
+        body: JSON.stringify({"npc_name":data})
+    });
+    
+    const json = await response.json();
+    alert(JSON.stringify(json))
+    document.getElementById("x_coord").value = json.x_coord;
+    document.getElementById("y_coord").value = json.y_coord;
+    document.getElementById("z_coord").value = json.z_coord;
+    document.getElementById("facing").value = json.facing;
+    document.getElementById("world").value = json.world;
+    return json
+ }
+      
+  async function getresponse (){
+    var data = document.getElementById("name").value;
+    postData('http://192.168.6.100:8000/get_npc', data)
+   }
+
     return (
         <div>
             <Form
@@ -76,38 +105,36 @@ const Quests = () => {
                     label="NPC Name"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing status",
                         },
                     ]}
-                    onValuesChange={handleChange}
                 >
 	    	    <input type="text" id="name" name="name"/>
+		    <button onClick={getresponse}>Search</button>
                 </Form.Item>
-	    <button onclick="">Search</button>
                 <Form.Item
                     name="x_coord"
                     label="X Coordinate"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing area",
                         },
                     ]}
-                    onValuesChange={handleChange}
                 >
-                    <Select/>
+		    <input type="text" id="x_coord" name="x_coord"/>
                 </Form.Item>
                 <Form.Item
                     name="y_coord"
                     label="Y Coordinate"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing area",
                         },
                     ]}
-                    onValuesChange={handleChange}
+                    onChange={handleChange}
                 >
                     <Select options={race} />
                 </Form.Item>
@@ -116,11 +143,11 @@ const Quests = () => {
                     label="Z Coordinate"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing type",
                         },
                     ]}
-                    onValuesChange={handleChange}
+                    onChange={handleChange}
                 >
                     <Select/>
                 </Form.Item>
@@ -129,11 +156,11 @@ const Quests = () => {
                     label="Facing Coordinate"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing type",
                         },
                     ]}
-                    onValuesChange={handleChange}
+                    onChange={handleChange}
                 >
                     <Select/>
                 </Form.Item>
@@ -142,11 +169,11 @@ const Quests = () => {
                     label="World Designation"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing type",
                         },
                     ]}
-                    onValuesChange={handleChange}
+                    onChange={handleChange}
                 >
                     <Select/>
                 </Form.Item>
@@ -155,11 +182,11 @@ const Quests = () => {
                     label="Max HP"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing type",
                         },
                     ]}
-                    onValuesChange={handleChange}
+                    onChange={handleChange}
                 >
                     <Select/>
                 </Form.Item>
@@ -168,11 +195,11 @@ const Quests = () => {
                     label="NPC Model"
                     rules={[
                         {
-                            required: true,
+                            required: false,
                             message: "Missing type",
                         },
                     ]}
-                    onValuesChange={handleChange}
+                    onChange={handleChange}
                 >
                     <Select/>
                 </Form.Item>

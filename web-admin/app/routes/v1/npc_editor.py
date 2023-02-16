@@ -22,12 +22,17 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/npc", response_model=schemas.NPCInfo)
+@router.post("/create_npc", response_model=schemas.NPCInfo)
 def create_npc(npc: schemas.CreateNPC, db: Session = Depends(get_db)):
     new_npc = crud.get_npc_by_name(db, npc_name=npc.npc_name)
     if new_npc:
         raise HTTPException(status_code=400, detail="NPC already exists")
     return crud.create_npc(db=db, npc=npc)
+
+@router.post("/get_npc", response_model=schemas.NPCInfo)
+def get_npc(npc: schemas.NPCInfoBase, db: Session = Depends(get_db)):
+    new_npc = crud.get_npc_by_name(db, npc_name=npc.npc_name)
+    return crud.get_npc_by_name(db, npc_name=npc.npc_name)
 
 @router.get("/npc_editor")
 async def generate(

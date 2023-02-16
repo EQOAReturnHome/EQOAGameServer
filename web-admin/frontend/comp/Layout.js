@@ -22,7 +22,6 @@ function getItem(label, key, icon, children) {
 
 const items = [
     getItem(<Link href="/">Home</Link>, "1", <HomeOutlined />),
-    getItem(<Link href="/quests">Quest Builder</Link>, "2", <BuildOutlined />),
     getItem(<Link href="#">RH Server APIs</Link>, "3", <DesktopOutlined />),
     getItem(<Link href="/docs">Web API Docs</Link>, "4", <ApiOutlined />),
     getItem(

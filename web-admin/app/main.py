@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.routes import base
-from app.routes.v1 import quests
 from app.routes.v1 import npc_editor
+from app.routes.v1 import item_editor
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
@@ -24,5 +24,5 @@ def get_application():
 app = get_application()
 
 app.include_router(base.router)
-app.include_router(quests.router)
 app.include_router(npc_editor.router)
+app.include_router(item_editor.router)
