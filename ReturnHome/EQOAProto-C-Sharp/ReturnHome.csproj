@@ -63,6 +63,7 @@
     <None Remove="Scripts\ports.lua" />
     <None Remove="Scripts\QuestHelper.lua" />
     <None Remove="Scripts\Quests.json" />
+    <None Remove="Scripts\rivervale\Mario_Steeltoe.lua" />
     <None Remove="Scripts\Temby\Dagget_Klem.lua" />
     <None Remove="Scripts\wyndhaven\coachman_brumley.lua" />
     <None Remove="Scripts\zentars_keep\coachman_skeel.lua" />
@@ -76,6 +77,7 @@
     <Content Include="Scripts\hazinak\coachman_zelik.lua" />
     <Content Include="Scripts\ports.lua" />
     <Content Include="Scripts\QuestHelper.lua" />
+    <Content Include="Scripts\rivervale\Mario_Steeltoe.lua" />
     <Content Include="Scripts\Temby\Dagget_Klem.lua" />
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />
     <Content Include="Scripts\zentars_keep\coachman_skeel.lua" />

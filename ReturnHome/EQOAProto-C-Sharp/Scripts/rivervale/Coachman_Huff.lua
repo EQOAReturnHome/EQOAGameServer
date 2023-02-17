@@ -5,6 +5,7 @@ local playerCoaches = {
     bobble_coach = "Get me a horse to Bobble by water.",
    moradhim_coach = "Get me a horse to Moradhim.",
    fayspires_coach = "Get me a horse to Fayspires",
+   highpass_coach = "Get me a horse to Highpass"
 }
 
 local dialogueOptions = {}
@@ -17,6 +18,8 @@ function event_say()
          TeleportPlayer(mySession,GetWorld(coaches.fayspires.world),coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
       elseif (ch:find("Bobble")) then
          TeleportPlayer(mySession,GetWorld(coaches.bobble_by_water.world),coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
+      elseif (ch:find("Highpass")) then
+         TeleportPlayer(mySession,GetWorld(coaches.highpass.world),coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do

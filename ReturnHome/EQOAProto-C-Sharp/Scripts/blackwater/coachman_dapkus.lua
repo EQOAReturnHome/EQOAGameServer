@@ -4,7 +4,7 @@ local coaches = require("Scripts/ports")
 local playerCoaches = {
     forkwatch_coach = "Get me a horse to Forkwatch.",
     gerntar_mines_coach = "Get me a horse to Gerntar's Mine",
-    oasis_coach = "Get me a horse to Oasis of Marr"
+    oasis_of_marr_coach = "Get me a horse to Oasis of Marr"
 }
 
 local dialogueOptions = {}

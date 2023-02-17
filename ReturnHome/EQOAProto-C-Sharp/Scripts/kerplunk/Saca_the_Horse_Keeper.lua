@@ -5,7 +5,7 @@ local coaches = require('Scripts/ports')
 local playerCoaches = {
    grobb_coach = "Get me a horse to grobb.",
    oggok_coach = "Get me a horse to oggok.",
-   south_crossroads_coach = "Get me a horse to da dark solace.",
+   south_crossroads_coach = "Get me a horse to da dark solace."
 }
 
 local dialogueOptions = {}

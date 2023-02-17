@@ -6,7 +6,7 @@ local playerCoaches = {
    highpass_coach = "Get me a horse to Highpass.",
    honjpur_coach = "Get me a horse to Honjour Village.",
    kerplunk_coach = "Get me a horse to Kerplunk Output.",
-   oasis_coach = "Get me a horse to the Oasis of Marr."
+   oasis_of_marr_coach = "Get me a horse to the Oasis of Marr."
 }
 
 local dialogueOptions = {}

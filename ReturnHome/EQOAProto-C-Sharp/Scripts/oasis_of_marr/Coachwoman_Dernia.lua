@@ -14,11 +14,11 @@ function event_say()
       if (ch:find("Docks")) then
          TeleportPlayer(
          mySession,
-         GetWorld(coaches.hazinak_docks.world),
-         coaches.hazinak_docks.x,
-         coaches.hazinak_docks.y,
-         coaches.hazinak_docks.z,
-         coaches.hazinak_docks.facing
+         GetWorld(coaches.hazinak_dock.world),
+         coaches.hazinak_dock.x,
+         coaches.hazinak_dock.y,
+         coaches.hazinak_dock.z,
+         coaches.hazinak_dock.facing
          )
       elseif (ch:find("Garden")) then
          TeleportPlayer(

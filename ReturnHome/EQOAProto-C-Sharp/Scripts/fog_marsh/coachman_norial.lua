@@ -15,7 +15,7 @@ function event_say()
       if (ch:find("Last")) then
          TeleportPlayer(mySession,GetWorld(coaches.mt_hatespike.world),coaches.mt_hatespike.x,coaches.mt_hatespike.y,coaches.mt_hatespike.z,coaches.mt_hatespike.facing)
       elseif (ch:find("Solace")) then
-         TeleportPlayer(mySession,GetWorld(coaches.south_crossroads.world),coaches.south_crossroads.x,coaches.south_crossroads.y,coaches.south_crossroads.z,coaches.south_crossroads.facing)
+         TeleportPlayer(mySession,GetWorld(coaches.dark_solace.world),coaches.dark_solace.x,coaches.dark_solace.y,coaches.dark_solace.z,coaches.dark_solace.facing)
       elseif (ch:find("Wyndhaven")) then
          TeleportPlayer(mySession,GetWorld(coaches.wyndhaven.world),coaches.wyndhaven.x,coaches.wyndhaven.y,coaches.wyndhaven.z,coaches.wyndhaven.facing)
       else

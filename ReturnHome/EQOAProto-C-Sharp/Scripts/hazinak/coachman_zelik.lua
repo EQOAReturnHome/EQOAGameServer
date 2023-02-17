@@ -3,7 +3,7 @@
 local coaches = require('Scripts/ports')
 
 local playerCoaches = {
-   oasis_coach = "Get me a horse to Oasis."
+   oasis_of_marr_coach = "Get me a horse to Oasis."
 }
 
 local dialogueOptions = {}

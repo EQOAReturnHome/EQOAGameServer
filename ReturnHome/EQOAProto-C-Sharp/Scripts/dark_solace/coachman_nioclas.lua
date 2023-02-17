@@ -4,7 +4,7 @@ local playerCoaches = {
    kerplunk_outpost_coach = "Get me a horse to Kerplunk Outpost.",
    fog_marsh_coach = "Get me a horse to Fog Marsh.",
    oasis_of_marr_coach = "Get me a horse to the Oasis of Marr.",
-   fort_seriak_coach = "Get me a horse to Fort Seriak"
+   highpass_coach = "Get me a horse to Highpass"
 }
 local coaches = require('Scripts/ports')
 local ch = tostring(choice)
@@ -47,14 +47,14 @@ function event_say()
          coaches.oasis.z,
          coaches.oasis.facing
          )
-         elseif (ch:find("Seriak")) then
+         elseif (ch:find("Highpass")) then
          TeleportPlayer(
          mySession,
-         GetWorld(coaches.fort_seriak.world),
-         coaches.fort_seriak.x,
-         coaches.fort_seriak.y,
-         coaches.fort_seriak.z,
-         coaches.fort_seriak.facing
+         GetWorld(coaches.highpass.world),
+         coaches.highpass.x,
+         coaches.highpass.y,
+         coaches.highpass.z,
+         coaches.highpass.facing
          )
       else
         local npcDialogue = "Where would you like to go?"
