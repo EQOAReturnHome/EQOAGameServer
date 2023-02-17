@@ -1,13 +1,37 @@
 import Generate from "../comp/Generate";
 import { useState } from "react";
-import ReactSelect from "react-select";
-import { Button, Form, Input, Select, Space } from "antd";
+import Select from "react-select";
+import { Button, Form, Input, Space } from "antd";
 import React, { Component } from "react";
 
 const item_models = [
-    { value: 'battleaxe', label: <div><img src="/item_models/battleaxe.jpg" height="200px" width="200px"/>Battleaxe</div> },
-    { value: 'bearded_axe', label: <div><img src="/item_models/bearded_axe.jpg" height="200px" width="200px"/>Bearded Axe</div> },
-  ];
+    {
+        value: "battleaxe",
+        label: (
+            <div>
+                <img
+                    src="/item_models/battleaxe.jpg"
+                    height="200px"
+                    width="200px"
+                />
+                Battleaxe
+            </div>
+        ),
+    },
+    {
+        value: "bearded_axe",
+        label: (
+            <div>
+                <img
+                    src="/item_models/bearded_axe.jpg"
+                    height="200px"
+                    width="200px"
+                />
+                Bearded Axe
+            </div>
+        ),
+    },
+];
 
 const attack_types = [
     {
@@ -53,119 +77,119 @@ const attack_types = [
     {
         label: "Thrown",
         value: "10",
-    }
-]
+    },
+];
 
 const Items = () => {
     const [form] = Form.useForm();
+    const [selectedValue, setSelectedValue] = useState();
 
     const onFinish = (values) => {
         console.log({ values });
     };
 
-    const handleChange = () => {
-        const [finalStatus, setStatus] = useState();
-        setStatus(form.getFieldValue("quest_status"));
-
-        form.setFieldsValue({
-            sights: [],
-        });
+    const handleChange = (e) => {
+        setSelectedValue(e.value);
     };
 
-async function update_image(){
-	alert(document.getElementById("item-model").value);
-}
-
-async function display_attacktype(){
-	var d = document.getElementById("attacktype");
-	console.log(d.selectedIndex);
-	//var d = document.getElementById("attacktype");
-	//var atkvalue = d.options[d.selectedIndex].value;
-	//let obj = attack_types.find(o => o.label === atkvalue);
-	//alert(obj.value)
-
-}
-
- async function calculateClassMask(){
-	document.getElementById("ranger").checked
-}
-
- async function postGetItem(url = '', data = {}) {
-    
-    const response = await fetch(url, {
-        method: 'POST',
-	headers: {
-		'Accept': 'application/json',
-		'Content-Type': 'application/json'
-	},
-	
-        body: JSON.stringify({"itemname":data})
-    });
-    
-    const json = await response.json();
-    alert(JSON.stringify(json))
-    document.getElementById("patternfam").value = json.patternfam;
-    document.getElementById("itemicon").value = json.itemicon;
-    document.getElementById("equipslot").value = json.equipslot;
-    if (json.trade == 0){
-    document.getElementById("trade").checked = false;
-    } else {
-    document.getElementById("trade").checked = true;
+    async function update_image() {
+        alert(document.getElementById("item-model").value);
     }
-    if (json.rent == 0){
-    document.getElementById("rent").checked = false;
-    } else {
-    document.getElementById("rent").checked = true;
+
+    const handleChangedImage = (e) => {
+        setSelectedValue(e.value);
+        console.log("made it here");
+        console.log(selectedValue);
+    };
+
+    async function display_attacktype() {
+        var d = document.getElementById("attacktype");
+        console.log(d.selectedIndex);
+        //var d = document.getElementById("attacktype");
+        //var atkvalue = d.options[d.selectedIndex].value;
+        //let obj = attack_types.find(o => o.label === atkvalue);
+        //alert(obj.value)
     }
-    document.getElementById("attacktype").value = json.attacktype;
-    document.getElementById("weapondamage").value = json.weapondamage;
-    document.getElementById("levelreq").value = json.levelreq;
-    document.getElementById("maxstack").value = json.maxstack;
-    document.getElementById("maxhp").value = json.maxhp;
-    document.getElementById("duration").value = json.duration;
-    document.getElementById("classuse").value = json.classuse;
-    document.getElementById("raceuse").value = json.raceuse;
-    document.getElementById("procanim").value = json.procanim;
-    if (json.lore == 0){
-    document.getElementById("lore").checked = false;
-    } else {
-    document.getElementById("lore").checked = true;
+
+    async function calculateClassMask() {
+        document.getElementById("ranger").checked;
     }
-    if (json.craft == 0){
-    document.getElementById("craft").checked = false;
-    } else {
-    document.getElementById("craft").checked = true;
+
+    async function postGetItem(url = "", data = {}) {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({ itemname: data }),
+        });
+
+        const json = await response.json();
+        alert(JSON.stringify(json));
+        document.getElementById("patternfam").value = json.patternfam;
+        document.getElementById("itemicon").value = json.itemicon;
+        document.getElementById("equipslot").value = json.equipslot;
+        if (json.trade == 0) {
+            document.getElementById("trade").checked = false;
+        } else {
+            document.getElementById("trade").checked = true;
+        }
+        if (json.rent == 0) {
+            document.getElementById("rent").checked = false;
+        } else {
+            document.getElementById("rent").checked = true;
+        }
+        document.getElementById("attacktype").value = json.attacktype;
+        document.getElementById("weapondamage").value = json.weapondamage;
+        document.getElementById("levelreq").value = json.levelreq;
+        document.getElementById("maxstack").value = json.maxstack;
+        document.getElementById("maxhp").value = json.maxhp;
+        document.getElementById("duration").value = json.duration;
+        document.getElementById("classuse").value = json.classuse;
+        document.getElementById("raceuse").value = json.raceuse;
+        document.getElementById("procanim").value = json.procanim;
+        if (json.lore == 0) {
+            document.getElementById("lore").checked = false;
+        } else {
+            document.getElementById("lore").checked = true;
+        }
+        if (json.craft == 0) {
+            document.getElementById("craft").checked = false;
+        } else {
+            document.getElementById("craft").checked = true;
+        }
+        document.getElementById("itemdesc").value = json.itemdesc;
+        document.getElementById("model").value = json.model;
+        document.getElementById("color").value = json.color;
+        document.getElementById("str").value = json.str;
+        document.getElementById("sta").value = json.sta;
+        document.getElementById("agi").value = json.agi;
+        document.getElementById("wis").value = json.wis;
+        document.getElementById("dex").value = json.dex;
+        document.getElementById("cha").value = json.cha;
+        document.getElementById("intelligence").value = json.intelligence;
+        document.getElementById("HPMAX").value = json.HPMAX;
+        document.getElementById("POWMAX").value = json.POWMAX;
+        document.getElementById("PoT").value = json.PoT;
+        document.getElementById("HoT").value = json.HoT;
+        document.getElementById("AC").value = json.AC;
+        document.getElementById("PR").value = json.PR;
+        document.getElementById("DR").value = json.DR;
+        document.getElementById("FR").value = json.FR;
+        document.getElementById("CR").value = json.CR;
+        document.getElementById("LR").value = json.LR;
+        document.getElementById("AR").value = json.AR;
+        document.getElementById("weaponproc").value = json.weaponproc;
+        document.getElementById("fish").value = json.fish;
+        return json;
     }
-    document.getElementById("itemdesc").value = json.itemdesc;
-    document.getElementById("model").value = json.model;
-    document.getElementById("color").value = json.color;
-    document.getElementById("str").value = json.str;
-    document.getElementById("sta").value = json.sta;
-    document.getElementById("agi").value = json.agi;
-    document.getElementById("wis").value = json.wis;
-    document.getElementById("dex").value = json.dex;
-    document.getElementById("cha").value = json.cha;
-    document.getElementById("intelligence").value = json.intelligence;
-    document.getElementById("HPMAX").value = json.HPMAX;
-    document.getElementById("POWMAX").value = json.POWMAX;
-    document.getElementById("PoT").value = json.PoT;
-    document.getElementById("HoT").value = json.HoT;
-    document.getElementById("AC").value = json.AC;
-    document.getElementById("PR").value = json.PR;
-    document.getElementById("DR").value = json.DR;
-    document.getElementById("FR").value = json.FR;
-    document.getElementById("CR").value = json.CR;
-    document.getElementById("LR").value = json.LR;
-    document.getElementById("AR").value = json.AR;
-    document.getElementById("weaponproc").value = json.weaponproc;
-    document.getElementById("fish").value = json.fish;
-    return json
- }
-      
-  async function getItem (){
-    var data = document.getElementById("itemname").value;
-    postGetItem('http://192.168.6.100:8000/get_item', data)
-   }
+
+    async function getItem() {
+        var data = document.getElementById("itemname").value;
+        postGetItem("http://localhost:8000/get_item", data);
+    }
 
     return (
         <div>
@@ -185,10 +209,10 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-	    	    <input type="text" id="itemname" name="itemname"/>
-		    <button onClick={getItem}>Search</button>
-		    <button onClick={getItem}>Add Item</button>
-		    <button onClick={getItem}>Update Item</button>
+                    <input type="text" id="itemname" name="itemname" />
+                    <button onClick={getItem}>Search</button>
+                    <button onClick={getItem}>Add Item</button>
+                    <button onClick={getItem}>Update Item</button>
                 </Form.Item>
                 <Form.Item
                     name="itemicon"
@@ -200,7 +224,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <input type="text" id="itemicon" name="itemicon"/>
+                    <input type="text" id="itemicon" name="itemicon" />
                 </Form.Item>
                 <Form.Item
                     name="equipslot"
@@ -212,7 +236,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <input type="text" id="equipslot" name="eqipslot"/>
+                    <input type="text" id="equipslot" name="eqipslot" />
                 </Form.Item>
                 <Form.Item
                     name="trade"
@@ -224,7 +248,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <input type="checkbox" id="trade" name="trade"/>
+                    <input type="checkbox" id="trade" name="trade" />
                 </Form.Item>
                 <Form.Item
                     name="rent"
@@ -236,10 +260,10 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <input type="checkbox" id="rent" name="rent"/>
+                    <input type="checkbox" id="rent" name="rent" />
                 </Form.Item>
                 <Form.Item
-	            name="atk_types"
+                    name="atk_types"
                     label="Attack Type"
                     rules={[
                         {
@@ -248,9 +272,14 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <Select options={attack_types} id="attacktype" name="attacktype" onChange={display_attacktype}/>
+                    <Select
+                        options={attack_types}
+                        id="attacktype"
+                        name="attacktype"
+                        onChange={display_attacktype}
+                    />
                 </Form.Item>
-		                <Form.Item
+                <Form.Item
                     name="weapondamage"
                     label="Weapon Damage"
                     rules={[
@@ -260,7 +289,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <input type="text" id="weapondamage" name="weapondamage"/>
+                    <input type="text" id="weapondamage" name="weapondamage" />
                 </Form.Item>
                 <Form.Item
                     name="levelreq"
@@ -272,9 +301,9 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		    <input type="text" id="levelreq" name="levelreq"/>
+                    <input type="text" id="levelreq" name="levelreq" />
                 </Form.Item>
-		<Form.Item
+                <Form.Item
                     name="maxstack"
                     label="Max Stack"
                     rules={[
@@ -284,7 +313,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="maxstack" name="maxstack"/>
+                    <input type="text" id="maxstack" name="maxstack" />
                 </Form.Item>
                 <Form.Item
                     name="maxhp"
@@ -296,7 +325,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="maxhp" name="maxhp"/>
+                    <input type="text" id="maxhp" name="maxhp" />
                 </Form.Item>
                 <Form.Item
                     name="duration"
@@ -308,7 +337,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="duration" name="duration"/>
+                    <input type="text" id="duration" name="duration" />
                 </Form.Item>
                 <Form.Item
                     name="classuse"
@@ -320,7 +349,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="classuse" name="classuse"/>
+                    <input type="text" id="classuse" name="classuse" />
                 </Form.Item>
                 <Form.Item
                     name="raceuse"
@@ -332,28 +361,32 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		<td>
-                    <input type="checkbox" id="human" name="human"/>
-		    <label for="human">  Human  </label>
-                    <input type="checkbox" id="elf" name="elf"/>
-		    <label for="elf">  Elf  </label>
-		    <input type="checkbox" id="darkelf" name="darkelf"/>
-                    <label for="darkelf">  Dark Elf  </label>
-                    <input type="checkbox" id="gnome" name="gnome"/>
-                    <label for="elf">  Gnome  </label>
-		    <input type="checkbox" id="dwarf" name="dwarf"/>
-                    <label for="human">  Dwarf  </label>
-                    <input type="checkbox" id="troll" name="troll"/>
-                    <label for="elf">  Troll </label>
-		    <input type="checkbox" id="barbarian" name="barbarian"/>
-                    <label for="human">  Barbarian </label>
-                    <input type="checkbox" id="raceuse" name="raceuse"/>
-                    <label for="elf">  Halfing  </label>
-		    <input type="checkbox" id="human" name="human"/>
-                    <label for="human">  Erudite  </label>
-                    <input type="checkbox" id="raceuse" name="raceuse"/>
-                    <label for="elf">  Ogre  </label>
-                </td>
+                    <td>
+                        <input type="checkbox" id="human" name="human" />
+                        <label for="human"> Human </label>
+                        <input type="checkbox" id="elf" name="elf" />
+                        <label for="elf"> Elf </label>
+                        <input type="checkbox" id="darkelf" name="darkelf" />
+                        <label for="darkelf"> Dark Elf </label>
+                        <input type="checkbox" id="gnome" name="gnome" />
+                        <label for="elf"> Gnome </label>
+                        <input type="checkbox" id="dwarf" name="dwarf" />
+                        <label for="human"> Dwarf </label>
+                        <input type="checkbox" id="troll" name="troll" />
+                        <label for="elf"> Troll </label>
+                        <input
+                            type="checkbox"
+                            id="barbarian"
+                            name="barbarian"
+                        />
+                        <label for="human"> Barbarian </label>
+                        <input type="checkbox" id="raceuse" name="raceuse" />
+                        <label for="elf"> Halfing </label>
+                        <input type="checkbox" id="human" name="human" />
+                        <label for="human"> Erudite </label>
+                        <input type="checkbox" id="raceuse" name="raceuse" />
+                        <label for="elf"> Ogre </label>
+                    </td>
                 </Form.Item>
                 <Form.Item
                     name="procanim"
@@ -365,7 +398,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="procanim" name="procanim"/>
+                    <input type="text" id="procanim" name="procanim" />
                 </Form.Item>
                 <Form.Item
                     name="lore"
@@ -377,7 +410,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="checkbox" id="lore" name="lore"/>
+                    <input type="checkbox" id="lore" name="lore" />
                 </Form.Item>
                 <Form.Item
                     name="craft"
@@ -389,7 +422,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="checkbox" id="craft" name="craft"/>
+                    <input type="checkbox" id="craft" name="craft" />
                 </Form.Item>
                 <Form.Item
                     name="itemdesc"
@@ -401,7 +434,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="itemdesc" name="itemdesx"/>
+                    <input type="text" id="itemdesc" name="itemdesx" />
                 </Form.Item>
                 <Form.Item
                     name="model"
@@ -413,9 +446,23 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-		<Select id="item-model" options={item_models} onChange={update_image}/>
-	   	<img id="item_img" src="https://gclabels.net/image/cache/data/new/inv/new/Blank-White-Square-Labels-s1w-600x600.png" height="200px" width="200px"/> 
+                    <Select
+                        placeholder="Select Option"
+                        value={item_models.filter(
+                            (obj) => obj.value === selectedValue
+                        )} // set selected value
+                        options={item_models} // set list of the data
+                        onChange={handleChange} // assign onChange function
+                    />
+                    <img
+                        id="item_img"
+                        src="https://gclabels.net/image/cache/data/new/inv/new/Blank-White-Square-Labels-s1w-600x600.png"
+                        height="200px"
+                        width="200px"
+                    />
                 </Form.Item>
+                <b>Selected Value (feel free to remove this): </b>{" "}
+                {selectedValue}
                 <Form.Item
                     name="color"
                     label="Color"
@@ -426,7 +473,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="color" name="color"/>
+                    <input type="text" id="color" name="color" />
                 </Form.Item>
                 <Form.Item
                     name="str"
@@ -438,7 +485,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="str" name="str"/>
+                    <input type="text" id="str" name="str" />
                 </Form.Item>
                 <Form.Item
                     name="sta"
@@ -450,7 +497,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="sta" name="sta"/>
+                    <input type="text" id="sta" name="sta" />
                 </Form.Item>
                 <Form.Item
                     name="agi"
@@ -462,7 +509,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="agi" name="agi"/>
+                    <input type="text" id="agi" name="agi" />
                 </Form.Item>
                 <Form.Item
                     name="wis"
@@ -474,7 +521,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="wis" name="wis"/>
+                    <input type="text" id="wis" name="wis" />
                 </Form.Item>
                 <Form.Item
                     name="dex"
@@ -486,7 +533,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="dex" name="dex"/>
+                    <input type="text" id="dex" name="dex" />
                 </Form.Item>
                 <Form.Item
                     name="cha"
@@ -498,7 +545,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="cha" name="cha"/>
+                    <input type="text" id="cha" name="cha" />
                 </Form.Item>
                 <Form.Item
                     name="intelligence"
@@ -510,7 +557,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="intelligence" name="intelligence"/>
+                    <input type="text" id="intelligence" name="intelligence" />
                 </Form.Item>
                 <Form.Item
                     name="patternfam"
@@ -522,7 +569,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="patternfam" name="patternfam"/>
+                    <input type="text" id="patternfam" name="patternfam" />
                 </Form.Item>
                 <Form.Item
                     name="HPMAX"
@@ -534,7 +581,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="HPMAX" name="HPMAX"/>
+                    <input type="text" id="HPMAX" name="HPMAX" />
                 </Form.Item>
                 <Form.Item
                     name="POWMAX"
@@ -546,7 +593,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="POWMAX" name="POWMAX"/>
+                    <input type="text" id="POWMAX" name="POWMAX" />
                 </Form.Item>
                 <Form.Item
                     name="PoT"
@@ -558,7 +605,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="PoT" name="PoT"/>
+                    <input type="text" id="PoT" name="PoT" />
                 </Form.Item>
                 <Form.Item
                     name="HoT"
@@ -570,7 +617,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="HoT" name="HoT"/>
+                    <input type="text" id="HoT" name="HoT" />
                 </Form.Item>
                 <Form.Item
                     name="AC"
@@ -582,7 +629,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="AC" name="AC"/>
+                    <input type="text" id="AC" name="AC" />
                 </Form.Item>
                 <Form.Item
                     name="PR"
@@ -594,7 +641,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="PR" name="PR"/>
+                    <input type="text" id="PR" name="PR" />
                 </Form.Item>
                 <Form.Item
                     name="DR"
@@ -606,7 +653,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="DR" name="DR"/>
+                    <input type="text" id="DR" name="DR" />
                 </Form.Item>
                 <Form.Item
                     name="FR"
@@ -618,7 +665,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="FR" name="FR"/>
+                    <input type="text" id="FR" name="FR" />
                 </Form.Item>
                 <Form.Item
                     name="CR"
@@ -630,9 +677,9 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="CR" name="CR"/>
+                    <input type="text" id="CR" name="CR" />
                 </Form.Item>
-                 <Form.Item
+                <Form.Item
                     name="LR"
                     label="Light Resistance"
                     rules={[
@@ -642,7 +689,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="LR" name="LR"/>
+                    <input type="text" id="LR" name="LR" />
                 </Form.Item>
                 <Form.Item
                     name="AR"
@@ -654,7 +701,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="AR" name="AR"/>
+                    <input type="text" id="AR" name="AR" />
                 </Form.Item>
                 <Form.Item
                     name="weaponproc"
@@ -666,7 +713,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="weaponproc" name="weaponproc"/>
+                    <input type="text" id="weaponproc" name="weaponproc" />
                 </Form.Item>
                 <Form.Item
                     name="fish"
@@ -678,7 +725,7 @@ async function display_attacktype(){
                         },
                     ]}
                 >
-                    <input type="text" id="fish" name="fish"/>
+                    <input type="text" id="fish" name="fish" />
                 </Form.Item>
             </Form>
         </div>
