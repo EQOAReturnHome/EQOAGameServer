@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { Button, Form, Input, Select, Space } from "antd";
 import React from "react";
-
+import {characterClass, characterRace} from "./npc_arrays";
 
 const race = [
     {

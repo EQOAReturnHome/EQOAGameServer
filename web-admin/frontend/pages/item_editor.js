@@ -3,86 +3,14 @@ import { useState } from "react";
 import Select from "react-select";
 import { Button, Form, Input, Space } from "antd";
 import React, { Component } from "react";
-
-const item_models = [
-    {
-        value: "battleaxe",
-        label: (
-            <div>
-                <img
-                    src="/item_models/battleaxe.jpg"
-                    height="200px"
-                    width="200px"
-                />
-                Battleaxe
-            </div>
-        ),
-    },
-    {
-        value: "bearded_axe",
-        label: (
-            <div>
-                <img
-                    src="/item_models/bearded_axe.jpg"
-                    height="200px"
-                    width="200px"
-                />
-                Bearded Axe
-            </div>
-        ),
-    },
-];
-
-const attack_types = [
-    {
-        label: "No Attack Type",
-        value: "0",
-    },
-    {
-        label: "1 Hand Slash",
-        value: "1",
-    },
-    {
-        label: "2 Hand Slash",
-        value: "2",
-    },
-    {
-        label: "1 Hand Blunt",
-        value: "3",
-    },
-    {
-        label: "2 Hand Blunt",
-        value: "4",
-    },
-    {
-        label: "1 Hand Pierce",
-        value: "5",
-    },
-    {
-        label: "2 Hand Pierce",
-        value: "6",
-    },
-    {
-        label: "Bow",
-        value: "7",
-    },
-    {
-        label: "1 Hand Crossbow",
-        value: "8",
-    },
-    {
-        label: "2 Hand Crossbow",
-        value: "9",
-    },
-    {
-        label: "Thrown",
-        value: "10",
-    },
-];
+import { item_models, attack_types } from "./item_arrays";
+import { characterRace, characterClass } from "./npc_arrays";
+import { icon_models } from "./icon_arrays";
 
 const Items = () => {
     const [form] = Form.useForm();
     const [selectedValue, setSelectedValue] = useState();
+    const [selectedAttack, setSelectedAttack] = useState();
 
     const onFinish = (values) => {
         console.log({ values });
@@ -92,27 +20,200 @@ const Items = () => {
         setSelectedValue(e.value);
     };
 
-    async function update_image() {
-        alert(document.getElementById("item-model").value);
-    }
-
     const handleChangedImage = (e) => {
         setSelectedValue(e.value);
-        console.log("made it here");
-        console.log(selectedValue);
     };
 
-    async function display_attacktype() {
-        var d = document.getElementById("attacktype");
-        console.log(d.selectedIndex);
-        //var d = document.getElementById("attacktype");
-        //var atkvalue = d.options[d.selectedIndex].value;
-        //let obj = attack_types.find(o => o.label === atkvalue);
-        //alert(obj.value)
+
+    async function addItem() {
+        var itemname = document.getElementById("itemname").value;
+        const url = "http://192.168.6.100:8000/create_item";
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({ itemname: itemname }),
+        });
+
+        const json = await response.json();
+        alert(JSON.stringify(json));
+        return json;
+        
+    }
+
+    async function updateItem() {
+        url = "http://192.168.6.100:8000/update_item"
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({ itemname: data }),
+        });
+    }
+
+    async function convertItemMask(classMask, raceMask) {
+
+
+        if ((characterClass.Warrior & classMask) == characterClass.Warrior) {
+            document.getElementById("warrior").checked = true;
+        }
+        if ((characterClass.Ranger & classMask) == characterClass.Ranger) {
+            document.getElementById("ranger").checked = true;
+        }
+        if ((characterClass.Paladin & classMask) == characterClass.Paladin) {
+            document.getElementById("paladin").checked = true;
+        }
+        if ((characterClass.ShadowKnight & classMask) == characterClass.ShadowKnight) {
+            document.getElementById("shadowknight").checked = true;
+        }
+        if ((characterClass.Monk & classMask) == characterClass.Monk) {
+            document.getElementById("monk").checked = true;
+        }
+        if ((characterClass.Bard & classMask) == characterClass.Bard) {
+            document.getElementById("bard").checked = true;
+        }
+        if ((characterClass.Rogue & classMask) == characterClass.Rogue) {
+            document.getElementById("rogue").checked = true;
+        }
+        if ((characterClass.Druid & classMask) == characterClass.Druid) {
+            document.getElementById("druid").checked = true;
+        }
+        if ((characterClass.Shaman & classMask) == characterClass.Shaman) {
+            document.getElementById("shaman").checked = true;
+        }
+        if ((characterClass.Cleric & classMask) == characterClass.Cleric) {
+            document.getElementById("cleric").checked = true;
+        }
+        if ((characterClass.Magician & classMask) == characterClass.Magician) {
+            document.getElementById("magician").checked = true;
+        }
+        if ((characterClass.Necromancer & classMask) == characterClass.Necromancer) {
+            document.getElementById("necromancer").checked = true;
+        }
+        if ((characterClass.Enchanter & classMask) == characterClass.Enchanter) {
+            document.getElementById("enchanter").checked = true;
+        }
+        if ((characterClass.Wizard & classMask) == characterClass.Wizard) {
+            document.getElementById("wizard").checked = true;
+        }
+        if ((characterClass.Alchemist & classMask) == characterClass.Alchemist) {
+            document.getElementById("alchemist").checked = true;
+        }
+
+        if ((characterRace.Human & raceMask) == characterRace.Human) {
+            document.getElementById("human").checked = true;
+        }
+        if ((characterRace.Elf & raceMask) == characterRace.Elf) {
+            document.getElementById("elf").checked = true;
+        }
+        if ((characterRace.Dark_Elf & raceMask) == characterRace.Dark_Elf) {
+            document.getElementById("darkelf").checked = true;
+        }
+        if ((characterRace.Gnome & raceMask) == characterRace.Gnome) {
+            document.getElementById("gnome").checked = true;
+        }
+        if ((characterRace.Troll & raceMask) == characterRace.Troll) {
+            document.getElementById("troll").checked = true;
+        }
+        if ((characterRace.Barbarian & raceMask) == characterRace.Barbarian) {
+            document.getElementById("barbarian").checked = true;
+        }
+        if ((characterRace.Halfling & raceMask) == characterRace.Halfling) {
+            document.getElementById("halfling").checked = true;
+        }
+        if ((characterRace.Erudite & raceMask) == characterRace.Erudite) {
+            document.getElementById("erudite").checked = true;
+        }
+        if ((characterRace.Ogre & raceMask) == characterRace.Ogre) {
+            document.getElementById("ogre").checked = true;
+        }
+        if ((characterRace.Dwarf & raceMask) == characterRace.Dwarf) {
+            document.getElementById("dwarf").checked = true;
+        }
+
+    }
+
+    async function decColorToHex(decimalNum) {
+        let colorHex = (decimalNum).toString(16);
+        let opacity = colorHex.slice(-2);
+        if (opacity == "ff") {
+            document.getElementById("color_opacity").checked = true;
+        }
     }
 
     async function calculateClassMask() {
-        document.getElementById("ranger").checked;
+        var war = document.getElementById("warrior").checked; //0
+        var rang = document.getElementById("ranger").checked; //1
+        var pal = document.getElementById("paladin").checked; //2
+        var sk = document.getElementById("shadowknight").checked; //3
+        var mnk = document.getElementById("monk").checked; //4
+        var brd = document.getElementById("bard").checked; //5
+        var rge = document.getElementById("rogue").checked; //6
+        var drd = document.getElementById("druid").checked; //7
+        var shm = document.getElementById("shaman").checked; //8
+        var clr = document.getElementById("cleric").checked; //9
+        var mag = document.getElementById("magician").checked; //10
+        var nec = document.getElementById("necromancer").checked; //11
+        var enc = document.getElementById("enchanter").checked; //12
+        var wiz = document.getElementById("wizard").checked; //13
+        var alc = document.getElementById("alchemist").checked; //14
+        var classValue = 0;
+
+            if(war)
+                classValue += 1;
+
+            if(rang)
+                classValue += 2;
+
+            if(pal)
+                classValue += 4;
+
+            if(sk)
+                classValue += 8;
+
+            if(mnk)
+                classValue += 16;
+
+            if(brd)
+                classValue += 32;
+
+            if(rge)
+                classValue += 64;
+
+            if(drd)
+                classValue += 128;
+
+            if(shm)
+                classValue += 256;
+
+            if(clr)
+                classValue += 512;
+
+            if(mag)
+                classValue += 1024;
+
+            if(nec)
+                classValue += 2048;
+
+            if(enc)
+                classValue += 4096;
+
+            if(wiz)
+                classValue += 8192;
+
+            if(alc)
+                classValue += 16384;
+    }
+
+
+    async function getColor(color) {
+        console.log(document.getElementById("colorpicker").value);
     }
 
     async function postGetItem(url = "", data = {}) {
@@ -131,24 +232,25 @@ const Items = () => {
         document.getElementById("patternfam").value = json.patternfam;
         document.getElementById("itemicon").value = json.itemicon;
         document.getElementById("equipslot").value = json.equipslot;
-        if (json.trade == 0) {
+        if (json.trade == 1) {
             document.getElementById("trade").checked = false;
         } else {
             document.getElementById("trade").checked = true;
         }
-        if (json.rent == 0) {
+        if (json.rent == 1) {
             document.getElementById("rent").checked = false;
         } else {
             document.getElementById("rent").checked = true;
         }
-        document.getElementById("attacktype").value = json.attacktype;
+        try {
+            document.getElementById("attacktype").value = json.attacktype;
+        } catch (err) { }
         document.getElementById("weapondamage").value = json.weapondamage;
         document.getElementById("levelreq").value = json.levelreq;
         document.getElementById("maxstack").value = json.maxstack;
         document.getElementById("maxhp").value = json.maxhp;
         document.getElementById("duration").value = json.duration;
-        document.getElementById("classuse").value = json.classuse;
-        document.getElementById("raceuse").value = json.raceuse;
+        convertItemMask(json.classuse, json.raceuse);
         document.getElementById("procanim").value = json.procanim;
         if (json.lore == 0) {
             document.getElementById("lore").checked = false;
@@ -161,8 +263,10 @@ const Items = () => {
             document.getElementById("craft").checked = true;
         }
         document.getElementById("itemdesc").value = json.itemdesc;
-        document.getElementById("model").value = json.model;
-        document.getElementById("color").value = json.color;
+        try {
+            document.getElementById("model").value = json.model;
+        } catch (err) { }
+        document.getElementById("colorpicker").value = decColorToHex(json.color);
         document.getElementById("str").value = json.str;
         document.getElementById("sta").value = json.sta;
         document.getElementById("agi").value = json.agi;
@@ -187,8 +291,14 @@ const Items = () => {
     }
 
     async function getItem() {
+        var elements = document.getElementsByTagName("input");
+        for (var ii = 0; ii < elements.length; ii++) {
+            if (elements[ii].type == "checkbox") {
+                elements[ii].checked = false;
+            }
+        }
         var data = document.getElementById("itemname").value;
-        postGetItem("http://localhost:8000/get_item", data);
+        postGetItem("http://192.168.6.100:8000/get_item", data);
     }
 
     return (
@@ -211,21 +321,30 @@ const Items = () => {
                 >
                     <input type="text" id="itemname" name="itemname" />
                     <button onClick={getItem}>Search</button>
-                    <button onClick={getItem}>Add Item</button>
-                    <button onClick={getItem}>Update Item</button>
+                    <button onClick={addItem}>Add Item</button>
+                    <button onClick={calculateClassMask}>Update Item</button>
                 </Form.Item>
                 <Form.Item
-                    name="itemicon"
-                    label="Item Icon"
+                    id="icon"
+                    label="Icon"
                     rules={[
                         {
                             required: false,
-                            message: "Missing area",
+                            message: "Missing type",
                         },
                     ]}
                 >
-                    <input type="text" id="itemicon" name="itemicon" />
+                    <Select
+                        placeholder="Select Option"
+                        value={item_models.filter(
+                            (obj) => obj.value === selectedValue
+                        )} // set selected value
+                        options={icon_models} // set list of the data
+                        onChange={handleChange} // assign onChange function
+                    />
                 </Form.Item>
+                <b>Selected Value (feel free to remove this): </b>{" "}
+                {selectedValue}
                 <Form.Item
                     name="equipslot"
                     label="Equip Slot"
@@ -263,7 +382,7 @@ const Items = () => {
                     <input type="checkbox" id="rent" name="rent" />
                 </Form.Item>
                 <Form.Item
-                    name="atk_types"
+                    id="atk_types"
                     label="Attack Type"
                     rules={[
                         {
@@ -273,11 +392,11 @@ const Items = () => {
                     ]}
                 >
                     <Select
-                        options={attack_types}
-                        id="attacktype"
-                        name="attacktype"
-                        onChange={display_attacktype}
+                        placeholder="Select Option" id="attack_type"
+                        options={attack_types} // set list of the data
                     />
+                    <b>Selected Value (feel free to remove this): </b>{" "}
+                    {selectedValue}
                 </Form.Item>
                 <Form.Item
                     name="weapondamage"
@@ -349,7 +468,38 @@ const Items = () => {
                         },
                     ]}
                 >
-                    <input type="text" id="classuse" name="classuse" />
+                    <td>
+                        <input type="checkbox" id="warrior" name="warrior" />
+                        <label for="warrior"> Warrior </label>
+                        <input type="checkbox" id="ranger" name="ranger" />
+                        <label for="ranger"> Ranger  </label>
+                        <input type="checkbox" id="paladin" name="paladin" />
+                        <label for="paladin"> Paladin </label>
+                        <input type="checkbox" id="shadowknight" name="shadowknight" />
+                        <label for="shadowknight"> Shadowknight </label>
+                        <input type="checkbox" id="monk" name="monk" />
+                        <label for="monk"> Monk  </label>
+                        <input type="checkbox" id="bard" name="bard" />
+                        <label for="bard"> Bard  </label>
+                        <input type="checkbox" id="rogue" name="rogue" />
+                        <label for="rogue"> Rogue  </label>
+                        <input type="checkbox" id="druid" name="druid" />
+                        <label for="druid"> Druid  </label>
+                        <input type="checkbox" id="shaman" name="shaman" />
+                        <label for="shaman"> Shaman  </label>
+                        <input type="checkbox" id="cleric" name="cleric" />
+                        <label for="cleric"> Cleric  </label>
+                        <input type="checkbox" id="magician" name="magician" />
+                        <label for="magician"> Magician  </label>
+                        <input type="checkbox" id="necromancer" name="necromancer" />
+                        <label for="necromancer"> Necromancer  </label>
+                        <input type="checkbox" id="enchanter" name="enchanter" />
+                        <label for="enchanter"> Enchanter </label>
+                        <input type="checkbox" id="wizard" name="wizard" />
+                        <label for="wizard"> Wizard  </label>
+                        <input type="checkbox" id="alchemist" name="alchemist" />
+                        <label for="alchemist"> Alchemist  </label>
+                    </td>
                 </Form.Item>
                 <Form.Item
                     name="raceuse"
@@ -369,23 +519,19 @@ const Items = () => {
                         <input type="checkbox" id="darkelf" name="darkelf" />
                         <label for="darkelf"> Dark Elf </label>
                         <input type="checkbox" id="gnome" name="gnome" />
-                        <label for="elf"> Gnome </label>
+                        <label for="gnome"> Gnome </label>
                         <input type="checkbox" id="dwarf" name="dwarf" />
-                        <label for="human"> Dwarf </label>
+                        <label for="dwarf"> Dwarf </label>
                         <input type="checkbox" id="troll" name="troll" />
-                        <label for="elf"> Troll </label>
-                        <input
-                            type="checkbox"
-                            id="barbarian"
-                            name="barbarian"
-                        />
-                        <label for="human"> Barbarian </label>
-                        <input type="checkbox" id="raceuse" name="raceuse" />
-                        <label for="elf"> Halfing </label>
-                        <input type="checkbox" id="human" name="human" />
-                        <label for="human"> Erudite </label>
-                        <input type="checkbox" id="raceuse" name="raceuse" />
-                        <label for="elf"> Ogre </label>
+                        <label for="troll"> Troll </label>
+                        <input type="checkbox" id="barbarian" name="barbarian" />
+                        <label for="barbarian"> Barbarian </label>
+                        <input type="checkbox" id="halfling" name="halfling" />
+                        <label for="halfling"> Halfing </label>
+                        <input type="checkbox" id="erudite" name="erudite" />
+                        <label for="erudite"> Erudite </label>
+                        <input type="checkbox" id="ogre" name="ogre" />
+                        <label for="ogre"> Ogre </label>
                     </td>
                 </Form.Item>
                 <Form.Item
@@ -437,7 +583,7 @@ const Items = () => {
                     <input type="text" id="itemdesc" name="itemdesx" />
                 </Form.Item>
                 <Form.Item
-                    name="model"
+                    id="model"
                     label="Model"
                     rules={[
                         {
@@ -454,18 +600,12 @@ const Items = () => {
                         options={item_models} // set list of the data
                         onChange={handleChange} // assign onChange function
                     />
-                    <img
-                        id="item_img"
-                        src="https://gclabels.net/image/cache/data/new/inv/new/Blank-White-Square-Labels-s1w-600x600.png"
-                        height="200px"
-                        width="200px"
-                    />
                 </Form.Item>
                 <b>Selected Value (feel free to remove this): </b>{" "}
                 {selectedValue}
                 <Form.Item
-                    name="color"
-                    label="Color"
+                    id="color"
+                    label="Item Color:"
                     rules={[
                         {
                             required: false,
@@ -473,7 +613,10 @@ const Items = () => {
                         },
                     ]}
                 >
-                    <input type="text" id="color" name="color" />
+                    <input type="color" id="colorpicker"
+                        onChange={getColor} />
+                    <input type="checkbox" id="color_opacity" />
+                    <label for="color_opacity">Transparent</label>
                 </Form.Item>
                 <Form.Item
                     name="str"

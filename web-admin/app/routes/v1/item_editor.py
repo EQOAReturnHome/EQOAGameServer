@@ -29,30 +29,15 @@ def create_item(item: schemas.CreateItem, db: Session = Depends(get_db)):
     return crud.create_item(db=db, item=item)
 
 @router.post("/get_item", response_model=schemas.ItemInfo)
-def get_item(item: schemas.ItemInfoBase, db: Session = Depends(get_db)):
+def get_item(item: schemas.GetItem, db: Session = Depends(get_db)):
     new_item = crud.get_item_by_name(db, itemname=item.itemname)
     if new_item is None:
         raise HTTPException(status_code=400, detail="No item Found")
     return crud.get_item_by_name(db, itemname=item.itemname)
 
-@router.get("/item_editor")
-async def generate(
-    player_class: str,
-    race: str,
-    race_type: Optional[str],
-    status: str,
-    location: str,
-    item: str,
-    quest_id: int,
-    step: Optional[int],
-):
-    quest_full_id = normalizeQuest(player_class=player_class, race=race, race_type=race_type, quest_id=quest_id)
-    quest_id_with_step = quest_full_id + step
-    # loads templates dir
-    file_loader = FileSystemLoader("app/templates")
-    env = Environment(loader=file_loader)
-    template = env.get_template("quest.txt")
-    output = template.render(
-        quest_id={quest_id}, status={status}, location={location}, item={item}, race_type={race_type}, step={step}
-    )
-    return {"message": output}
+@router.post("/update_item", response_model=schemas.ItemInfo)
+def update_item(item: schemas.UpdateItem, db: Session = Depends(get_db)):
+    existing_item = crud.get_item_by_name(db, itemname=item.itemname)
+    if existing_item is None:
+        raise HTTPException(status_code=400, detail="No item Found")
+    return crud.update_item(db, item=item)
