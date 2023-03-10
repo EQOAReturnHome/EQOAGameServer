@@ -6,9 +6,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientFaction
     {
-        public static void ProcessClientFaction(Session session, PacketMessage ClientPacket)
+        public static void ProcessClientFaction(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
             ServerFaction.ServerSendFaction(session);
         }
     }

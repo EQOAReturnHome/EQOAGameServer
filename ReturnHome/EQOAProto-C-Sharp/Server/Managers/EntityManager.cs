@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.Managers
 {
     public static class EntityManager
     {
         private static List<Entity> entityList = new();
+        private static List<Item> itemList = new();
         private static ObjectIDCreator _idCreator;
 
         static EntityManager()
@@ -55,6 +58,22 @@ namespace ReturnHome.Server.Managers
 
             e = default;
             return false;
+        }
+
+        public static bool QueryForEntityByServerID(uint ServerID, out Entity e)
+        {
+            if (_idCreator.QueryEntity(ServerID, out Entity ent))
+            {
+                e = ent;
+                return true;
+
+            }
+            else
+            {
+
+                e = default;
+                return false;
+            }
         }
 
         public static bool QueryForEntity(string name, out Entity c)

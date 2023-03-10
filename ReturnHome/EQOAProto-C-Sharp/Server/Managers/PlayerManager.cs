@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Managers
@@ -45,15 +46,25 @@ namespace ReturnHome.Server.Managers
             return playerList;
         }
 
-        public static List<Character> RequestPlayerList()
-        {
-            return playerList;
-        }
 
         //Stub method to be called on timer to save all characters in world
         public static void SaveCharacterData()
         {
             //List<Entity> charList = (List<Entity>)qtree.GetAllObjects().Cast<Entity>().ToList();
+        }
+
+        public static bool QueryForPlayer(uint targetID, out Character player)
+        {
+            foreach (Character c in playerList)
+            {
+                if(c.ServerID == targetID)
+                {
+                    player = c;
+                    return true;
+                }
+            }
+            player = default;
+            return false;
         }
     }
 }

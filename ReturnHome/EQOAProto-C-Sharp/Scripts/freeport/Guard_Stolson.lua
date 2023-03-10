@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "I'd be happy to show you around if only I were off duty.  Safe travels!"
+    npcDialogue = "Councilor Nothard is just upstairs, if you have official business with him."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

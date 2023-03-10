@@ -1,92 +1,42 @@
 using System;
+
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network
 {
-    public class ClientPacket : Packet
+    public class ClientPacket
     {
-        public bool ProcessPacket(ReadOnlyMemory<byte> buffer)
+        public ushort Local_Endpoint;
+        public uint Remote_Endpoint;
+        public SegmentHeader segmentHeader = new();
+        public SegmentBody segmentBody = new();
+        public bool ProcessPacket(Memory<byte> buffer)
         {
             BufferReader reader = new BufferReader(buffer.Span);
 
             //Track memory offset as packet is processed
-            try
+            reader.Position = reader.Length - 4;
+            if(reader.Read<uint>() != CRC.calculateCRC(reader.Buffer.Slice(0, reader.Length - 4)))
             {
-                Header.Unpack(ref reader, buffer);
+                reader.Position = 0;
+                Logger.Err($"CRC Failed for endpoint {reader.Read<ushort>():2X}");
+            }
 
-                //Need a way to identify an additional bundle from client and to process this
+            reader.Position = 0;
 
-                //If crc checksum is false, crc failed...
-                //Verify packet is not a transfer, transfers dont have crc
-                //Just drop the packet
-                if (!(Header.TargetEndPoint == 0xFFFF))
-                {
-                    //If packet indicates to cancel session, do it, and stop reading.
-                    //One off issue... Server select -> Character select, if ip/endpoint is the same, client will bundle old session disconnect
-                    //in same packet as the new connection, difficult to process this in current setup. Easy to ignore and let client resend
-                    if (Header.CancelSession)
-                        return true;
+            Local_Endpoint = reader.Read<ushort>();
+            Remote_Endpoint = reader.Read<ushort>(); //TODO: Eventually need to consider scoping for 0xFFFF endpoint for server transfers
+                
+            segmentHeader.Read(ref reader, Local_Endpoint, Remote_Endpoint);
 
-                    //If CRC fails and packet isn't canceling the session
-                    if (!Header.CRCChecksum)
-                        return false;
-
-                    //If the buffer size is equal to bytes read + 4 (CRC)
-                    //just return true as packets been fully broke down
-                    if (reader.Length == reader.Position + 4)
-                        //Packet should just be an ack or session cancel
-                        return true;
-
-                    //Read messages, if this fails... drop the packet
-                    if (!ReadMessages(reader, buffer))
-                        return false;
-                }
-
+            //Nothing else to read, need to terminate session
+            if((segmentHeader.flags & SegmentHeaderFlags.ResetConnection) != 0)
                 return true;
-            }
 
-            catch
-            {
-                //Log exception
-
+            if (!segmentBody.Read(ref reader, buffer, segmentHeader))
                 return false;
-            }
-        }
-
-        private bool ReadMessages(BufferReader reader, ReadOnlyMemory<byte> buffer)
-        {
-            //If message type is present, break out messages
-            if (Header.ProcessMessage)
-            {
-                //Subtract 4 from buffer length to account for removing CRC
-                while (reader.Position < (reader.Length - 4))
-                {
-                    try
-                    {
-                        var message = new ClientPacketMessage();
-                        if (!message.Unpack(ref reader, buffer))
-                            return false;
-                        if (message.Header.messageType == (byte)MessageType.ClientUpdate)
-                            clientUpdate = message;
-                        else
-                            Messages.TryAdd(message.Header.MessageNumber, message);
-                    }
-
-                    catch (Exception)
-                    {
-                        // corrupt packet? Maybe figure out some additional logging here
-                        return false;
-                    }
-                }
-            }
 
             return true;
-        }
-
-        //Nothing needs to be released... for now.
-        public void ReleaseBuffer()
-        {
-
         }
     }
 }

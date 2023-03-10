@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "What can I do fer ye?"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "By the blessing of Brell, The Church of Below will protect the dwarfs from the curses of this land."

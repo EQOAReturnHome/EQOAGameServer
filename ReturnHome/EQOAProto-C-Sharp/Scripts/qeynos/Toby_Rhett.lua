@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "If it's isn't urgent, then keep it to yourself.  I'm busy."
+    npcDialogue = "There is quite the stench coming from those careless alchemists next door! Who let them move in here? What kind of dangerous concoctions are they producing in there? I shall file a complaint with King Bayle!"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

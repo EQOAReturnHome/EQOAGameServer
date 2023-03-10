@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Where would you like for me to send you?"
+    npcDialogue = "I can cast you to far away places, with your guildmasters permission."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

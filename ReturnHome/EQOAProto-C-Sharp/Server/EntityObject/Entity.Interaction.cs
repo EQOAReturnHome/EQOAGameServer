@@ -13,8 +13,11 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.Opcodes.Chat;
 
 using NLua;
-using Newtonsoft.Json;
 using ReturnHome.Server.EntityObject.Items;
+using System.Collections.Concurrent;
+using ReturnHome.Server.EntityObject.Actors;
+using System.Text.RegularExpressions;
+using ReturnHome.Database.SQL;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -37,12 +40,14 @@ namespace ReturnHome.Server.EntityObject
 
                     //Keep a reference to our current target on hand
                     EntityManager.QueryForEntity(_target, out _ourTarget);
+                    if (_ourTarget != null)
+                        //Console.WriteLine($"{CharName} targeting {_ourTarget.CharName} at X: {_ourTarget.x} Y: {_ourTarget.y} Z: {_ourTarget.z} XVel:{_ourTarget.VelocityX} VelY: {_ourTarget.VelocityY} VelZ: {_ourTarget.VelocityZ}");
 
-                    if (isPlayer && ObjectID != 0)
-                    {
-                        //Get target information about the object
-                        TargetInformation(_target);
-                    }
+                        if (isPlayer && ObjectID != 0)
+                        {
+                            //Get target information about the object
+                            TargetInformation(_target);
+                        }
                 }
             }
         }
@@ -131,39 +136,51 @@ namespace ReturnHome.Server.EntityObject
         {
             if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
             {
-
-                npc.Inventory.RetrieveItem(itemSlot, out Item item);
-                if (Inventory.Tunar < item.ItemCost)
+                if (npc.Inventory.TryRetrieveItem(itemSlot, out Item item, out byte index))
                 {
-                    ChatMessage.DistributeSpecificMessageAndColor(((Character)this).characterSession, $"You can't afford that.", new byte[] { 0xFF, 0x00, 0x00, 0x00 });
-                }
-                else
-                {
-                    Inventory.RemoveTunar((int)(item.ItemCost * itemQty));
+                    if (Inventory.Tunar < (item.Pattern.ItemCost * itemQty))
+                    {
+                        ChatMessage.ClientErrorMessage(((Character)this).characterSession, $"You can't afford that.");
+                        ServerInventoryFull.InventoryFull(((Character)this).characterSession);
+                    }
 
-                    //Adjust player tunar
-                    ServerUpdatePlayerTunar.UpdatePlayerTunar(((Character)this).characterSession, Inventory.Tunar);
-
-                    Item newItem = item.AcquireItem(itemQty);
-
-                    Inventory.AddItem(newItem);
-
-                    ServerAddInventoryItemQuantity.AddInventoryItemQuantity(((Character)this).characterSession, newItem);
+                    else
+                    {
+                        //TODO: Is this logic better? Verified we have the tunar. Try to add it to our inventory, if rejected for any reason, we don't pull the tunar from character
+                        Item newItem = item.AcquireItem(itemQty);
+                        if (Inventory.AddItem(newItem))
+                            Inventory.RemoveTunar((int)(item.Pattern.ItemCost * itemQty));
+                    }
                 }
             }
-        }
-
-        public void TriggerMerchantMenu(uint targetNPC)
-        {
-            if (EntityManager.QueryForEntity(targetNPC, out Entity npc))
-                ServerTriggerMerchantMenu.TriggerMerchantMenu(((Character)this).characterSession, npc);
         }
 
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
         public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
         {
+            if (dialogue != null)
+            {
+                dialogue = dialogue.Replace("playerName", session.MyCharacter.CharName);
+            }
+
+            if (dialogue == "")
+            {
+                return;
+            }
+            else if (dialogue.Length > 217)
+            {
+                string splitRegex = @"(?<=[.?!]\s)";
+                string[] newDialogue = Regex.Split(dialogue, splitRegex);
+                foreach (string s in newDialogue)
+                {
+                    SendDialogue(session, s, diagOptions);
+                }
+                return;
+
+            }
             //Clear player's previous dialogue options before adding new ones.
             session.MyCharacter.MyDialogue.diagOptions.Clear();
+
 
             //loop over luatable, assigning every value to an element of the players diagOptions list
             //lua table always returns a dict type object of <object,object>
@@ -171,12 +188,12 @@ namespace ReturnHome.Server.EntityObject
             {
                 foreach (KeyValuePair<object, object> k in diagOptions)
                     session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
-
                 //If it's not a yes/no choice then sort alphabetically.
                 //This forces it to return choices the same every time.
                 if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
                     session.MyCharacter.MyDialogue.diagOptions.Sort();
             }
+
 
             //Length of choices
             uint choicesLength = 0;
@@ -190,7 +207,9 @@ namespace ReturnHome.Server.EntityObject
                 choiceCounter = (uint)session.MyCharacter.MyDialogue.diagOptions.Count;
                 //Length of choices
                 foreach (string choice in session.MyCharacter.MyDialogue.diagOptions)
+                {
                     choicesLength += (uint)choice.Length;
+                }
 
                 //count the number of textOptions
                 textOptions = (byte)session.MyCharacter.MyDialogue.diagOptions.Count;
@@ -204,6 +223,7 @@ namespace ReturnHome.Server.EntityObject
 
             //set player dialogue to the incoming dialogue
             session.MyCharacter.MyDialogue.dialogue = dialogue;
+
             //create variable memory span for sending out dialogue
             Message message = Message.Create(MessageType.ReliableMessage, dialogueType);
             BufferWriter writer = new BufferWriter(message.Span);
@@ -229,21 +249,51 @@ namespace ReturnHome.Server.EntityObject
             session.MyCharacter.MyDialogue.choice = 1000;
         }
 
-        public void ProcessDialogue(Session session, BufferReader reader, PacketMessage ClientPacket)
+        //Method for only sending multiple strings of dialogue.
+        public void SendMultiDialogue(Session session, LuaTable dialogue)
         {
-            uint interactTarget = 0;
-            //Read the incoming message and get the objectID that was interacted with
+            int choiceCounter = 0;
+            List<string> multiDialogue = new List<string>();
+            //Converts luatable 
+            if (dialogue != null)
+            {
+                foreach (KeyValuePair<object, object> k in dialogue)
+                {
+                    string repString = k.Value.ToString();
+                    repString = repString.Replace("playerName", session.MyCharacter.CharName);
+                    multiDialogue.Add(repString);
 
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
-                interactTarget = reader.Read<uint>();
+                }
+            }
 
+
+
+            foreach (string d in multiDialogue)
+            {
+                //create variable memory span for sending out dialogue
+                Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.DialogueBox);
+                BufferWriter writer = new BufferWriter(message.Span);
+
+                writer.Write(message.Opcode);
+                writer.Write(choiceCounter);
+                writer.WriteString(Encoding.Unicode, d);
+                //if it's an option box iterate through options and write options to message
+
+                message.Size = writer.Position;
+                //Send Message
+                session.sessionQueue.Add(message);
+            }
+        }
+
+
+        public void ProcessDialogue(Session session, BufferReader reader, Message ClientPacket, uint interactTarget)
+        {
             //if option choice incoming
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
+            if (ClientPacket.Opcode == GameOpcode.DialogueBoxOption)
             {
                 //try to pull the option counter and players choice out of message
                 try
                 {
-                    uint optionCounter = reader.Read<uint>();
                     session.MyCharacter.MyDialogue.choice = reader.Read<byte>();
                     //if diag message is 255(exit dialogue in client) return immediately without new message
                     //and set choice to incredibly high number to make sure it doesn't retrigger any specific dialogue.
@@ -264,15 +314,15 @@ namespace ReturnHome.Server.EntityObject
             Dialogue dialogue = session.MyCharacter.MyDialogue;
             GameOpcode dialogueType = GameOpcode.DialogueBoxOption;
             //if a diag option choice incoming set outgoing to diag box option
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
+            if (ClientPacket.Opcode == GameOpcode.DialogueBoxOption)
                 dialogueType = GameOpcode.DialogueBoxOption;
 
             //else this is just a regular interaction with only dialogue
-            else if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            else if (ClientPacket.Opcode == GameOpcode.Interact)
                 dialogueType = GameOpcode.DialogueBox;
 
             //Gets NPC name from ObjectID
-            if (ClientPacket.Header.Opcode == (ushort)GameOpcode.Interact)
+            if (ClientPacket.Opcode == GameOpcode.Interact)
             {
                 if (EntityManager.QueryForEntity(interactTarget, out Entity npc))
                     dialogue.npcName = npc.CharName;
@@ -387,19 +437,124 @@ namespace ReturnHome.Server.EntityObject
 
         }
 
-        public static bool CheckQuestItem(Session session, int itemID, int itemQty)
+        //Not the most efficent, but works..
+        public static bool CheckIfQuestItemInInventory(Session session, int itemID, int itemQty)
         {
-            if (session.MyCharacter.Inventory.itemContainer.Any(p => p.Value.ItemID == itemID && p.Value.StackLeft >= itemQty))
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID)
+                    if (session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
+                        return true;
+            return false;
+        }
+
+        public static bool CheckIfItemInInventory(Session session, int itemID, out byte key, out Item item)
+        {
+            item = default;
+            key = 0;
+
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; ++i)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID)
+                {
+                    item = session.MyCharacter.Inventory.itemContainer[i].item;
+                    key = session.MyCharacter.Inventory.itemContainer[i].key;
+                    return true;
+                }
+
+            return false;
+        }
+
+        //Not the most efficent, but works..
+        public static bool RemoveQuestItemFromPlayerInventory(Session session, int itemID, int itemQty)
+        {
+            for (byte i = 0; i < session.MyCharacter.Inventory.Count; i++)
+                if (session.MyCharacter.Inventory.itemContainer[i].item.Pattern.ItemID == itemID && session.MyCharacter.Inventory.itemContainer[i].item.StackLeft >= itemQty)
+                {
+                    session.MyCharacter.Inventory.UpdateQuantity(session.MyCharacter.Inventory.itemContainer[i].key, itemQty);
+                    return true;
+                }
+
+            return false;
+        }
+
+        public static bool AddItemToPlayerInventory(Session session)
+        {
+            //Do some magic to create an item here?!
+            //Maybe quest NPC's store quest rewards and we figure out how to give accordingly?
+            throw new NotImplementedException("AddItemToPlayerInventory not fully implemented, don't use this");
+            session.MyCharacter.Inventory.AddItem(default);
+        }
+
+        public void TakeDamage(uint playerID, int dmg)
+        {
+
+            if (CurrentHP > 0)
             {
-                return true;
+                if (dmg > this.CurrentHP)
+                {
+                    this.CurrentHP = 0;
+                }
+                else
+                {
+                    this.CurrentHP -= dmg;
+                }
             }
-            else
+            //TODO: We have Character entities here causing casting exceptions
+            ((Actor)this).EvaluateAggro(dmg, playerID);
+        }
+
+        public static void UpdateAnim(uint ServerID, AnimationState animation)
+        {
+            if (EntityManager.QueryForEntityByServerID(ServerID, out Entity entity))
             {
-                return false;
+                entity.Animation = (byte)animation;
             }
         }
 
+        public static void UpdateAnimByte(uint ServerID, byte animation)
+        {
+            if (EntityManager.QueryForEntityByServerID(ServerID, out Entity entity))
+            {
+                entity.Animation = animation;
+            }
+        }
+
+        public static void AddTunar(Session session, int tunar) => session.MyCharacter.Inventory.AddTunar(tunar);
+
+        public static void RemoveTunar(Session session, int tunar) => session.MyCharacter.Inventory.RemoveTunar(tunar);
+
+        //Handles turning NPC to player when they interact.
+        public void TurnToPlayer(int serverID)
+        {
+            if (EntityManager.QueryForEntityByServerID(Target, out Entity e))
+            {
+                byte newFacing = (byte)Lerp(e.Facing, Facing - (255 / 2), 1f);
 
 
+                //Probably need to use quaternions but lerping for now just to make them turn correctly.
+                /*Quaternion newPlayerRotation = new Quaternion(x, y, z, Facing);
+                Quaternion newNPCRotation = new Quaternion(e.x, e.y, e.z, MathF.Round(e.FacingF) * MathF.PI / 128.0f);
+                Quaternion qSlerp = Quaternion.Slerp(newPlayerRotation, newNPCRotation, 1);
+                e.Facing = (byte)MathF.Round(qSlerp.W * 128.0f / MathF.PI);*/
+                e.Facing = newFacing;
+
+
+                //disabling until FSM is built and/or can make them stop "shuffling"
+                /*if (newFacing > e.Facing)
+                {
+                    e.Animation = (byte)AnimationState.TurningInPlaceRight;
+                }
+                else
+                {
+                    e.Animation = (byte)AnimationState.TurningInPlaceLeft;
+                }*/
+
+                //basic lerp function
+                float Lerp(float firstFloat, float secondFloat, float by)
+                {
+                    return firstFloat * (1 - by) + secondFloat * by;
+                }
+
+            }
+        }
     }
 }

@@ -1,5 +1,11 @@
 ﻿using System;
+using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Actors;
+using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client
@@ -11,85 +17,50 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 If it has 0x80+, it is/should be unattackable
 Bankers are 0x02. So most likely 0x82 for unattackable and banker
 Coachmen are 0x0100, so 0x0180 for coachmen and unattackable
+        Coachmen:   0x100
+        Blacksmith: 0x8
+        Banker:     0x2
+        Merchant:   0x1
 */
-
-        public static void InteractActor(Session session, PacketMessage clientPacket)
+        //TODO:Verify and check that the interaction type matches npc type
+        //TODO: Create a Flag enum for npc types, so we can easily read and set/change npc types
+        public static void InteractActor(Session session, Message clientPacket)
         {
-            BufferReader reader = new(clientPacket.Data.Span);
+            BufferReader reader = new(clientPacket.Span);
+            //Get NPC ID
+            uint targetNPC = reader.Read<uint>();
 
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.ArrangeItem)
+            //Get NPC and Verify it is within range to interact
+            if (!EntityManager.QueryForEntity(targetNPC, out Entity e))
+                return;
+
+            if (!session.MyCharacter.IsWithinRange())
+                return;
+
+            switch (clientPacket.Opcode)
             {
-                byte itemSlot1 = (byte)reader.Read<uint>();
-                byte itemSlot2 = (byte)reader.Read<uint>();
-                session.MyCharacter.ArrangeItem(itemSlot1, itemSlot2);
-            }
+                //Merchant popup window, should be trigger some kind of flag if this goes through? Allowing buying/selling?
+                case GameOpcode.MerchantDiag:
+                    if ((e.EntityType & EntityType.Merchant) == EntityType.Merchant)
+                        ServerTriggerMerchantMenu.TriggerMerchantMenu(session, e);
+                    break;
 
-            //Merchant Buy
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantBuy)
-            {
-                byte itemSlot = (byte)reader.Read7BitEncodedInt64();
-                int itemQty = (int)reader.Read7BitEncodedInt64();
-                uint targetNPC = reader.Read<uint>();
-                session.MyCharacter.MerchantBuy(itemSlot, itemQty, targetNPC);
-            }
+                //Bank popup window
+                case GameOpcode.BankUI:
+                    if ((e.EntityType & EntityType.Banker) == EntityType.Banker)
+                        ServerBankInteract.OpenBankMenu(session);
+                    break;
 
-            //Merchant Sell
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantSell)
-            {
-                byte itemSlot = (byte)reader.Read<int>();
-                int itemQty = (int)reader.Read7BitEncodedInt64();
-                uint targetNPC = reader.Read<uint>();
-                //We just need to verify the player is talking to a merchant and within range here, just let it work for now
-                session.MyCharacter.SellItem(itemSlot, itemQty, targetNPC);
+                case GameOpcode.BlackSmithMenu:
+                    if ((e.EntityType & EntityType.Blacksmith) == EntityType.Blacksmith)
+                        ServerBlackSmith.ActivateBlackSmithMenu(session);
+                    break;
 
-            }
-
-            //Merchant popup window
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.MerchantDiag)
-            {
-                uint targetNPC = reader.Read<uint>();
-                session.MyCharacter.TriggerMerchantMenu(targetNPC);
-            }
-
-
-            //Bank popup window
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankUI)
-            {
-                Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.BankUI);
-                BufferWriter writer = new BufferWriter(message.Span);
-
-                writer.Write(message.Opcode);
-                message.Size = writer.Position;
-                session.sessionQueue.Add(message);
-            }
-
-            //Deposit and Withdraw Bank Tunar
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.DepositBankTunar)
-            {
-
-                uint targetNPC = reader.Read<uint>();
-                uint giveOrTake = (uint)reader.Read7BitEncodedUInt64();
-                int transferAmount = (int)reader.Read7BitEncodedInt64();
-                session.MyCharacter.BankTunar(targetNPC, giveOrTake, transferAmount);
-
-            }
-
-            //Deposit and Withdraw Bank item
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.BankItem)
-            {
-
-                uint targetNPC = reader.Read<uint>();
-                byte giveOrTake = reader.Read<byte>();
-                byte itemToTransfer = (byte)reader.Read<uint>();
-                int qtyToTransfer = (int)reader.Read7BitEncodedInt64();
-                session.MyCharacter.TransferItem(giveOrTake, itemToTransfer, qtyToTransfer);
-
-            }
-
-            //Dialogue and Quest Interaction
-            if (clientPacket.Header.Opcode == (ushort)GameOpcode.Interact || clientPacket.Header.Opcode == (ushort)GameOpcode.DialogueBoxOption)
-            {
-                session.MyCharacter.ProcessDialogue(session, reader, clientPacket);
+                //Dialogue and Quest Interaction
+                case GameOpcode.Interact:
+                case GameOpcode.DialogueBoxOption:
+                    session.MyCharacter.ProcessDialogue(session, reader, clientPacket, targetNPC);
+                    break;
             }
         }
     }

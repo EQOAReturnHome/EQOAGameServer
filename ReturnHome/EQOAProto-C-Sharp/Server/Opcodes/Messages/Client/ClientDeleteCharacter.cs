@@ -6,11 +6,11 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     class ClientDeleteCharacter
     {
-        public static void DeleteCharacter(Session session, PacketMessage ClientPacket)
+        public static void DeleteCharacter(Session session, Message ClientPacket)
         {
             CharacterSQL deletedCharacter = new CharacterSQL();
 
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
             //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
             int clientServID = (int)reader.Read7BitEncodedInt64();
 

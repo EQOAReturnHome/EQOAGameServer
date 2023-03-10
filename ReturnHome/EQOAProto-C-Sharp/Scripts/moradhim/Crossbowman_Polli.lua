@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Nothin' escapes our sights!!  We'll shoot em dead before they ever step foot in our city!"
+    npcDialogue = "There are a lot of dull moments manning the crossbow. To stay sharp we run drills on the critters in the field. We keep score with each other, and of course the frosteye orcs are worth double."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

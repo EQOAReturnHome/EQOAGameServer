@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Tread softly, weakling.  Or you may find yourself under my boot."
+    npcDialogue = "The only thing more disgusting than a weakling, like you playerName, is a dirty Lycan. Kill them all I say."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

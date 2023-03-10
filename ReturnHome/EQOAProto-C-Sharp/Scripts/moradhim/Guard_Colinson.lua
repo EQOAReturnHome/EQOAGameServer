@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Don' make me hav' ta smite ya!"
+    npcDialogue = "Outta ma way, playerName!"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

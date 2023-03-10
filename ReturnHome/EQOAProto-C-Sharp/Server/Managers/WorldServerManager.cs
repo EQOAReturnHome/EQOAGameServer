@@ -3,13 +3,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject.Actors;
-using ReturnHome.Server.EntityObject;
-using QuadTrees;
-
 using ReturnHome.Server.Network.Managers;
-using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.Items;
 
 namespace ReturnHome.Server.Managers
 {
@@ -27,26 +25,48 @@ namespace ReturnHome.Server.Managers
         public static void Initialize()
         {
             //Creates NPC List
+            Console.WriteLine("Collecting Item Patterns...");
             CharacterSQL npcList = new();
+
+            List<ItemPattern> myItemPatterns = npcList.ItemPatterns();
+            npcList.CloseConnection();
+            Console.WriteLine("Total Item Pattern's Acquired: " + myItemPatterns.Count);
+            Console.WriteLine("Adding Item Patterns...");
+            for (int i = 0; i < myItemPatterns.Count; ++i)
+                ItemManager.AddItem(myItemPatterns[i]);
+
+            npcList = new();
+            Console.WriteLine("Collecting Actors...");
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
+
             //Closing DB connection
             npcList.CloseConnection();
             MapManager.Initialize();
+
+            Console.WriteLine("Done.");
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");
+
             foreach (Actor myActor in myNpcList)
             {
                 EntityManager.AddEntity(myActor);
                 MapManager.Add(myActor);
 
             }
+
             Console.WriteLine("Done.");
+            Console.WriteLine("Getting itemID seed.");
+            CharacterSQL itemIDs = new();
+            itemIDs.GetMaxItemID();
+            itemIDs.CloseConnection();
 
             Console.WriteLine("Loading Default character options");
             CharacterSQL LoadDefaultCharacters = new();
             LoadDefaultCharacters.CollectDefaultCharacters();
             LoadDefaultCharacters.CloseConnection();
+
+
             Console.WriteLine("Done...");
             var thread = new Thread(() =>
             {

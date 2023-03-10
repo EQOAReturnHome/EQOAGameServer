@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Leave me be, would you?"
+    npcDialogue = "Death to all werewolves!"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

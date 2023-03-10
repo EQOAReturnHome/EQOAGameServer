@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace ReturnHome.Server.Zone
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Drawing;
     using System.Numerics;
@@ -21,9 +22,10 @@ namespace ReturnHome.Server.Zone
     public class Map
     {
         private QuadTreePointF<Entity> _qtree;
-        private List<Character> _playerList = new();
+        private ConcurrentDictionary<int, Character> _playerList = new();
         private List<Entity> _entityBuffer = new();
         private List<Entity> _removeBuffer = new();
+        private List<Entity> _entityList = new();
         //private quadTree 
         private string _name;
         public string Name
@@ -36,15 +38,12 @@ namespace ReturnHome.Server.Zone
 
         }
 
-        public Map(string name)
-        {
-            Name = name;
-        }
+        public Map(string name) => Name = name;
 
         public void Initialize()
         {
             if (Name == "Tunaria")
-                _qtree = new QuadTreePointF<Entity>(new RectangleF(3000.0f, 3000.0f, 24000.0f, 30000.0f));
+                _qtree = new QuadTreePointF<Entity>(new RectangleF(2000.0f, 2000.0f, 26000.0f, 32000.0f));
 
             else if (Name == "Odus")
                 _qtree = new QuadTreePointF<Entity>(new RectangleF(3000.0f, 1000.0f, 10000.0f, 12000.0f));
@@ -79,7 +78,7 @@ namespace ReturnHome.Server.Zone
             e.map = this;
 
             if (e.isPlayer)
-                _playerList.Add((Character)e);
+                _playerList.GetOrAdd(e.ServerID, (Character)e);
         }
 
         //Called by server tick to bulk add entities
@@ -91,30 +90,23 @@ namespace ReturnHome.Server.Zone
 
         public void QueryObjectsForDistribution()
         {
-            List<Entity> entityList = new();
-
-            foreach (Character entity in _playerList)
+            foreach (KeyValuePair<int, Character> kv in _playerList)
             {
-                _qtree.GetObjects(new RectangleF(entity.x - 100f, entity.z - 100f, 200f, 150.0f), entityList);
+                Character entity = kv.Value;
+                _qtree.GetObjects(new RectangleF(entity.x - 100f, entity.z - 100f, 200f, 150.0f), _entityList);
 
                 //Sort Character List
-                entityList = entityList.OrderBy(x => Vector3.Distance(new Vector3(entity.x, entity.y, entity.z), new Vector3(x.x, x.y, x.z))).ToList();
+                _entityList = _entityList.OrderBy(x => Vector3.Distance(new Vector3(entity.x, entity.y, entity.z), new Vector3(x.x, x.y, x.z))).ToList();
 
-                entity.characterSession.rdpCommIn.connectionData.AddChannelObjects(entityList);
+                entity.characterSession.rdpCommIn.connectionData.AddChannelObjects(_entityList);
 
-                entityList.Clear();
+                _entityList.Clear();
             }
         }
 
-        public void UpdatePosition(Entity e)
-        {
-            _qtree.Move(e);
-        }
+        public void UpdatePosition(Entity e) => _qtree.Move(e);
 
-        public void RemoveObject(Entity e)
-        {
-            _removeBuffer.Add(e);
-        }
+        public void RemoveObject(Entity e) => _removeBuffer.Add(e);
 
         public void RemoveBulkObjects()
         {
@@ -122,7 +114,8 @@ namespace ReturnHome.Server.Zone
             {
                 _qtree.Remove(e);
                 if (e.isPlayer)
-                    _playerList.Remove((Character)e);
+                    if (!_playerList.Remove(e.ServerID, out Character c))
+                        Console.WriteLine($"Failed to Character {c.CharName}");
             }
 
             _removeBuffer.Clear();

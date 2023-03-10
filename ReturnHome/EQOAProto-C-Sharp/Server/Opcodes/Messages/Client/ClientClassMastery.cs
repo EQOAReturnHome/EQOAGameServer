@@ -7,9 +7,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 {
     public static class ClientClassMastery
     {
-        public static void ProcessClassMastery(Session session, PacketMessage ClientPacket)
+        public static void ProcessClassMastery(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             byte subOpcode = reader.Read<byte>();
             int counter = reader.Read<int>();
@@ -22,7 +22,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 
                 //request cm menu
                 case 4:
-                    Console.WriteLine("Sending CM Menu");
                     ServerCMMenu.SendCMMenu(session);
                     break;
             }

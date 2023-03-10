@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -20,7 +21,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public TrainingPoints(int totalTrainingPoints, int UnusedTrainingPoints)
         {
             if (TotalTrainingPoints > _maxTrainingPoints)
-                Console.WriteLine("Error, character has more then max allowable Training Points");
+                Logger.Err("Error, character has more then max allowable Training Points");
 
             if (TotalTrainingPoints == _maxTrainingPoints)
                 _hitMaxTrainingPoints = true;
@@ -55,7 +56,7 @@ namespace ReturnHome.Server.EntityObject.Player
             }
 
             else
-                Console.WriteLine("Character traying to spent more training points then remaining");
+                Logger.Err("Character trying to spent more training points then remaining");
 
             return false;
         }

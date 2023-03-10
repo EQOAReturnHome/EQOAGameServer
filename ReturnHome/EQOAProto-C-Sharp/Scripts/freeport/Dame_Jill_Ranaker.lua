@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "I'm sorry but you'll have to excuse me.  I'm extremely busy."
+    npcDialogue = "Welcome to the Church of the Marr Twins, also known as the Temple of Marr."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

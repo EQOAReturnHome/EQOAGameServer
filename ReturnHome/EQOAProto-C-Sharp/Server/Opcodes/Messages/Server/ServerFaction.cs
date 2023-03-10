@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
@@ -9,19 +7,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void ServerSendFaction(Session session)
         {
-            Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.FactionStuff);
-            BufferWriter writer = new BufferWriter(message.Span);
+            /*Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.Something2);//0 removes from group, no message //1 Group leader ejected you //2 Group disbanded //3 not invited to this group //4 Group is full //5 no message, not in group
+            BufferWriter writer = new BufferWriter(message.Span); //7 Group disbanded
 
             writer.Write(message.Opcode);
-            //throw new Exception();
-            //writer.Write7BitEncodedInt64(200);
-            //writer.Write(673457636);
-            //writer.Write((byte)0x0C);
-            //writer.Write((byte)12);
-            writer.WriteString(Encoding.Unicode, "Test");
+            writer.Write<byte>(7);
 
             message.Size = writer.Position;
-            session.sessionQueue.Add(message);
+            session.sessionQueue.Add(message);*/
         }
     }
 }

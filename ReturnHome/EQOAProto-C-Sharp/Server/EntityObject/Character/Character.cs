@@ -1,19 +1,28 @@
 using System.Collections.Generic;
 using System.Text;
-using Newtonsoft.Json;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Stats;
+using System;
+using System.Text.Json;
 
 namespace ReturnHome.Server.EntityObject.Player
-{  
+{
     public partial class Character : Entity
     {
+        //default to true, only opcode reading from client should be writing here.
+        public bool LootMessages = true;
+        public bool DamageNumberMessages = true;
+        public bool FactionMessages = true;
+
+
         public int CMCounter = 1;
         public int CMPercentage = 0;
         public int SpentCMs = 0;
         public int UnspentCMs = 0;
+
+        public uint GroupID = 0;
 
         private static string Tunaria = "data\\tunaria.esf";
 
@@ -25,16 +34,17 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Spell> MySpells = new List<Spell> { };
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
-        public List<Quest> MyQuests = new List<Quest> { };
+        public List<Quest> activeQuests = new List<Quest>();
+        public List<Quest> completedQuests = new List<Quest>();
         public Dialogue MyDialogue = new Dialogue();
-        public Dictionary<string, bool> playerFlags = new Dictionary<string, bool>();
+        public Dictionary<string, string> playerFlags = new Dictionary<string, string>();
 
         public TrainingPoints PlayerTrainingPoints;
 
         public World ExpectedWorld;
         //this Reference helps keep these 2 objects tied together
         public Session characterSession;
-        public int ServerID;
+
 
         public int XPEarnedInThisLevel;
         public long TotalXP = 0;
@@ -47,7 +57,7 @@ namespace ReturnHome.Server.EntityObject.Player
         public int Teleportcounter { get; internal set; } = 0;
 
         //Used to create our Default characters stored on the server to either reference values, or deep copy for entirely new characters
-        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp) : base(true, 1)
+        public Character(int race, int tclass, int humanType, int sex, float X, float Y, float Z, float facing, float speed, int world, int modelID, List<KeyValuePair<StatModifiers, int>> temp, List<Hotkey> hotkeys) : base(true, 1)
         {
             Speed = speed;
             EntityRace = (Race)race;
@@ -57,15 +67,15 @@ namespace ReturnHome.Server.EntityObject.Player
             //Default characters start with 20 total and 20 unused TP's
             PlayerTrainingPoints = new(20, 20);
             Level = 1;
-            Inventory = new(0);
-            Bank = new(0, false);
+            Inventory = new(50000000, this);
+            Bank = new(0, this, false);
             x = X;
             y = Y;
             z = Z;
             FacingF = facing;
             World = (World)world;
             ModelID = modelID;
-
+            MyHotkeys= hotkeys;
             //Base HPFactor calculated in Character
             switch (EntityClass)
             {
@@ -105,10 +115,9 @@ namespace ReturnHome.Server.EntityObject.Player
         //Need instantiation, but needs some review because it's so big... 
         public Character(string charName, int serverID, int modelID, int tClass, int race, int humType, int level, int hairColor, int hairLength, int hairStyle, int faceOption, int sex, int earnedXP, int debt, int breath, int tunar, int bankTunar, int UnusedTrainingPoints, int TotalTrainingPoints,
                          float speed, int world, float xCoord, float yCoord, float zCoord, float facing, int tpStrength, int tpStamina, int tpAgility, int tpDexterity, int tpWisdom, int tpIntelligence, int tpCharisma, int currentHP, int currentPower, int aC,
-                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing,string playerFlags, Session MySession) : base(true, level)
+                         int poisonResist, int diseaseResist, int fireResist, int coldResist, int lightningResist, int arcaneResist, int fishing, string playerFlags, string completedQuests, string activeQuests, Session MySession) : base(true, level)
         {
             Speed = speed;
-            //playerFlags.Add("Freeport", true);
             Target = 0xFFFFFFFF;
             CharName = charName;
             ServerID = serverID;
@@ -132,8 +141,8 @@ namespace ReturnHome.Server.EntityObject.Player
 
             totalDebt = debt;
             Breath = breath;
-            Inventory = new(tunar);
-            Bank = new(bankTunar, false);
+            Inventory = new(tunar, this);
+            Bank = new(bankTunar, this, false);
             PlayerTrainingPoints = new(TotalTrainingPoints, UnusedTrainingPoints);
             World = (World)world;
             ExpectedWorld = (World)world;
@@ -191,13 +200,21 @@ namespace ReturnHome.Server.EntityObject.Player
             CurrentStats.Add(StatModifiers.TPCHA, tpCharisma);
 
 
-            if (playerFlags != null){
-                this.playerFlags = JsonConvert.DeserializeObject<Dictionary<string, bool>>(playerFlags);
+            if (playerFlags != null)
+            {
+                this.playerFlags = JsonSerializer.Deserialize<Dictionary<string, string>>(playerFlags);
             }
-            //CurrentPower2 = currentPower2;
-            //BasePower = basePower;
-            //HealOT2 = healOT2;
-            //PowerOT2 = powerOT2;
+
+            if(completedQuests != null)
+            {
+                this.completedQuests = JsonSerializer.Deserialize<List<Quest>>(completedQuests);
+            }
+
+            if(activeQuests != null)
+            {
+                this.activeQuests = JsonSerializer.Deserialize<List<Quest>>(activeQuests);
+            }
+
             characterSession = MySession;
         }
 
@@ -238,18 +255,24 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write(0.0f);
             writer.Write(0.0f);
         }
-        public bool GetPlayerFlags(Session mySession, string flagKey)
+        public string GetPlayerFlags(Session mySession, string flagKey)
         {
             if (mySession.MyCharacter.playerFlags == null)
-                return false;
+                return "noFlags";
 
-            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey) && mySession.MyCharacter.playerFlags[flagKey])
-                return true;
+            if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
+            {
+                return mySession.MyCharacter.playerFlags[flagKey];
+            }
 
-            return false;
+
+
+            else
+                return "noFlags";
+
         }
 
-        public void SetPlayerFlag(Session mySession, string flagKey, bool flagValue)
+        public void SetPlayerFlag(Session mySession, string flagKey, string flagValue)
         {
             //TODO: Fix for characters without flags? bypassing for now
             if (mySession.MyCharacter.playerFlags == null)
@@ -260,6 +283,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
                 mySession.MyCharacter.playerFlags[flagKey] = flagValue;
+            Logger.Info($"Flag {mySession.MyCharacter.playerFlags[flagKey]} set for {mySession.MyCharacter.CharName}");
         }
 
         public Character Copy() => (Character)MemberwiseClone();

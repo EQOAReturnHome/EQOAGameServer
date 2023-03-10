@@ -1,9 +1,9 @@
-﻿using System;
-using ReturnHome.Server.EntityObject;
+﻿using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Stats;
+using Z.EntityFramework.Plus;
 
 namespace ReturnHome.Server.Opcodes.Chat
 {
@@ -20,9 +20,15 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                 message = $"Found character: {c.CharName}";
                 ChatMessage.GenerateClientSpecificChat(MySession, message);
+                if (changes.Length < 2)
+                    return false;
 
                 switch(changes[1])
                 {
+                    case "test":
+                        ServerClientMenu.ChangeMenu(MySession, 0x23, 0x80);
+                        break;
+                        
                     case "Zone":
                         message = $"Map: {MySession.MyCharacter.map.Name}";
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
@@ -60,6 +66,30 @@ namespace ReturnHome.Server.Opcodes.Chat
                         ServerTeleportPlayer.TeleportPlayer(MySession, World.Tunaria, 24568f, 53.5f, 3502f, -3.0826661586761475f);
                         break;
 
+                    case "on":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdateOnline(byte.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
+                    case "pat":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdatePattern(uint.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
+                    case "unk2":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdateUnknown2(byte.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
+                    case "attack":
+                        message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
+                        c.ObjectUpdateUnknown(ushort.Parse(changes[2]));
+                        ChatMessage.GenerateClientSpecificChat(MySession, message);
+                        break;
+
                     case "animation":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
                         c.Animation = byte.Parse(changes[2]);
@@ -92,25 +122,25 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                     case "vy":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.VelocityY = float.Parse(changes[2]);
+                        c.VelocityY = ushort.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
                     case "vx":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.VelocityX = float.Parse(changes[2]);
+                        c.VelocityX = ushort.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
                     case "vz":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.VelocityZ = float.Parse(changes[2]);
+                        c.VelocityZ = ushort.Parse(changes[2]);
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
                     case "move":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
-                        c.Movement = byte.Parse(changes[2]);
+                        c.ObjectUpdateMovement(byte.Parse(changes[2]));
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
@@ -162,7 +192,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
                         break;
 
-                    case "test":
+                    case "test2":
                         message = $"Changing character: {c.CharName}, {changes[1]} to {changes[2]}";
                         c.ObjectUpdateUnknown();
                         ChatMessage.GenerateClientSpecificChat(MySession, message);
@@ -181,6 +211,9 @@ namespace ReturnHome.Server.Opcodes.Chat
                         break;
 
                     case "stat":
+                        if (changes.Length < 4)
+                            return false;
+
                         switch(changes[2])
                         {
                             case "basestrength":

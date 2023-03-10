@@ -4,15 +4,14 @@ local coaches = require('Scripts/ports')
 
 local playerCoaches = {
    freeport_coach = "Get me a horse to Freeport.",
-   klick_coach = "Get me a horse to Klick'Anon'.",
+   klick_coach = "Get me a horse to Klick'Anon.",
    rivervale_coach = "Get me a horse to Rivervale."
 }
 
 local ch = tostring(choice)
-SetPlayerFlags(mySession, "admin", true)
 function event_say()
    dialogueOptions = {}
-   if(GetPlayerFlags(mySession, "bobble_by_water_coach")) then
+   if(GetPlayerFlags(mySession, "bobble_by_water_coach") == "true") then
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
@@ -43,7 +42,7 @@ function event_say()
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if ((GetPlayerFlags(mySession, "admin")  or GetPlayerFlags(mySession, coach)) == "true") then
                table.insert(dialogueOptions, diag)
             end
 
@@ -55,7 +54,7 @@ function event_say()
 
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "bobble_by_water_coach", true)
+         SetPlayerFlags(mySession, "bobble_by_water_coach", "true")
                SendDialogue(mySession, npcDialogue, dialogueOptions)
 
       elseif (ch:find("No")) then

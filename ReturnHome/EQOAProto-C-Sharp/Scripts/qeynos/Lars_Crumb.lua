@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Why, I wouldn't want to be anywhere else in the world right now."
+    npcDialogue = "The boss will be here shortly. I am certain you don't want to be here when he arrives. It's best you don’t mention what you've seen here to anyone."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

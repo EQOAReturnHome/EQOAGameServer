@@ -7,9 +7,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
     class ClientDiscVersion
     {
         ///Game Disc Version
-        public static void DiscVersion(Session session, PacketMessage ClientPacket)
+        public static void DiscVersion(Session session, Message ClientPacket)
         {
-            BufferReader reader = new(ClientPacket.Data.Span);
+            BufferReader reader = new(ClientPacket.message.Span);
 
             ///Gets Gameversion sent by client
             int GameVersion = reader.Read<int>();

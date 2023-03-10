@@ -1,16 +1,15 @@
 local playerCoaches = {
-   darvar_coach = "Get me a horse to Darvar Manor.",
-   seriak_coach = "Get me a horse to Ft. Seriak.",
+   darvar_manor_coach = "Get me a horse to Darvar Manor.",
+   fort_seriak_coach = "Get me a horse to Ft. Seriak.",
    freeport_coach = "Get me a horse to Freeport.",
-   solace_coach = "Get me a horse to the city of Dark Solace.",
+   dark_solace_coach = "Get me a horse to the city of Dark Solace.",
    rivervale_coach = "Get me a horse to the halfling home of Rivervale"
 }
 local coaches = require('Scripts/ports')
 local ch = tostring(choice)
-SetPlayerFlags(mySession, "admin", true)
 function event_say()
    local dialogueOptions = {}
-   if(GetPlayerFlags(mySession, "highpass_coach")) then
+   if(GetPlayerFlags(mySession, "highpass_coach") == "true") then
       if (ch:find("Freeport")) then
          TeleportPlayer(
          mySession,
@@ -48,7 +47,6 @@ function event_say()
          coaches.rivervale.facing
          )
          elseif (ch:find("Darvar")) then
-         SendDialogue(mySession, npcDialogue, dialogueOptions)
          TeleportPlayer(
          mySession,
          GetWorld(coaches.darvar_manor.world),
@@ -60,7 +58,7 @@ function event_say()
       else
         local npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if ((GetPlayerFlags(mySession, "admin")  or GetPlayerFlags(mySession, coach)) == "true") then
                table.insert(dialogueOptions, diag)
             end
          end
@@ -69,7 +67,7 @@ function event_say()
    else
    if (ch:find("Yes")) then
       npcDialogue = "Excellent, you can now use this coach any time."
-      SetPlayerFlags(mySession, "highpass_coach", true)
+      SetPlayerFlags(mySession, "highpass_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
 
    elseif (ch:find("No")) then

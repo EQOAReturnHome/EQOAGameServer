@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Be wary on your travels, adventurer.  The Freezeblood roam these parts."
+    npcDialogue = "Honor is the most noble creed that any true warrior should live and die by."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

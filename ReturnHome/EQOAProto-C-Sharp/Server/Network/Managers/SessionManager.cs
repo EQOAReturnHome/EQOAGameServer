@@ -1,10 +1,8 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using System.Linq;
 
 using ReturnHome.Utilities;
-using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -28,28 +26,33 @@ namespace ReturnHome.Server.Network.Managers
 			Session ClientSession;
 
             //Remove session
-            if (packet.Header.CancelSession)
+            if ((packet.segmentHeader.flags & SegmentHeaderFlags.ResetConnection) != 0)
             {
                 //Add a method here to save session data and character etc, whatever is applicable.
                 //Attempt to remove from serverlisting for now
-                findSession(ClientIPEndPoint, packet.Header.InstanceID, out ClientSession);
+                //Probably be more accurate to track account/connection state to dictate what needs to happen here
+                findSession(ClientIPEndPoint, packet.segmentHeader.instance, out ClientSession);
+                if (ClientSession == null)
+                    return;
                 ServerListManager.RemoveSession(ClientSession);
+                ClientSession.DropSession(true);
+
                 if (SessionHash.TryRemove(ClientSession))
                     Logger.Info("Session Successfully removed from Session List");
                 return;
             }
 
             //Create a new session
-            if(packet.Header.NewInstance)
-			{
+            if ((packet.segmentHeader.flags & SegmentHeaderFlags.NewInstance) != 0)
+            {
                 // Create New Session
-                ClientSession = new Session(listener, ClientIPEndPoint, packet.Header.InstanceID, packet.Header.SessionID, packet.Header.ClientEndPoint, listener.serverEndPoint, false);
+                ClientSession = new Session(listener, ClientIPEndPoint, packet.segmentHeader.instance, packet.segmentHeader.remote_endpoint, packet.Local_Endpoint, listener.serverEndPoint, false);
 
                 //Try adding session to hashset
                 if (SessionHash.TryAdd(ClientSession))
                 {
                     Logger.Info($"{ClientSession.ClientEndpoint.ToString("X")}: Processing new session");
-                    ClientSession.PacketBodyFlags.SessionAck = true;
+                    ClientSession.segmentBodyFlags |= SegmentBodyFlags.sessionAck;
                     //Success, keep processing data
                     ClientSession.rdpCommIn.ProcessPacket(packet);
                 }
@@ -69,13 +72,13 @@ namespace ReturnHome.Server.Network.Managers
                     {
                         //Somehow got the wrong session? Def. Needs a log to notate this
                         ClientSession = null;
-                        Logger.Info($"Session for Id {packet.Header.ClientEndPoint} has IP {ClientSession.MyIPEndPoint} but packet has IP {ClientIPEndPoint}");
+                        Logger.Err($"Session for Id {packet.Local_Endpoint} has IP {ClientSession.MyIPEndPoint} but packet has IP {ClientIPEndPoint}");
                     }
                 }
 
                 else
                 {
-                    Logger.Info($"Unsolicited Packet from {ClientIPEndPoint} with Id { packet.Header.ClientEndPoint}");
+                    Logger.Info($"Unsolicited Packet from {ClientIPEndPoint} with Id { packet.Local_Endpoint}");
                 }
             }
         }
@@ -174,27 +177,23 @@ namespace ReturnHome.Server.Network.Managers
         {
             int sessionCount = 0;
 
-            //Should push client object update directly to character if needed
-            //test  Parallel.ForEach(SessionHash, s => s?.UpdateClientObject());
-
-            MapManager.UpdateMaps();
-
-            // The session tick outbound processes pending actions and handles outgoing messages
-            Parallel.ForEach(SessionHash, s => s?.TickOutbound());
-
-            // Removes sessions in the NetworkTimeout state, including sessions that have reached a timeout limit.
+            // Removes sessions in the NetworkTimeout state, including sessions that have reached a timeout limit. These should be dropped before processing anything
             foreach (var session in SessionHash.Where(k => !Equals(null, k)))
             {
                 if (session.PendingTermination)
                 {
                     session.DropSession();
+                    continue;
                 }
-
                 sessionCount++;
             }
+
+            MapManager.UpdateMaps();
+            GroupManager.DistributeGroupUpdates();
+            // The session tick outbound processes pending actions and handles outgoing messages
+            Parallel.ForEach(SessionHash, s => s?.TickOutbound());
 			
             return sessionCount;
         }
-		
     }
 }

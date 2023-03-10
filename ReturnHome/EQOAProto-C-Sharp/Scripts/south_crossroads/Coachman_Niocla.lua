@@ -6,14 +6,13 @@ local playerCoaches = {
    highpass_coach = "Get me a horse to Highpass.",
    honjpur_coach = "Get me a horse to Honjour Village.",
    kerplunk_coach = "Get me a horse to Kerplunk Output.",
-   oasis_coach = "Get me a horse to the Oasis of Marr."
+   oasis_of_marr_coach = "Get me a horse to the Oasis of Marr."
 }
 
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-SetPlayerFlags(mySession, "admin", true)
-   if(GetPlayerFlags(mySession, "south_crossroads_coach")) then
+   if(GetPlayerFlags(mySession, "south_crossorads_coach") == "true") then
       if (ch:find("Highpass")) then
          TeleportPlayer(mySession,GetWorld(coaches.highpass.world),coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
       elseif (ch:find("Honjour")) then
@@ -25,7 +24,7 @@ SetPlayerFlags(mySession, "admin", true)
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if ((GetPlayerFlags(mySession, "admin")  or GetPlayerFlags(mySession, coach)) == "true") then
                table.insert(dialogueOptions, diag)
             end
          end
@@ -34,7 +33,7 @@ SetPlayerFlags(mySession, "admin", true)
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "south_crossorads_coach", true)
+         SetPlayerFlags(mySession, "south_crossorads_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."

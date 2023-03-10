@@ -12,6 +12,8 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Server.Managers;
+using MySqlDataAdapter = MySql.Data.MySqlClient.MySqlDataAdapter;
 
 namespace ReturnHome.Database.SQL
 {
@@ -20,35 +22,72 @@ namespace ReturnHome.Database.SQL
     {
         public void CollectDefaultCharacters()
         {
-            using var cmd = new MySqlCommand("GetDefaultCharacters", con);
+            List<Hotkey> hotkeys = new List<Hotkey>();
+            //Get Default hotkey here
+            using var cmd = new MySqlCommand("GetCharHotkeys", con);
             cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("charID", 1);
             using MySqlDataReader rdr = cmd.ExecuteReader();
+
             while (rdr.Read())
             {
+                //Instantiate new character object, not to be confused with a newly created character
+                Hotkey thisHotkey = new Hotkey
+                (
+                     //direction
+                     rdr.GetString(0),
+                     //Nlabel
+                     rdr.GetString(1),
+                     //Nmessage
+                     rdr.GetString(2),
+                     //Wlabel
+                     rdr.GetString(3),
+                     //Wmessage
+                     rdr.GetString(4),
+                     //Elabel
+                     rdr.GetString(5),
+                     //Emessage
+                     rdr.GetString(6),
+                     //Slabel
+                     rdr.GetString(7),
+                     //Smessage
+                     rdr.GetString(8)
+                );
+
+                //Add these spells to player book
+                hotkeys.Add(thisHotkey);
+            }
+            rdr.Close();
+
+            using var cmd2 = new MySqlCommand("GetDefaultCharacters", con);
+            cmd2.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr2 = cmd2.ExecuteReader();
+            while (rdr2.Read())
+            {
                 List<KeyValuePair<StatModifiers, int>> temp = new();
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTR, rdr.GetInt32(11)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTA, rdr.GetInt32(12)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseAGI, rdr.GetInt32(13)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseDEX, rdr.GetInt32(14)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseWIS, rdr.GetInt32(15)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseINT, rdr.GetInt32(16)));
-                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseCHA, rdr.GetInt32(17)));
-                DefaultCharacter.DefaultCharacterDict.TryAdd(((Race)rdr.GetInt32(0), (Class)rdr.GetInt32(1), (HumanType)rdr.GetInt32(2), (Sex)rdr.GetInt32(3)), new Character(rdr.GetInt32(0),
-                                                                                                                                                                             rdr.GetInt32(1),
-                                                                                                                                                                             rdr.GetInt32(2),
-                                                                                                                                                                             rdr.GetInt32(3),
-                                                                                                                                                                             rdr.GetFloat(4),
-                                                                                                                                                                             rdr.GetFloat(5),
-                                                                                                                                                                             rdr.GetFloat(6),
-                                                                                                                                                                             rdr.GetFloat(7),
-                                                                                                                                                                             rdr.GetFloat(8),
-                                                                                                                                                                             rdr.GetInt32(9),
-                                                                                                                                                                             rdr.GetInt32(10),
-                                                                                                                                                                             temp));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTR, rdr2.GetInt32(11)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseSTA, rdr2.GetInt32(12)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseAGI, rdr2.GetInt32(13)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseDEX, rdr2.GetInt32(14)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseWIS, rdr2.GetInt32(15)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseINT, rdr2.GetInt32(16)));
+                temp.Add(new KeyValuePair<StatModifiers, int>(StatModifiers.BaseCHA, rdr2.GetInt32(17)));
+                DefaultCharacter.DefaultCharacterDict.TryAdd(((Race)rdr2.GetInt32(0), (Class)rdr2.GetInt32(1), (HumanType)rdr2.GetInt32(2), (Sex)rdr2.GetInt32(3)), new Character(rdr2.GetInt32(0),
+                                                                                                                                                                             rdr2.GetInt32(1),
+                                                                                                                                                                             rdr2.GetInt32(2),
+                                                                                                                                                                             rdr2.GetInt32(3),
+                                                                                                                                                                             rdr2.GetFloat(4),
+                                                                                                                                                                             rdr2.GetFloat(5),
+                                                                                                                                                                             rdr2.GetFloat(6),
+                                                                                                                                                                             rdr2.GetFloat(7),
+                                                                                                                                                                             rdr2.GetFloat(8),
+                                                                                                                                                                             rdr2.GetInt32(9),
+                                                                                                                                                                             rdr2.GetInt32(10),
+                                                                                                                                                                             temp, hotkeys));
             }
         }
 
-        public void SavePlayerData(Character player, string playerFlags)
+        public void SavePlayerData(Character player)
         {
             //Create new sql connection calling stored proc to update data
             using var SecondCmd = new MySqlCommand("UpdatePlayerData", con);
@@ -89,11 +128,106 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("newLightningr", player.LightningResist);
             SecondCmd.Parameters.AddWithValue("newArcaner", player.ArcaneResist);
             SecondCmd.Parameters.AddWithValue("newFishing", player.Fishing);
-            SecondCmd.Parameters.AddWithValue("playerFlags", playerFlags);
+            SecondCmd.Parameters.AddWithValue("playerFlags", (string)JsonSerializer.Serialize(player.playerFlags));
+            SecondCmd.Parameters.AddWithValue("completedQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.completedQuests));
+            SecondCmd.Parameters.AddWithValue("activeQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.activeQuests));
 
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
             SecondCmd.ExecuteNonQuery();
+
+            //SavePlayerItems(player);
+        }
+
+        /*public void SavePlayerItems(Character player)
+        {
+
+            DataTable dt = new DataTable("charInv");
+            dt.Clear();
+            dt.Columns.Add("serverID");
+            dt.Columns.Add("stackLeft");
+            dt.Columns.Add("remainHP");
+            dt.Columns.Add("remainCharge");
+            dt.Columns.Add("patternID");
+            dt.Columns.Add("equipLoc");
+            dt.Columns.Add("location");
+            dt.Columns.Add("listNumber");
+            DataRow dr = null;
+            int auto = 17;
+            foreach (ClientItemWrapper item in player.Inventory.itemContainer)
+            {
+                dr = dt.NewRow();
+                dr["serverID"] = player.ServerID;
+                dr["stackLeft"] = item.item.StackLeft;
+                dr["remainHP"] = item.item.RemainingHP;
+                dr["remainCharge"] = item.item.Charges;
+                dr["patternID"] = item.item.Pattern.ItemID;
+                dr["equiploc"] = (byte)item.item.EquipLocation;
+                dr["location"] = item.item.Location;
+                dr["listNumber"] = item.item.ClientIndex;
+                dt.Rows.Add(dr);
+            }
+
+            printDataTable(dt);
+
+
+            MySqlDataAdapter da = new MySqlDataAdapter("Select * from charInventory", con);
+            MySqlCommandBuilder cb = new MySqlCommandBuilder(da);
+            //da.Fill(dt);
+            DataTable changes = dt.GetChanges();
+            da.Update(changes);
+            dt.AcceptChanges();
+            da.Dispose();
+
+        }*/
+
+        public void AddPlayerItem(Character player, Item item)
+        {
+
+            //Create new sql connection calling stored proc to update data
+            using var Cmd = new MySqlCommand("AddPlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("playerID", player.ServerID);
+            Cmd.Parameters.AddWithValue("ID", item.ID);
+            Cmd.Parameters.AddWithValue("stack", item.StackLeft);
+            Cmd.Parameters.AddWithValue("remHP", item.RemainingHP);
+            Cmd.Parameters.AddWithValue("remCharge", item.Charges);
+            Cmd.Parameters.AddWithValue("pattern", item.Pattern.ItemID);
+            Cmd.Parameters.AddWithValue("equip_location", (sbyte)item.EquipLocation);
+            Cmd.Parameters.AddWithValue("loc", (sbyte)item.Location);
+            Cmd.Parameters.AddWithValue("listnum", item.ClientIndex);
+
+            Cmd.ExecuteNonQuery();
+        }
+
+        public void UpdatePlayerItem(Character player, Item item)
+        {
+            using var Cmd = new MySqlCommand("UpdatePlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("playerID", player.ServerID);
+            Cmd.Parameters.AddWithValue("stack", item.StackLeft);
+            Cmd.Parameters.AddWithValue("remHP", item.RemainingHP);
+            Cmd.Parameters.AddWithValue("remCharge", item.Charges);
+            Cmd.Parameters.AddWithValue("equip_location", (sbyte)item.EquipLocation);
+            Cmd.Parameters.AddWithValue("ID", item.ID);
+            Cmd.Parameters.AddWithValue("loc", (sbyte)item.Location);
+
+
+            Cmd.ExecuteNonQuery();
+
+        }
+
+        public void DeletePlayerItem(int itemID)
+        {
+            //Create new sql connection calling stored proc to update data
+            using var Cmd = new MySqlCommand("DeletePlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("ID", itemID);
+            Cmd.ExecuteNonQuery();
+
         }
 
         //Queries NPC database to populate world lists
@@ -156,7 +290,9 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(21),
                     //NPC Type
                     //Should be a ushort but throws an overflow error, needs to be looked at eventually, cast to ushort in Actor.cs
-                    rdr.GetUInt32(22));
+                    (EntityType)rdr.GetUInt32(22),
+                    //NPC ID
+                    rdr.GetInt32(23));
                 //add the created actor to the npcData list
                 npcData.Add(newActor);
 
@@ -168,99 +304,26 @@ namespace ReturnHome.Database.SQL
             SecondCmd.CommandType = CommandType.StoredProcedure;
             using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
 
-            string actorName;
+            int actorID;
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
             {
                 //Hold charactervalue so we have names to compare against 
-                actorName = SecondRdr.GetString(0);
+                actorID = SecondRdr.GetInt32(0);
 
                 //Iterate through characterData list finding charnames that exist
-                Actor thisActor = npcData.Find(i => Equals(i.CharName, actorName));
-
-                if (thisActor.Inventory == null)
-                    thisActor.Inventory = new(0);
-
-                Item ThisItem = new Item(
-                  //Stacksleft
-                  SecondRdr.GetInt32(1),
-                  //RemainingHP
-                  SecondRdr.GetInt32(2),
-                  //Charges
-                  SecondRdr.GetInt32(3),
-                  //Equipment Location
-                  SecondRdr.GetInt32(4),
-                  //Location (Bank, self, auction etc)
-                  SecondRdr.GetByte(5),
-                  //Location in inventory
-                  SecondRdr.GetByte(6),
-                  //ItemID
-                  SecondRdr.GetInt32(7),
-                  //Item cost 
-                  SecondRdr.GetUInt32(8),
-                  //ItemIcon
-                  SecondRdr.GetInt32(9),
-                  //Itempattern equipslot
-                  SecondRdr.GetInt32(10),
-                  //Attack Type 
-                  SecondRdr.GetInt32(11),
-                  //WeaponDamage
-                  SecondRdr.GetInt32(12),
-                  //MaxHP of item 
-                  SecondRdr.GetInt32(13),
-                  //Tradeable?
-                  SecondRdr.GetInt32(14),
-                  //Rentable
-                  SecondRdr.GetInt32(15),
-                  //Craft Item
-                  SecondRdr.GetInt32(16),
-                  //Lore item 
-                  SecondRdr.GetInt32(17),
-                  //Level requirement 
-                  SecondRdr.GetInt32(18),
-                  //Max stack of item 
-                  SecondRdr.GetInt32(19),
-                  //ItemName
-                  SecondRdr.GetString(20),
-                  //Item Description
-                  SecondRdr.GetString(21),
-                  //Duration
-                  SecondRdr.GetInt32(22),
-                  //useable classes
-                  SecondRdr.GetInt32(23),
-                  //useable races
-                  SecondRdr.GetInt32(24),
-                  //Proc Animation
-                  SecondRdr.GetInt32(25),
-                  new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                                                               },
-                  //Model
-                  SecondRdr.GetInt32(44),
-                  //Color
-                  SecondRdr.GetUInt32(45));
-
-                //If this is 1, it needs to go to inventory
-                if (ThisItem.Location == 1)
+                Actor thisActor = npcData.Find(i => Equals(i.ServerID, actorID));
+                if (thisActor != null)
                 {
-                    thisActor.Inventory.AddItem(ThisItem);
+                    if (thisActor.Inventory == null)
+                        thisActor.Inventory = new(0, thisActor);
+
+                    Item ThisItem = ItemManager.CreateItem(SecondRdr.GetInt32(7), SecondRdr.GetInt32(1), thisActor);
+
+                    //If this is 1, it needs to go to inventory
+                    if (ThisItem.Location == ItemLocation.Inventory)
+                        thisActor.Inventory.AddItem(ThisItem);
                 }
             }
 
@@ -268,6 +331,65 @@ namespace ReturnHome.Database.SQL
             //return the list of actors from DB
             return npcData;
         }
+
+        public List<ItemPattern> ItemPatterns()
+        {
+            List<ItemPattern> itemPatterns = new();
+
+            using var cmd = new MySqlCommand("GetItemPatterns", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                ItemPattern item = new(
+                      //ItemID
+                      rdr.GetInt32(0),
+                      //Item cost 
+                      rdr.GetUInt32(1),
+                      //ItemIcon
+                      rdr.GetInt32(2),
+                      //Itempattern equipslot
+                      rdr.GetInt32(3),
+                      //Attack Type 
+                      rdr.GetInt32(4),
+                      //WeaponDamage
+                      rdr.GetInt32(5),
+                      //MaxHP of item 
+                      rdr.GetInt32(6),
+                      //Level requirement 
+                      rdr.GetInt32(11),
+                      //Max stack of item 
+                      rdr.GetInt32(12),
+                      //ItemName
+                      rdr.GetString(13),
+                      //Item Description
+                      rdr.GetString(14),
+                      //Duration
+                      rdr.GetInt32(15),
+                      //useable classes
+                      rdr.GetInt32(16),
+                      //useable races
+                      rdr.GetInt32(17),
+                      //Proc Animation
+                      rdr.GetInt32(18),
+                      new int[28] { rdr.GetInt32(19), rdr.GetInt32(20), rdr.GetInt32(21), rdr.GetInt32(22), rdr.GetInt32(23), rdr.GetInt32(24), rdr.GetInt32(25),
+                                    0, rdr.GetInt32(26), 0, rdr.GetInt32(27), 0, rdr.GetInt32(28),  rdr.GetInt32(29), rdr.GetInt32(30), 0, 0, 0, 0, 0, 0, 0,
+                                    rdr.GetInt32(31),  rdr.GetInt32(32), rdr.GetInt32(33), rdr.GetInt32(34), rdr.GetInt32(35), rdr.GetInt32(36) },
+                      //Model
+                      rdr.GetInt32(37),
+                      //Color
+                      rdr.GetUInt32(38),
+                      (rdr.GetInt32(7) == 1 ? ItemFlags.NoTrade : 0) | (rdr.GetInt32(8) == 0 ? ItemFlags.NoRent : 0) | (rdr.GetInt32(9) == 1 ? ItemFlags.Craft : 0) | (rdr.GetInt32(10) == 1 ? ItemFlags.Lore : 0));
+
+                itemPatterns.Add(item);
+            }
+
+            rdr.Close();
+            return itemPatterns;
+        }
+
+
         //Class to pull characters from DB via serverid
         public List<Character> AccountCharacters(Session session)
         {
@@ -291,10 +413,10 @@ namespace ReturnHome.Database.SQL
                 //Instantiate character object
                 Character newCharacter = new Character
                 (
-                    //charName 1
-                    rdr.GetString(0),
-                    //serverid 2
-                    rdr.GetInt32(1),
+                    //serverid 1
+                    rdr.GetString(1),
+                    //charName 2
+                    rdr.GetInt32(0),
                     //modelid 3
                     rdr.GetInt32(2),
                     //tclass 4
@@ -376,14 +498,16 @@ namespace ReturnHome.Database.SQL
                     rdr.GetInt32(41),
                     //flags 41
                     rdr.GetString(42),
+                    //activeQuests
+                    rdr.GetString(44),
+                    //completedQuests
+                    rdr.GetString(43),
                     //58
                     session);
 
-
-                //Add character attribute data to charaterData List
-                //Console.WriteLine(newCharacter.CharName);
                 characterData.Add(newCharacter);
             }
+
             //Close first reader
             rdr.Close();
 
@@ -392,6 +516,7 @@ namespace ReturnHome.Database.SQL
             SecondCmd.CommandType = CommandType.StoredProcedure;
             SecondCmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
+
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
@@ -412,93 +537,33 @@ namespace ReturnHome.Database.SQL
                   //Equipment Location
                   SecondRdr.GetInt32(4),
                   //Location (Bank, self, auction etc)
-                  SecondRdr.GetByte(5),
+                  (ItemLocation)SecondRdr.GetSByte(5),
                   //Location in inventory
                   SecondRdr.GetByte(6),
                   //ItemID
-                  SecondRdr.GetInt32(7),
-                  //Item cost 
-                  SecondRdr.GetUInt32(8),
-                  //ItemIcon
-                  SecondRdr.GetInt32(9),
-                  //Itempattern equipslot
-                  SecondRdr.GetInt32(10),
-                  //Attack Type 
-                  SecondRdr.GetInt32(11),
-                  //WeaponDamage
-                  SecondRdr.GetInt32(12),
-                  //MaxHP of item 
-                  SecondRdr.GetInt32(13),
-                  //Tradeable?
-                  SecondRdr.GetInt32(14),
-                  //Rentable
-                  SecondRdr.GetInt32(15),
-                  //Craft Item
-                  SecondRdr.GetInt32(16),
-                  //Lore item 
-                  SecondRdr.GetInt32(17),
-                  //Level requirement 
-                  SecondRdr.GetInt32(18),
-                  //Max stack of item 
-                  SecondRdr.GetInt32(19),
-                  //ItemName
-                  SecondRdr.GetString(20),
-                  //Item Description
-                  SecondRdr.GetString(21),
-                  //Duration
-                  SecondRdr.GetInt32(22),
-                  //useable classes
-                  SecondRdr.GetInt32(23),
-                  //useable races
-                  SecondRdr.GetInt32(24),
-                  //Proc Animation
-                  SecondRdr.GetInt32(25),
-                  new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                  },
-                  //Model
-                  SecondRdr.GetInt32(44),
-                  //Color
-                  SecondRdr.GetUInt32(45));
+                  ItemManager.GetItemPattern(SecondRdr.GetInt32(7)),
+                  SecondRdr.GetInt32(46));
 
                 //If this is 1, it needs to go to inventory
                 //Only this one one is needed for character select data
-                if (ThisItem.Location == 1)
-                {
+                //TODO:Add a enum? for Item Location to represent inventory, bank, auction
+                if (ThisItem.Location == ItemLocation.Inventory)
                     thisChar.Inventory.AddItem(ThisItem);
-                }
 
-                
+
                 //If this is 2, it needs to go to the Bank
-                else if (ThisItem.Location == 2)
-                {
+                else if (ThisItem.Location == ItemLocation.Bank)
                     thisChar.Bank.AddItem(ThisItem);
-                }
+
                 //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                else if (ThisItem.Location == 4)
-                {
+                else if (ThisItem.Location == ItemLocation.Auction)
                     thisChar.AuctionItems.Add(ThisItem);
-                }
+
             }
 
             SecondRdr.Close();
-            //foreach (Character character in characterData.OrderBy(newCharacter => newCharacter.CharName)) Console.WriteLine(character);
+
+
 
             //return Character Data with characters and gear.
             return characterData;
@@ -510,25 +575,24 @@ namespace ReturnHome.Database.SQL
             Character selectedCharacter = null;
 
             //Queries DB for all characters and their necessary attributes  to generate character select
-            //Later should convert to a SQL stored procedure if possible.
-            //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetAccountCharacters", con);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
+
             //Read through results from query populating character data needed for character select
             while (rdr.Read())
             {
-                if (rdr.GetInt32(1) == serverID)
+                if (rdr.GetInt32(0) == serverID)
                 {
                     //Instantiate character object
                     selectedCharacter = new Character
                     (
                         //charName 1
-                        rdr.GetString(0),
+                        rdr.GetString(1),
                         //serverid 2
-                        rdr.GetInt32(1),
+                        rdr.GetInt32(0),
                         //modelid 3
                         rdr.GetInt32(2),
                         //tclass 4
@@ -611,9 +675,13 @@ namespace ReturnHome.Database.SQL
                         rdr.GetInt32(41),
                         //flags 41
                         rdr.GetString(42),
+                        //activeQuests
+                        rdr.GetString(44),
+                        //completedQuests
+                        rdr.GetString(43),
                         //58
                         session);
-                        break;
+                    break;
                 }
             }
 
@@ -628,7 +696,7 @@ namespace ReturnHome.Database.SQL
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
-            {
+            {            
                 //Hold character value so we have names to compare against 
                 if (SecondRdr.GetString(0) == selectedCharacter.CharName)
                 {
@@ -642,81 +710,24 @@ namespace ReturnHome.Database.SQL
                       //Equipment Location
                       SecondRdr.GetInt32(4),
                       //Location (Bank, self, auction etc)
-                      SecondRdr.GetByte(5),
+                      (ItemLocation)SecondRdr.GetSByte(5),
                       //Location in inventory
                       SecondRdr.GetByte(6),
                       //ItemID
-                      SecondRdr.GetInt32(7),
-                      //Item cost 
-                      SecondRdr.GetUInt32(8),
-                      //ItemIcon
-                      SecondRdr.GetInt32(9),
-                      //Itempattern equipslot
-                      SecondRdr.GetInt32(10),
-                      //Attack Type 
-                      SecondRdr.GetInt32(11),
-                      //WeaponDamage
-                      SecondRdr.GetInt32(12),
-                      //MaxHP of item 
-                      SecondRdr.GetInt32(13),
-                      //Tradeable?
-                      SecondRdr.GetInt32(14),
-                      //Rentable
-                      SecondRdr.GetInt32(15),
-                      //Craft Item
-                      SecondRdr.GetInt32(16),
-                      //Lore item 
-                      SecondRdr.GetInt32(17),
-                      //Level requirement 
-                      SecondRdr.GetInt32(18),
-                      //Max stack of item 
-                      SecondRdr.GetInt32(19),
-                      //ItemName
-                      SecondRdr.GetString(20),
-                      //Item Description
-                      SecondRdr.GetString(21),
-                      //Duration
-                      SecondRdr.GetInt32(22),
-                      //useable classes
-                      SecondRdr.GetInt32(23),
-                      //useable races
-                      SecondRdr.GetInt32(24),
-                      //Proc Animation
-                      SecondRdr.GetInt32(25),
-                      new List<KeyValuePair<StatModifiers, int>>() { new KeyValuePair<StatModifiers, int>(StatModifiers.STR, SecondRdr.GetInt32(26)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.STA, SecondRdr.GetInt32(27)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AGI, SecondRdr.GetInt32(28)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DEX, SecondRdr.GetInt32(29)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.WIS, SecondRdr.GetInt32(30)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.INT, SecondRdr.GetInt32(31)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.CHA, SecondRdr.GetInt32(32)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HPMAX, SecondRdr.GetInt32(33)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.POWMAX, SecondRdr.GetInt32(34)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoT, SecondRdr.GetInt32(35)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.HoT, SecondRdr.GetInt32(36)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.AC, SecondRdr.GetInt32(37)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.PoisonResistance, SecondRdr.GetInt32(38)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.DiseaseResistance, SecondRdr.GetInt32(39)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.FireResistance, SecondRdr.GetInt32(40)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ColdResistance, SecondRdr.GetInt32(41)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.LightningResistance, SecondRdr.GetInt32(42)),
-                                                                 new KeyValuePair<StatModifiers, int>(StatModifiers.ArcaneResistance, SecondRdr.GetInt32(43))
-                      },
-                      //Model
-                      SecondRdr.GetInt32(44),
-                      //Color
-                      SecondRdr.GetUInt32(45));
+                      ItemManager.GetItemPattern(SecondRdr.GetInt32(7)),
+                      SecondRdr.GetInt32(46));
 
                     //If this is 1, it needs to go to inventory
-                    if (ThisItem.Location == 1)
+                    //TODO:Add a enum? for Item Location to represent inventory, bank, auction
+                    if (ThisItem.Location == ItemLocation.Inventory)
                         selectedCharacter.Inventory.AddItem(ThisItem);
 
                     //If this is 2, it needs to go to the Bank
-                    else if (ThisItem.Location == 2)
+                    else if (ThisItem.Location == ItemLocation.Bank)
                         selectedCharacter.Bank.AddItem(ThisItem);
 
                     //If this is 4, it needs to go to "Auction items". This should be items you are selling and still technically in your possession
-                    else if (ThisItem.Location == 4)
+                    else if (ThisItem.Location == ItemLocation.Auction)
                         selectedCharacter.AuctionItems.Add(ThisItem);
                 }
 
@@ -725,9 +736,12 @@ namespace ReturnHome.Database.SQL
             }
             SecondRdr.Close();
 
+
             //return Character Data with characters and gear.
             return selectedCharacter;
         }
+
+
 
         public void GetPlayerSpells(Session session)
         {
@@ -798,7 +812,7 @@ namespace ReturnHome.Database.SQL
             //Currently pulls ALL charcters, will pull characters based on accountID.
             using var cmd = new MySqlCommand("GetCharHotkeys", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ObjectID);
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ServerID);
             using MySqlDataReader rdr = cmd.ExecuteReader();
 
             while (rdr.Read())
@@ -918,13 +932,12 @@ namespace ReturnHome.Database.SQL
         //Method to create new character for player's account
         public void CreateCharacter(Session session, Character charCreation)
         {
-            Console.WriteLine("Trying to write flags");
-            charCreation.playerFlags = new Dictionary<string, bool>()
-            {
-                { "NewPlayerControls", true }
-            };
-            string serializedPlayerFlags = Newtonsoft.Json.JsonConvert.SerializeObject(charCreation.playerFlags);
-            Console.WriteLine(serializedPlayerFlags);
+            charCreation.playerFlags = new Dictionary<string, string>()
+{
+{ "NewPlayerIntro", "0" },
+                {"admin", "true" }
+};
+            string serializedPlayerFlags = (string)JsonSerializer.Serialize(charCreation.playerFlags);
 
             //Create second command using second connection and char insert query string
             using var SecondCmd = new MySqlCommand("CreateCharacter", con);
@@ -977,14 +990,99 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("ArcaneR", 40);
             SecondCmd.Parameters.AddWithValue("Fishing", 0);
             SecondCmd.Parameters.AddWithValue("playerFlags", serializedPlayerFlags);
+            SecondCmd.Parameters.AddWithValue("completedQuests", "[]");
+            SecondCmd.Parameters.AddWithValue("activeQuests", "[]");
             //Execute parameterized statement entering it into the DB
             SecondCmd.ExecuteNonQuery();
+
+            using var cmd = new MySqlCommand("GetAccountCharacters", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("pAccountID", session.AccountID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            //string to hold local charcter Name
+            int serverID = 0;
+
+            //Read through results from query populating character data needed for character select
+            while (rdr.Read())
+            {
+                if(rdr.GetString(1) == charCreation.CharName)
+                    serverID = rdr.GetInt32(0);
+            }
+            rdr.Close();
+
+            if (serverID == 0)
+            {
+                Console.WriteLine("Character Creation Failed");
+                return;
+            }
+
+            using var ThirdCmd = new MySqlCommand("CreateHotkeys", con);
+            ThirdCmd.CommandType = CommandType.StoredProcedure;
+            for(int i = 0; i < charCreation.MyHotkeys.Count; i++)
+            {
+                ThirdCmd.Parameters.Clear();
+                ThirdCmd.Parameters.AddWithValue("Serverid", serverID);
+                ThirdCmd.Parameters.AddWithValue("Direction", charCreation.MyHotkeys[i].Direction);
+                ThirdCmd.Parameters.AddWithValue("nlabel", charCreation.MyHotkeys[i].NLabel);
+                ThirdCmd.Parameters.AddWithValue("nmessage", charCreation.MyHotkeys[i].NMessage);
+                ThirdCmd.Parameters.AddWithValue("wlabel", charCreation.MyHotkeys[i].WLabel);
+                ThirdCmd.Parameters.AddWithValue("wmessage", charCreation.MyHotkeys[i].WMessage);
+                ThirdCmd.Parameters.AddWithValue("elabel", charCreation.MyHotkeys[i].ELabel);
+                ThirdCmd.Parameters.AddWithValue("emessage", charCreation.MyHotkeys[i].EMessage);
+                ThirdCmd.Parameters.AddWithValue("slabel", charCreation.MyHotkeys[i].SLabel);
+                ThirdCmd.Parameters.AddWithValue("smessage", charCreation.MyHotkeys[i].SMessage);
+                ThirdCmd.ExecuteNonQuery();
+            }
 
             //Don't close connection because we have character list generated next
             List<Character> MyCharacterList = AccountCharacters(session);
 
             //Send Fresh Character Listing
             ServerCreateCharacterList.CreateCharacterList(MyCharacterList, session);
+        }
+
+        //Probably no longer need this since we're doing all DB saves immediately
+        /*public static void printDataTable(DataTable tbl)
+        {
+            string line = "";
+            foreach (DataColumn item in tbl.Columns)
+            {
+                line += item.ColumnName + "   ";
+            }
+            line += "\n";
+            foreach (DataRow row in tbl.Rows)
+            {
+                for (int i = 0; i < tbl.Columns.Count; i++)
+                {
+                    line += row[i].ToString() + "   ";
+                }
+                line += "\n";
+            }
+            Console.WriteLine(line);
+        }*/
+
+        public void GetMaxItemID()
+        {
+            using var CheckItemRows = new MySqlCommand("Select COUNT(*) from charInventory;", con);
+            int result = int.Parse(CheckItemRows.ExecuteScalar().ToString());
+
+            if (result == 0)
+            {
+                Console.WriteLine("No items exist for any characters. Starting at 1.");
+                ItemManager.nextItemID = 1;
+            }
+            else
+            {
+
+                //TODO: Need to figure out a way to track this while still working if there are no existing entries to return max ID of.
+                //Set and open SQL con
+                //SQL query to check if a name exists in the DB or not
+                using var GetItemIDCmd = new MySqlCommand("select MAX(itemID) from charInventory;", con);
+                //Executes the SQL reader
+                ItemManager.nextItemID = (int)GetItemIDCmd.ExecuteScalar() + 1;
+            }
+            Console.WriteLine($"Next Item ID available: {ItemManager.nextItemID}");
         }
     }
 }

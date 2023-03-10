@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "Keep your eyes peeled.  Some shifty characters occupy this city.  Keep your pocket tight."
+    npcDialogue = "We've just received reports of increased activity from the thieves of Kithicor Forest, who have been making it difficult for couriers to deliver messages across Tunaria."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

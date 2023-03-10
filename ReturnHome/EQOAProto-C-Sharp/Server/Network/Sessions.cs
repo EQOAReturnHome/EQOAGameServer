@@ -7,6 +7,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network
 {
@@ -45,7 +46,7 @@ namespace ReturnHome.Server.Network
         public bool BundleTypeTransition = false;
 
         public bool serverSelect;
-        public SegmentBodyFlags PacketBodyFlags = new();
+        public SegmentBodyFlags segmentBodyFlags = new();
         public bool characterInWorld = false;
         public bool inGame = false;
         public bool objectUpdate = false;
@@ -94,7 +95,8 @@ namespace ReturnHome.Server.Network
         //TODO Put this somewhere else
         public void TargetUpdate()
         {
-            string message = $"Targeting ObjectID: {MyCharacter.Target}";
+            EntityManager.QueryForEntity(MyCharacter.Target, out Entity targetNPC);
+            string message = $"Targeting Object with ServerID: {targetNPC.ServerID}";
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 
@@ -138,6 +140,7 @@ namespace ReturnHome.Server.Network
                     i.GenerateUpdate();
 
                 rdpCommIn.connectionData.clientStatUpdate.GenerateUpdate();
+                rdpCommIn.connectionData.serverGroupUpdate.GenerateUpdate();
             }
 
             PendingTermination = inGame ? _pingCount >= 50 ? true : false : _pingCount >= 10 ? true : false;
@@ -150,12 +153,15 @@ namespace ReturnHome.Server.Network
         //Optional override for dropping the session, currently simplifies for removing a character when they log out
         public void DropSession(bool Override = false)
         {
-            if (!PendingTermination) return;
+            if (!PendingTermination && !Override) return;
 
             MapManager.RemoveObject(MyCharacter);
             PlayerManager.RemovePlayer(MyCharacter);
             EntityManager.RemoveEntity(MyCharacter);
-            SessionManager.SessionHash.TryRemove(this);
+            if (SessionManager.SessionHash.TryRemove(this))
+                return;
+            else
+                Console.WriteLine($"Couldn't remove Session: {ClientEndpoint} IP: {MyIPEndPoint}");
         }
     }
 }

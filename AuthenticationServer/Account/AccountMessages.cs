@@ -96,19 +96,11 @@ namespace AuthServer.Account
 
             //Response Code
             BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.ACCT_CREATE_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //LoginResponse
-            ThisClient.resOffset += 4;
-
-            //Skip next 12 bytes
-            new byte[12].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]);
-            ThisClient.resOffset += 4;
+            ThisClient.resOffset += 16;
 
             //Add Our message
             Encoding.ASCII.GetBytes(Response).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + Response.Length)]);
-            ThisClient.resOffset += Response.Length;
-
-            new byte[256 - Response.Length].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + (256 - Response.Length))]);
-            ThisClient.resOffset += (256 - Response.Length);
-
+            ThisClient.resOffset += 256;
             //Process Last bit of packet and send
             SendMessage(ThisClient);
         }
@@ -121,16 +113,10 @@ namespace AuthServer.Account
             ThisClient.ResponsePacket = new byte[272];
 
             BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.CHANGE_PASSWORD_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //Good Password Response
-            ThisClient.resOffset += 4;
-
-            new byte[4].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]);
-            ThisClient.resOffset += 4;
+            ThisClient.resOffset += 8;
 
             BitConverter.GetBytes(ByteSwaps.SwapBytes(1)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //1 is success I believe? 0 is probably failure? Been awhile
-            ThisClient.resOffset += 4;
-
-            new byte[256].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 256)]);
-            ThisClient.resOffset += 256;
+            ThisClient.resOffset += 260;
 
             SendMessage(ThisClient);
         }
@@ -143,20 +129,10 @@ namespace AuthServer.Account
             ThisClient.ResponsePacket = new byte[276];
 
             BitConverter.GetBytes(ByteSwaps.SwapBytes(AccountMessageTypes.ACCT_CREATE_RESPONSE)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); //Good Password Response
-            ThisClient.resOffset += 4;
-
-            new byte[4].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]);
-            ThisClient.resOffset += 4;
+            ThisClient.resOffset += 8;
 
             BitConverter.GetBytes(ByteSwaps.SwapBytes(1)).CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]); ; //1 is success I believe? 0 is probably failure? Been awhile
-            ThisClient.resOffset += 4;
-
-            new byte[4].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 4)]);
-            ThisClient.resOffset += 4;
-
-            //Skip 256 bytes, Believe a message could go here but untested.
-            new byte[256].CopyTo(ThisClient.ResponsePacket[ThisClient.resOffset..(ThisClient.resOffset + 256)]);
-            ThisClient.resOffset += 256;
+            ThisClient.resOffset += 264;
 
             SendMessage(ThisClient);
         }

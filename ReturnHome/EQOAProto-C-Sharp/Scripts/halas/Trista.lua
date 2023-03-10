@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "I do not have anything for you, child.  Please be on your way."
+    npcDialogue = "No time to waste, playerName, my days are consumed with making sure our young shaman are well armed."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

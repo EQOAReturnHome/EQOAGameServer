@@ -1,24 +1,41 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-
-using System;
+﻿using System;
+using System.Collections.Generic;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Network
 {
     public class ClientObjectUpdate
     {
-        public ushort BaseXorMessage { get; set; } = 0;
-        private Memory<byte> BaseClientUpdate { get; set; }
+        //Save base messages coming?
+        private List<StateBaseMessage> _bases = new ();
+        public ushort SeqNum;
+        public void AddBaseClientArray(Memory<byte> update, ushort seq) => _bases.Add(new StateBaseMessage(seq, update));
 
-        public void UpdateBaseClientArray(Memory<byte> update)
+        public bool GetBaseClientArray(ushort BaseSeqnum, out Memory<byte> temp2)
         {
-            BaseClientUpdate = update;
+            temp2 = default;
+            foreach(StateBaseMessage s in _bases)
+            {
+                if(s.SeqNum == BaseSeqnum)
+                {
+                    temp2 = s.BaseMessage;
+                    return true;
+                }
+            }
+            return false;
         }
 
-        public Memory<byte> GetBaseClientArray()
+        public void seqnum_remove_thru(ushort sn)
         {
-            return BaseClientUpdate;
+            while (_bases.Count > 0)
+            {
+                StateBaseMessage msg = _bases[0];
+                if ((msg.SeqNum - (sn & 0xffff)) * 0x10000 < 0)
+                    _bases.RemoveAt(0);
+
+                else
+                    return;
+            }
         }
     }
 }

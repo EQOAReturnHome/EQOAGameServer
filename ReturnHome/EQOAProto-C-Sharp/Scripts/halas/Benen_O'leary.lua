@@ -1,5 +1,1 @@
-function event_say()
-diagOptions = {}
-    npcDialogue = "What exactly can I do for you??"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "Can I show you my wares?"

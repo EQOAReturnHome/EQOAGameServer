@@ -7,7 +7,7 @@ namespace ReturnHome.Server.EntityObject
 {
     public partial class Entity
     {
-        private static float _speedAdjust = 6.25f;
+        private static float _speedAdjust = 6.4f;
 
         public void ObjectUpdateObjectID() => MemoryMarshal.Write(ObjectUpdate.Span[0..], ref _objectID);
 
@@ -19,7 +19,7 @@ namespace ReturnHome.Server.EntityObject
 
             BinaryPrimitives.WriteInt32BigEndian(temp[10..], (int)(Position.Z * 128.0f));
             BinaryPrimitives.WriteInt32BigEndian(temp[7..], (int)(Position.Y * 128.0f));
-            BinaryPrimitives.WriteInt32BigEndian(temp[4..],(int)(Position.X * 128.0f));
+            BinaryPrimitives.WriteInt32BigEndian(temp[4..], (int)(Position.X * 128.0f));
 
             //Critical to make sure that writing the int's don't override the facing value
             ObjectUpdateEntity();
@@ -33,13 +33,14 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateKillTime() => MemoryMarshal.Write(ObjectUpdate.Span[17..], ref _killTime);
 
-        public void ObjectUpdateHPFlag() => ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)0;
+        public void ObjectUpdateHPFlag() => ObjectUpdate.Span[25] = HPFlag ? (byte)1 : (byte)3;
 
         public void ObjectUpdateHPBar()
         {
-            if (HPMax == 0 || CurrentHP == 0)
-                return;
-            ObjectUpdate.Span[26] = (byte)((255 * CurrentHP) / HPMax);
+            ObjectUpdate.Span[26] = (byte)(255f * CurrentHP / HPMax);
+            HPFlag = true;
+            if (ObjectUpdate.Span[26] == 0)
+                HPFlag = false;
         }
 
         public void ObjectUpdateModelID() => MemoryMarshal.Write(ObjectUpdate.Span[27..], ref _modelID);
@@ -50,28 +51,24 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVelocityX()
         {
-            sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
-            if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
-            if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[40..], ref svx);
+            ushort svx = VelocityX;
+            MemoryMarshal.Write(ObjectUpdate.Span[39..], ref svx);
         }
 
         public void ObjectUpdateVelocityY()
         {
-            /*Don't need to adjust Y, for now
-            sbyte svx = (sbyte)Math.Round(VelocityX * _speedAdjust);
-            if (svx > 127) { Console.WriteLine("WARNING: svx=" + svx); svx = 127; }
-            if (svx < -128) { Console.WriteLine("WARNING: svx=" + svx); svx = -128; }
-            new byte[] { (byte)svx }.CopyTo(ObjectUpdate.Slice(39, 1));
+            /*
+            sbyte svy = (sbyte)Math.Round(VelocityY * _speedAdjust);
+            if (svy > 127) { Console.WriteLine("WARNING: svx=" + svy); svy = 127; }
+            if (svy < -128) { Console.WriteLine("WARNING: svx=" + svy); svy = -128; }
+            MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svy);
             */
         }
 
         public void ObjectUpdateVelocityZ()
         {
-            sbyte svz = (sbyte)Math.Round(VelocityZ * _speedAdjust);
-            if (svz > 127) { Console.WriteLine("WARNING: svx=" + svz); svz = 127; }
-            if (svz < -128) { Console.WriteLine("WARNING: svx=" + svz); svz = -128; }
-            MemoryMarshal.Write(ObjectUpdate.Span[42..], ref svz);
+            ushort svz = VelocityZ;
+            MemoryMarshal.Write(ObjectUpdate.Span[41..], ref svz);
         }
 
         public void ObjectUpdateEastWest() => ObjectUpdate.Span[44] = EastToWest;
@@ -92,10 +89,14 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateTarget() => MemoryMarshal.Write(ObjectUpdate.Span[58..], ref _target);
 
-        public void ObjectUpdateUnknown()
+        public void ObjectUpdateUnknown(ushort temp = 0x0501)
         {
-            ushort temp = 0x0105;
             MemoryMarshal.Write(ObjectUpdate.Span[62..], ref temp);
+        }
+
+        public void ObjectUpdateUnknown2(byte temp = 0x01)
+        {
+            MemoryMarshal.Write(ObjectUpdate.Span[189..], ref temp);
         }
 
         public void ObjectUpdatePrimary() => MemoryMarshal.Write(ObjectUpdate.Span[66..], ref _primary);
@@ -124,9 +125,9 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateVanillaColors()
         {
-            ushort temp = 0xFFFF; 
-            for(int i = 0; i < 6; i++)
-                MemoryMarshal.Write(ObjectUpdate.Span[(98 + ( i * 2))..], ref temp);
+            ushort temp = 0xFFFF;
+            for (int i = 0; i < 6; i++)
+                MemoryMarshal.Write(ObjectUpdate.Span[(98 + (i * 2))..], ref temp);
         }
 
         public void ObjectUpdateChestColor() => BinaryPrimitives.WriteUInt32BigEndian(ObjectUpdate.Slice(110, 4).Span, ChestColor);
@@ -159,16 +160,16 @@ namespace ReturnHome.Server.EntityObject
             span3[154..177].Fill(0);
             ReadOnlySpan<char> span2 = _charName.AsSpan();
             for (int i = 0; i < span2.Length; ++i)
-                span3[154+i] = (byte)span2[i];
+                span3[154 + i] = (byte)span2[i];
         }
 
         public void ObjectUpdateLevel() => ObjectUpdate.Span[178] = (byte)Level;
 
-        public void ObjectUpdateMovement() => ObjectUpdate.Span[179] = Movement;
+        public void ObjectUpdateMovement(byte temp = 1) => ObjectUpdate.Span[179] = temp;
 
         public void ObjectUpdateNameColor(byte color = 255)
         {
-            if(isPlayer)
+            if (isPlayer)
                 ObjectUpdate.Span[180] = color == 255 ? (byte)2 : color;
             else
                 ObjectUpdate.Span[180] = color == 255 ? (byte)0 : color;
@@ -182,9 +183,11 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateNPCType() => MemoryMarshal.Write(ObjectUpdate.Span[184..], ref _npcType);
 
-        public void ObjectUpdatePattern() => BitConverter.GetBytes(0xFFFFFFFF).CopyTo(ObjectUpdate.Slice(186, 4));
+        public void ObjectUpdatePattern(uint stuff = 0xFFFFFFFF) => BitConverter.GetBytes(stuff).CopyTo(ObjectUpdate.Slice(186, 4));
 
         public void ObjectUpdateStatus(byte status = 0) => ObjectUpdate.Span[192] = status;
+
+        public void ObjectUpdateOnline(byte status = 1) => ObjectUpdate.Span[194] = status;
 
         public void ObjectUpdateEnd() => Encoding.UTF8.GetBytes("trsq").CopyTo(ObjectUpdate.Slice(196, 4));
     }

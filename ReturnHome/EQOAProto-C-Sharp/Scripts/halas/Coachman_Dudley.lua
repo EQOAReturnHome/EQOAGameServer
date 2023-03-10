@@ -10,7 +10,7 @@ local playerCoaches = {
 local dialogueOptions = {}
 local ch = tostring(choice)
 function event_say()
-   if(GetPlayerFlags(mySession, "halas_coach")) then
+   if(GetPlayerFlags(mySession, "halas_coach") == "true") then
       if (ch:find("Moradhim")) then
          TeleportPlayer(mySession,GetWorld(coaches.moradhim.world),coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
       elseif (ch:find("Lightwolf")) then
@@ -18,7 +18,7 @@ function event_say()
       else
          npcDialogue = "Where would you like to go?"
          for coach, diag in pairs(playerCoaches) do
-            if (GetPlayerFlags(mySession, coach) or GetPlayerFlags(mySession, "admin")) then
+            if ((GetPlayerFlags(mySession, "admin")  or GetPlayerFlags(mySession, coach)) == "true") then
                table.insert(dialogueOptions, diag)
             end
          end
@@ -27,7 +27,7 @@ function event_say()
    else
       if (ch:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
-         SetPlayerFlags(mySession, "halas_coach", true)
+         SetPlayerFlags(mySession, "halas_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       elseif (ch:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."

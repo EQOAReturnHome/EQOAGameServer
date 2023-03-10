@@ -25,7 +25,7 @@
     public enum HumanType : byte
     {
         Other    = 0,
-        Freeport = 1,
-        Qeynos   = 2
+        Eastern = 1,
+        Western   = 2
     }
 }

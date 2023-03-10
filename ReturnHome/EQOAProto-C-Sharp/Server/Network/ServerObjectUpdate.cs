@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject;
+using System.Linq;
 
 namespace ReturnHome.Server.Network
 {
@@ -9,41 +10,21 @@ namespace ReturnHome.Server.Network
     {
         //Holds receiving clients session info
         private Session _session;
-
+        private Dictionary<ushort, Memory<byte>> _baseXORs = new();
         //Stores our base data to xor against
         private Memory<byte> _baseXOR = new Memory<byte>(new byte[0xC9]);
 
         //This is when the client ack's a specific message, we then set this to that ack'd message # to help generate our xor
         private ushort _baseMessageCounter = 0;
-        public ushort BaseMessageCounter
-        {
-            get { return _baseMessageCounter; }
-            set
-            {
-                if (value > _baseMessageCounter)
-                    _baseMessageCounter = value;
-
-                else
-                    Console.WriteLine($"Error setting base message counter. Setting {value} Expected: {_baseMessageCounter}");
-            }
-        }
 
         //Simple message counter
         private ushort _messageCounter = 1;
-        public ushort MessageCounter
-        {
-            get { return _messageCounter; }
-            set
-            {
-                if (value > _messageCounter)
-                    _messageCounter = value;
 
-                else
-                    Console.WriteLine($"Error setting message counter. Setting: {value} Expected: {_messageCounter}");
-            }
-        }
         //May not be needed
         private byte _objectChannel;
+
+        //Currently only send base data on first packet till client ack's a message
+        private bool _sendBaseData = true;
 
         //Place to hold all of our XOR result's till client acks. We then xor that against the baseXOR to get new base object update, clear list once a message is ack'd by client
         private Dictionary<ushort, Memory<byte>> _currentXORResults = new Dictionary<ushort, Memory<byte>>();
@@ -102,14 +83,16 @@ namespace ReturnHome.Server.Network
                 }
 
                 //See if character and current message has changed
-                if (!CompareObjects(_baseXOR.Slice(1, 0xC8), entity.ObjectUpdate))
-                {
+                if (!_baseXOR.Slice(1, 0xC8).Span.SequenceEqual(entity.ObjectUpdate.Span)) 
+                {/*
+                    if ((_xor!= 0 && _xor < 33) || !_sendBaseData)
+                    {*/
                     Memory<byte> temp = new Memory<byte>(new byte[0xC9]);
-                    temp.Span[0] = _isActive & (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
+                    temp.Span[0] = _isActive && (_baseXOR.Span[0] == 0) ? (byte)1 : (byte)0;
                     CoordinateConversions.Xor_data(temp.Slice(1, 0xC8), entity.ObjectUpdate, _baseXOR.Slice(1, 0xC8), 0xC8);
-                    _currentXORResults.Add(MessageCounter, temp);
-                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
-                    MessageCounter++;
+                    _currentXORResults.Add(_messageCounter, temp);
+                    _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
+                    ++_messageCounter;
                 }
             }
         }
@@ -122,9 +105,9 @@ namespace ReturnHome.Server.Network
             //Since we are deactivating the channel, all we need to do is modify the first byte
             temp.Span[0] = (_baseXOR.Span[0] == 1) ? (byte)1 : (byte)0;
 
-            _currentXORResults.Add(MessageCounter, temp);
-            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, MessageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(MessageCounter - _baseMessageCounter), temp));
-            MessageCounter++;
+            _currentXORResults.Add(_messageCounter, temp);
+            _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
+            ++_messageCounter;
         }
 
         public void UpdateBaseXor(ushort msgCounter)
@@ -138,29 +121,14 @@ namespace ReturnHome.Server.Network
             //xor base against this message
             CoordinateConversions.Xor_data(_baseXOR, tempMemory, 0xC9);
 
+            //Logger.Log(entity.CharName, _baseXOR);
             //Clear Dictionary
             _currentXORResults.Clear();
 
             //Ensure this is new base
-            BaseMessageCounter = msgCounter;
-        }
+            _baseMessageCounter = msgCounter;
 
-        private static bool CompareObjects(Memory<byte> first, Memory<byte> second)
-        {
-            if (first.Length != second.Length)
-                return false;
-
-            Span<byte> firstTemp = first.Span;
-            Span<byte> secondTemp = second.Span;
-
-            for (int i = 0; i < first.Length; i++)
-            {
-                if (firstTemp[i] == secondTemp[i])
-                    continue;
-                else
-                    return false;
-            }
-            return true;
+            _sendBaseData = false;
         }
     }
 }

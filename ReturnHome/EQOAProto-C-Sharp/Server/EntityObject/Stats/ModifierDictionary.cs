@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.EntityObject.Stats
 {
@@ -24,7 +23,7 @@ namespace ReturnHome.Server.EntityObject.Stats
 
             //Shouldn't be needed
             else
-                dictionary.Add(key, value);
+                return;
 
             //If it is an npc, this isn't really relevant to run through?
             if (!_e.isPlayer && (key != StatModifiers.STA))

@@ -48,59 +48,41 @@ namespace ReturnHome.Utilities
         }
 
         //Pass in Unreliable message and expected unreliable length
-        public static unsafe Memory<byte> Run_length_decode(ReadOnlySpan<byte> arg1, int length)
+        public static Memory<byte> Run_length_decode(ref BufferReader reader, int length)
         {
-            int offset = 0;
-            byte[] messageBuf = new byte[length];
+            Memory<byte> messageBuf = new Memory<byte>(new byte[length]);
+            Span<byte> temp = messageBuf.Span;
 
-            fixed (byte* tempBuf = &MemoryMarshal.GetReference(arg1))
+            byte local_70;
+            int counter = 0;
+
+            //real bytes
+            uint len_00;
+
+            //null byte count
+            int uVar2;
+
+            while (true)
             {
-                byte* buf = tempBuf;
-                byte local_70;
-                byte counter = 0;
-
-                //real bytes
-                uint len_00;
-
-                //null byte count
-                uint uVar2;
-                int uVar1;
-
-                while (true)
+                local_70 = reader.Read<byte>();
+                if (local_70 == 0) break;
+                len_00 = (uint)local_70 & 0x7f;
+                if ((local_70 & 0x80) == 0)
                 {
-                    local_70 = buf[offset++];
-                    if (local_70 == 0) break;
-                    len_00 = (uint)local_70 & 0x7f;
-                    if ((local_70 & 0x80) == 0)
-                    {
-                        len_00 = (uint)(local_70 >> 4);
-                        uVar2 = (uint)local_70 & 0xf;
-                    }
+                    len_00 = (uint)(local_70 >> 4);
+                    uVar2 = local_70 & 0xf;
+                }
 
-                    else
-                    {
-                        local_70 = buf[offset++];
-                        uVar2 = local_70;
-                    }
+                else
+                    uVar2 = reader.Read<byte>();
 
-                    uVar1 = 0;
-                    if (uVar2 != 0)
+                if (len_00 != 0)
+                {
+                    counter += uVar2;
+                    for (int i = 0; i < len_00; i++)
                     {
-                        do
-                        {
-                            messageBuf[counter] = 0;
-                            counter += 1;
-                            uVar1 += 1;
-                        } while (uVar1 < uVar2);
-                    }
-
-                    if (len_00 != 0)
-                    {
-                        for (int i = 0; i < len_00; i++)
-                        {
-                            messageBuf[counter] = buf[offset++];
-                            counter += 1;
-                        }
+                        temp[counter] = reader.Read<byte>();
+                        counter += 1;
                     }
                 }
             }

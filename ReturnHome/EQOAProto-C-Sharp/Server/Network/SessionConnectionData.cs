@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ReturnHome.Server.EntityObject;
-using ReturnHome.Server.EntityObject.Player;
 
 namespace ReturnHome.Server.Network
 {
@@ -15,6 +13,7 @@ namespace ReturnHome.Server.Network
         public ushort lastSentPacketSequence { get; set; }
         public ushort clientLastReceivedMessage { get; set; }
         public ushort clientLastReceivedMessageFinal { get; set; }
+        //public ConcurrentStack<PacketMessage> ClientUpdateStack;
 
         //This property will trigger the rdpreport bool when it increments
         public ushort lastReceivedMessageSequence
@@ -25,7 +24,7 @@ namespace ReturnHome.Server.Network
                 if (_lastReceivedMessageSequence <= value)
                 {
                     _lastReceivedMessageSequence = value;
-                    _session.PacketBodyFlags.RdpReport = true;
+                    _session.segmentBodyFlags |= SegmentBodyFlags.guaranted_ack;
                 }
             }
         }
@@ -35,6 +34,7 @@ namespace ReturnHome.Server.Network
         //Need a way to ensure no more then 24 objects can be allocated, array may be best?
         public Memory<ServerObjectUpdate> serverObjects;
         public ServerStatUpdate clientStatUpdate;
+        public ServerGroupUpdate serverGroupUpdate;
         /*
          * Need to be able to do a full cycle reset for server objects.
          * Whenever a player moves/teleports to a new map/world, all of the c9 channels need to be reset
@@ -61,14 +61,17 @@ namespace ReturnHome.Server.Network
             //Create the object to track incoming client updates
             client = new();
             clientStatUpdate = new(_session, (byte)MessageType.StatUpdate);
-
+            serverGroupUpdate = new(_session, (byte)MessageType.GroupUpdate);
             serverObjects = new Memory<ServerObjectUpdate>(new ServerObjectUpdate[0x17]);
+
+            //TODO: Prioritize channels for group member's and pet's, 3 group member's and a pet max possible
             Span<ServerObjectUpdate> tempSpan = serverObjects.Span;
 
             for (int i = 0; i < tempSpan.Length; i++)
                 tempSpan[i] = new(_session, (byte)i);
         }
 
+        //Need to define a way to prioritize group members, and eventually pet's for c9 applications
         public void AddChannelObjects(List<Entity> charList)
         {
             Span<ServerObjectUpdate> temp = serverObjects.Span;
@@ -82,7 +85,7 @@ namespace ReturnHome.Server.Network
                 return;
             }
 
-            charList = charList.GetRange(0, charList.Count > 23 ? 23 : charList.Count);
+            charList = charList.GetRange(0, charList.Count > 22 ? 22 : charList.Count);
 
             //Iterate over List from QuadTree against Channels
             for (int i = 1; i < serverObjects.Length; i++)
@@ -110,6 +113,7 @@ namespace ReturnHome.Server.Network
                     charList.RemoveAt(0);
                     if (charList.Count == 0)
                         return;
+
                 }
                 continue;
             }
