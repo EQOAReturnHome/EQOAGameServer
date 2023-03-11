@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
 	<PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
+	<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
     <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="6.0.4" />
     <PackageReference Include="MySqlConnector" Version="0.69.4" />
     <PackageReference Include="NLua" Version="1.6.0" />
@@ -60,10 +61,11 @@
     <None Remove="Scripts\freeport\Magician_start.lua" />
     <None Remove="Scripts\freeport\Quests.json" />
     <None Remove="Scripts\hazinak\coachman_zelik.lua" />
+    <None Remove="Scripts\items.lua" />
     <None Remove="Scripts\ports.lua" />
     <None Remove="Scripts\QuestHelper.lua" />
     <None Remove="Scripts\Quests.json" />
-    <None Remove="Scripts\rivervale\Mario_Steeltoe.lua" />
+    <None Remove="Scripts\rivervale\Marlo_Steeltoe.lua" />
     <None Remove="Scripts\Temby\Dagget_Klem.lua" />
     <None Remove="Scripts\wyndhaven\coachman_brumley.lua" />
     <None Remove="Scripts\zentars_keep\coachman_skeel.lua" />
@@ -75,9 +77,11 @@
     <Content Include="Scripts\freeport\Magician_start.lua" />
     <Content Include="Scripts\freeport\Quests.json" />
     <Content Include="Scripts\hazinak\coachman_zelik.lua" />
+    <Content Include="Scripts\items.lua" />
     <Content Include="Scripts\ports.lua" />
     <Content Include="Scripts\QuestHelper.lua" />
     <Content Include="Scripts\rivervale\Mario_Steeltoe.lua" />
+    <Content Include="Scripts\rivervale\Marlo_Steeltoe.lua" />
     <Content Include="Scripts\Temby\Dagget_Klem.lua" />
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />
     <Content Include="Scripts\zentars_keep\coachman_skeel.lua" />

@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
-    npcDialogue = "*zzzzzzzZZZZZZZ...BEEP*, "TARGET AQUIRED. STANDING BY.""
+    npcDialogue = "*zzzzzzzZZZZZZZ...BEEP*, \"TARGET ACQUIRED. STANDING BY.\""
 SendDialogue(mySession, npcDialogue, diagOptions)
 end
