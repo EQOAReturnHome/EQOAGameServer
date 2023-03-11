@@ -7,10 +7,11 @@ import { item_models, attack_types } from "./item_arrays";
 import { characterRace, characterClass } from "./npc_arrays";
 import { icon_models } from "./icon_arrays";
 
+const backend_url = "http://eqoa-admin.com:8000"
+
 const Items = () => {
     const [form] = Form.useForm();
     const [selectedValue, setSelectedValue] = useState();
-    const [selectedAttack, setSelectedAttack] = useState();
 
     const onFinish = (values) => {
         console.log({ values });
@@ -18,6 +19,7 @@ const Items = () => {
 
     const handleChange = (e) => {
         setSelectedValue(e.value);
+	
     };
 
     const handleChangedImage = (e) => {
@@ -27,7 +29,7 @@ const Items = () => {
 
     async function addItem() {
         var itemname = document.getElementById("itemname").value;
-        const url = "http://192.168.6.100:8000/create_item";
+        const url = backend_url + "/create_item";
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -44,8 +46,14 @@ const Items = () => {
         
     }
 
+    async function clearFields(){
+    document.getElementById("itemForm").reset();
+    }
+
+
+
     async function updateItem() {
-        url = "http://192.168.6.100:8000/update_item"
+        const url = backend_url + "/update_item";
         const response = await fetch(url, {
             method: "POST",
             headers: {
@@ -230,7 +238,9 @@ const Items = () => {
         const json = await response.json();
         alert(JSON.stringify(json));
         document.getElementById("patternfam").value = json.patternfam;
+	try {
         document.getElementById("itemicon").value = json.itemicon;
+	} catch (err) {}
         document.getElementById("equipslot").value = json.equipslot;
         if (json.trade == 1) {
             document.getElementById("trade").checked = false;
@@ -264,7 +274,9 @@ const Items = () => {
         }
         document.getElementById("itemdesc").value = json.itemdesc;
         try {
-            document.getElementById("model").value = json.model;
+	    let model_val = item_models.filter(function(p) { return p.model === json.model })
+            document.getElementById("model").value = model_val[0].value;
+	selectedValue = model_val[0].value;
         } catch (err) { }
         document.getElementById("colorpicker").value = decColorToHex(json.color);
         document.getElementById("str").value = json.str;
@@ -287,6 +299,7 @@ const Items = () => {
         document.getElementById("AR").value = json.AR;
         document.getElementById("weaponproc").value = json.weaponproc;
         document.getElementById("fish").value = json.fish;
+	console.log(item_models.filter(function(p) { return p.model === json.model }));
         return json;
     }
 
@@ -298,7 +311,7 @@ const Items = () => {
             }
         }
         var data = document.getElementById("itemname").value;
-        postGetItem("http://192.168.6.100:8000/get_item", data);
+        postGetItem(backend_url + "/get_item", data);
     }
 
     return (
@@ -308,6 +321,7 @@ const Items = () => {
                 name="dynamic_form_nest_item"
                 onFinish={onFinish}
                 autoComplete="off"
+		id="itemForm"
             >
                 <Form.Item
                     name="itemname"
@@ -322,7 +336,8 @@ const Items = () => {
                     <input type="text" id="itemname" name="itemname" />
                     <button onClick={getItem}>Search</button>
                     <button onClick={addItem}>Add Item</button>
-                    <button onClick={calculateClassMask}>Update Item</button>
+                    <button onClick={updateItem}>Update Item</button>
+		    <button onClick={clearFields}>Clear Form</button>
                 </Form.Item>
                 <Form.Item
                     id="icon"

@@ -40,41 +40,41 @@ class ItemInfo(Base):
     patternid = Column(Integer, unique=True, primary_key=True, index=True)
     itemname = Column(String)
     patternfam = Column(Integer, default=0)
-    itemicon = 0
-    equipslot = 0
-    trade = 0
-    rent = 0
-    attacktype = 0
-    weapondamage = 0
-    levelreq = 1
-    maxstack = 1
-    maxhp = 100
-    duration = 50
+    itemicon = Column(Integer, default=1)
+    equipslot = Column(Integer, default=0)
+    trade = Column(Integer, default=0)
+    rent = Column(Integer, default=0)
+    attacktype = Column(Integer, default=0)
+    weapondamage = Column(Integer, default=0)
+    levelreq = Column(Integer, default=1)
+    maxstack = Column(Integer, default=1)
+    maxhp = Column(Integer, default=100)
+    duration = Column(Integer, default=50)
     classuse = Column(Integer, default = 32767)
     raceuse = Column(Integer, default = 1023)
-    procanim = 0
-    lore = 0
-    craft = 0
+    procanim = Column(Integer, default=0)
+    lore = Column(Integer, default=0)
+    craft = Column(Integer, default=0)
     itemdesc = Column(String, default="This is just placeholder text, please update.")
-    model = 0
-    color = 0
-    str = 0
-    sta = 0
-    agi = 0
-    wis = 0
-    dex = 0
-    cha = 0
-    intelligence = 0
-    HPMAX = 0
-    POWMAX = 0
-    PoT = 0
-    HoT = 0
-    AC = 0
-    PR = 0
-    DR = 0
-    FR = 0
-    CR = 0
-    LR = 0
-    AR = 0
-    weaponproc = 0
-    fish = 0
+    model = Column(Integer, default=0)
+    color = Column(Integer, default=0)
+    str = Column(Integer, default=0)
+    sta = Column(Integer, default=0)
+    agi = Column(Integer, default=0)
+    wis = Column(Integer, default=0)
+    dex = Column(Integer, default=0)
+    cha = Column(Integer, default=0)
+    intelligence = Column(Integer, default=0)
+    HPMAX = Column(Integer, default=0)
+    POWMAX = Column(Integer, default=0)
+    PoT = Column(Integer, default=0)
+    HoT = Column(Integer, default=0)
+    AC = Column(Integer, default=0)
+    PR = Column(Integer, default=0)
+    DR = Column(Integer, default=0)
+    FR = Column(Integer, default=0)
+    CR = Column(Integer, default=0) 
+    LR = Column(Integer, default=0)
+    AR = Column(Integer, default=0)
+    weaponproc = Column(Integer, default=0)
+    fish = Column(Integer, default=0) 
