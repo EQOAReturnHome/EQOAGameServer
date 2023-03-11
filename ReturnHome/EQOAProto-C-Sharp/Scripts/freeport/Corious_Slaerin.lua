@@ -53,7 +53,7 @@ function event_say()
          "Corious Slaerin: You can find her just outside, to the east. Return only when you complete any tasks she gives you.",
          "You have received a quest!" }
          SendMultiDialogue(mySession, multiDialogue)
-         StartQuest(mySession, 10011, quests[10011][0].log)
+         StartQuest(mySession, 11011, quests[11011][0].log)
       else
          npcDialogue = "If you have something to say, say it."
          diagOptions = { "I am ready for my next test." }
@@ -67,7 +67,7 @@ function event_say()
          SendMultiDialogue(mySession, multiDialogue)
          CompleteQuest(mySession, 11011, quests[11011][3].xp)
       elseif (ch:find("Sorry")) then
-         npcDialogue = ""
+            npcDialogue = "Don't stand around wasting my time"
       else
          npcDialogue = "Have you completed the tasks that I sent you for?"
          diagOptions = {"Yes, it is done", "Sorry, i'll be on my way."}

@@ -1,5 +1,6 @@
 local ch = tostring(choice)
 local quests = require('Scripts/FreeportQuests')
+local items = require('Scripts/items')
 function event_say()
     local diagOptions = {}
     local questText = ""
@@ -20,7 +21,7 @@ function event_say()
             SendDialogue(mySession, npcDialogue, diagOptions)
         end
     elseif (GetPlayerFlags(mySession, "10012") == "1") then
-        if (CheckQuestItem(mySession, 4866, 2)) then
+        if (CheckQuestItem(mySession, items.CRACKED_ANT_PINCER, 2)) then
             if (ch:find("nevermind")) then
                 npcDialogue =
                     "Kellina: It's important that you bring me what I have asked for. What was it now… Ah yes, I need two cracked ant pincers."
@@ -35,8 +36,8 @@ function event_say()
                     "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                TurnInItem(mySession, 4866, 2)
-                GrantItem(mySession, 8373, 1)
+                TurnInItem(mySession, items.CRACKED_ANT_PINCER, 2)
+                GrantItem(mySession, items.SMOLDERING_AURA, 1)
                 CompleteQuest(mySession, 10012, quests[10012][1].xp)
             else
                 npcDialogue = "I don't remember calling for you."
@@ -80,8 +81,8 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10013") == "1") then
         if
-            (CheckQuestItem(mySession, 5002, 1) and CheckQuestItem(mySession, 8314, 1) and
-                CheckQuestItem(mySession, 4891, 1))
+            (CheckQuestItem(mySession, items.PLAIN_ROBE, 1) and CheckQuestItem(mySession, items.SILK_CORD, 1) and
+                CheckQuestItem(mySession, items.RUINED_BAT_WING, 1))
          then
             if (ch:find("No")) then
                 multiDialogue = {
@@ -101,10 +102,10 @@ function event_say()
                     "Kellina: If you visit a blacksmith they will repair your weapons and armor for a price."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                TurnInItem(mySession, 5002, 1)
-                TurnInItem(mySession, 8314, 1)
-                TurnInItem(mySession, 4891, 1)
-                GrantItem(mySession, 4927, 1)
+                TurnInItem(mySession, items.PLAIN_ROBE, 1)
+                TurnInItem(mySession, items.SILK_CORD, 1)
+                TurnInItem(mySession, items.RUINED_BAT_WING, 1)
+                GrantItem(mySession, items.BLUE_ROBE, 1)
                 CompleteQuest(mySession, 10013, quests[10013][1].xp)
             else
                 npcDialogue = "Have you collected the components?"
@@ -152,7 +153,7 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10014") == "1") then
         if
-            (CheckQuestItem(mySession, 8321, 1))
+            (CheckQuestItem(mySession, items.STOLEN_GOODS, 1))
          then
             if (ch:find("Not")) then
                 npcDialogue =
@@ -168,8 +169,8 @@ function event_say()
                     "You have received Motivate."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                TurnInItem(mySession, 8321, 1)
-                GrantItem(mySession, 8445, 1)
+                TurnInItem(mySession, items.STOLEN_GOODS, 1)
+                GrantItem(mySession, items.MOTIVATE, 1)
                 CompleteQuest(mySession, 10014, quests[10014][1].xp)
             else
                 npcDialogue = "Have you retrieved the stolen goods?"
@@ -206,7 +207,7 @@ function event_say()
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
     elseif (GetPlayerFlags(mySession, "10015") == "1") then
-        if (CheckQuestItem(mySession, 8332, 1)) then
+        if (CheckQuestItem(mySession, items.EEL_VENOM_SAC, 1)) then
             if (ch:find("sorry")) then
                 npcDialogue =
                     "Bring Kellina a chichan eel venom sac. You will find it north of Freeport, along the river."
@@ -222,9 +223,9 @@ function event_say()
                     "You have finished a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                TurnInItem(mySession, 8332, 1)
-                GrantItem(mySession, 8446, 1)
-                GrantItem(mySession, 8447, 1)
+                TurnInItem(mySession, items.EEL_VENOM_SAC, 1)
+                GrantItem(mySession, items.INFUSION, 1)
+                GrantItem(mySession, items.BLACKENED_LEGGINGS, 1)
                 CompleteQuest(mySession, 10015, quests[10015][1].xp)
             else
                 npcDialogue = "Do you have the venom sac?"
@@ -294,8 +295,8 @@ function event_say()
         "You have received a summoners garb."
         }
         SendMultiDialogue(mySession, multiDialogue)
-        GrantItem(mySession, 8451, 1)
-        GrantItem(mySession, 8452, 1)
+        GrantItem(mySession, items.ENDURE_FIRE, 1)
+        GrantItem(mySession, items.SUMMONERS_GARB, 1)
         CompleteQuest(mySession, 10018, quests[10018][6].xp)
     else
         npcDialogue = "I am quite busy with my students right now. Are you sure you're in the right place?"
