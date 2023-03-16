@@ -7,25 +7,36 @@ import { item_models, attack_types } from "./item_arrays";
 import { characterRace, characterClass } from "./npc_arrays";
 import { icon_models } from "./icon_arrays";
 
-const backend_url = "http://eqoa-admin.com:8000"
+const backend_url = "http://eqoa-admin.com:8000";
 
 const Items = () => {
     const [form] = Form.useForm();
-    const [selectedValue, setSelectedValue] = useState();
+    // item model, item icon, attack type, and color picker states
+    const [selectedModelValue, setSelectedModelValue] = useState();
+    const [selectedIconValue, setSelectedIconValue] = useState();
+    const [selectedAttackTypeValue, setSelectedAttackTypeValue] = useState();
+    const [selectedColorValue, setSelectedColorValue] = useState();
 
     const onFinish = (values) => {
         console.log({ values });
     };
 
-    const handleChange = (e) => {
-        setSelectedValue(e.value);
-	
+    // lets refactor these later to one single function, seems like we can DRY this up
+    const handleIconChange = (e) => {
+        setSelectedIconValue(e.value);
     };
 
-    const handleChangedImage = (e) => {
-        setSelectedValue(e.value);
+    const handleAttackTypeChange = (e) => {
+        setSelectedAttackTypeValue(e.value);
     };
 
+    const handleModelChange = (e) => {
+        setSelectedModelValue(e.value);
+    };
+
+    const handleColorChange = () => {
+        setSelectedColorValue(document.getElementById("colorpicker").value);
+    };
 
     async function addItem() {
         var itemname = document.getElementById("itemname").value;
@@ -43,14 +54,11 @@ const Items = () => {
         const json = await response.json();
         alert(JSON.stringify(json));
         return json;
-        
     }
 
-    async function clearFields(){
-    document.getElementById("itemForm").reset();
+    async function clearFields() {
+        document.getElementById("itemForm").reset();
     }
-
-
 
     async function updateItem() {
         const url = backend_url + "/update_item";
@@ -66,8 +74,6 @@ const Items = () => {
     }
 
     async function convertItemMask(classMask, raceMask) {
-
-
         if ((characterClass.Warrior & classMask) == characterClass.Warrior) {
             document.getElementById("warrior").checked = true;
         }
@@ -77,7 +83,10 @@ const Items = () => {
         if ((characterClass.Paladin & classMask) == characterClass.Paladin) {
             document.getElementById("paladin").checked = true;
         }
-        if ((characterClass.ShadowKnight & classMask) == characterClass.ShadowKnight) {
+        if (
+            (characterClass.ShadowKnight & classMask) ==
+            characterClass.ShadowKnight
+        ) {
             document.getElementById("shadowknight").checked = true;
         }
         if ((characterClass.Monk & classMask) == characterClass.Monk) {
@@ -101,16 +110,25 @@ const Items = () => {
         if ((characterClass.Magician & classMask) == characterClass.Magician) {
             document.getElementById("magician").checked = true;
         }
-        if ((characterClass.Necromancer & classMask) == characterClass.Necromancer) {
+        if (
+            (characterClass.Necromancer & classMask) ==
+            characterClass.Necromancer
+        ) {
             document.getElementById("necromancer").checked = true;
         }
-        if ((characterClass.Enchanter & classMask) == characterClass.Enchanter) {
+        if (
+            (characterClass.Enchanter & classMask) ==
+            characterClass.Enchanter
+        ) {
             document.getElementById("enchanter").checked = true;
         }
         if ((characterClass.Wizard & classMask) == characterClass.Wizard) {
             document.getElementById("wizard").checked = true;
         }
-        if ((characterClass.Alchemist & classMask) == characterClass.Alchemist) {
+        if (
+            (characterClass.Alchemist & classMask) ==
+            characterClass.Alchemist
+        ) {
             document.getElementById("alchemist").checked = true;
         }
 
@@ -144,11 +162,10 @@ const Items = () => {
         if ((characterRace.Dwarf & raceMask) == characterRace.Dwarf) {
             document.getElementById("dwarf").checked = true;
         }
-
     }
 
     async function decColorToHex(decimalNum) {
-        let colorHex = (decimalNum).toString(16);
+        let colorHex = decimalNum.toString(16);
         let opacity = colorHex.slice(-2);
         if (opacity == "ff") {
             document.getElementById("color_opacity").checked = true;
@@ -173,56 +190,40 @@ const Items = () => {
         var alc = document.getElementById("alchemist").checked; //14
         var classValue = 0;
 
-            if(war)
-                classValue += 1;
+        if (war) classValue += 1;
 
-            if(rang)
-                classValue += 2;
+        if (rang) classValue += 2;
 
-            if(pal)
-                classValue += 4;
+        if (pal) classValue += 4;
 
-            if(sk)
-                classValue += 8;
+        if (sk) classValue += 8;
 
-            if(mnk)
-                classValue += 16;
+        if (mnk) classValue += 16;
 
-            if(brd)
-                classValue += 32;
+        if (brd) classValue += 32;
 
-            if(rge)
-                classValue += 64;
+        if (rge) classValue += 64;
 
-            if(drd)
-                classValue += 128;
+        if (drd) classValue += 128;
 
-            if(shm)
-                classValue += 256;
+        if (shm) classValue += 256;
 
-            if(clr)
-                classValue += 512;
+        if (clr) classValue += 512;
 
-            if(mag)
-                classValue += 1024;
+        if (mag) classValue += 1024;
 
-            if(nec)
-                classValue += 2048;
+        if (nec) classValue += 2048;
 
-            if(enc)
-                classValue += 4096;
+        if (enc) classValue += 4096;
 
-            if(wiz)
-                classValue += 8192;
+        if (wiz) classValue += 8192;
 
-            if(alc)
-                classValue += 16384;
+        if (alc) classValue += 16384;
     }
 
-
-    async function getColor(color) {
-        console.log(document.getElementById("colorpicker").value);
-    }
+    // async function getColor() {
+    //     console.log(document.getElementById("colorpicker").value);
+    // }
 
     async function postGetItem(url = "", data = {}) {
         const response = await fetch(url, {
@@ -238,9 +239,9 @@ const Items = () => {
         const json = await response.json();
         alert(JSON.stringify(json));
         document.getElementById("patternfam").value = json.patternfam;
-	try {
-        document.getElementById("itemicon").value = json.itemicon;
-	} catch (err) {}
+        try {
+            document.getElementById("itemicon").value = json.itemicon;
+        } catch (err) {}
         document.getElementById("equipslot").value = json.equipslot;
         if (json.trade == 1) {
             document.getElementById("trade").checked = false;
@@ -254,7 +255,7 @@ const Items = () => {
         }
         try {
             document.getElementById("attacktype").value = json.attacktype;
-        } catch (err) { }
+        } catch (err) {}
         document.getElementById("weapondamage").value = json.weapondamage;
         document.getElementById("levelreq").value = json.levelreq;
         document.getElementById("maxstack").value = json.maxstack;
@@ -274,11 +275,15 @@ const Items = () => {
         }
         document.getElementById("itemdesc").value = json.itemdesc;
         try {
-	    let model_val = item_models.filter(function(p) { return p.model === json.model })
+            let model_val = item_models.filter(function (p) {
+                return p.model === json.model;
+            });
             document.getElementById("model").value = model_val[0].value;
-	selectedValue = model_val[0].value;
-        } catch (err) { }
-        document.getElementById("colorpicker").value = decColorToHex(json.color);
+            selectedValue = model_val[0].value;
+        } catch (err) {}
+        document.getElementById("colorpicker").value = decColorToHex(
+            json.color
+        );
         document.getElementById("str").value = json.str;
         document.getElementById("sta").value = json.sta;
         document.getElementById("agi").value = json.agi;
@@ -299,7 +304,11 @@ const Items = () => {
         document.getElementById("AR").value = json.AR;
         document.getElementById("weaponproc").value = json.weaponproc;
         document.getElementById("fish").value = json.fish;
-	console.log(item_models.filter(function(p) { return p.model === json.model }));
+        console.log(
+            item_models.filter(function (p) {
+                return p.model === json.model;
+            })
+        );
         return json;
     }
 
@@ -321,7 +330,7 @@ const Items = () => {
                 name="dynamic_form_nest_item"
                 onFinish={onFinish}
                 autoComplete="off"
-		id="itemForm"
+                id="itemForm"
             >
                 <Form.Item
                     name="itemname"
@@ -337,7 +346,7 @@ const Items = () => {
                     <button onClick={getItem}>Search</button>
                     <button onClick={addItem}>Add Item</button>
                     <button onClick={updateItem}>Update Item</button>
-		    <button onClick={clearFields}>Clear Form</button>
+                    <button onClick={clearFields}>Clear Form</button>
                 </Form.Item>
                 <Form.Item
                     id="icon"
@@ -352,14 +361,14 @@ const Items = () => {
                     <Select
                         placeholder="Select Option"
                         value={item_models.filter(
-                            (obj) => obj.value === selectedValue
+                            (obj) => obj.value === selectedIconValue
                         )} // set selected value
                         options={icon_models} // set list of the data
-                        onChange={handleChange} // assign onChange function
+                        onChange={handleIconChange}
                     />
                 </Form.Item>
-                <b>Selected Value (feel free to remove this): </b>{" "}
-                {selectedValue}
+                {/* Debug only, remove when you are done with testing the values. */}
+                <b>Selected Icon Value: </b> {selectedIconValue}
                 <Form.Item
                     name="equipslot"
                     label="Equip Slot"
@@ -407,11 +416,17 @@ const Items = () => {
                     ]}
                 >
                     <Select
-                        placeholder="Select Option" id="attack_type"
+                        placeholder="Select Option"
+                        id="attack_type"
+                        value={item_models.filter(
+                            (obj) => obj.value === selectedAttackTypeValue
+                        )} // set selected value
                         options={attack_types} // set list of the data
+                        onChange={handleAttackTypeChange}
                     />
-                    <b>Selected Value (feel free to remove this): </b>{" "}
-                    {selectedValue}
+                    {/* Debug only, remove when you are done with testing the values. */}
+                    <b>Selected Attack Type Value: </b>{" "}
+                    {selectedAttackTypeValue}
                 </Form.Item>
                 <Form.Item
                     name="weapondamage"
@@ -487,33 +502,49 @@ const Items = () => {
                         <input type="checkbox" id="warrior" name="warrior" />
                         <label for="warrior"> Warrior </label>
                         <input type="checkbox" id="ranger" name="ranger" />
-                        <label for="ranger"> Ranger  </label>
+                        <label for="ranger"> Ranger </label>
                         <input type="checkbox" id="paladin" name="paladin" />
                         <label for="paladin"> Paladin </label>
-                        <input type="checkbox" id="shadowknight" name="shadowknight" />
+                        <input
+                            type="checkbox"
+                            id="shadowknight"
+                            name="shadowknight"
+                        />
                         <label for="shadowknight"> Shadowknight </label>
                         <input type="checkbox" id="monk" name="monk" />
-                        <label for="monk"> Monk  </label>
+                        <label for="monk"> Monk </label>
                         <input type="checkbox" id="bard" name="bard" />
-                        <label for="bard"> Bard  </label>
+                        <label for="bard"> Bard </label>
                         <input type="checkbox" id="rogue" name="rogue" />
-                        <label for="rogue"> Rogue  </label>
+                        <label for="rogue"> Rogue </label>
                         <input type="checkbox" id="druid" name="druid" />
-                        <label for="druid"> Druid  </label>
+                        <label for="druid"> Druid </label>
                         <input type="checkbox" id="shaman" name="shaman" />
-                        <label for="shaman"> Shaman  </label>
+                        <label for="shaman"> Shaman </label>
                         <input type="checkbox" id="cleric" name="cleric" />
-                        <label for="cleric"> Cleric  </label>
+                        <label for="cleric"> Cleric </label>
                         <input type="checkbox" id="magician" name="magician" />
-                        <label for="magician"> Magician  </label>
-                        <input type="checkbox" id="necromancer" name="necromancer" />
-                        <label for="necromancer"> Necromancer  </label>
-                        <input type="checkbox" id="enchanter" name="enchanter" />
+                        <label for="magician"> Magician </label>
+                        <input
+                            type="checkbox"
+                            id="necromancer"
+                            name="necromancer"
+                        />
+                        <label for="necromancer"> Necromancer </label>
+                        <input
+                            type="checkbox"
+                            id="enchanter"
+                            name="enchanter"
+                        />
                         <label for="enchanter"> Enchanter </label>
                         <input type="checkbox" id="wizard" name="wizard" />
-                        <label for="wizard"> Wizard  </label>
-                        <input type="checkbox" id="alchemist" name="alchemist" />
-                        <label for="alchemist"> Alchemist  </label>
+                        <label for="wizard"> Wizard </label>
+                        <input
+                            type="checkbox"
+                            id="alchemist"
+                            name="alchemist"
+                        />
+                        <label for="alchemist"> Alchemist </label>
                     </td>
                 </Form.Item>
                 <Form.Item
@@ -539,7 +570,11 @@ const Items = () => {
                         <label for="dwarf"> Dwarf </label>
                         <input type="checkbox" id="troll" name="troll" />
                         <label for="troll"> Troll </label>
-                        <input type="checkbox" id="barbarian" name="barbarian" />
+                        <input
+                            type="checkbox"
+                            id="barbarian"
+                            name="barbarian"
+                        />
                         <label for="barbarian"> Barbarian </label>
                         <input type="checkbox" id="halfling" name="halfling" />
                         <label for="halfling"> Halfing </label>
@@ -610,14 +645,14 @@ const Items = () => {
                     <Select
                         placeholder="Select Option"
                         value={item_models.filter(
-                            (obj) => obj.value === selectedValue
+                            (obj) => obj.value === selectedModelValue
                         )} // set selected value
                         options={item_models} // set list of the data
-                        onChange={handleChange} // assign onChange function
+                        onChange={handleModelChange} // assign onChange function
                     />
                 </Form.Item>
-                <b>Selected Value (feel free to remove this): </b>{" "}
-                {selectedValue}
+                {/* Debug only, remove when you are done with testing the values. */}
+                <b>Selected Model Value: </b> {selectedModelValue}
                 <Form.Item
                     id="color"
                     label="Item Color:"
@@ -627,12 +662,13 @@ const Items = () => {
                             message: "Missing type",
                         },
                     ]}
+                    onChange={handleColorChange}
                 >
-                    <input type="color" id="colorpicker"
-                        onChange={getColor} />
+                    <input type="color" id="colorpicker" />
                     <input type="checkbox" id="color_opacity" />
                     <label for="color_opacity">Transparent</label>
                 </Form.Item>
+                <b>Selected Color Value: </b> {selectedColorValue}
                 <Form.Item
                     name="str"
                     label="Strength"
