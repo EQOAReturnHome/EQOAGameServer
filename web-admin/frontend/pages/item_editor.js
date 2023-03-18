@@ -7,15 +7,20 @@ import { item_models, attack_types } from "./item_arrays";
 import { characterRace, characterClass } from "./npc_arrays";
 import { icon_models } from "./icon_arrays";
 
-const backend_url = "http://eqoa-admin.com:8000";
+const backend_url = "http://localhost:8000";
 
 const Items = () => {
     const [form] = Form.useForm();
-    // item model, item icon, attack type, and color picker states
+    // item model, item icon, attack type, and color picker states for raw values
     const [selectedModelValue, setSelectedModelValue] = useState();
     const [selectedIconValue, setSelectedIconValue] = useState();
     const [selectedAttackTypeValue, setSelectedAttackTypeValue] = useState();
     const [selectedColorValue, setSelectedColorValue] = useState();
+
+    // item model, item icon, and attack type states for images
+    const [selectedModelModel, setSelectedModelModel] = useState();
+    const [selectedIconModel, setSelectedIconModel] = useState();
+    const [selectedAttackTypeModel, setSelectedAttackTypeModel] = useState();
 
     const onFinish = (values) => {
         console.log({ values });
@@ -28,10 +33,11 @@ const Items = () => {
 
     const handleAttackTypeChange = (e) => {
         setSelectedAttackTypeValue(e.value);
+        setSelectedAttackTypeModel(e.label);
     };
 
     const handleModelChange = (e) => {
-        setSelectedModelValue(e.model);
+        setSelectedModelModel(e.label);
     };
 
     const handleColorChange = () => {
@@ -327,6 +333,15 @@ const Items = () => {
 	alert(classValue);
     }
 
+    function lookup_icon_image(icon) {
+        for (let i = 0; i < icon_models.length; i++) {
+            if (icon == icon_models[i].model) {
+                console.log("found match for icon");
+                return icon_models[i].label;
+            }
+        }
+    }
+
     async function postGetItem(url = "", data = {}) {
         const response = await fetch(url, {
             method: "POST",
@@ -340,6 +355,13 @@ const Items = () => {
 
         const json = await response.json();
         alert(JSON.stringify(json));
+        // console.log(JSON.stringify(json["itemicon"]));
+        // setSelectedIconModel(JSON.stringify(json["itemicon"]));
+        setSelectedIconValue(JSON.stringify(json["itemicon"]));
+        setSelectedIconModel(
+            lookup_icon_image({ selectedIconValue }.selectedIconValue)
+        );
+        // document.getElementById("icon").value = { selectedIconModel };
         document.getElementById("patternfam").value = json.patternfam;
         try {
             document.getElementById("itemicon").value = json.itemicon;
@@ -456,10 +478,11 @@ const Items = () => {
                     ]}
                 >
                     <Select
-                        placeholder="Select Option"
                         value={icon_models.filter(
                             (obj) => obj.model === selectedIconValue
                         )} // set selected value
+                        placeholder={selectedIconModel}
+                        id="icon"
                         options={icon_models} // set list of the data
                         onChange={handleIconChange}
                     />
