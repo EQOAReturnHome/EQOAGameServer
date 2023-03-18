@@ -23,7 +23,7 @@ const Items = () => {
 
     // lets refactor these later to one single function, seems like we can DRY this up
     const handleIconChange = (e) => {
-        setSelectedIconValue(e.value);
+        setSelectedIconValue(e.model);
     };
 
     const handleAttackTypeChange = (e) => {
@@ -31,15 +31,127 @@ const Items = () => {
     };
 
     const handleModelChange = (e) => {
-        setSelectedModelValue(e.value);
+        setSelectedModelValue(e.model);
     };
 
     const handleColorChange = () => {
         setSelectedColorValue(document.getElementById("colorpicker").value);
     };
 
+    function calculateRaceMask() {
+        var hum = document.getElementById("human").checked; //0
+        var elf = document.getElementById("elf").checked; //1
+        var delf = document.getElementById("darkelf").checked; //2
+        var gno = document.getElementById("gnome").checked; //3
+        var dwa = document.getElementById("dwarf").checked; //4
+        var trl = document.getElementById("troll").checked; //5
+        var barb = document.getElementById("barbarian").checked; //6
+        var hlf = document.getElementById("halfling").checked; //7
+        var eru = document.getElementById("erudite").checked; //8
+        var ogr = document.getElementById("ogre").checked; //9
+
+        var raceValue = 0;
+
+        if (hum) raceValue += 1;
+
+        if (elf) raceValue += 2;
+
+        if (delf) raceValue += 4;
+
+        if (gno) raceValue += 8;
+
+        if (dwa) raceValue += 16;
+
+        if (trl) raceValue += 32;
+
+        if (barb) raceValue += 64;
+
+        if (hlf) raceValue += 128;
+
+        if (eru) raceValue += 256;
+
+        if (ogr) raceValue += 512;
+
+        return raceValue;
+    }
+
+   function calculateClassMask() {
+        var war = document.getElementById("warrior").checked; //0
+        var rang = document.getElementById("ranger").checked; //1
+        var pal = document.getElementById("paladin").checked; //2
+        var sk = document.getElementById("shadowknight").checked; //3
+        var mnk = document.getElementById("monk").checked; //4
+        var brd = document.getElementById("bard").checked; //5
+        var rge = document.getElementById("rogue").checked; //6
+        var drd = document.getElementById("druid").checked; //7
+        var shm = document.getElementById("shaman").checked; //8
+        var clr = document.getElementById("cleric").checked; //9
+        var mag = document.getElementById("magician").checked; //10
+        var nec = document.getElementById("necromancer").checked; //11
+        var enc = document.getElementById("enchanter").checked; //12
+        var wiz = document.getElementById("wizard").checked; //13
+        var alc = document.getElementById("alchemist").checked; //14
+        var classValue = 0;
+
+        if (war) classValue += 1;
+
+        if (rang) classValue += 2;
+
+        if (pal) classValue += 4;
+
+        if (sk) classValue += 8;
+
+        if (mnk) classValue += 16;
+
+        if (brd) classValue += 32;
+
+        if (rge) classValue += 64;
+
+        if (drd) classValue += 128;
+
+        if (shm) classValue += 256;
+
+        if (clr) classValue += 512;
+
+        if (mag) classValue += 1024;
+
+        if (nec) classValue += 2048;
+
+        if (enc) classValue += 4096;
+
+        if (wiz) classValue += 8192;
+
+        if (alc) classValue += 16384;
+
+        return classValue;
+    } 
+
     async function addItem() {
-        var itemname = document.getElementById("itemname").value;
+        var itemtrade;
+        var itemrent;
+        var itemlore;
+        var itemcraft;
+        if(document.getElementById("trade").checked == true){
+            itemtrade = 1
+        }else{
+            itemtrade = 0
+        }
+        if(document.getElementById("rent").checked == true){
+            itemrent = 1
+        }else{
+            itemrent = 0
+        }
+        if(document.getElementById("lore").checked == true){
+            itemlore = 1
+        }else{
+            itemlore = 0
+        }
+        if(document.getElementById("craft").checked == true){
+            itemcraft = 1
+        }else{
+            itemcraft = 0
+        }
+
         const url = backend_url + "/create_item";
         const response = await fetch(url, {
             method: "POST",
@@ -47,13 +159,95 @@ const Items = () => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-
-            body: JSON.stringify({ itemname: itemname }),
+            
+            body: JSON.stringify({ itemname: document.getElementById("itemname").value
+            ,itemicon:{selectedIconValue}.selectedIconValue
+            ,equipslot: document.getElementById("equipslot").value
+            ,trade: itemtrade
+            ,rent: itemrent
+            ,attacktype: {selectedAttackTypeValue}.selectedAttackTypeValue
+            ,weapondamage: document.getElementById("weapondamage").value
+            ,levelreq: document.getElementById("levelreq").value
+            ,maxstack: document.getElementById("maxstack").value
+            ,maxhp: document.getElementById("maxhp").value
+            ,duration: document.getElementById("duration").value
+            ,classuse: calculateClassMask()
+            ,raceuse: calculateRaceMask()
+            ,procanim: document.getElementById("procanim").value
+            ,lore: itemlore
+            ,craft: itemcraft
+            ,itemdesc: document.getElementById("itemdesc").value
+            ,model: {selectedModelValue}.selectedModelValue
+            ,color: {selectedColorValue}.selectedColorValue
+            ,str: document.getElementById("str").value
+            ,sta: document.getElementById("sta").value
+            ,agi: document.getElementById("agi").value
+            ,wis: document.getElementById("wis").value
+            ,dex: document.getElementById("dex").value
+            ,cha: document.getElementById("cha").value
+            ,intelligence: document.getElementById("intelligence").value
+            ,cost: document.getElementById("patternfam").value
+            ,HPMAX: document.getElementById("HPMAX").value
+            ,POWMAX: document.getElementById("POWMAX").value
+            ,PoT: document.getElementById("PoT").value
+            ,HoT: document.getElementById("HoT").value
+            ,AC: document.getElementById("AC").value
+            ,PR: document.getElementById("PR").value
+            ,DR: document.getElementById("DR").value
+            ,FR: document.getElementById("FR").value
+            ,CR: document.getElementById("CR").value
+            ,LR: document.getElementById("LR").value
+            ,AR: document.getElementById("AR").value
+            ,weaponproc: document.getElementById("weaponproc").value
+            ,fish: document.getElementById("fish").value
+        })
         });
 
+        console.log(JSON.stringify({ itemname: document.getElementById("itemname").value
+            ,itemicon:{selectedIconValue}.selectedIconValue
+            ,equipslot: document.getElementById("equipslot").value
+            ,trade: itemtrade
+            ,rent: itemrent
+            ,attacktype: {selectedAttackTypeValue}.selectedAttackTypeValue
+            ,weapondamage: document.getElementById("weapondamage").value
+            ,levelreq: document.getElementById("levelreq").value
+            ,maxstack: document.getElementById("maxstack").value
+            ,maxhp: document.getElementById("maxhp").value
+            ,duration: document.getElementById("duration").value
+            ,classuse: calculateClassMask()
+            ,raceuse: calculateRaceMask()
+            ,procanim: document.getElementById("procanim").value
+            ,lore: itemlore
+            ,craft: itemcraft
+            ,itemdesc: document.getElementById("itemdesc").value
+            ,model: {selectedModelValue}.selectedModelValue
+            ,color: {selectedColorValue}.selectedColorValue
+            ,str: document.getElementById("str").value
+            ,sta: document.getElementById("sta").value
+            ,agi: document.getElementById("agi").value
+            ,wis: document.getElementById("wis").value
+            ,dex: document.getElementById("dex").value
+            ,cha: document.getElementById("cha").value
+            ,intelligence: document.getElementById("intelligence").value
+            ,cost: document.getElementById("patternfam").value
+            ,HPMAX: document.getElementById("HPMAX").value
+            ,POWMAX: document.getElementById("POWMAX").value
+            ,PoT: document.getElementById("PoT").value
+            ,HoT: document.getElementById("HoT").value
+            ,AC: document.getElementById("AC").value
+            ,PR: document.getElementById("PR").value
+            ,DR: document.getElementById("DR").value
+            ,FR: document.getElementById("FR").value
+            ,CR: document.getElementById("CR").value
+            ,LR: document.getElementById("LR").value
+            ,AR: document.getElementById("AR").value
+            ,weaponproc: document.getElementById("weaponproc").value
+            ,fish: document.getElementById("fish").value
+        }));
+        
         const json = await response.json();
-        alert(JSON.stringify(json));
-        return json;
+	//alert(JSON.stringify(json));
+        //return json;
     }
 
     async function clearFields() {
@@ -71,97 +265,6 @@ const Items = () => {
 
             body: JSON.stringify({ itemname: data }),
         });
-    }
-
-    async function convertItemMask(classMask, raceMask) {
-        if ((characterClass.Warrior & classMask) == characterClass.Warrior) {
-            document.getElementById("warrior").checked = true;
-        }
-        if ((characterClass.Ranger & classMask) == characterClass.Ranger) {
-            document.getElementById("ranger").checked = true;
-        }
-        if ((characterClass.Paladin & classMask) == characterClass.Paladin) {
-            document.getElementById("paladin").checked = true;
-        }
-        if (
-            (characterClass.ShadowKnight & classMask) ==
-            characterClass.ShadowKnight
-        ) {
-            document.getElementById("shadowknight").checked = true;
-        }
-        if ((characterClass.Monk & classMask) == characterClass.Monk) {
-            document.getElementById("monk").checked = true;
-        }
-        if ((characterClass.Bard & classMask) == characterClass.Bard) {
-            document.getElementById("bard").checked = true;
-        }
-        if ((characterClass.Rogue & classMask) == characterClass.Rogue) {
-            document.getElementById("rogue").checked = true;
-        }
-        if ((characterClass.Druid & classMask) == characterClass.Druid) {
-            document.getElementById("druid").checked = true;
-        }
-        if ((characterClass.Shaman & classMask) == characterClass.Shaman) {
-            document.getElementById("shaman").checked = true;
-        }
-        if ((characterClass.Cleric & classMask) == characterClass.Cleric) {
-            document.getElementById("cleric").checked = true;
-        }
-        if ((characterClass.Magician & classMask) == characterClass.Magician) {
-            document.getElementById("magician").checked = true;
-        }
-        if (
-            (characterClass.Necromancer & classMask) ==
-            characterClass.Necromancer
-        ) {
-            document.getElementById("necromancer").checked = true;
-        }
-        if (
-            (characterClass.Enchanter & classMask) ==
-            characterClass.Enchanter
-        ) {
-            document.getElementById("enchanter").checked = true;
-        }
-        if ((characterClass.Wizard & classMask) == characterClass.Wizard) {
-            document.getElementById("wizard").checked = true;
-        }
-        if (
-            (characterClass.Alchemist & classMask) ==
-            characterClass.Alchemist
-        ) {
-            document.getElementById("alchemist").checked = true;
-        }
-
-        if ((characterRace.Human & raceMask) == characterRace.Human) {
-            document.getElementById("human").checked = true;
-        }
-        if ((characterRace.Elf & raceMask) == characterRace.Elf) {
-            document.getElementById("elf").checked = true;
-        }
-        if ((characterRace.Dark_Elf & raceMask) == characterRace.Dark_Elf) {
-            document.getElementById("darkelf").checked = true;
-        }
-        if ((characterRace.Gnome & raceMask) == characterRace.Gnome) {
-            document.getElementById("gnome").checked = true;
-        }
-        if ((characterRace.Troll & raceMask) == characterRace.Troll) {
-            document.getElementById("troll").checked = true;
-        }
-        if ((characterRace.Barbarian & raceMask) == characterRace.Barbarian) {
-            document.getElementById("barbarian").checked = true;
-        }
-        if ((characterRace.Halfling & raceMask) == characterRace.Halfling) {
-            document.getElementById("halfling").checked = true;
-        }
-        if ((characterRace.Erudite & raceMask) == characterRace.Erudite) {
-            document.getElementById("erudite").checked = true;
-        }
-        if ((characterRace.Ogre & raceMask) == characterRace.Ogre) {
-            document.getElementById("ogre").checked = true;
-        }
-        if ((characterRace.Dwarf & raceMask) == characterRace.Dwarf) {
-            document.getElementById("dwarf").checked = true;
-        }
     }
 
     async function decColorToHex(decimalNum) {
@@ -219,11 +322,10 @@ const Items = () => {
         if (wiz) classValue += 8192;
 
         if (alc) classValue += 16384;
-    }
 
-    // async function getColor() {
-    //     console.log(document.getElementById("colorpicker").value);
-    // }
+        return classValue;
+	alert(classValue);
+    }
 
     async function postGetItem(url = "", data = {}) {
         const response = await fetch(url, {
@@ -304,11 +406,6 @@ const Items = () => {
         document.getElementById("AR").value = json.AR;
         document.getElementById("weaponproc").value = json.weaponproc;
         document.getElementById("fish").value = json.fish;
-        console.log(
-            item_models.filter(function (p) {
-                return p.model === json.model;
-            })
-        );
         return json;
     }
 
@@ -360,8 +457,8 @@ const Items = () => {
                 >
                     <Select
                         placeholder="Select Option"
-                        value={item_models.filter(
-                            (obj) => obj.value === selectedIconValue
+                        value={icon_models.filter(
+                            (obj) => obj.model === selectedIconValue
                         )} // set selected value
                         options={icon_models} // set list of the data
                         onChange={handleIconChange}
@@ -418,7 +515,7 @@ const Items = () => {
                     <Select
                         placeholder="Select Option"
                         id="attack_type"
-                        value={item_models.filter(
+                        value={attack_types.filter(
                             (obj) => obj.value === selectedAttackTypeValue
                         )} // set selected value
                         options={attack_types} // set list of the data
@@ -573,7 +670,7 @@ const Items = () => {
                         <input
                             type="checkbox"
                             id="barbarian"
-                            name="barbarian"
+                            name="barbarian"
                         />
                         <label for="barbarian"> Barbarian </label>
                         <input type="checkbox" id="halfling" name="halfling" />
@@ -645,7 +742,7 @@ const Items = () => {
                     <Select
                         placeholder="Select Option"
                         value={item_models.filter(
-                            (obj) => obj.value === selectedModelValue
+                            (obj) => obj.model === selectedModelValue
                         )} // set selected value
                         options={item_models} // set list of the data
                         onChange={handleModelChange} // assign onChange function

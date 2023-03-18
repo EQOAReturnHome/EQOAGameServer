@@ -1,7 +1,7 @@
 export const item_models = [
 { 
         value: "Battleaxe",
-        model: 38646438,
+        model: "38646438",
         label: (
             <div>
                 <img

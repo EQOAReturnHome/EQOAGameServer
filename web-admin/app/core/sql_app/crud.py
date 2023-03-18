@@ -21,7 +21,17 @@ def get_item_by_name(db: Session, itemname: str):
 
 
 def create_item(db: Session, item: schemas.ItemInfo):
-    new_item = models.ItemInfo(itemname=item.itemname)
+    new_item = models.ItemInfo(itemname=item.itemname, patternfam=item.patternfam, \
+                               itemicon=item.itemicon, equipslot=item.equipslot, trade=item.trade, \
+                                rent=item.rent, attacktype=item.attacktype, weapondamage=item.weapondamage, \
+                                levelreq=item.levelreq, maxstack=item.maxstack, maxhp=item.maxhp, \
+                                duration=item.duration, classuse=item.classuse, raceuse=item.raceuse, \
+                                procanim=item.procanim, lore=item.lore, craft=item.craft, \
+                                itemdesc=item.itemdesc, model=item.model, color=item.color, str=item.str, \
+                                sta=item.sta, agi=item.agi, wis=item.wis, dex=item.dex, cha=item.cha, \
+                                intelligence=item.intelligence, HPMAX=item.HPMAX, POWMAX=item.POWMAX, \
+                                PoT=item.PoT, HoT=item.HoT, AC=item.AC, PR=item.PR, DR=item.DR, FR=item.FR, \
+                                CR=item.CR, LR=item.LR, AR=item.AR, weaponproc=item.weaponproc, fish=item.fish)
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
