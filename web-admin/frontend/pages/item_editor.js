@@ -7,7 +7,7 @@ import { item_models, attack_types } from "./item_arrays";
 import { characterRace, characterClass } from "./npc_arrays";
 import { icon_models } from "./icon_arrays";
 
-const backend_url = "http://localhost:8000";
+const backend_url = "http://eqoa-admin.com:8000";
 
 const Items = () => {
     const [form] = Form.useForm();
@@ -273,64 +273,103 @@ const Items = () => {
         });
     }
 
+    async function convertItemMask(classMask, raceMask) {
+	            if ((characterClass.Warrior & classMask) == characterClass.Warrior) {
+			                document.getElementById("warrior").checked = true;
+			            }
+	            if ((characterClass.Ranger & classMask) == characterClass.Ranger) {
+			                document.getElementById("ranger").checked = true;
+			            }
+	            if ((characterClass.Paladin & classMask) == characterClass.Paladin) {
+			                document.getElementById("paladin").checked = true;
+			            }
+	            if (
+			                (characterClass.ShadowKnight & classMask) ==
+			                characterClass.ShadowKnight
+			            ) {
+			                document.getElementById("shadowknight").checked = true;
+			            }
+	            if ((characterClass.Monk & classMask) == characterClass.Monk) {
+			                document.getElementById("monk").checked = true;
+			            }
+	            if ((characterClass.Bard & classMask) == characterClass.Bard) {
+			                document.getElementById("bard").checked = true;
+			            }
+	            if ((characterClass.Rogue & classMask) == characterClass.Rogue) {
+			                document.getElementById("rogue").checked = true;
+			            }
+	            if ((characterClass.Druid & classMask) == characterClass.Druid) {
+			                document.getElementById("druid").checked = true;
+			            }
+	            if ((characterClass.Shaman & classMask) == characterClass.Shaman) {
+			                document.getElementById("shaman").checked = true;
+			            }
+	            if ((characterClass.Cleric & classMask) == characterClass.Cleric) {
+			                document.getElementById("cleric").checked = true;
+			            }
+	            if ((characterClass.Magician & classMask) == characterClass.Magician) {
+			                document.getElementById("magician").checked = true;
+			            }
+	            if (
+			                (characterClass.Necromancer & classMask) ==
+			                characterClass.Necromancer
+			            ) {
+			                document.getElementById("necromancer").checked = true;
+			            }
+	            if (
+			                (characterClass.Enchanter & classMask) ==
+			                characterClass.Enchanter
+			            ) {
+			                document.getElementById("enchanter").checked = true;
+			            }
+	            if ((characterClass.Wizard & classMask) == characterClass.Wizard) {
+			                document.getElementById("wizard").checked = true;
+			            }
+	            if (
+			                (characterClass.Alchemist & classMask) ==
+			                characterClass.Alchemist
+			            ) {
+			                document.getElementById("alchemist").checked = true;
+			            }
+
+	            if ((characterRace.Human & raceMask) == characterRace.Human) {
+			                document.getElementById("human").checked = true;
+			            }
+	            if ((characterRace.Elf & raceMask) == characterRace.Elf) {
+			                document.getElementById("elf").checked = true;
+			            }
+	            if ((characterRace.Dark_Elf & raceMask) == characterRace.Dark_Elf) {
+			                document.getElementById("darkelf").checked = true;
+			            }
+	            if ((characterRace.Gnome & raceMask) == characterRace.Gnome) {
+			                document.getElementById("gnome").checked = true;
+			            }
+	            if ((characterRace.Troll & raceMask) == characterRace.Troll) {
+			                document.getElementById("troll").checked = true;
+			            }
+	            if ((characterRace.Barbarian & raceMask) == characterRace.Barbarian) {
+			                document.getElementById("barbarian").checked = true;
+			            }
+	            if ((characterRace.Halfling & raceMask) == characterRace.Halfling) {
+			                document.getElementById("halfling").checked = true;
+			            }
+	            if ((characterRace.Erudite & raceMask) == characterRace.Erudite) {
+			                document.getElementById("erudite").checked = true;
+			            }
+	            if ((characterRace.Ogre & raceMask) == characterRace.Ogre) {
+			                document.getElementById("ogre").checked = true;
+			            }
+	            if ((characterRace.Dwarf & raceMask) == characterRace.Dwarf) {
+			                document.getElementById("dwarf").checked = true;
+			            }
+	        }
+
     async function decColorToHex(decimalNum) {
         let colorHex = decimalNum.toString(16);
         let opacity = colorHex.slice(-2);
         if (opacity == "ff") {
             document.getElementById("color_opacity").checked = true;
         }
-    }
-
-    async function calculateClassMask() {
-        var war = document.getElementById("warrior").checked; //0
-        var rang = document.getElementById("ranger").checked; //1
-        var pal = document.getElementById("paladin").checked; //2
-        var sk = document.getElementById("shadowknight").checked; //3
-        var mnk = document.getElementById("monk").checked; //4
-        var brd = document.getElementById("bard").checked; //5
-        var rge = document.getElementById("rogue").checked; //6
-        var drd = document.getElementById("druid").checked; //7
-        var shm = document.getElementById("shaman").checked; //8
-        var clr = document.getElementById("cleric").checked; //9
-        var mag = document.getElementById("magician").checked; //10
-        var nec = document.getElementById("necromancer").checked; //11
-        var enc = document.getElementById("enchanter").checked; //12
-        var wiz = document.getElementById("wizard").checked; //13
-        var alc = document.getElementById("alchemist").checked; //14
-        var classValue = 0;
-
-        if (war) classValue += 1;
-
-        if (rang) classValue += 2;
-
-        if (pal) classValue += 4;
-
-        if (sk) classValue += 8;
-
-        if (mnk) classValue += 16;
-
-        if (brd) classValue += 32;
-
-        if (rge) classValue += 64;
-
-        if (drd) classValue += 128;
-
-        if (shm) classValue += 256;
-
-        if (clr) classValue += 512;
-
-        if (mag) classValue += 1024;
-
-        if (nec) classValue += 2048;
-
-        if (enc) classValue += 4096;
-
-        if (wiz) classValue += 8192;
-
-        if (alc) classValue += 16384;
-
-        return classValue;
-	alert(classValue);
     }
 
     function lookup_icon_image(icon) {
@@ -478,9 +517,6 @@ const Items = () => {
                     ]}
                 >
                     <Select
-                        value={icon_models.filter(
-                            (obj) => obj.model === selectedIconValue
-                        )} // set selected value
                         placeholder={selectedIconModel}
                         id="icon"
                         options={icon_models} // set list of the data
@@ -538,9 +574,6 @@ const Items = () => {
                     <Select
                         placeholder="Select Option"
                         id="attack_type"
-                        value={attack_types.filter(
-                            (obj) => obj.value === selectedAttackTypeValue
-                        )} // set selected value
                         options={attack_types} // set list of the data
                         onChange={handleAttackTypeChange}
                     />
@@ -764,9 +797,6 @@ const Items = () => {
                 >
                     <Select
                         placeholder="Select Option"
-                        value={item_models.filter(
-                            (obj) => obj.model === selectedModelValue
-                        )} // set selected value
                         options={item_models} // set list of the data
                         onChange={handleModelChange} // assign onChange function
                     />
