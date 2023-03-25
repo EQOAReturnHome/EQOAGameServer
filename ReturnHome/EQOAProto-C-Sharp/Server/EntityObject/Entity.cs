@@ -3,6 +3,7 @@ using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
+using ReturnHome.Server.EntityObject.Spells;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -13,12 +14,15 @@ namespace ReturnHome.Server.EntityObject
         //Implies if object is visible or not
         public bool Invisible = false;
 
+        public SpellBook MySpellBook;
         private int _level;
         private uint _objectID;
         private long _killTime;
         private EntityType _npcType = 0;
         public int ServerID;
         public AIContainer aiContainer;
+        public int _respawnTime;
+        public bool canRespawn { get; private set; } = true;
 
 
         public byte chatMode = 0; //Default to 0, say = 0, Shout = 3 NPC's can technically talk in chat too?

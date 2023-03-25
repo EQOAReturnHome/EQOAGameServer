@@ -65,11 +65,12 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public void ExitCorpse(Session session)
         {
+            Console.WriteLine($"Loot count, {Loot.Count}");
             _lootee = null;
 
             if (Loot.Count <= 0)
             {
-                //Destroy corpse somehow
+                EntityManager.RemoveEntity(_npc);
             }
         }
     }

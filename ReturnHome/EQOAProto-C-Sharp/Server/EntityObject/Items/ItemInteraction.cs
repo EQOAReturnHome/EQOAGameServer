@@ -58,6 +58,7 @@ namespace ReturnHome.Server.EntityObject.Items
 
             //If we are then interacting with an item that is not equipable, must be a consumable item?
             else
+                ServerLearnSpell.LearnSpell(((Character)e).characterSession);
                 Console.WriteLine("Interacting with a consumable item?");
         }
     }

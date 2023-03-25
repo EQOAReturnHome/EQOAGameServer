@@ -6,6 +6,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Stats;
 using System;
 using System.Text.Json;
+using ReturnHome.Server.EntityObject.Spells;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -15,6 +16,12 @@ namespace ReturnHome.Server.EntityObject.Player
         public bool LootMessages = true;
         public bool DamageNumberMessages = true;
         public bool FactionMessages = true;
+
+        public World boundWorld;
+        public float boundX;
+        public float boundY;
+        public float boundZ;
+        public float boundFacing;
 
 
         public int CMCounter = 1;
@@ -31,7 +38,6 @@ namespace ReturnHome.Server.EntityObject.Player
         public List<Item> AuctionItems = new List<Item> { };
         public List<WeaponHotbar> WeaponHotbars = new List<WeaponHotbar> { };
         public List<Hotkey> MyHotkeys = new List<Hotkey> { };
-        public List<Spell> MySpells = new List<Spell> { };
         public List<Auction> MySellingAuctions = new List<Auction> { };
         public List<Auction> MyBuyingAuctions = new List<Auction> { };
         public List<Quest> activeQuests = new List<Quest>();
@@ -284,6 +290,15 @@ namespace ReturnHome.Server.EntityObject.Player
             else if (mySession.MyCharacter.playerFlags.ContainsKey(flagKey))
                 mySession.MyCharacter.playerFlags[flagKey] = flagValue;
             Logger.Info($"Flag {mySession.MyCharacter.playerFlags[flagKey]} set for {mySession.MyCharacter.CharName}");
+        }
+
+        public void SetPlayerBinding()
+        {
+            this.boundWorld = (World)World;
+            this.boundX= x;
+            this.boundY= y;
+            this.boundZ= z;
+            this.boundFacing= Facing;
         }
 
         public Character Copy() => (Character)MemberwiseClone();

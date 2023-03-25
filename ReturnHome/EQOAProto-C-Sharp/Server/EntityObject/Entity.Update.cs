@@ -11,6 +11,10 @@ namespace ReturnHome.Server.EntityObject
 
         public void ObjectUpdateObjectID() => MemoryMarshal.Write(ObjectUpdate.Span[0..], ref _objectID);
 
+        public void ObjectUpdateSpell() => MemoryMarshal.Write(ObjectUpdate.Span[60..], ref _spell);
+
+
+
         public void ObjectUpdateEntity(byte temp = 0x82) => ObjectUpdate.Span[4] = temp;
 
         public void ObjectUpdatePosition()

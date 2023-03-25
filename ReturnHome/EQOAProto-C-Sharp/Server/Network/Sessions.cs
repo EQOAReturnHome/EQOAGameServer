@@ -100,6 +100,13 @@ namespace ReturnHome.Server.Network
             ChatMessage.GenerateClientSpecificChat(this, message);
         }
 
+        //For testing to make sure server is sending correct data - cj
+        public void SpellCastUpdate()
+        {
+            string message = $"Test SpellCast: {MyCharacter.Spell}";
+            ChatMessage.GenerateClientSpecificChat(this, message);
+        }
+
         public void ResetPing()
         {
             _pingCount = 0;

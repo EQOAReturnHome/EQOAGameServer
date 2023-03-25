@@ -18,8 +18,15 @@ namespace ReturnHome.Server.Managers
 {
     public static class EventManager
     {
+        //private static readonly Lua lua = new();
+
+        static EventManager()
+        {
+            //lua.LoadCLRPackage();
+        }
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
+
 
             //CharacterSQL sql = new CharacterSQL();
             //sql.SavePlayerItems(mySession.MyCharacter);
@@ -63,6 +70,7 @@ namespace ReturnHome.Server.Managers
 
                 //pass the string choice to the Lua as choice
                 lua["choice"] = choiceOption;
+                Console.WriteLine(choiceOption);
             }
             //Create handles for the lua script to access some c# variables and methods
             lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
@@ -90,6 +98,20 @@ namespace ReturnHome.Server.Managers
             lua["TurnInItem"] = ItemManager.UpdateQuantity;
             lua["RemoveTunar"] = Entity.RemoveTunar;
             lua["AddTunar"] = Entity.AddTunar;
+            lua["BindPlayer"] = mySession.MyCharacter.SetPlayerBinding;
+
+
+            lua["boundWorld"] = mySession.MyCharacter.boundWorld;
+            lua["boundX"] = mySession.MyCharacter.boundX;
+            lua["boundY"] = mySession.MyCharacter.boundY;
+            lua["boundZ"] = mySession.MyCharacter.boundZ;
+            lua["boundFacing"] = mySession.MyCharacter.boundFacing;
+
+            lua["playerWorld"] = mySession.MyCharacter.World;
+            lua["playerX"] = mySession.MyCharacter.x;
+            lua["playerY"] = mySession.MyCharacter.y;
+            lua["playerZ"] = mySession.MyCharacter.z;
+            lua["playerFacing"] = mySession.MyCharacter.Facing;
 
 
             lua["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);

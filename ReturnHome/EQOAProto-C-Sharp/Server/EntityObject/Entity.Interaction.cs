@@ -24,6 +24,8 @@ namespace ReturnHome.Server.EntityObject
     public partial class Entity
     {
         public ItemContainer Inventory;
+        private uint _spell;
+        private Entity _ourSpell;
         private uint _target;
         private uint _targetCounter = 1;
         private Entity _ourTarget;
@@ -66,11 +68,42 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public bool IsWithinRange()
+        public uint Spell
+        {
+            get { return _spell; }
+            set
+            {
+                if (true)
+                {
+                    _spell = value;
+                    ObjectUpdateSpell();
+                    //Keep a reference to our current target on hand
+                    EntityManager.QueryForEntity(_spell, out _ourSpell);
+                    SpellInfo(_spell);
+                }
+            }
+        }
+
+        public void SpellInfo(uint spell)
+        {
+
+            if (EntityManager.QueryForEntity(_target, out Entity ent))
+            {
+                //This shouldn't happen, but to be safe? Eventually could be an expired object that was originally target?
+                //if (ent == null)
+                //  return;
+                SpellManager.GetSpell(((Character)this).characterSession, spell, _target);
+
+            }
+        }
+
+
+
+        public bool IsWithinRange(float distance = 10.0f)
         {
             //What should be the distance check against interacting with NPC's?
             //Should this distance check be farther or shorter for attacking in combat, too? Such as auto attack
-            if (Vector3.Distance(Position, _ourTarget.Position) <= 10.0f)
+            if (Vector3.Distance(Position, _ourTarget.Position) <= distance)
                 return true;
             return false;
         }

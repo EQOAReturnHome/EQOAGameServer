@@ -13,7 +13,7 @@ using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
-using MySqlDataAdapter = MySql.Data.MySqlClient.MySqlDataAdapter;
+using ReturnHome.Server.EntityObject.Spells;
 
 namespace ReturnHome.Database.SQL
 {
@@ -131,6 +131,12 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("playerFlags", (string)JsonSerializer.Serialize(player.playerFlags));
             SecondCmd.Parameters.AddWithValue("completedQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.completedQuests));
             SecondCmd.Parameters.AddWithValue("activeQuests", (string)JsonSerializer.Serialize<IList<Quest>>(player.activeQuests));
+            SecondCmd.Parameters.AddWithValue("bound_World", (byte)player.boundWorld);
+            SecondCmd.Parameters.AddWithValue("bound_X", player.boundX);
+            SecondCmd.Parameters.AddWithValue("bound_Y", player.boundY);
+            SecondCmd.Parameters.AddWithValue("bound_Z", player.boundZ);
+            SecondCmd.Parameters.AddWithValue("bound_Facing", player.boundFacing);
+
 
             //Execute parameterized statement entering it into the DB
             //using MySqlDataReader SecondRdr = SecondCmd.ExecuteReader();
@@ -742,9 +748,35 @@ namespace ReturnHome.Database.SQL
         }
 
 
+        public void GetPlayerSpellIDs(Session session)
+        {
+            //Queries DB for SpellIDs relevant to the character to link to Lua Spell Files
+            using var cmd = new MySqlCommand("GetCharSpellIDs", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("charID", session.MyCharacter.ServerID);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                //Add SpellID to MySpellIDs Dictionary with WhereOnHotBar as the Key
+                //SpellID
+                int spellID = rdr.GetInt32(0);
+                //location in SpellBook
+                int addedOrder = rdr.GetInt32(1);
+                //WhereOnHotBar
+                uint whereOnBar = rdr.GetUInt32(2);
+
+                //session.MyCharacter.MySpellIDs.Add(whereOnBar, spellID);
+                //session.MyCharacter.MySpellBook.Add(spellID, addedOrder);
+
+            }
+
+            rdr.Close();
+        }
+
 
         public void GetPlayerSpells(Session session)
         {
+            List<Spell> spellList = new List<Spell>();
             //Queries DB for all characters and their necessary attributes  to generate character select
             //Later should convert to a SQL stored procedure if possible.
             //Currently pulls ALL charcters, will pull characters based on accountID.
@@ -761,7 +793,7 @@ namespace ReturnHome.Database.SQL
                      //SpellID
                      rdr.GetInt32(0),
                      //AddedOrder
-                     rdr.GetInt32(1),
+                     rdr.GetByte(1),
                      //OnHotBar
                      rdr.GetInt32(2),
                      //WhereOnHotBar
@@ -792,15 +824,18 @@ namespace ReturnHome.Database.SQL
                      rdr.GetInt32(15),
                      //EqpRequirement
                      rdr.GetInt32(16),
+                     //SpellEffect
+                     rdr.GetInt64(17),
                      //SpellName
-                     rdr.GetString(17),
+                     rdr.GetString(18),
                      //SpellDesc
-                     rdr.GetString(18)
+                     rdr.GetString(19)
                 );
 
                 //Add these spells to player book
-                session.MyCharacter.MySpells.Add(thisSpell);
+                spellList.Add(thisSpell);
             }
+            session.MyCharacter.MySpellBook = new(session.MyCharacter, spellList);
 
             rdr.Close();
         }
@@ -992,6 +1027,12 @@ namespace ReturnHome.Database.SQL
             SecondCmd.Parameters.AddWithValue("playerFlags", serializedPlayerFlags);
             SecondCmd.Parameters.AddWithValue("completedQuests", "[]");
             SecondCmd.Parameters.AddWithValue("activeQuests", "[]");
+            SecondCmd.Parameters.AddWithValue("bound_World", (byte)charCreation.World);
+            SecondCmd.Parameters.AddWithValue("bound_X", charCreation.x);
+            SecondCmd.Parameters.AddWithValue("bound_Y", charCreation.y);
+            SecondCmd.Parameters.AddWithValue("bound_Z", charCreation.z);
+            SecondCmd.Parameters.AddWithValue("bound_Facing", charCreation.Facing);
+
             //Execute parameterized statement entering it into the DB
             SecondCmd.ExecuteNonQuery();
 

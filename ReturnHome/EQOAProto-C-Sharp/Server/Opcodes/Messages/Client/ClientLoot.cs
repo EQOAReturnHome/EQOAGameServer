@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.Managers;
@@ -39,6 +40,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             writer.Write(message.Opcode);
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
+
+            if (EntityManager.QueryForEntity(session.MyCharacter.Target, out Entity temp))
+                ((Actor)temp).corpse.ExitCorpse(session);
         }
     }
 }

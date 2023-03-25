@@ -54,6 +54,9 @@
         UpdateTrainingPoints = 0x001D,
         ClassMasteryServer = 0x1402,
         FactionStuff = 0xa7a,
+        SpellInformation = 0x00b1,
+        Damage = 0x00db,
+        SpellCoolDown = 0x00cd,
         CharacterModifiedDisconnect = 0x07d2,
         LoggedInFromAnotherLocationDisconnect = 0x07A4,
         BadLoginPassword = 0x0729,
@@ -85,6 +88,8 @@
         AdjustItemHP = 0x60,
         ErrorMessage = 0xCE, //Sends red error message to client in chat box
         InventoryFull = 0xD7,
+        LearnSpell = 0xB3,
+        ServerMemorizeSpell = 0xB4,
 
 
         //From client
@@ -109,6 +114,7 @@
         ClassMastery = 0x1401,
         ClientFaction = 0x0AC4,
         Attack = 0x0F,
+        CastSpell = 0x32,
         WhoList = 0x0E01,
         GroupInvite = 0x0625,
         LeaveGroup = 0x0623,
@@ -124,6 +130,8 @@
         CharacterInWorld = 0x14,
         CloseBlacksmithMenu = 0x63,
         RequestRepair = 0x62,
+        ClientMemorizeSpell = 0x33,
+        ClientRearrangeSpell = 0x3A,
     }
 
     public static class GameVersions

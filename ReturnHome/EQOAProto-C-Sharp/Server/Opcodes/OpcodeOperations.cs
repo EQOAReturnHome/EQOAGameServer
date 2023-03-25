@@ -59,6 +59,8 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.BlackSmithMenu, ClientInteractActor.InteractActor },
             { GameOpcode.CloseBlacksmithMenu, ClientBlackSmith.CloseBlackSmithMenu },
             { GameOpcode.RequestRepair, ClientBlackSmith.BlackSmithRepairGear },
+            { GameOpcode.CastSpell, ClientCastSpell.CastSpell },
+            { GameOpcode.ClientMemorizeSpell, ClientMemorizeSpell.MemorizeSpell },
 
 
         };

@@ -192,7 +192,14 @@ namespace ReturnHome.Server.Network.Managers
             GroupManager.DistributeGroupUpdates();
             // The session tick outbound processes pending actions and handles outgoing messages
             Parallel.ForEach(SessionHash, s => s?.TickOutbound());
-			
+
+            //Should abilities stuff be updated here? Works for now considering NPC's do nothing yet
+            foreach (Session session in SessionHash)
+            {
+                if (session.inGame)
+                    session.MyCharacter.MySpellBook.CheckCoolDownAndCast();
+            }
+
             return sessionCount;
         }
     }
