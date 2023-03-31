@@ -4,6 +4,7 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.Network;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -348,9 +349,9 @@ namespace ReturnHome.Server.EntityObject
             return this.EntityClass;
         }
 
-        public int GetLevel()
+        public static int GetLevel(Session session)
         {
-            return this.Level;
+            return session.MyCharacter.Level;
         }
 
 

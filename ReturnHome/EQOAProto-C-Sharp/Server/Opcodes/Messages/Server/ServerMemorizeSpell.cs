@@ -21,7 +21,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 
             Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.LearnSpell);
             BufferWriter writer = new BufferWriter(message.Span);
-            Spell testSpell = new Spell(10, 7, 0, 0, 1, 1, 23, 1, 1, 4, 1, 0, -1013573000, 638503769, 0, 0, 255, 0, "Blowjob", "The best spell in the game");
+            Spell testSpell = new Spell(10, 7, 0, 0, 1, 1, 23, 1, 1, 4, 1, 0, -1013573000, 638503769, 0, 0, 255,"Blowjob", "The best spell in the game");
 
             writer.Write(message.Opcode);
             writer.Write(1);

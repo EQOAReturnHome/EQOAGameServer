@@ -83,7 +83,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         {
             Spell spell = _spellHotbar.Span[hotBarLocation];
             //When we go to use a spell, perform range checks, LOS, and if target is attackable, if good start casting spell
-            if (spell.StartSpellCast(_e))
+            if (spell.StartSpellCast(_e, hotBarLocation))
             {
                 _spellCasting.Add(spell);
                 _spellCoolDown.Add(spell);

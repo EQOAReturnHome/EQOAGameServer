@@ -189,7 +189,7 @@ namespace ReturnHome.Server.EntityObject
         }
 
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
-        public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
+        public static void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
         {
             if (dialogue != null)
             {
@@ -283,7 +283,7 @@ namespace ReturnHome.Server.EntityObject
         }
 
         //Method for only sending multiple strings of dialogue.
-        public void SendMultiDialogue(Session session, LuaTable dialogue)
+        public static void SendMultiDialogue(Session session, LuaTable dialogue)
         {
             int choiceCounter = 0;
             List<string> multiDialogue = new List<string>();
@@ -456,7 +456,7 @@ namespace ReturnHome.Server.EntityObject
                 if (session.MyCharacter._newTrainingPoints > 0)
                 {
                     session.MyCharacter.PlayerTrainingPoints.EarnTrainingPoints(session.MyCharacter._newTrainingPoints);
-                    session.MyCharacter.SendDialogue(session, "You have received more training points!", null);
+                    Character.SendDialogue(session, "You have received more training points!", null);
 
                     //Since we are adding training points, we have to indicate a negative value to the client so it will add it to the total. it's weird...
                     ServerAdjustTrainingPoints.AdjustTrainingPoints(session, session.MyCharacter._newTrainingPoints * -1);

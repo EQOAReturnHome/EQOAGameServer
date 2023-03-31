@@ -7,22 +7,29 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Player;
 using System.ServiceModel.Channels;
 using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.EntityObject.Items;
+using System.Collections.Concurrent;
 
 namespace ReturnHome.Server.Managers
 {
 
     public static class SpellManager
     {
-        public static Lua lua = new Lua();
 
         static SpellManager()
         {
-            lua.LoadCLRPackage();
         }
+
+        private static readonly ConcurrentDictionary<int, SpellPattern> SpellList = new();
+
+        public static void AddSpell(SpellPattern Spell) => SpellList.TryAdd(Spell.SpellID, Spell);
+
+
+        public static SpellPattern GetSpellPattern(int SpellID) => SpellList[SpellID];
 
         public static void GetSpell(Session session, uint whereOnBar, uint target)
         {
-            Console.WriteLine($"Activating spell on bar slot: {whereOnBar}");
+            Console.WriteLine($"Activating spell on bar slot: {whereOnBar} - GetSpell");
             Spell spell = session.MyCharacter.MySpellBook.GetSpell(whereOnBar, session);
 
             int addedOrder = spell.AddedOrder;
@@ -43,34 +50,34 @@ namespace ReturnHome.Server.Managers
             //load lua CLR library
 
             //Create handles for the lua script to access some c# variables and methods
-            lua["CastSpell"] = ServerCastSpell.CastSpell;
-            lua["Damage"] = ServerDamage.Damage;
-            lua["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
-            lua["session"] = session;
-            lua["target"] = target;
-            lua["spellBookLoc"] = whereOnBar;
-            lua["spellID"] = spellID;
-            lua["addedOrder"] = addedOrder;
-            lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
+            LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
+            LuaState.State["Damage"] = ServerDamage.Damage;
+            LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
+            LuaState.State["session"] = session;
+            LuaState.State["target"] = target;
+            LuaState.State["spellBookLoc"] = whereOnBar;
+            LuaState.State["spellID"] = spellID;
+            LuaState.State["addedOrder"] = addedOrder;
+            LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
 
-            lua["boundWorld"] = session.MyCharacter.boundWorld;
-            lua["boundX"] = session.MyCharacter.boundX;
-            lua["boundY"] = session.MyCharacter.boundY;
-            lua["boundZ"] = session.MyCharacter.boundZ;
-            lua["boundFacing"] = session.MyCharacter.boundFacing;
+            LuaState.State["boundWorld"] = session.MyCharacter.boundWorld;
+            LuaState.State["boundX"] = session.MyCharacter.boundX;
+            LuaState.State["boundY"] = session.MyCharacter.boundY;
+            LuaState.State["boundZ"] = session.MyCharacter.boundZ;
+            LuaState.State["boundFacing"] = session.MyCharacter.boundFacing;
 
-            lua["playerWorld"] = session.MyCharacter.World;
-            lua["playerX"] = session.MyCharacter.x;
-            lua["playerY"] = session.MyCharacter.y;
-            lua["playerZ"] = session.MyCharacter.z;
-            lua["playerFacing"] = session.MyCharacter.Facing;
+            LuaState.State["playerWorld"] = session.MyCharacter.World;
+            LuaState.State["playerX"] = session.MyCharacter.x;
+            LuaState.State["playerY"] = session.MyCharacter.y;
+            LuaState.State["playerZ"] = session.MyCharacter.z;
+            LuaState.State["playerFacing"] = session.MyCharacter.Facing;
 
 
             //Call the Lua script found by the Directory Find above
-            lua.DoFile(file[0]);
+            LuaState.State.DoFile(file[0]);
 
                 //Call Lua function for initial interaction
-                LuaFunction callFunction = lua.GetFunction("startSpell");
+                LuaFunction callFunction = LuaState.State.GetFunction("startSpell");
             callFunction.Call();
 
 
@@ -99,34 +106,34 @@ namespace ReturnHome.Server.Managers
             //load lua CLR library
 
             //Create handles for the lua script to access some c# variables and methods
-            lua["CastSpell"] = ServerCastSpell.CastSpell;
-            lua["Damage"] = ServerDamage.Damage;
-            lua["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
-            lua["session"] = session;
-            lua["target"] = target;
-            lua["spellBookLoc"] = whereOnBar;
-            lua["spellID"] = spellID;
-            lua["addedOrder"] = addedOrder;
-            lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
+            LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
+            LuaState.State["Damage"] = ServerDamage.Damage;
+            LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
+            LuaState.State["session"] = session;
+            LuaState.State["target"] = target;
+            LuaState.State["spellBookLoc"] = whereOnBar;
+            LuaState.State["spellID"] = spellID;
+            LuaState.State["addedOrder"] = addedOrder;
+            LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
 
-            lua["boundWorld"] = session.MyCharacter.boundWorld;
-            lua["boundX"] = session.MyCharacter.boundX;
-            lua["boundY"] = session.MyCharacter.boundY;
-            lua["boundZ"] = session.MyCharacter.boundZ;
-            lua["boundFacing"] = session.MyCharacter.boundFacing;
+            LuaState.State["boundWorld"] = session.MyCharacter.boundWorld;
+            LuaState.State["boundX"] = session.MyCharacter.boundX;
+            LuaState.State["boundY"] = session.MyCharacter.boundY;
+            LuaState.State["boundZ"] = session.MyCharacter.boundZ;
+            LuaState.State["boundFacing"] = session.MyCharacter.boundFacing;
 
-            lua["playerWorld"] = session.MyCharacter.World;
-            lua["playerX"] = session.MyCharacter.x;
-            lua["playerY"] = session.MyCharacter.y;
-            lua["playerZ"] = session.MyCharacter.z;
-            lua["playerFacing"] = session.MyCharacter.Facing;
+            LuaState.State["playerWorld"] = session.MyCharacter.World;
+            LuaState.State["playerX"] = session.MyCharacter.x;
+            LuaState.State["playerY"] = session.MyCharacter.y;
+            LuaState.State["playerZ"] = session.MyCharacter.z;
+            LuaState.State["playerFacing"] = session.MyCharacter.Facing;
 
 
             //Call the Lua script found by the Directory Find above
-            lua.DoFile(file[0]);
+            LuaState.State.DoFile(file[0]);
 
             //Call Lua function for initial interaction
-            LuaFunction callFunction = lua.GetFunction("completeSpell");
+            LuaFunction callFunction = LuaState.State.GetFunction("completeSpell");
             callFunction.Call();
 
 

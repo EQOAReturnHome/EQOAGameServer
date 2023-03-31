@@ -43,7 +43,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         //Only items really needed are (int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide) rest of data could be acquired from scripting
         public Spell(int thisSpellID, byte thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide,
             int thisAbilityLevel, int thisUnk2, int thisUnk3, float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon,
-            int thisScope, int thisRecast, int thisEqpRequirement, long thisSpellEffect, string thisSpellName, string thisSpellDesc)
+            int thisScope, int thisRecast, int thisEqpRequirement,string thisSpellName, string thisSpellDesc)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;
@@ -64,7 +64,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             EqpRequirement = thisEqpRequirement;
             SpellName = thisSpellName;
             SpellDesc = thisSpellDesc;
-            SpellEffect = thisSpellEffect;
+            //SpellEffect = thisSpellEffect;
 
             Console.WriteLine(SpellName);
         }
@@ -96,7 +96,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             writer.Write((byte)0);
         }
 
-        public bool StartSpellCast(Entity e)
+        public bool StartSpellCast(Entity e, int hotbarlocation)
         {
             Console.WriteLine($"Starting spell cast.");
             //If Target is within expected spell range and required power is available and Spell isn't on cooldown (Any other considerations?), start casting the spell
@@ -108,7 +108,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                 if (e.isPlayer)
                 {
                     Console.WriteLine($"Casting spell");
-                    SpellManager.GetSpell(((Character)e).characterSession,0, e.Target);
+                    SpellManager.GetSpell(((Character)e).characterSession,(uint)hotbarlocation, e.Target);
 
                     //TODO: May need to be different here?
                     ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);

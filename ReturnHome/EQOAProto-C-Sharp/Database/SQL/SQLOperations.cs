@@ -395,6 +395,53 @@ namespace ReturnHome.Database.SQL
             return itemPatterns;
         }
 
+        public List<SpellPattern> SpellPatterns()
+        {
+            List<SpellPattern> spellPatterns = new();
+
+            using var cmd = new MySqlCommand("GetSpellPatterns", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                SpellPattern Spell = new(
+                     //SpellID
+                     rdr.GetInt32(0),
+                     //Spell Level 
+                     rdr.GetInt32(1),
+                     //Unk2
+                     rdr.GetInt32(2),
+                     //Unk3
+                     rdr.GetInt32(3),
+                     //Range
+                     rdr.GetInt32(4),
+                     //Cast Time
+                     rdr.GetInt32(5),
+                     //Power
+                     rdr.GetInt32(6),
+                     //IconColor
+                     rdr.GetInt32(7),
+                     //Icon 
+                     rdr.GetInt32(8),
+                     //Scope
+                     rdr.GetInt32(9),
+                     //Recast
+                     rdr.GetInt32(10),
+                     //Equip Requirement
+                     rdr.GetInt32(11),
+                     //Spell Name
+                     rdr.GetString(12),
+                     //Spell Description
+                     rdr.GetString(13));
+
+                spellPatterns.Add(Spell);
+            }
+
+            rdr.Close();
+            return spellPatterns;
+        }
+
 
         //Class to pull characters from DB via serverid
         public List<Character> AccountCharacters(Session session)
@@ -825,11 +872,11 @@ namespace ReturnHome.Database.SQL
                      //EqpRequirement
                      rdr.GetInt32(16),
                      //SpellEffect
-                     rdr.GetInt64(17),
+                     //rdr.GetInt64(17),
                      //SpellName
-                     rdr.GetString(18),
+                     rdr.GetString(17),
                      //SpellDesc
-                     rdr.GetString(19)
+                     rdr.GetString(18)
                 );
 
                 //Add these spells to player book

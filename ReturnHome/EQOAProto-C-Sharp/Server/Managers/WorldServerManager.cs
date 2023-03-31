@@ -8,6 +8,7 @@ using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Spells;
 
 namespace ReturnHome.Server.Managers
 {
@@ -29,11 +30,21 @@ namespace ReturnHome.Server.Managers
             CharacterSQL npcList = new();
 
             List<ItemPattern> myItemPatterns = npcList.ItemPatterns();
+
+            Console.WriteLine("Collecting Spell Patterns...");
+            List<SpellPattern> mySpellPatterns = npcList.SpellPatterns();
+
+
             npcList.CloseConnection();
             Console.WriteLine("Total Item Pattern's Acquired: " + myItemPatterns.Count);
             Console.WriteLine("Adding Item Patterns...");
             for (int i = 0; i < myItemPatterns.Count; ++i)
                 ItemManager.AddItem(myItemPatterns[i]);
+
+
+            Console.WriteLine("Adding Spell Patterns...");
+            for (int i = 0; i < mySpellPatterns.Count; ++i)
+                SpellManager.AddSpell(mySpellPatterns[i]);
 
             npcList = new();
             Console.WriteLine("Collecting Actors...");

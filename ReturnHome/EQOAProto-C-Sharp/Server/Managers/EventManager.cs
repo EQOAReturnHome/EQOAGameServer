@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using ReturnHome.Database.SQL;
 using System.Data;
 using ReturnHome.Server.EntityObject.Items;
+using System.ServiceModel.Channels;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ReturnHome.Server.Managers
 {
@@ -32,6 +34,21 @@ namespace ReturnHome.Server.Managers
             //sql.SavePlayerItems(mySession.MyCharacter);
 
             //ItemManager.GrantItem(mySession, 31010, 1);
+
+
+            LuaState.State["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
+            LuaState.State["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
+            LuaState.State["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);
+            LuaState.State["level"] = Entity.GetLevel(mySession);
+
+
+            LuaState.State["SendDialogue"] = Character.SendDialogue;
+            LuaState.State["SendMultiDialogue"] = Character.SendMultiDialogue;
+            LuaState.State["mySession"] = mySession;
+            LuaState.State["thisNPC"] = mySession.MyCharacter.Target;
+            LuaState.State["BindPlayer"] = mySession.MyCharacter.SetPlayerBinding;
+
+
 
 
 
@@ -59,9 +76,9 @@ namespace ReturnHome.Server.Managers
 
 
             //Create new lua object
-            Lua lua = new Lua();
+            //Lua lua = new Lua();
             //load lua CLR library 
-            lua.LoadCLRPackage();
+            //lua.LoadCLRPackage();
             //If the op code to be sent is a dialogue box make sure we capture dialogue choices 
             if (opcode == GameOpcode.DialogueBoxOption)
             {
@@ -69,64 +86,18 @@ namespace ReturnHome.Server.Managers
                 string choiceOption = mySession.MyCharacter.MyDialogue.diagOptions[(int)mySession.MyCharacter.MyDialogue.choice];
 
                 //pass the string choice to the Lua as choice
-                lua["choice"] = choiceOption;
+                LuaState.State["choice"] = choiceOption;
                 Console.WriteLine(choiceOption);
             }
-            //Create handles for the lua script to access some c# variables and methods
-            lua["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
-            lua["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
-            lua["AddQuest"] = Quest.AddQuest;
-            lua["DeleteQuest"] = Quest.DeleteQuest;
-            lua["SendDialogue"] = mySession.MyCharacter.SendDialogue;
-            lua["SendMultiDialogue"] = mySession.MyCharacter.SendMultiDialogue;
-            lua["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
-            lua["StartQuest"] = Quest.StartQuest;
-            lua["ContinueQuest"] = Quest.ContinueQuest;
-            lua["CompleteQuest"] = Quest.CompleteQuest;
-            lua["CheckQuestItem"] = Character.CheckIfQuestItemInInventory;
-            lua["mySession"] = mySession;
-            lua["GenerateChatMessage"] = Opcodes.Chat.ChatMessage.GenerateClientSpecificChat;
-            lua["GrantXP"] = Character.GrantXP;
-            lua["GetWorld"] = Utility_Funcs.GetEnumObjectByValue<World>;
-            lua["GetClass"] = Utility_Funcs.GetEnumObjectByValue<Class>;
-            lua["GetRace"] = Utility_Funcs.GetEnumObjectByValue<Race>;
-            lua["GetHumanType"] = Utility_Funcs.GetEnumObjectByValue<HumanType>;
-            lua["UpdateAnim"] = Entity.UpdateAnim;
-            //wont actually return npc object to update, only npcid
-            lua["thisNPC"] = mySession.MyCharacter.Target;
-            lua["GrantItem"] = ItemManager.GrantItem;
-            lua["TurnInItem"] = ItemManager.UpdateQuantity;
-            lua["RemoveTunar"] = Entity.RemoveTunar;
-            lua["AddTunar"] = Entity.AddTunar;
-            lua["BindPlayer"] = mySession.MyCharacter.SetPlayerBinding;
-
-
-            lua["boundWorld"] = mySession.MyCharacter.boundWorld;
-            lua["boundX"] = mySession.MyCharacter.boundX;
-            lua["boundY"] = mySession.MyCharacter.boundY;
-            lua["boundZ"] = mySession.MyCharacter.boundZ;
-            lua["boundFacing"] = mySession.MyCharacter.boundFacing;
-
-            lua["playerWorld"] = mySession.MyCharacter.World;
-            lua["playerX"] = mySession.MyCharacter.x;
-            lua["playerY"] = mySession.MyCharacter.y;
-            lua["playerZ"] = mySession.MyCharacter.z;
-            lua["playerFacing"] = mySession.MyCharacter.Facing;
-
-
-            lua["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
-            lua["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
-            lua["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);
-            lua["level"] = mySession.MyCharacter.Level;
 
             //Call the Lua script found by the Dictionary Find above
-            lua.DoFile(file[0]);
+            LuaState.State.DoFile(file[0]);
 
             //switch to find correct lua function based on op code from NPC Interact 0x04
             if (opcode == GameOpcode.DialogueBox || opcode == GameOpcode.DialogueBoxOption)
             {
                 //Call Lua function for initial interaction
-                LuaFunction callFunction = lua.GetFunction("event_say");
+                LuaFunction callFunction = LuaState.State.GetFunction("event_say");
                 mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
                 callFunction.Call();
             }
@@ -146,13 +117,16 @@ namespace ReturnHome.Server.Managers
                 return myString;
             }
 
-            //Create new lua object
-            Lua lua = new Lua();
-            //load lua CLR library 
-            lua.LoadCLRPackage();
-            lua.DoFile(file[0]);
 
-            myString = (string)lua["merchantDialogue"];
+            LuaState.State.DoFile(file[0]);
+
+            //Create new lua object
+            //Lua lua = new Lua();
+            //load lua CLR library 
+            //lua.LoadCLRPackage();
+            //lua.DoFile(file[0]);
+
+            myString = (string)LuaState.State["merchantDialogue"];
 
             if (string.IsNullOrEmpty(myString))
             {

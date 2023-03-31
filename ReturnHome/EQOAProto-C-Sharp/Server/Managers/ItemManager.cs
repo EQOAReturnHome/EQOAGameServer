@@ -5,6 +5,10 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Database.SQL;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.Opcodes.Messages.Server;
+using System.IO;
+using NLua;
 
 namespace ReturnHome.Server.Managers
 {
@@ -51,6 +55,45 @@ namespace ReturnHome.Server.Managers
             if (Character.CheckIfItemInInventory(mySession, itemID, out byte key, out Item newItem))
                 mySession.MyCharacter.Inventory.UpdateQuantity(key, qty);
 
+
+        }
+
+        public static void UseItem(int itemID, Session session)
+        {
+            //Console.WriteLine($"Activating item with itemID {itemID}");
+            ItemPattern item = GetItemPattern(itemID);
+            Console.WriteLine($"This should be {item.ItemName}");
+
+            //Find Lua script recursively through scripts directory by class
+            string[] file = Directory.GetFiles("../../../Scripts", item.ItemName + ".lua", SearchOption.AllDirectories);
+
+
+            //TODO: work around for a spell with no scripts etc? Investigate more eventually
+            if (file.Length < 1 || file == null)
+                return;
+
+            //Create new lua object
+            //Lua lua = new Lua();
+
+            //load lua CLR library
+
+            //Create handles for the lua script to access some c# variables and methods
+            LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
+            LuaState.State["Damage"] = ServerDamage.Damage;
+            LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
+            LuaState.State["session"] = session;
+            LuaState.State["target"] = session.MyCharacter.Target;
+            LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
+            LuaState.State["LearnSpell"] = ServerLearnSpell.LearnSpell;
+            LuaState.State["GetSpell"] = SpellManager.GetSpellPattern;
+
+
+            //Call the Lua script found by the Directory Find above
+            LuaState.State.DoFile(file[0]);
+
+            //Call Lua function for initial interaction
+            LuaFunction callFunction = LuaState.State.GetFunction("useItem");
+            callFunction.Call();
 
         }
     }
