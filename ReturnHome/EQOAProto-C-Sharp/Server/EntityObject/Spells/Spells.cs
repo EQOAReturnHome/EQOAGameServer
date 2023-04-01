@@ -11,29 +11,29 @@ namespace ReturnHome.Server.EntityObject.Spells
     //
     public class Spell
     {
-        public bool coolDownCompleted { get; private set; } = true;
-        public bool spellCastingCompleted { get; private set; } = true;
-        public long SpellLastUsed { get; private set; }
-        public int SpellID { get; private set; }
-        public byte AddedOrder { get; private set; }
-        public int OnHotBar { get; private set; }
-        public int WhereOnHotBar { get; private set; }
-        public int Unk1 { get; private set; }
-        public int ShowHide { get; private set; }
-        public int AbilityLevel { get; private set; }
-        public int Unk2 { get; private set; }
-        public int Unk3 { get; private set; }
-        public float SpellRange { get; private set; }
-        public int CastTime { get; private set; }
-        public int RequiredPower { get; private set; }
-        public int IconColor { get; private set; }
-        public int Icon { get; private set; }
-        public int Scope { get; private set; }
-        public int Recast { get; private set; }
-        public int EqpRequirement { get; private set; }
-        public string SpellName { get; private set; }
-        public string SpellDesc { get; private set; }
-        public long SpellEffect { get; private set; }
+        public bool coolDownCompleted { get;  set; } = true;
+        public bool spellCastingCompleted { get;  set; } = true;
+        public long SpellLastUsed { get;  set; }
+        public int SpellID { get;  set; }
+        public byte AddedOrder { get; set; }
+        public int OnHotBar { get;  set; }
+        public int WhereOnHotBar { get;  set; }
+        public int Unk1 { get;  set; }
+        public int ShowHide { get;  set; }
+        public int AbilityLevel { get;  set; }
+        public int Unk2 { get;  set; }
+        public int Unk3 { get;  set; }
+        public float SpellRange { get;  set; }
+        public int CastTime { get;  set; }
+        public int RequiredPower { get;  set; }
+        public int IconColor { get;  set; }
+        public int Icon { get;  set; }
+        public int Scope { get;  set; }
+        public int Recast { get;  set; }
+        public int EqpRequirement { get;  set; }
+        public string SpellName { get;  set; }
+        public string SpellDesc { get;  set; }
+        public long SpellEffect { get;  set; }
 
         public Spell()
         { }

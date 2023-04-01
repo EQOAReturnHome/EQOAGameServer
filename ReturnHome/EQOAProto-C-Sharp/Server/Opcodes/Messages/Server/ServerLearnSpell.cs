@@ -21,9 +21,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
         {
             Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.LearnSpell);
             BufferWriter writer = new BufferWriter(message.Span);
-            //Spell testSpell = new Spell(179, 1, 0, 0, 1, 1, 13, 1, 1, 1, 1, 0, 486870879, 638503769, 0, 0, 255,"Kick", "An attack that allows you to kick your enemy.");
-            //Spell testSpell = new Spell(2, 3, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, -1809115846, -568605204, 0, 0, 255, "Werewolf Form", "Assume the form of the werewolf.");
-            //Spell testSpell = new Spell(3, 4, 0, 0, 1, 1, 11, 1, 1, 2, 1, 0, 486870879, -49534593, 1, 0, 255, 0, "Provoke", "Allows you to gain the attention of your enemy.");
             writer.Write(message.Opcode);
             writer.Write(1);
             writer.Write(1);

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
@@ -15,6 +17,8 @@ namespace ReturnHome.Server.EntityObject.Spells
 
         //Use this to track player spell hotbar eventually
         private Memory<Spell> _spellHotbar;
+
+
 
         private List<Spell> _spellCasting = new();
         private List<int> _spellCastingIndex = new();
@@ -45,6 +49,22 @@ namespace ReturnHome.Server.EntityObject.Spells
             }
         }
 
+        public Spell GetSpellFromBook(int AddedOrder)
+        {
+            Spell spell = new Spell();
+            foreach(Spell foundSpell in _spellList)
+            {
+                if(foundSpell.AddedOrder == AddedOrder)
+                {
+                    Console.WriteLine($"Found spell with added with name {foundSpell.SpellName}");
+                    return foundSpell;
+                }
+            }
+            
+            Console.WriteLine($"The spell name being learned is {spell.SpellName}");
+            return spell;
+        }
+
 
         public int GetSpellID(uint hotbarLocation, Session session)
         {
@@ -71,11 +91,20 @@ namespace ReturnHome.Server.EntityObject.Spells
         {
             //Check Level, Race and Class to make sure it's acceptable to have this spell from said scroll
             if (true)
-                //AddSpell to Spell book by doing something like spell.AddedOrder = _spellList.Count; _SpellList.Add(spell);
-                return true;
+                //AddSpell to Spell book by doing something like
+                //
+                spell.AddedOrder = (byte)(_spellList.Count);
+                _spellList.Add(spell);
+            return true;
 
             //If it fails, return false indicating we cannot add this spell
             return false;
+        }
+
+        public void AddSpellToHotbar(int hotbarSlot, Spell spell)
+        {
+            Span<Spell> temp = _spellHotbar.Span;            
+            temp[hotbarSlot] = spell;
         }
 
         //Are we passing AddedOrder here or SpellID? SpellID might be difficult

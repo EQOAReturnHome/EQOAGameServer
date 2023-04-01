@@ -78,14 +78,8 @@ namespace ReturnHome.Server.Managers
             //load lua CLR library
 
             //Create handles for the lua script to access some c# variables and methods
-            LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
-            LuaState.State["Damage"] = ServerDamage.Damage;
-            LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
             LuaState.State["session"] = session;
             LuaState.State["target"] = session.MyCharacter.Target;
-            LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
-            LuaState.State["LearnSpell"] = ServerLearnSpell.LearnSpell;
-            LuaState.State["GetSpell"] = SpellManager.GetSpellPattern;
 
 
             //Call the Lua script found by the Directory Find above

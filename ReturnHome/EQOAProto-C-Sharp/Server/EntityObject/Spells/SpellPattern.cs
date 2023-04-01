@@ -53,7 +53,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             writer.Write7BitEncodedInt64(session.MyCharacter.MySpellBook.Count);
             writer.Write7BitEncodedInt64(0);
             writer.Write7BitEncodedInt64(0);
-            writer.Write7BitEncodedInt64(1);
+            writer.Write7BitEncodedInt64(0);
             writer.Write7BitEncodedInt64(1);
             writer.Write7BitEncodedInt64(SpellLevel);
             writer.Write7BitEncodedInt64(Unk2);

@@ -10,6 +10,7 @@ using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
 using ReturnHome.Server.Network;
 using System.ServiceModel.Channels;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ReturnHome.Server.Managers
 {
@@ -44,6 +45,14 @@ namespace ReturnHome.Server.Managers
             State["TurnInItem"] = ItemManager.UpdateQuantity;
             State["RemoveTunar"] = Entity.RemoveTunar;
             State["AddTunar"] = Entity.AddTunar;
+
+            State["CastSpell"] = ServerCastSpell.CastSpell;
+            State["Damage"] = ServerDamage.Damage;
+            State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
+            State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
+            State["ServerLearnSpell"] = ServerLearnSpell.LearnSpell;
+            State["LearnSpell"] = SpellManager.LearnSpell;
+            State["GetSpell"] = SpellManager.GetSpellPattern;
 
 
 

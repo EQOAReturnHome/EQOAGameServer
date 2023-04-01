@@ -27,6 +27,40 @@ namespace ReturnHome.Server.Managers
 
         public static SpellPattern GetSpellPattern(int SpellID) => SpellList[SpellID];
 
+
+        public static void LearnSpell(Session session, SpellPattern Spell)
+        {
+            Console.Write("Trying to learn spell");
+            Spell newSpell = CreateSpell(Spell);
+            newSpell.AddedOrder = (byte)session.MyCharacter.MySpellBook.Count;
+            session.MyCharacter.MySpellBook.AddSpellToBook(newSpell);
+            ServerLearnSpell.LearnSpell(session, GetSpellPattern(Spell.SpellID));
+
+        }
+
+        public static Spell CreateSpell(SpellPattern pattern)
+        {
+            Spell newSpell = new Spell();
+            newSpell.SpellLastUsed = 0;
+            newSpell.SpellID = pattern.SpellID;
+            newSpell.Unk1 = 0;
+            newSpell.ShowHide = 1;
+            newSpell.AbilityLevel = pattern.SpellLevel;
+            newSpell.Unk2 = 0;
+            newSpell.Unk3 = 0;
+            newSpell.SpellRange = pattern.Range;
+            newSpell.CastTime = pattern.CastTime;
+            newSpell.RequiredPower = pattern.Power;
+            newSpell.IconColor = pattern.IconColor;
+            newSpell.Icon = pattern.Icon;
+            newSpell.Scope = pattern.Scope;
+            newSpell.Recast = pattern.Recast;
+            newSpell.EqpRequirement = pattern.EquipReq;
+            newSpell.SpellName = pattern.SpellName;
+            newSpell.SpellDesc = pattern.SpellDescription;
+            return newSpell;
+        }
+
         public static void GetSpell(Session session, uint whereOnBar, uint target)
         {
             Console.WriteLine($"Activating spell on bar slot: {whereOnBar} - GetSpell");
