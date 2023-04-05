@@ -9,6 +9,7 @@ using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using System.IO;
 using NLua;
+using System.ServiceModel.Channels;
 
 namespace ReturnHome.Server.Managers
 {
@@ -64,8 +65,11 @@ namespace ReturnHome.Server.Managers
             ItemPattern item = GetItemPattern(itemID);
             Console.WriteLine($"This should be {item.ItemName}");
 
+            string itemName = item.ItemName.Replace(" ", "_");
+
+
             //Find Lua script recursively through scripts directory by class
-            string[] file = Directory.GetFiles("../../../Scripts", item.ItemName + ".lua", SearchOption.AllDirectories);
+            string[] file = Directory.GetFiles("../../../Scripts", itemName + ".lua", SearchOption.AllDirectories);
 
 
             //TODO: work around for a spell with no scripts etc? Investigate more eventually

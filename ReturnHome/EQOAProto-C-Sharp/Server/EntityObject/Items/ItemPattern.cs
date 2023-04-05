@@ -2,32 +2,32 @@
 {
     public class ItemPattern
     {
-        public int ItemID { get; private set; }
-        public uint ItemCost { get; private set; }
-        public int Unk1 { get; private set; }
-        public int ItemIcon { get; private set; }
-        public int Unk2 { get; private set; }
-        public ItemSlot itemSlot { get; private set; }
-        public int Unk3 { get; private set; }
-        public ItemFlags Flags { get; private set; }
-        public int Unk4 { get; private set; }
-        public int Attacktype { get; private set; }
-        public int Weapondamage { get; private set; }
-        public int Unk5 { get; private set; }
-        public int Levelreq { get; private set; }
-        public int Maxstack { get; private set; }
-        public int Maxhp { get; private set; }
-        public int Duration { get; private set; }
-        public int Classuse { get; private set; }
-        public int Raceuse { get; private set; }
-        public int Procanim { get; private set; }
-        public int Unk6 { get; private set; }
-        public string ItemName { get; private set; }
-        public string ItemDesc { get; private set; }
-        public int Model { get; private set; }
-        public uint Color { get; private set; }
+        public int ItemID { get;  set; }
+        public uint ItemCost { get;  set; }
+        public int Unk1 { get;  set; }
+        public int ItemIcon { get;  set; }
+        public int Unk2 { get;  set; }
+        public ItemSlot itemSlot { get;  set; }
+        public int Unk3 { get;  set; }
+        public ItemFlags Flags { get;  set; }
+        public int Unk4 { get;  set; }
+        public int Attacktype { get;  set; }
+        public int Weapondamage { get;  set; }
+        public int Unk5 { get;  set; }
+        public int Levelreq { get;  set; }
+        public int Maxstack { get;  set; }
+        public int Maxhp { get;  set; }
+        public int Duration { get;  set; }
+        public int Classuse { get;  set; }
+        public int Raceuse { get;  set; }
+        public int Procanim { get;  set; }
+        public int Unk6 { get;  set; }
+        public string ItemName { get;  set; }
+        public string ItemDesc { get;  set; }
+        public int Model { get;  set; }
+        public uint Color { get;  set; }
         public int[] Stats;
-        public int StatSize { get; private set; }
+        public int StatSize { get;  set; }
 
         public bool IsLore => (Flags & ItemFlags.Lore) == ItemFlags.Lore;
         public bool IsNoRent => (Flags & ItemFlags.NoRent) == ItemFlags.NoRent;

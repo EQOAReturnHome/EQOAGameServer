@@ -1,6 +1,7 @@
 local ch = tostring(choice)
 local quests = require('Scripts/FreeportQuests')
 local items = require('Scripts/items')
+
 function event_say()
     local diagOptions = {}
     local questText = ""

@@ -116,7 +116,7 @@ namespace ReturnHome.Server.EntityObject.Spells
 
                 }
                 //Keep this commented out for now or you run out of power
-                //e.CurrentPower -= RequiredPower;
+                e.CurrentPower -= RequiredPower;
                 SpellLastUsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 coolDownCompleted = false;
                 spellCastingCompleted = false;

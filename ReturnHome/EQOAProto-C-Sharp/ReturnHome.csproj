@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Scripts\bobble_by_water\Delwin_Stitchfinger.lua" />
+    <None Remove="Scripts\character_defaults.lua" />
     <None Remove="Scripts\freeport\FreeportQuests.lua" />
     <None Remove="Scripts\freeport\Magician_start.lua" />
     <None Remove="Scripts\freeport\Quests.json" />
@@ -66,6 +67,7 @@
     <None Remove="Scripts\QuestHelper.lua" />
     <None Remove="Scripts\Quests.json" />
     <None Remove="Scripts\rivervale\Marlo_Steeltoe.lua" />
+    <None Remove="Scripts\spells.lua" />
     <None Remove="Scripts\Spells\179.lua" />
     <None Remove="Scripts\Temby\Dagget_Klem.lua" />
     <None Remove="Scripts\wyndhaven\coachman_brumley.lua" />
@@ -73,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Scripts\bobble_by_water\Delwin_Stitchfinger.lua" />
+    <Content Include="Scripts\character_defaults.lua" />
     <Content Include="Scripts\FreeportQuests.lua" />
     <Content Include="Scripts\freeport\FreeportQuests.lua" />
     <Content Include="Scripts\freeport\Magician_start.lua" />
@@ -83,6 +86,7 @@
     <Content Include="Scripts\QuestHelper.lua" />
     <Content Include="Scripts\rivervale\Mario_Steeltoe.lua" />
     <Content Include="Scripts\rivervale\Marlo_Steeltoe.lua" />
+    <Content Include="Scripts\spells.lua" />
     <Content Include="Scripts\Spells\179.lua" />
     <Content Include="Scripts\Temby\Dagget_Klem.lua" />
     <Content Include="Scripts\wyndhaven\coachman_brumley.lua" />

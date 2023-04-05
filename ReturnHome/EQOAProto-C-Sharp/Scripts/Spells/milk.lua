@@ -15,5 +15,5 @@ end
 
 function useItem()
     print("Using Milk")
-    LearnSpell(session, GetSpell(1))
+    LearnSpell(session, GetSpell(1571))
 end

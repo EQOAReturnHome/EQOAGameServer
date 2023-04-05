@@ -9,7 +9,7 @@
         Dwarf     = 4,
         Troll     = 5,
         Barbarian = 6,
-        Halfing   = 7,
+        Halfling   = 7,
         Erudite   = 8,
         Ogre      = 9
     }

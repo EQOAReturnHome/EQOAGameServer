@@ -20,11 +20,34 @@ namespace ReturnHome.Server.Managers
 {
     public static class EventManager
     {
-        //private static readonly Lua lua = new();
 
         static EventManager()
         {
-            //lua.LoadCLRPackage();
+        }
+
+        public static void CreatePlayerDefaults(int serverID, Character charCreation)
+        {
+
+            CharacterSQL charDefaults = new CharacterSQL();
+
+            Console.WriteLine("Creating player defaults");
+            
+            string[] file = Directory.GetFiles("../../../Scripts", "character_defaults.lua", SearchOption.AllDirectories);
+
+
+            LuaState.State["race"] = Entity.GetRace(charCreation.EntityRace);
+            LuaState.State["class"] = Entity.GetClass(charCreation.EntityClass);
+            LuaState.State["humanType"] = Entity.GetHumanType(charCreation.EntityHumanType);
+            LuaState.State["AddDefaultSpell"] = charDefaults.CreateDefaultSpell;
+            LuaState.State["AddDefaultGear"] = charDefaults.CreateDefaultGear;
+            LuaState.State["serverID"] = serverID;
+
+            LuaState.State.DoFile(file[0]);
+
+            LuaFunction callFunction = LuaState.State.GetFunction("CharacterDefaults");
+            callFunction.Call();
+
+
         }
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
@@ -73,12 +96,6 @@ namespace ReturnHome.Server.Managers
                     return;
             }
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
-
-
-            //Create new lua object
-            //Lua lua = new Lua();
-            //load lua CLR library 
-            //lua.LoadCLRPackage();
             //If the op code to be sent is a dialogue box make sure we capture dialogue choices 
             if (opcode == GameOpcode.DialogueBoxOption)
             {
@@ -119,12 +136,6 @@ namespace ReturnHome.Server.Managers
 
 
             LuaState.State.DoFile(file[0]);
-
-            //Create new lua object
-            //Lua lua = new Lua();
-            //load lua CLR library 
-            //lua.LoadCLRPackage();
-            //lua.DoFile(file[0]);
 
             myString = (string)LuaState.State["merchantDialogue"];
 

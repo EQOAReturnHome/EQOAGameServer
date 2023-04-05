@@ -78,11 +78,6 @@ namespace ReturnHome.Server.Managers
             if (file.Length < 1 || file == null)
                 return;
 
-            //Create new lua object
-            //Lua lua = new Lua();
-
-            //load lua CLR library
-
             //Create handles for the lua script to access some c# variables and methods
             LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
             LuaState.State["Damage"] = ServerDamage.Damage;
@@ -119,7 +114,6 @@ namespace ReturnHome.Server.Managers
 
         public static void CastSpell(Session session, uint whereOnBar, uint target)
         {
-            Console.WriteLine($"Activating spell on bar slot: {whereOnBar}");
             Spell spell = session.MyCharacter.MySpellBook.GetSpell(whereOnBar, session);
 
             int addedOrder = spell.AddedOrder;
@@ -133,11 +127,6 @@ namespace ReturnHome.Server.Managers
             //TODO: work around for a spell with no scripts etc? Investigate more eventually
             if (file.Length < 1 || file == null)
                 return;
-
-            //Create new lua object
-            //Lua lua = new Lua();
-
-            //load lua CLR library
 
             //Create handles for the lua script to access some c# variables and methods
             LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;

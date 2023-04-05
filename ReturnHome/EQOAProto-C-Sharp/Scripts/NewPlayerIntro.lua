@@ -3,6 +3,7 @@ function event_say()
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
+    local multiDialogue = {}
     --Human
     if (race == "Human") then
         --Freeport/Eastern

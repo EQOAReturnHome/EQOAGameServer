@@ -19,15 +19,12 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             BufferReader reader = new(clientPacket.message.Span);
 
             //First 4 bytes is targeting counter, just discarding for now
-            _ = reader.Read<uint>();
-            int spell = reader.Read<byte>(); // WhereOnHotBar Value
-            int hotbarSlot = reader.Read<byte>();
+            uint _counter = reader.Read<uint>();
+            byte spell = reader.Read<byte>(); // WhereOnHotBar Value
+            byte hotbarSlot = reader.Read<byte>();
 
-
-            Console.WriteLine($"Spell in slot {spell} of spellbook on hotbar slot {hotbarSlot}");
-
-            session.MyCharacter.MySpellBook.AddSpellToHotbar(hotbarSlot, session.MyCharacter.MySpellBook.GetSpellFromBook(spell));
-            ServerMemorizeSpell.MemorizeSpell(session, session.MyCharacter.MySpellBook.GetSpellFromBook(spell));
+            session.MyCharacter.MySpellBook.AddSpellToHotbar(hotbarSlot, session.MyCharacter.MySpellBook.GetSpellFromBook(spell, session));
+            ServerMemorizeSpell.MemorizeSpell(session, _counter, spell, hotbarSlot);
         }
     }
 }

@@ -14,6 +14,7 @@ using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Spells;
+using System.Numerics;
 
 namespace ReturnHome.Database.SQL
 {
@@ -1011,6 +1012,47 @@ namespace ReturnHome.Database.SQL
             return TestCharName;
         }
 
+        public void CreateDefaultSpell(int playerID, int spellID, int addedOrder)
+        {
+            Console.WriteLine($"Writing player spell {spellID}");
+            //Create new sql connection calling stored proc to update data
+            using var Cmd = new MySqlCommand("CreateDefaultSpell", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("playerID", playerID);
+            Cmd.Parameters.AddWithValue("spellID", spellID);
+            Cmd.Parameters.AddWithValue("addedOrder", addedOrder);
+            Cmd.Parameters.AddWithValue("onHotBar", 0);
+            Cmd.Parameters.AddWithValue("whereOnBar", 0);
+            Cmd.Parameters.AddWithValue("unk1", 1);
+            Cmd.Parameters.AddWithValue("showHide", 1);
+
+            Cmd.ExecuteNonQuery();
+        }
+
+        public void CreateDefaultGear(int playerID, int itemID, int qty)
+        {
+
+            ItemPattern item = ItemManager.GetItemPattern(itemID);
+            Console.WriteLine("Adding default gear");
+            //Create new sql connection calling stored proc to update data
+            using var Cmd = new MySqlCommand("AddPlayerItem", con);
+            Cmd.CommandType = CommandType.StoredProcedure;
+
+            Cmd.Parameters.AddWithValue("playerID", playerID);
+            Cmd.Parameters.AddWithValue("ID", ItemManager.nextItemID);
+            ItemManager.nextItemID++;
+            Cmd.Parameters.AddWithValue("stack", qty);
+            Cmd.Parameters.AddWithValue("remHP", item.Maxhp);
+            Cmd.Parameters.AddWithValue("remCharge", 0);
+            Cmd.Parameters.AddWithValue("pattern", itemID);
+            Cmd.Parameters.AddWithValue("equip_location", -1);
+            Cmd.Parameters.AddWithValue("loc", -1);
+            Cmd.Parameters.AddWithValue("listnum", 0);
+
+            Cmd.ExecuteNonQuery();
+        }
+
         //Method to create new character for player's account
         public void CreateCharacter(Session session, Character charCreation)
         {
@@ -1122,6 +1164,8 @@ namespace ReturnHome.Database.SQL
                 ThirdCmd.Parameters.AddWithValue("smessage", charCreation.MyHotkeys[i].SMessage);
                 ThirdCmd.ExecuteNonQuery();
             }
+
+            EventManager.CreatePlayerDefaults(serverID, charCreation);
 
             //Don't close connection because we have character list generated next
             List<Character> MyCharacterList = AccountCharacters(session);

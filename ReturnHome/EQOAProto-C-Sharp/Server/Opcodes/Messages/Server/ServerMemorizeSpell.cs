@@ -14,18 +14,18 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     public static class ServerMemorizeSpell
     {
-        public static void MemorizeSpell(Session session, Spell spell)
+        public static void MemorizeSpell(Session session, uint counter, byte bookSlot, byte hotbarSlot)
         {
 
             //0xB4 = int, byte, byte
 
-            Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.LearnSpell);
+            Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.ServerMemorizeSpell);
             BufferWriter writer = new BufferWriter(message.Span);
 
             writer.Write(message.Opcode);
-            writer.Write(1);
-            writer.Write(1);
-            spell.DumpSpell(ref writer);
+            writer.Write(counter);
+            writer.Write(bookSlot);
+            writer.Write(hotbarSlot);
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
