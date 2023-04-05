@@ -53,6 +53,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         {
             Spell spell = new Spell();
             //AddedOrder = _spellList.Count();
+            AddedOrder = 0;
             Console.WriteLine($"Added order is {AddedOrder}");
             foreach (Spell foundSpell in session.MyCharacter.MySpellBook._spellList)
             {

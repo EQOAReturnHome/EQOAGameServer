@@ -43,7 +43,7 @@ services:
     container_name: gohttpserver
     image: "druwadi13/gohttpserver"
     volumes:
-      - C:/Users/TargetAcquired/source/repos/EQOAReturnHome:/app/public
+      - $PWD:/app/public
     ports:
       - "7000:7000"
     networks:

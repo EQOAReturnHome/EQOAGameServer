@@ -1,11 +1,14 @@
 local ch = tostring(choice)
 
-function event_say()
+local function event_say()
+local npcDialogue = ""
+local diagOptions = {}
     if (ch:find("bind")) then
-        print("In the bind")
         npcDialogue = "Your soul will now return here, playerName."
-        BindPlayer()
+        print("binding")
+        --BindPlayer()
     elseif (ch:find("Not")) then
+        print("Not binding")
         npcDialogue = "Please come back if you change your mind."
     else
         npcDialogue = "Would you like me to bind your soul to this location?"

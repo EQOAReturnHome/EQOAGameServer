@@ -104,7 +104,6 @@ namespace ReturnHome.Server.Managers
 
                 //pass the string choice to the Lua as choice
                 LuaState.State["choice"] = choiceOption;
-                Console.WriteLine(choiceOption);
             }
 
             //Call the Lua script found by the Dictionary Find above
