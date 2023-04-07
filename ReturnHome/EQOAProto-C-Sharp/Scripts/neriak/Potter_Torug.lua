@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "Guud! Me' gotta sell deez' jugs!"
 SendDialogue(mySession, npcDialogue, diagOptions)

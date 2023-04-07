@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "Where would you like for me to send you?"
 SendDialogue(mySession, npcDialogue, diagOptions)

@@ -7,10 +7,10 @@ local playerCoaches = {
 }
 
 local dialogueOptions = {}
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
    if(GetPlayerFlags(mySession, "hazinak_good_coach") == "true") then
-      if (ch:find("Oasis")) then
+      if (choice:find("Oasis")) then
          TeleportPlayer(mySession,GetWorld(coaches.oasis.world),coaches.oasis.x,coaches.oasis.y,coaches.oasis.z,coaches.oasis.facing)
       else
          npcDialogue = "Where would you like to go?"
@@ -22,11 +22,11 @@ function event_say()
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       end
    else
-      if (ch:find("Yes")) then
+      if (choice:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
          SetPlayerFlags(mySession, "hazinak_good_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
-      elseif (ch:find("No")) then
+      elseif (choice:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       else

@@ -9,16 +9,16 @@ local playerCoaches = {
 }
 
 local dialogueOptions = {}
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
    if(GetPlayerFlags(mySession, "rivervale_coach") == "true") then
-      if (ch:find("Moradhim")) then
+      if (choice:find("Moradhim")) then
          TeleportPlayer(mySession,GetWorld(coaches.moradhim.world),coaches.moradhim.x,coaches.moradhim.y,coaches.moradhim.z,coaches.moradhim.facing)
-      elseif (ch:find("Fayspires")) then
+      elseif (choice:find("Fayspires")) then
          TeleportPlayer(mySession,GetWorld(coaches.fayspires.world),coaches.fayspires.x,coaches.fayspires.y,coaches.fayspires.z,coaches.fayspires.facing)
-      elseif (ch:find("Bobble")) then
+      elseif (choice:find("Bobble")) then
          TeleportPlayer(mySession,GetWorld(coaches.bobble_by_water.world),coaches.bobble_by_water.x,coaches.bobble_by_water.y,coaches.bobble_by_water.z,coaches.bobble_by_water.facing)
-      elseif (ch:find("Highpass")) then
+      elseif (choice:find("Highpass")) then
          TeleportPlayer(mySession,GetWorld(coaches.highpass.world),coaches.highpass.x,coaches.highpass.y,coaches.highpass.z,coaches.highpass.facing)
       else
          npcDialogue = "Where would you like to go?"
@@ -30,11 +30,11 @@ function event_say()
          SendDialogue(mySession, npcDialogue, dialogueOptions)
          end
    else
-      if (ch:find("Yes")) then
+      if (choice:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
          SetPlayerFlags(mySession, "rivervale_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
-      elseif (ch:find("No")) then
+      elseif (choice:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       else

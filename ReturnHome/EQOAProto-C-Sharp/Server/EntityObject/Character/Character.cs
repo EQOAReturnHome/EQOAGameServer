@@ -261,7 +261,7 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write(0.0f);
             writer.Write(0.0f);
         }
-        public static string GetPlayerFlags(Session mySession, string flagKey)
+        public string GetPlayerFlags(Session mySession, string flagKey)
         {
             if (mySession.MyCharacter.playerFlags == null)
                 return "noFlags";
@@ -278,7 +278,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
         }
 
-        public static void SetPlayerFlag(Session mySession, string flagKey, string flagValue)
+        public void SetPlayerFlag(Session mySession, string flagKey, string flagValue)
         {
             //TODO: Fix for characters without flags? bypassing for now
             if (mySession.MyCharacter.playerFlags == null)

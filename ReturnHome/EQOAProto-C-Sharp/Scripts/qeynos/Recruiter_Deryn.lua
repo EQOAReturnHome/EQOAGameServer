@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I'm looking for some brave souls to collect some rare supplies. Let me know if you have anyone in mind, playerName."
 SendDialogue(mySession, npcDialogue, diagOptions)

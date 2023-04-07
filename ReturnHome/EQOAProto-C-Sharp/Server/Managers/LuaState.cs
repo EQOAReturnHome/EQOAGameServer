@@ -23,9 +23,6 @@ namespace ReturnHome.Server.Managers
         {
             State.LoadCLRPackage();
 
-            State["GetPlayerFlags"] = Character.GetPlayerFlags;
-            State["SetPlayerFlags"] = Character.SetPlayerFlag;
-
             State["AddQuest"] = Quest.AddQuest;
             State["DeleteQuest"] = Quest.DeleteQuest;
             State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;

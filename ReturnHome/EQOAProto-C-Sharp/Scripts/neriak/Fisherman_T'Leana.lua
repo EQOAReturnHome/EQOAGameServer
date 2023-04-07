@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "Not much to catch but a few cave minnow. Do you have a rod and bait?"
 SendDialogue(mySession, npcDialogue, diagOptions)

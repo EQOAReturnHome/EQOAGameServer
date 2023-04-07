@@ -1,7 +1,7 @@
-local ch = tostring(choice)
+ 
 local quests = require('Scripts/FreeportQuests')
 
-function event_say()
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
@@ -12,7 +12,7 @@ function event_say()
         SetPlayerFlags(mySession, "12010", "0")
     end
     if (GetPlayerFlags(mySession, "12010") == "0") then
-        if (ch:find("enchanter")) then
+        if (choice:find("enchanter")) then
             multiDialogue = { "Azlynn: Most who seek enchantments do not realize how much that they will be trading in their old life for the new one. This is much more than mastering illusions.",
             "Azlynn: But if you insist, I will expect you to complete a number of tasks before you will earn the title of enchanter.",
             "Azlynn: Your first task is to acquire a Bronze Ring from the merchant Yulia. Your fee for this will be waived.",
@@ -26,11 +26,11 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "12010") == "1") then
         if (CheckQuestItem(mySession, 8305, 1)) then
-            if (ch:find("nevermind")) then
+            if (choice:find("nevermind")) then
                 npcDialogue = "I will need an item to get started. You will need the iron ring from Merchant Yulia, then return to me."
-            elseif (ch:find("ring")) then
-                multiDialogue = { "Azlynn: It's going to take more than running errands to learn this power. We are going to have to test your wit and your will…",
-                "Azlynn: I will have your next task ready in a few moments. Don’t wander off now…" }
+            elseif (choice:find("ring")) then
+                multiDialogue = { "Azlynn: It's going to take more than running errands to learn this power. We are going to have to test your wit and your willï¿½",
+                "Azlynn: I will have your next task ready in a few moments. Donï¿½t wander off nowï¿½" }
                 SendMultiDialogue(mySession, multiDialogue)
                 CompleteQuest(mySession, 12010, quests[12010][1].xp)
             else
@@ -41,7 +41,7 @@ function event_say()
             npcDialogue = "I will need an item to get started. You will need the Bronze Ring from Merchant Yulia, then return to me."
         end
     elseif (GetPlayerFlags(mySession, "12011") == "0") then
-        if (ch:find("am")) then
+        if (choice:find("am")) then
             multiDialogue = { "Azlynn: No class is as tricky and deceptive as the Enchanter. Able to disguise themselves with magic spells, they can slip into areas where they would normally be killed on sight and interact freely with their enemies.",
             "Azlynn: They can also toy with the mind, such as strengthening the resolve of those around them or forcing their enemies to switch sides and fight for the enchanter.",
             "Azlynn: Enchanters are poor fighters and die easily in combat, but they are a valuable support class. The enchanter's spells help keep the party's power full.",
@@ -58,7 +58,7 @@ function event_say()
             diagOptions = {"I am."}
         end
     elseif (GetPlayerFlags(mySession, "12011") == "3") then
-        if (ch:find("done")) then
+        if (choice:find("done")) then
             CompleteQuest(mySession, 12011, quests[12011][3].xp)
             multiDialogue = {
                 "Azlynn: Ahh, wonderful. Be sure to have yourself bound often. It is quite inconvenient to be defeated far from your last binding.",

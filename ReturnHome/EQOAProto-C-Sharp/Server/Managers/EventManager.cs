@@ -52,12 +52,7 @@ namespace ReturnHome.Server.Managers
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
 
-
-            //CharacterSQL sql = new CharacterSQL();
-            //sql.SavePlayerItems(mySession.MyCharacter);
-
-            //ItemManager.GrantItem(mySession, 31010, 1);
-
+            string choiceOption = "Test";
 
             LuaState.State["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
             LuaState.State["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
@@ -65,14 +60,13 @@ namespace ReturnHome.Server.Managers
             LuaState.State["level"] = Entity.GetLevel(mySession);
 
 
-            LuaState.State["SendDialogue"] = Character.SendDialogue;
-            LuaState.State["SendMultiDialogue"] = Character.SendMultiDialogue;
+            LuaState.State["SendDialogue"] = mySession.MyCharacter.SendDialogue;
+            LuaState.State["SendMultiDialogue"] = mySession.MyCharacter.SendMultiDialogue;
             LuaState.State["mySession"] = mySession;
             LuaState.State["thisNPC"] = mySession.MyCharacter.Target;
             LuaState.State["BindPlayer"] = mySession.MyCharacter.SetPlayerBinding;
-
-
-
+            LuaState.State["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
+            LuaState.State["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
 
 
             string[] file;
@@ -95,15 +89,15 @@ namespace ReturnHome.Server.Managers
                 if (file.Length < 1 || file == null)
                     return;
             }
+
+
             //TODO: work around for a npc with no scripts etc? Investigate more eventually
             //If the op code to be sent is a dialogue box make sure we capture dialogue choices 
             if (opcode == GameOpcode.DialogueBoxOption)
             {
                 //send the dialogue choice to the lua script based on the chosen option index
-                string choiceOption = mySession.MyCharacter.MyDialogue.diagOptions[(int)mySession.MyCharacter.MyDialogue.choice];
+                choiceOption = mySession.MyCharacter.MyDialogue.diagOptions[(int)mySession.MyCharacter.MyDialogue.choice];
 
-                //pass the string choice to the Lua as choice
-                LuaState.State["choice"] = choiceOption;
             }
 
             //Call the Lua script found by the Dictionary Find above
@@ -114,8 +108,10 @@ namespace ReturnHome.Server.Managers
             {
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = LuaState.State.GetFunction("event_say");
+
                 mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
-                callFunction.Call();
+                Console.WriteLine($"Choice Option is: {choiceOption}");
+                callFunction.Call(choiceOption);
             }
         }
 

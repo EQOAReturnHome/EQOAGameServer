@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I've killed my share of freezeblood vermin, but they just keep coming. My scouts tell me of organization amongst them."
 SendDialogue(mySession, npcDialogue, diagOptions)

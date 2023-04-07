@@ -1,5 +1,5 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
-    npcDialogue = "I need to get out of this job, especially after what happened to the last cadet. I can still hear his screams…I wonder if Qeynos is hiring…"
+    npcDialogue = "I need to get out of this job, especially after what happened to the last cadet. I can still hear his screamsï¿½I wonder if Qeynos is hiringï¿½"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

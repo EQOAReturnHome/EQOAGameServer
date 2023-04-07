@@ -9,14 +9,14 @@ local playerCoaches = {
 }
 
 local dialogueOptions = {}
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
    if(GetPlayerFlags(mySession, "kerplunk_coach") == "true") then
-      if (ch:find("solace")) then
+      if (choice:find("solace")) then
          TeleportPlayer(mySession,GetWorld(coaches.dark_solace.world),coaches.dark_solace.x,coaches.dark_solace.y,coaches.dark_solace.z,coaches.dark_solace.facing)
-      elseif (ch:find("grobb")) then
+      elseif (choice:find("grobb")) then
          TeleportPlayer(mySession,GetWorld(coaches.grobb.world),coaches.grobb.x,coaches.grobb.y,coaches.grobb.z,coaches.grobb.facing)
-      elseif (ch:find("oggok")) then
+      elseif (choice:find("oggok")) then
          TeleportPlayer(mySession,GetWorld(coaches.oggok.world),coaches.oggok.x,coaches.oggok.y,coaches.oggok.z,coaches.oggok.facing)
       else
          npcDialogue = "Where would you like to go?"
@@ -28,11 +28,11 @@ function event_say()
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       end
    else
-      if (ch:find("Yes")) then
+      if (choice:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
          SetPlayerFlags(mySession, "kerplunk_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
-      elseif (ch:find("No")) then
+      elseif (choice:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       else

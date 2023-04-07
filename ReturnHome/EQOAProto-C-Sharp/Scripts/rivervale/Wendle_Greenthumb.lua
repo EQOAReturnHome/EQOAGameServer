@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "Hard to sleep these days. I can still hear the screams they make when they change...only good lycan is a dead lycan."
 SendDialogue(mySession, npcDialogue, diagOptions)

@@ -1,10 +1,10 @@
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
    local diagOptions = {}
    local questText = ""
    local npcDialogue = ""
 if(GetPlayerFlags(mySession, "12012") == "0") then
-  if(ch:find("Azlynn")) then
+  if(choice:find("Azlynn")) then
       multiDialogue = { "Opanheim: A yes, fresh talent. It is my pleasure to see what you are made of. But I suppose you'll need some training first.",
       "Opanheim: Equip whatever mighty weapon you may have and beetles. Bring me 2 beetle carapace fragments as proof of your heroic deed.",
       "Opanheim: After I receive the carapaces, I will reward you with a Crawling Skin Scroll, an enchanter's specialty.",
@@ -20,9 +20,9 @@ if(GetPlayerFlags(mySession, "12012") == "0") then
   end
 elseif (GetPlayerFlags(mySession, "12012") == "1") then
     if (CheckQuestItem(mySession, 4861, 2)) then
-	  if(ch:find("excuse"))then
+	  if(choice:find("excuse"))then
          npcDialogue = "It's important that you bring me what I have asked from you. I need two beetle carapace fragments."
-      elseif(ch:find("beetle"))then
+      elseif(choice:find("beetle"))then
          multiDialogue = { "Opanheim: I find your work to be quite satisfactory. Maybe I will play with you a bit longer.",
          "Opanheim: As I said, you will be rewarded. Take this scroll and study it well. The spell is trivial compared to my power, but it's a start.",
          "You have finished a quest!", "You have given away a beetle carapace fragment.", "You have given away a beetle carapace fragment.",

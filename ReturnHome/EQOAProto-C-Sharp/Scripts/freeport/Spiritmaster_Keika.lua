@@ -1,16 +1,16 @@
-local ch = tostring(choice)
+ 
 local quests = require('Scripts/FreeportQuests')
-function event_say()
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
     --Necromancer Quest
     if (GetPlayerFlags(mySession, "11011") == "1")
     then
-        if(ch:find("Farewell")) then
+        if(choice:find("Farewell")) then
         diagOptions = {}
         npcDialogue = "Spiritmaster Keika: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
-        elseif(ch:find("Sorry")) then
+        elseif(choice:find("Sorry")) then
         diagOptions = {}
         npcDialogue = ""
             multiDialogue = {"Spiritmaster Keika: Ahh, you must be a new member of the House Slaerin. All new recruits come to me for binding.",
@@ -34,9 +34,9 @@ function event_say()
     then
         npcDialogue = "Hello."
         diagOptions = { "Sorry to bother, but Azlynn sent me.", "Farewell" }
-        if(ch:find("Farewell")) then
+        if(choice:find("Farewell")) then
         npcDialogue = "Spiritmaster Keika: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
-        elseif(ch:find("Sorry")) then
+        elseif(choice:find("Sorry")) then
             multiDialogue = "Spiritmaster Keika: You were sent to me for binding, or rather, the binding of your spirit.",
             "Spiritmaster Keika: When a spirit is bound to a location, that spirit will return to the last location it was bound to if it's body is slain.",
             "Spiritmaster Keika: The body will rematerialize there along with all of it's equipment. I will bind your spirit to this location now.",

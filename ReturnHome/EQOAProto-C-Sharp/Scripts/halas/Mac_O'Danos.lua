@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "This bridge will lead you to the heart of our city. Be sure to visit the merchants and spend some tunar during your visit."
 SendDialogue(mySession, npcDialogue, diagOptions)

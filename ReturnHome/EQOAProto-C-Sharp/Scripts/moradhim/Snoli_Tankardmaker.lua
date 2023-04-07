@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I make ma livin' craftin' a large mug for every dwarf in the city. We dwarves love our ale, and at the end of the day a good tankard is the best tool ye can put in our hands."
 SendDialogue(mySession, npcDialogue, diagOptions)

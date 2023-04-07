@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "The merchants of Qeynos pay me to sit at this stinking lake and make sure they get their fish."
 SendDialogue(mySession, npcDialogue, diagOptions)

@@ -1,12 +1,12 @@
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
     local quests = require('Scripts/FreeportQuests')
 
     if (GetPlayerFlags(mySession, "10016") == "1") then
-        if (ch:find("am")) then
+        if (choice:find("am")) then
             multiDialogue = {
                 "Guard Sareken: Very good. Listen, things have been rough for the guards here at Freeport as of late. I've been having trouble keeping my men sufficiently supplied. I could use a little help.",
                 "Guard Sareken: Would you be willing to donate to the protection of Freeport? I need 147 Tunar for our current shortage.",
@@ -17,7 +17,7 @@ function event_say()
             }
             SendMultiDialogue(mySession, multiDialogue)
             ContinueQuest(mySession, 10016, quests[10016][1].log)
-        elseif(ch:find("mean")) then
+        elseif(choice:find("mean")) then
             multiDialogue = {"Guard Sareken: Oh, that's too bad. We really could have used the help."}
             SendMultiDialogue(mySession, multiDialogue)
         else
@@ -27,10 +27,10 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10016") == "2") then
         if (CheckQuestItem(mySession, 8333, 3) and mySession.MyCharacter.Inventory.Tunar >= 147) then
-            if (ch:find("Whoops")) then
+            if (choice:find("Whoops")) then
                 npcDialogue =
                     "Guard Sareken: You must return to me with 147 tunar and three tough pike scales as soon as possible."
-            elseif (ch:find("here")) then
+            elseif (choice:find("here")) then
                 multiDialogue = {
                     "Guard Sareken: Impressive. It seems as though Kellina has been doing a better job with the Academy of Arcane Science as of late, if your work here is anything to show for it.",
                     "Guard Sareken: This will no doubt bolster our supplies. Thank you.",
@@ -56,10 +56,10 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10016") == "3") then
         if (CheckQuestItem(mySession, 8448, 1)) then
-            if (ch:find("think")) then
+            if (choice:find("think")) then
                 npcDialogue =
                     "Guard Sareken: You must return to me with the orc ransacker's club, which can be found near the old house north of Freeport."
-            elseif (ch:find("easy")) then
+            elseif (choice:find("easy")) then
                 multiDialogue = {
                     "Guard Sareken: Yes, this does appear to be the club of such an orc. It is quite alarming that such a foul creature has wandered this close to the city. I must investigate further.",
                     "Guard Sareken: You have proven yourself worthy as a magician of The Academy of Arcane Science. Kellina will hear of my highest marks for your performance.",

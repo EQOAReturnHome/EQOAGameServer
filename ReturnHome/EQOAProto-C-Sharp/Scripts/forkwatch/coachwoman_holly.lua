@@ -10,10 +10,10 @@ local playerCoaches = {
 }
 
 local dialogueOptions = {}
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
         if (GetPlayerFlags(mySession, "forkwatch_coach") == "true") then
-        if (ch:find("Qeynos")) then
+        if (choice:find("Qeynos")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.qeynos.world),
@@ -22,7 +22,7 @@ function event_say()
                 coaches.qeynos.z,
                 coaches.qeynos.facing
             )
-        elseif (ch:find("Darvar")) then
+        elseif (choice:find("Darvar")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.darvar_manor.world),
@@ -31,7 +31,7 @@ function event_say()
                 coaches.darvar_manor.z,
                 coaches.darvar_manor.facing
             )
-        elseif (ch:find("Blackwater")) then
+        elseif (choice:find("Blackwater")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.blackwater.world),
@@ -40,7 +40,7 @@ function event_say()
                 coaches.blackwater.z,
                 coaches.blackwater.facing
             )
-        elseif (ch:find("Highbourne")) then
+        elseif (choice:find("Highbourne")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.highbourne.world),
@@ -59,11 +59,11 @@ function event_say()
             SendDialogue(mySession, npcDialogue, dialogueOptions)
         end
     else
-        if (ch:find("Yes")) then
+        if (choice:find("Yes")) then
             npcDialogue = "Excellent, you can now use this coach any time."
             SetPlayerFlags(mySession, "forkwatch_coach", "true")
             SendDialogue(mySession, npcDialogue, dialogueOptions)
-        elseif (ch:find("No")) then
+        elseif (choice:find("No")) then
             npcDialogue = "If you aren't interested then why are you wasting my time."
             SendDialogue(mySession, npcDialogue, dialogueOptions)
         else

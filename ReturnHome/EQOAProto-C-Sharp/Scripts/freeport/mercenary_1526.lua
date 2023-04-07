@@ -1,5 +1,5 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
-    npcDialogue = "There is something odd about that Ilenar Crelwin. Something…sinister, and perverse."
+    npcDialogue = "There is something odd about that Ilenar Crelwin. Somethingï¿½sinister, and perverse."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

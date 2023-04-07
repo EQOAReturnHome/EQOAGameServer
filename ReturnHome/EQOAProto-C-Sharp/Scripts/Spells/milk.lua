@@ -10,10 +10,9 @@ function startSpell()
 end
 
 function completeSpell()
-   TeleportPlayer(session, boundWorld,boundX,boundY,boundZ,boundFacing)
 end
 
 function useItem()
     print("Using Milk")
-    LearnSpell(session, GetSpell(1571))
+    LearnSpell(session, GetSpell(170))
 end

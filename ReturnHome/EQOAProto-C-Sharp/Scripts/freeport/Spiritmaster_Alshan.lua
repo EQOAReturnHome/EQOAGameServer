@@ -1,15 +1,15 @@
-local ch = tostring(choice)
+ 
 local quests = require('Scripts/FreeportQuests')
-function event_say()
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
     if (GetPlayerFlags(mySession, "10011") == "1")
     then
-        if(ch:find("Good")) then
+        if(choice:find("Good")) then
         diagOptions = {}
         npcDialogue = "Spiritmaster Alshan: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
-        elseif(ch:find("Sorry")) then
+        elseif(choice:find("Sorry")) then
         diagOptions = {}
         npcDialogue = ""
             multiDialogue = {"Spiritmaster Alshan: You were sent to me for binding, or rather, the binding of your spirit.",
@@ -28,9 +28,9 @@ function event_say()
     then
         npcDialogue = "Hello."
         diagOptions = { "Sorry to bother, but Azlynn sent me.", "Farewell" }
-        if(ch:find("Farewell")) then
+        if(choice:find("Farewell")) then
         npcDialogue = "Spiritmaster Alshan: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
-        elseif(ch:find("Sorry")) then
+        elseif(choice:find("Sorry")) then
             multiDialogue = "Spiritmaster Alshan: You were sent to me for binding, or rather, the binding of your spirit.",
             "Spiritmaster Alshan: When a spirit is bound to a location, that spirit will return to the last location it was bound to if it's body is slain.",
             "Spiritmaster Alshan: The body will rematerialize there along with all of it's equipment. I will bind your spirit to this location now.",

@@ -1,12 +1,12 @@
-local ch = tostring(choice)
+ 
 local quests = require('Scripts/FreeportQuests')
 local items = require('Scripts/items')
-function event_say()
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
     if (GetPlayerFlags(mySession, "10012") == "0") then
-        if (ch:find("Malsis")) then
+        if (choice:find("Malsis")) then
             multiDialogue = {
                 "Kellina: Oohh, now that isn't that disappointing. Well I suppose I should instruct you. But first you must prove your worth.",
                 "Kellina: Equip whatever mighty weapon you may have and slay ants. Bring me 2 cracked ant pincers as proof of your valiant deed.",
@@ -22,10 +22,10 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10012") == "1") then
         if (CheckQuestItem(mySession, items.CRACKED_ANT_PINCER, 2)) then
-            if (ch:find("nevermind")) then
+            if (choice:find("nevermind")) then
                 npcDialogue =
-                    "Kellina: It's important that you bring me what I have asked for. What was it now… Ah yes, I need two cracked ant pincers."
-            elseif (ch:find("pincers")) then
+                    "Kellina: It's important that you bring me what I have asked for. What was it nowï¿½ Ah yes, I need two cracked ant pincers."
+            elseif (choice:find("pincers")) then
                 multiDialogue = {
                     "Kellina: I suppose I can disregard your folly. You are new after all. And you did complete the task I assigned you.",
                     "Kellina: I am a woman of my word. Take this scroll and study it well. The spell is paltry compared to my power, but it's a start.",
@@ -49,7 +49,7 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10013") == "0") then
         if (level >= 4) then
-            if (ch:find("continue")) then
+            if (choice:find("continue")) then
                 multiDialogue = {
                     "Kellina: Apprenticeship? You must at least wear the blue robe of our caste first if you wish to call yourself my apprentice.",
                     "Kellina: Luckily for you I'm feeling somewhat generous today. I'll enchant the robe for you if you bring me the components."
@@ -58,7 +58,7 @@ function event_say()
                 npcDialogue = "Go on, fetch them quickly"
                 diagOptions = {"But...I don't know what they are?"}
                 SendDialogue(mySession, npcDialogue, diagOptions)
-            elseif (ch:find("know")) then
+            elseif (choice:find("know")) then
                 multiDialogue = {
                     "Kellina: Soulusek's eye, do I even have to think for you now? Nevermind. What I require is a plain robe, and a silk cord.",
                     "Kellina: Plain robes can be purchased from Merchant Yulia just outside this building.",
@@ -84,12 +84,12 @@ function event_say()
             (CheckQuestItem(mySession, items.PLAIN_ROBE, 1) and CheckQuestItem(mySession, items.SILK_CORD, 1) and
                 CheckQuestItem(mySession, items.RUINED_BAT_WING, 1))
          then
-            if (ch:find("No")) then
+            if (choice:find("No")) then
                 multiDialogue = {
                     "Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-            elseif (ch:find("have")) then
+            elseif (choice:find("have")) then
                 multiDialogue = {
                     "Kellina: Thank you, the enchantment on this robe shall serve to strengthen your defenses against elemental cold.",
                     "Kellina: You may now be strong enough to help with a task given to me, get some rest first though and come back when you're ready.",
@@ -117,7 +117,7 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10014") == "0") then
         if (level >= 5) then
-            if (ch:find("task")) then
+            if (choice:find("task")) then
                 multiDialogue = {
                     "Kellina: I truly hope you are my dear, for the task I have for you is necessarily fraught with peril.",
                     "Kellina: Our Academy depends on caravan shipments from the west for a great deal of our research supplies.",
@@ -128,12 +128,12 @@ function event_say()
                     "Will you use the knowledge we have taught you thus far to recover the stolen goods and bring these criminals to justice?"
                 diagOptions = {"I will.", "Sorry, I can't help you with this"}
                 SendDialogue(mySession, npcDialogue, diagOptions)
-            elseif (ch:find("Sorry")) then
+            elseif (choice:find("Sorry")) then
                 multiDialogue = {
                     "Kellina: Do you fancy yourself your own master? You had best reconsider getting this done or we will have to reconsider your enrollment here."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-            elseif (ch:find("will")) then
+            elseif (choice:find("will")) then
                 multiDialogue = {
                     "Kellina: Great knowledge will be the reward for your bravery. However this is no challenge to take lightly or alone.",
                     "Kellina: For this you should seek the company of other adventurers in Freeport. The Smiling Serpent tavern is a good place to start.",
@@ -144,7 +144,7 @@ function event_say()
                 SendMultiDialogue(mySession, multiDialogue)
                 StartQuest(mySession, 10014, quests[10014][0].log)
             else
-                npcDialogue = "I don’t have time for chit chat, dear."
+                npcDialogue = "I donï¿½t have time for chit chat, dear."
                 diagOptions = {"I am ready for my next task."}
             end
         else
@@ -155,12 +155,12 @@ function event_say()
         if
             (CheckQuestItem(mySession, items.STOLEN_GOODS, 1))
          then
-            if (ch:find("Not")) then
+            if (choice:find("Not")) then
                 npcDialogue =
                     "Kellina: Get your head together, and focus on the task at hand. Find the highwaymen and retrieve from them the stolen goods."
-            elseif (ch:find("have")) then
+            elseif (choice:find("have")) then
                 multiDialogue = {
-                    "Kellina: I see...! To be honest, I wasn't sure if I would ever see you again, but here you are proving yourself more useful…",
+                    "Kellina: I see...! To be honest, I wasn't sure if I would ever see you again, but here you are proving yourself more usefulï¿½",
                     "Kellina: The Academy, along with the other guilds might owe you a debt. I'm not sure what we would have done without these supplies.",
                     "Kellina: For this, I am proud to have you as a true Magician of The Academy of Arcane Science. I award you with this Motivate Scroll.",
                     "Kellina: I will certainly have more tasks for you, but I need some time to look into a few things. Come see me again later.",
@@ -182,12 +182,12 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10015") == "0") then
         if (level >= 7) then
-            if (ch:find("Nothing")) then
+            if (choice:find("Nothing")) then
                 multiDialogue = {
                     "Kellina: You'll need to learn to speak up for yourself, or you won't get far in this city."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-            elseif (ch:find("ready")) then
+            elseif (choice:find("ready")) then
                 multiDialogue = {
                     "Kellina: You've returned not a moment too soon. I have a task that needs attention but I am preoccupied at the moment.",
                     "Kellina: I've just received word of a dangerous creature spotted near freeport. The Chichan is a poisonous eel that preys upon unwitting travelers.",
@@ -208,10 +208,10 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10015") == "1") then
         if (CheckQuestItem(mySession, items.EEL_VENOM_SAC, 1)) then
-            if (ch:find("sorry")) then
+            if (choice:find("sorry")) then
                 npcDialogue =
                     "Bring Kellina a chichan eel venom sac. You will find it north of Freeport, along the river."
-            elseif (ch:find("here")) then
+            elseif (choice:find("here")) then
                 multiDialogue = {
                     "Kellina: Well done. You might be a bright spot in this otherwise dreary place.",
                     "Kellina: I must investigate this venom sac immediately.",
@@ -237,12 +237,12 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10016") == "0") then
         if (level >= 10) then
-            if (ch:find("later")) then
+            if (choice:find("later")) then
                 multiDialogue = {
                     "Kellina: Declining to help your teacher will not look good on your records, I assure you."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-            elseif (ch:find("am")) then
+            elseif (choice:find("am")) then
                 multiDialogue = {
                     "Kellina: I have so many requests for assistance now I can barely keep up. I must now have you help me with this next task.",
                     "Kellina: Guard Sareken is in need of assistance. Please find him at the north entrance of Freeport.",
@@ -261,12 +261,12 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10017") == "0") then
         if (level >= 13) then
-            if (ch:find("nevermind")) then
+            if (choice:find("nevermind")) then
                 multiDialogue = {
                     "Kellina: You'll need to learn to speak up for yourself, or you won't get far in this city."
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-            elseif (ch:find("returned")) then
+            elseif (choice:find("returned")) then
                 multiDialogue = {
                     "Kellina: Yes of course, I can use you to...Oh nevermind that.",
                     "Kellina: It is good you have returned. A colleague of mine has returned to Freeport. To be honest, I cant stand him. He's had a bit of a mishap, and needs our...your help.",

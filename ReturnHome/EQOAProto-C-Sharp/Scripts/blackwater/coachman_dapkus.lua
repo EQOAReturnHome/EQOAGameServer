@@ -8,10 +8,10 @@ local playerCoaches = {
 }
 
 local dialogueOptions = {}
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
         if (GetPlayerFlags(mySession, "blackwater_coach") == "true") then
-        if (ch:find("Forkwatch")) then
+        if (choice:find("Forkwatch")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.forkwatch.world),
@@ -20,7 +20,7 @@ function event_say()
                 coaches.forkwatch.z,
                 coaches.forkwatch.facing
             )
-        elseif (ch:find("Mine")) then
+        elseif (choice:find("Mine")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.gerntar_mines.world),
@@ -29,7 +29,7 @@ function event_say()
                 coaches.gerntar_mines.z,
                 coaches.gerntar_mines.facing
             )
-        elseif (ch:find("Oasis")) then
+        elseif (choice:find("Oasis")) then
             TeleportPlayer(
                 mySession,
                 GetWorld(coaches.oasis.world),
@@ -48,11 +48,11 @@ function event_say()
             SendDialogue(mySession, npcDialogue, dialogueOptions)
         end
     else
-        if (ch:find("Yes")) then
+        if (choice:find("Yes")) then
             npcDialogue = "Excellent, you can now use this coach any time."
             SetPlayerFlags(mySession, "blackwater_coach", "true")
             SendDialogue(mySession, npcDialogue, dialogueOptions)
-        elseif (ch:find("No")) then
+        elseif (choice:find("No")) then
             npcDialogue = "If you aren't interested then why are you wasting my time."
             SendDialogue(mySession, npcDialogue, dialogueOptions)
         else

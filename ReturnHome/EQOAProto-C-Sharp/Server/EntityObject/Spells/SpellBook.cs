@@ -53,7 +53,6 @@ namespace ReturnHome.Server.EntityObject.Spells
         {
             Spell spell = new Spell();
             //AddedOrder = _spellList.Count();
-            AddedOrder = 0;
             Console.WriteLine($"Added order is {AddedOrder}");
             foreach (Spell foundSpell in session.MyCharacter.MySpellBook._spellList)
             {
@@ -113,6 +112,8 @@ namespace ReturnHome.Server.EntityObject.Spells
             Console.WriteLine($"Putting spell {spell.SpellName} on hotbar in slot {hotbarSlot}");
             Span<Spell> temp = _spellHotbar.Span;
             temp[hotbarSlot] = spell;
+            spell.WhereOnHotBar = hotbarSlot;
+
         }
 
         //Are we passing AddedOrder here or SpellID? SpellID might be difficult
@@ -143,8 +144,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                 //Check if cast is completing
                 if (_spellCasting[i].CastCompleted())
                 {
-                    SpellManager.CastSpell(((Character)_e).characterSession, _spellCasting[i].AddedOrder, ((Character)_e).characterSession.MyCharacter.Target);
-                    //Calculate damage and disperse server side
+                    SpellManager.CastSpell(((Character)_e).characterSession, (uint)_spellCasting[i].WhereOnHotBar, ((Character)_e).characterSession.MyCharacter.Target);                    //Calculate damage and disperse server side
                     _spellCastingIndex.Add(i);
                 }
             }

@@ -1,5 +1,5 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
-    npcDialogue = "Cured drakes blood… Can't say I've used that before but…Oh it shouldn't be a problem mixing  with embalming fluid…I think…Hmm."
+    npcDialogue = "Cured drakes bloodï¿½ Can't say I've used that before butï¿½Oh it shouldn't be a problem mixing  with embalming fluidï¿½I thinkï¿½Hmm."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

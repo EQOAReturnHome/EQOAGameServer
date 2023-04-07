@@ -1,5 +1,5 @@
-﻿local ch = tostring(choice)
-function event_say()
+﻿ 
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""

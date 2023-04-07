@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I have been tracking down the location of the perpetual motion device. Perhaps I will combine this tech with my own for some unprecedented results."
 SendDialogue(mySession, npcDialogue, diagOptions)

@@ -2,9 +2,9 @@
 
 local coaches = require("Scripts/ports")
 
-local ch = tostring(choice)
-function event_say()
-    if (ch:find("Freeport")) then
+ 
+function  event_say(choice)
+    if (choice:find("Freeport")) then
         TeleportPlayer(
             mySession,
             GetWorld(coaches.freeport_ferry.world),

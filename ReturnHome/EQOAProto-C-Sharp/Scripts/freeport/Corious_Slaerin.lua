@@ -1,6 +1,6 @@
-local ch = tostring(choice)
+ 
 local quests = require('Scripts/FreeportQuests')
-function event_say()
+function  event_say(choice)
    local diagOptions = {}
    local questText = ""
    local npcDialogue = ""
@@ -12,7 +12,7 @@ function event_say()
       SetPlayerFlags(mySession, "11010", "0")
    end
    if (GetPlayerFlags(mySession, "11010") == "0") then
-      if (ch:find("wish")) then
+      if (choice:find("wish")) then
          multiDialogue = {
             "Corious Slaerin: You couldn't possibly know that, until you've seen with your own eyes the power of raising the dead to life with your own will.",
             "Corious Slaerin: But if you insist, I will expect you to complete a number of tasks before you will earn the title of necromancer.",
@@ -28,11 +28,11 @@ function event_say()
       end
    elseif (GetPlayerFlags(mySession, "11010") == "1") then
       if (CheckQuestItem(mySession, 8459, 1)) then
-         if (ch:find("nevermind")) then
+         if (choice:find("nevermind")) then
             npcDialogue = "Well don't just stand around wasting my time"
-         elseif (ch:find("earring")) then
+         elseif (choice:find("earring")) then
             multiDialogue = { "Corious Slaerin: It's going to take more than running errands to learn this power. We are going to have to test your wit and your will...",
-            "Corious Slaerin: I will have your next task ready in a few moments. Don’t wander off now...",
+            "Corious Slaerin: I will have your next task ready in a few moments. Donï¿½t wander off now...",
             "You have finished a quest!" }
             SendMultiDialogue(mySession, multiDialogue)
             CompleteQuest(mySession, 11010, quests[11010][1].xp)
@@ -44,7 +44,7 @@ function event_say()
          npcDialogue = "If you can't follow my instructions, why shouldn't I just turn you into one of my pets right now? You will need the Bone Earring from Merchant Gilgash, then return to me."
       end
    elseif (GetPlayerFlags(mySession, "11011") == "0") then
-      if (ch:find("ready")) then
+      if (choice:find("ready")) then
          multiDialogue = { "Corious Slaerin: A necromancer's unholy spells specialize in robbing enemies of their physical abilities and health in order to bolster themselves and their party.",
          "Corious Slaerin: They also can command undead pets equal in strength to those of a magician. A skilled necromancer can fight alone or in a group, though many necromancers either choose or are forced to walk alone.",
          "Corious Slaerin: In a group, they can aid the attack by sending their pets into battle and assist with health and power restoration by transferring their own health and power to those in need.",
@@ -59,14 +59,14 @@ function event_say()
          diagOptions = { "I am ready for my next test." }
       end
    elseif (GetPlayerFlags(mySession, "11011") == "3") then
-      if (ch:find("Yes")) then
+      if (choice:find("Yes")) then
          multiDialogue = { "Corious Slaerin: Without fail, be sure to have yourself bound often. It is quite inconvenient to be defeated far from your last binding.",
          "Corious Slaerin: Now that you've completed that, I have another task for you. Go see Rathei Slaerin, she will assist you.",
          "Corious Slaerin: You can find Rathei Slaerin just behind me.",
          "You have finished a quest!"}
          SendMultiDialogue(mySession, multiDialogue)
          CompleteQuest(mySession, 11011, quests[11011][3].xp)
-      elseif (ch:find("Sorry")) then
+      elseif (choice:find("Sorry")) then
             npcDialogue = "Don't stand around wasting my time"
       else
          npcDialogue = "Have you completed the tasks that I sent you for?"

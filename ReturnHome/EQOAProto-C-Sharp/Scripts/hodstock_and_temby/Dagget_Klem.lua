@@ -1,11 +1,11 @@
-﻿local ch = tostring(choice)
-function event_say()
+﻿ 
+function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
     local quests = require("Scripts/FreeportQuests")
     if (GetPlayerFlags(mySession, "10018") == "1") then
-        if (ch:find("nightworm")) then
+        if (choice:find("nightworm")) then
             multiDialogue = {
                 "Dagget Klem: Ah yes, Ilenar. One of my best customers. Those roots are not easy to pull from the swamps. But I happen to have a shipment for sale.",
                 "Dagget Klem: The only problem is, these bloody sharks are making it impossible for ships to dock here.",
@@ -17,7 +17,7 @@ function event_say()
             }
             SendMultiDialogue(mySession, multiDialogue)
             ContinueQuest(mySession, 10018, quests[10018][1].log)
-        elseif (ch:find("ate")) then
+        elseif (choice:find("ate")) then
             multiDialogue = {"Dagget Klem: More for me then, I suppose."}
             SendMultiDialogue(mySession,multiDialogue)
         else
@@ -45,7 +45,7 @@ function event_say()
         end
     elseif (GetPlayerFlags(mySession, "10018") == "3") then
         if(mySession.MyCharacter.Inventory.Tunar >= 260) then
-            if (ch:find("Tunar")) then
+            if (choice:find("Tunar")) then
                 multiDialogue = {
                     "Dagget Klem: Ok then. Here they are. Pleasure doing business. Oh, and best not let them spill out of that case. They are quite deadly...",
                     "You have finished a quest!",
@@ -57,7 +57,7 @@ function event_say()
                 RemoveTunar(mySession, 260)
                 GrantItem(mySession, 8340,1)
                 ContinueQuest(mySession, 10018, quests[10018][3].log)
-            elseif(ch:find("yet")) then
+            elseif(choice:find("yet")) then
                 multiDialogue = {"Dagget Klem: Well, I can't wait around for all day. Figure it out and let's get this deal done."}
                 SendMultiDialogue(mySession, multiDialogue)
             else

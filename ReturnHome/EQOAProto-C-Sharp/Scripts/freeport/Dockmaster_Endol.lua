@@ -2,11 +2,11 @@
 
 local coaches = require("Scripts/ports")
 
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I love listening to the waves crash.  I couldn't tell you of a more peaceful existence."
-    if (ch:find("Hazinak")) then
+    if (choice:find("Hazinak")) then
         TeleportPlayer(
             mySession,
             GetWorld(coaches.hazinak_ferry.world),

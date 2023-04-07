@@ -1,4 +1,4 @@
-function event_say()
+function  event_say(choice)
 diagOptions = {}
     npcDialogue = "*GLIP-GLIP, BOOOOSH*"
 SendDialogue(mySession, npcDialogue, diagOptions)

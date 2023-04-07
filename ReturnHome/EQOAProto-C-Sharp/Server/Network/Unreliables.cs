@@ -95,7 +95,7 @@ namespace ReturnHome.Server.Network
 
                 Mysession.inGame = true;
                 //This is just a shim for the player intro.
-                if (Character.GetPlayerFlags(Mysession, "NewPlayerIntro") == "0")
+                if (Mysession.MyCharacter.GetPlayerFlags(Mysession, "NewPlayerIntro") == "0")
                 {
                     Mysession.MyCharacter.MyDialogue.npcName = "NewPlayerIntro";
                     EventManager.GetNPCDialogue(GameOpcode.DialogueBox, Mysession);

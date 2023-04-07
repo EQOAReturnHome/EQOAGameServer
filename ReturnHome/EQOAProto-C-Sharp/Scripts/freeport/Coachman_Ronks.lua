@@ -9,13 +9,12 @@ local playerCoaches = {
 }
 SetPlayerFlags(mySession, "admin", "true")
 local dialogueOptions = {}
-local ch = tostring(choice)
-function event_say()
+function event_say(choice)
    --Magician                          --Enchanter
    if ((GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011")) == "2") then
       npcDialogue = "What do you want?"
       diagOptions = {"Spiritmaster Alshan sent me.", "Nothing"}
-      if (ch:find("Alshan")) then
+      if (choice:find("Alshan")) then
          multiDialogue = {
             "Coachman Ronks: Oh...from Spiritmaster Alshan. You know, I'm getting sick and tired of the...well, nevermind.",
             "Coachman Ronks: Apparently, it is my duty as a citizen of this \"fine\" city to add you to the stable ledger.",
@@ -34,7 +33,7 @@ function event_say()
          end
          SetPlayerFlags(mySession, "freeport_coach", "true")
          npcDialogue = ""
-      elseif (ch:find("Nothing")) then
+      elseif (choice:find("Nothing")) then
          npcDialogue = "Coachman Ronks: Well don't just stand around here, I have work to do!"
          diagOptions = {}
       end
@@ -43,7 +42,7 @@ function event_say()
    elseif ((GetPlayerFlags(mySession, "11011") or GetPlayerFlags(mySession, "09011")) == "2") then
       npcDialogue = "What do you want?"
       diagOptions = {"Spiritmaster Keika sent me.", "Nothing"}
-      if (ch:find("Keika")) then
+      if (choice:find("Keika")) then
          multiDialogue = {
             "Coachman Ronks: Oh...from Spiritmaster Keika. You know, I'm getting sick and tired of the...well, nevermind.",
             "Coachman Ronks: Apparently, it is my duty as a citizen of this \"fine\" city to add you to the stable ledger.",
@@ -62,7 +61,7 @@ function event_say()
       end
       SetPlayerFlags(mySession, "freeport_coach", "true")
       npcDialogue = ""
-      elseif (ch:find("Nothing")) then
+      elseif (choice:find("Nothing")) then
          npcDialogue = "Coachman Ronks: Well don't just stand around here, I have work to do!"
          diagOptions = {}
       end
@@ -70,7 +69,7 @@ function event_say()
    SetPlayerFlags(mySession, "freeport_coach", "true")
 elseif (GetPlayerFlags(mySession, "10011") ~= "1") then
    if (GetPlayerFlags(mySession, "freeport_coach") == "true") then
-      if (ch:find("Highpass")) then
+      if (choice:find("Highpass")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.highpass.world),
@@ -79,7 +78,7 @@ elseif (GetPlayerFlags(mySession, "10011") ~= "1") then
          coaches.highpass.z,
          coaches.highpass.facing
          )
-      elseif (ch:find("Tea")) then
+      elseif (choice:find("Tea")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.muniels_tea_garden.world),
@@ -88,7 +87,7 @@ elseif (GetPlayerFlags(mySession, "10011") ~= "1") then
          coaches.muniels_tea_garden.z,
          coaches.muniels_tea_garden.facing
          )
-      elseif (ch:find("Bobble")) then
+      elseif (choice:find("Bobble")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.bobble_by_water.world),
@@ -97,7 +96,7 @@ elseif (GetPlayerFlags(mySession, "10011") ~= "1") then
          coaches.bobble_by_water.z,
          coaches.bobble_by_water.facing
          )
-      elseif (ch:find("Neriak")) then
+      elseif (choice:find("Neriak")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.neriak.world),
@@ -116,11 +115,11 @@ elseif (GetPlayerFlags(mySession, "10011") ~= "1") then
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       end
    else
-      if (ch:find("Yes")) then
+      if (choice:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
          SetPlayerFlags(mySession, "freeport_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
-      elseif (ch:find("No")) then
+      elseif (choice:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       else

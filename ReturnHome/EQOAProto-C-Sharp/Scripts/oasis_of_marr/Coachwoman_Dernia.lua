@@ -7,11 +7,11 @@ local playerCoaches = {
    dark_solace_coach = "Get me a horse to Dark Solace"
 }
 local coaches = require('Scripts/ports')
-local ch = tostring(choice)
-function event_say()
+ 
+function  event_say(choice)
    local dialogueOptions = {}
    if(GetPlayerFlags(mySession, "oasis_of_marr_coach") == "true") then
-      if (ch:find("Docks")) then
+      if (choice:find("Docks")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.hazinak_dock.world),
@@ -20,7 +20,7 @@ function event_say()
          coaches.hazinak_dock.z,
          coaches.hazinak_dock.facing
          )
-      elseif (ch:find("Garden")) then
+      elseif (choice:find("Garden")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.muniels_tea_garden.world),
@@ -29,7 +29,7 @@ function event_say()
          coaches.muniels_tea_garden.z,
          coaches.muniels_tea_garden.facing
          )
-      elseif (ch:find("Solace")) then
+      elseif (choice:find("Solace")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.dark_solace.world),
@@ -38,7 +38,7 @@ function event_say()
          coaches.dark_solace.z,
          coaches.dark_solace.facing
          )
-      elseif (ch:find("Temple")) then
+      elseif (choice:find("Temple")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.hazinak_temple.world),
@@ -47,7 +47,7 @@ function event_say()
          coaches.hazinak_temple.z,
          coaches.hazinak_temple.facing
          )
-         elseif (ch:find("Blackwater")) then
+         elseif (choice:find("Blackwater")) then
          TeleportPlayer(
          mySession,
          GetWorld(coaches.blackwater.world),
@@ -66,12 +66,12 @@ function event_say()
          SendDialogue(mySession, npcDialogue, dialogueOptions)
       end
    else
-   if (ch:find("Yes")) then
+   if (choice:find("Yes")) then
       npcDialogue = "Excellent, you can now use this coach any time."
       SetPlayerFlags(mySession, "oasis_of_marr_coach", "true")
          SendDialogue(mySession, npcDialogue, dialogueOptions)
 
-   elseif (ch:find("No")) then
+   elseif (choice:find("No")) then
       npcDialogue = "If you aren't interested then why are you wasting my time."
          SendDialogue(mySession, npcDialogue, dialogueOptions)
 

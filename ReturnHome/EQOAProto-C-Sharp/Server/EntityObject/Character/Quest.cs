@@ -56,7 +56,7 @@ namespace ReturnHome.Server.EntityObject.Player
             Logger.Info(($"Quest {questID}, step {newQuest.questStep} started by {session.MyCharacter.CharName}"));
             session.MyCharacter.activeQuests.Add(newQuest);
 
-            Character.SetPlayerFlag(session, questID.ToString(), newQuest.questStep.ToString());
+            session.MyCharacter.SetPlayerFlag(session, questID.ToString(), newQuest.questStep.ToString());
             ServerAddQuestLog.AddQuestLog(session, (uint)newQuest.questIndex, newQuest.log);
         }
 
@@ -76,7 +76,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
             //convert to logger
             Logger.Info($"Quest {questID}, step {quest.questStep} started by {session.MyCharacter.CharName}");
-            Character.SetPlayerFlag(session, quest.questID.ToString(), quest.questStep.ToString());
+            session.MyCharacter.SetPlayerFlag(session, quest.questID.ToString(), quest.questStep.ToString());
             ServerAddQuestLog.AddQuestLog(session, (uint)quest.questIndex, quest.log);
         }
 
@@ -120,8 +120,8 @@ namespace ReturnHome.Server.EntityObject.Player
             {
                 session.MyCharacter.completedQuests.Add(thisQuest);
                 session.MyCharacter.activeQuests.Remove(thisQuest);
-                Character.SetPlayerFlag(session, questID.ToString(), "99");
-                Character.SetPlayerFlag(session, (++questID).ToString(), "0");
+                session.MyCharacter.SetPlayerFlag(session, questID.ToString(), "99");
+                session.MyCharacter.SetPlayerFlag(session, (++questID).ToString(), "0");
                 if (questXP > 0)
                     Entity.GrantXP(session, questXP);
 
