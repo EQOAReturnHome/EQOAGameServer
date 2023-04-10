@@ -434,7 +434,9 @@ namespace ReturnHome.Database.SQL
                      //Spell Name
                      rdr.GetString(12),
                      //Spell Description
-                     rdr.GetString(13));
+                     rdr.GetString(13),
+                     //Spell Type
+                     rdr.GetInt32(14));
 
                 spellPatterns.Add(Spell);
             }
@@ -556,6 +558,16 @@ namespace ReturnHome.Database.SQL
                     rdr.GetString(44),
                     //completedQuests
                     rdr.GetString(43),
+                    //boundWorld
+                    rdr.GetInt32(45),
+                    //boundX
+                    rdr.GetFloat(46),
+                    //boundY
+                    rdr.GetFloat(47),
+                    //boundZ
+                    rdr.GetFloat(48),
+                    //boundfacing
+                    rdr.GetFloat(49),
                     //58
                     session);
 
@@ -733,6 +745,16 @@ namespace ReturnHome.Database.SQL
                         rdr.GetString(44),
                         //completedQuests
                         rdr.GetString(43),
+                        //boundWorld
+                        rdr.GetInt32(45),
+                        //boundX
+                        rdr.GetFloat(46),
+                        //boundY
+                        rdr.GetFloat(47),
+                        //boundZ
+                        rdr.GetFloat(48),
+                        //boundfacing
+                        rdr.GetFloat(49),
                         //58
                         session);
                     break;
@@ -750,7 +772,7 @@ namespace ReturnHome.Database.SQL
 
             //Use second reader to iterate through character gear and assign to character attributes
             while (SecondRdr.Read())
-            {            
+            {
                 //Hold character value so we have names to compare against 
                 if (SecondRdr.GetString(0) == selectedCharacter.CharName)
                 {
@@ -877,7 +899,9 @@ namespace ReturnHome.Database.SQL
                      //SpellName
                      rdr.GetString(17),
                      //SpellDesc
-                     rdr.GetString(18)
+                     rdr.GetString(18),
+                     //SpellType
+                     rdr.GetInt32(19)
                 );
 
                 //Add these spells to player book

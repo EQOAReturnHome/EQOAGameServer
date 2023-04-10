@@ -86,7 +86,7 @@ function  event_say(choice)
             elseif (choice:find("thank")) then
                 multiDialogue = {
                     "Delwin Stitchfinger: Oh my stars, what a delectable selection. They look irresistible. Tell Ilenar that I was happy to be of service.",
-                    "Delwin Stitchfinger: I simply must try one...lets see...*NOM NOM NOM*. Oh so good, I must have another…*NOM NOM* I have never had a...*COUGH* *GASP* *GAG*",
+                    "Delwin Stitchfinger: I simply must try one...lets see...*NOM NOM NOM*. Oh so good, I must have another...*NOM NOM* I have never had a...*COUGH* *GASP* *GAG*",
                     "You have finished a quest!",
                     "You have given away poisoned chocolates.",
                     "You have received a quest!"

@@ -16,7 +16,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write(session.SessionID); // ID of Caster
             writer.Write(target); // ID of Target
             writer.Position += 1;
-            writer.Write(time); // Cast time
+            writer.Write(time*1000); // Cast time
             writer.Write(spellFx); // SpellFX
             message.Size = writer.Position;
             session.sessionQueue.Add(message);

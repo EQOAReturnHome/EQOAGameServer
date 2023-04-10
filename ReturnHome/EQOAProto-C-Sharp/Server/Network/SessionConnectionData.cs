@@ -35,6 +35,7 @@ namespace ReturnHome.Server.Network
         public Memory<ServerObjectUpdate> serverObjects;
         public ServerStatUpdate clientStatUpdate;
         public ServerGroupUpdate serverGroupUpdate;
+        public ServerBuffUpdate serverBuffUpdate;
         /*
          * Need to be able to do a full cycle reset for server objects.
          * Whenever a player moves/teleports to a new map/world, all of the c9 channels need to be reset
@@ -62,6 +63,7 @@ namespace ReturnHome.Server.Network
             client = new();
             clientStatUpdate = new(_session, (byte)MessageType.StatUpdate);
             serverGroupUpdate = new(_session, (byte)MessageType.GroupUpdate);
+            serverBuffUpdate = new(_session, (byte)MessageType.BuffUpdate);
             serverObjects = new Memory<ServerObjectUpdate>(new ServerObjectUpdate[0x17]);
 
             //TODO: Prioritize channels for group member's and pet's, 3 group member's and a pet max possible

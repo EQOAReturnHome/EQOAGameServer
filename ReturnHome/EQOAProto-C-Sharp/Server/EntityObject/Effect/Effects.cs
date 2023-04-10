@@ -7,11 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ReturnHome.Server
+namespace ReturnHome.Server.EntityObject.Effect
 {
-    public class QuestInterface
+    public enum Effects : byte
     {
-
-
+       MINOR_HEALING = 0
     }
 }

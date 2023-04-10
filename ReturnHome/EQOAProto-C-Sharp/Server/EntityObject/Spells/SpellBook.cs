@@ -112,7 +112,9 @@ namespace ReturnHome.Server.EntityObject.Spells
             Console.WriteLine($"Putting spell {spell.SpellName} on hotbar in slot {hotbarSlot}");
             Span<Spell> temp = _spellHotbar.Span;
             temp[hotbarSlot] = spell;
+            spell.OnHotBar = 1;
             spell.WhereOnHotBar = hotbarSlot;
+
 
         }
 
@@ -124,6 +126,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             //When we go to use a spell, perform range checks, LOS, and if target is attackable, if good start casting spell
             if (spell.StartSpellCast(_e, hotBarLocation))
             {
+                Console.WriteLine("Starting spell cast, adding casting and cooldown.");
                 _spellCasting.Add(spell);
                 _spellCoolDown.Add(spell);
                 return true;

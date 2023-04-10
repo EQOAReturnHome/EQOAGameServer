@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -34,6 +35,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         public string SpellName { get;  set; }
         public string SpellDesc { get;  set; }
         public long SpellEffect { get;  set; }
+        public SpellType SType { get; set; }
 
         public Spell()
         { }
@@ -43,7 +45,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         //Only items really needed are (int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide) rest of data could be acquired from scripting
         public Spell(int thisSpellID, byte thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide,
             int thisAbilityLevel, int thisUnk2, int thisUnk3, float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon,
-            int thisScope, int thisRecast, int thisEqpRequirement,string thisSpellName, string thisSpellDesc)
+            int thisScope, int thisRecast, int thisEqpRequirement,string thisSpellName, string thisSpellDesc, int spellType)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;
@@ -64,6 +66,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             EqpRequirement = thisEqpRequirement;
             SpellName = thisSpellName;
             SpellDesc = thisSpellDesc;
+            SType = (SpellType)spellType;
             //SpellEffect = thisSpellEffect;
 
             Console.WriteLine(SpellName);
@@ -98,16 +101,28 @@ namespace ReturnHome.Server.EntityObject.Spells
 
         public bool StartSpellCast(Entity e, int hotbarlocation)
         {
-            Console.WriteLine($"Starting spell cast.");
+            Console.WriteLine($"In Spell Cast Start Method");
             //If Target is within expected spell range and required power is available and Spell isn't on cooldown (Any other considerations?), start casting the spell
             //Should also use CurrentPower here, and return true to spell book so it can pass to cast and cool down list
             //Also need to consider sharing this to all nearby players so they see you casting... keep it simple for now
-            if (e.IsWithinRange(SpellRange) && (e.CurrentPower >= RequiredPower) && coolDownCompleted)
+            if (e.IsWithinRange(SpellRange) && (e.CurrentPower >= RequiredPower) && coolDownCompleted && e.isPlayer && IsValidTarget(e))
             {
+                //TODO: Expand on this later  to include more functionality
+                switch (Scope)
+                {
+                    case (byte)SpellScope.Self:
+                        e.Target = e.ObjectID;
+                        break;
+                    case (byte)SpellScope.Pet:
+                        break;
+                    case (byte)SpellScope.Group:
+                        break;
+                }
+
                 //If entity is a player, make sure they see their own spell
                 if (e.isPlayer)
                 {
-                    Console.WriteLine($"Casting spell");
+                    Console.WriteLine($"Entity is player so can see spell.");
                     SpellManager.GetSpell(((Character)e).characterSession,(uint)hotbarlocation, e.Target);
 
                     //TODO: May need to be different here?
@@ -116,7 +131,7 @@ namespace ReturnHome.Server.EntityObject.Spells
 
                 }
                 //Keep this commented out for now or you run out of power
-                e.CurrentPower -= RequiredPower;
+                //e.CurrentPower -= RequiredPower;
                 SpellLastUsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 coolDownCompleted = false;
                 spellCastingCompleted = false;
@@ -125,7 +140,47 @@ namespace ReturnHome.Server.EntityObject.Spells
                 //May need to explore best way to disperse spell casting to nearby players here eventually, so npc and characters can disperse that message.
                 return true;
             }
+            else
+            {
+                Console.WriteLine("Didn't meet requirements to cast");
+                SpellManager.FizzleSpell(((Character)e).characterSession);
+                return false;
 
+            }
+
+        }
+
+        //TODO: Flesh out for enemies as well as players? This may not be quite right
+        //verify whether the spells target is valid for the caster type
+        public bool IsValidTarget(Entity e)
+        {
+            Console.WriteLine($"Scope is {Scope}");
+            EntityManager.QueryForEntity(e.Target, out Entity ent);
+
+            if(Scope == (byte)SpellScope.Self)
+            {
+                return true;
+            }
+
+            //if the player is targeting another player allow defenensive spells -- i.e heals, buffs, etc
+            //but not offensive spells. Dueling later will need another consideration.
+            if (((Character)e).isPlayer && ent.isPlayer)
+            {
+                switch (SType)
+                {
+                    case SpellType.Offensive: return false;
+                    case SpellType.Defensive: return true;
+                }
+            }
+            //If the player is not targeting a player allow offensive spells only
+            else if (((Character)e).isPlayer && !ent.isPlayer)
+            {
+                switch (SType)
+                {
+                    case SpellType.Defensive: return false;
+                    case SpellType.Offensive: return true;
+                }
+            }
             return false;
         }
 

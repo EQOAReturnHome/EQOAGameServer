@@ -144,7 +144,7 @@ function  event_say(choice)
                 SendMultiDialogue(mySession, multiDialogue)
                 StartQuest(mySession, 10014, quests[10014][0].log)
             else
-                npcDialogue = "I don�t have time for chit chat, dear."
+                npcDialogue = "I don't have time for chit chat, dear."
                 diagOptions = {"I am ready for my next task."}
             end
         else

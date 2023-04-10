@@ -50,7 +50,7 @@ function event_say(choice)
     elseif (GetPlayerFlags(mySession, "10011") == "0") then
         if (choice:find("task")) then
             multiDialogue = {
-                "I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you….........oh wait",
+                "I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you............oh wait",
                 "That's right, I remember you now. I apologize. You must forgive my temper. Time inevitably takes its toll upon an elementalist.",
                 "Oh yes! So you're ready for your next task. I need you to speak to Spiritmaster Alshan.",
                 "You can find him just outside the Academy, near the bottom of the stairs. Return only when you complete any tasks he gives you.",

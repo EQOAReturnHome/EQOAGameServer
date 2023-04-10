@@ -1,8 +1,7 @@
-﻿-- Kick
-local spellFX = 0x0A286E2E  --Spell Effect
-local recast = 300 --Recast Time
-local castTime = 10
-local damage = -115
+--Minor Healing
+local spellFX = 0xC2B700FA  --Spell Effect
+local recast = 300000 --Recast Time
+local castTime = 30000
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)
@@ -10,8 +9,8 @@ function startSpell()
 end
 
 function completeSpell()
-    Damage(session, damage, target)
 end
 
 function useItem()
 end
+

@@ -27,8 +27,9 @@ namespace ReturnHome.Server.EntityObject.Spells
         public int EquipReq { get; set; }
         public string SpellName { get; set; }
         public string SpellDescription { get; set; }
+        public int SpellType { get; set; }
 
-        public SpellPattern(int spellID, int spellLevel, int unk2, int unk3, int range, int castTime, int power, int iconColor, int icon, int scope, int recast, int equipReq, string spellName, string spellDescription)
+        public SpellPattern(int spellID, int spellLevel, int unk2, int unk3, int range, int castTime, int power, int iconColor, int icon, int scope, int recast, int equipReq, string spellName, string spellDescription, int spellType)
         {
             this.SpellID = spellID;
             SpellLevel = spellLevel;
@@ -44,6 +45,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             EquipReq = equipReq;
             SpellName = spellName;
             SpellDescription = spellDescription;
+            SpellType = spellType;
         }
 
         public void DumpSpell(Session session, ref BufferWriter writer)

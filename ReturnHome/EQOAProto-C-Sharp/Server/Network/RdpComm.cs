@@ -149,6 +149,8 @@ namespace ReturnHome.Server.Network
 
                     else if (s.Channel == (byte)MessageType.GroupUpdate)
                         connectionData.serverGroupUpdate.UpdateBaseXor(s.Ack);
+                    else if (s.Channel == (byte)MessageType.BuffUpdate)
+                        connectionData.serverBuffUpdate.UpdateBaseXor(s.Ack);
                     else
                         Console.WriteLine($"Received Channel {s.Channel}, not implemented yet or processing error on channel processing");
                 }

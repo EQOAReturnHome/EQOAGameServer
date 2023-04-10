@@ -1,8 +1,8 @@
-﻿-- Kick
-local spellFX = 0x0A286E2E  --Spell Effect
-local recast = 300 --Recast Time
-local castTime = 10
-local damage = -115
+-- Chilling Aura
+local spellFX = 0x66CD778B  --Spell Effect
+local recast = 10000 --Recast Time
+local castTime = 20000
+duration
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)
@@ -10,8 +10,9 @@ function startSpell()
 end
 
 function completeSpell()
-    Damage(session, damage, target)
+--Proc cast buff goes here apply
 end
 
 function useItem()
 end
+

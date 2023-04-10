@@ -16,7 +16,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write(message.Opcode);
             writer.Write(addedOrder); // Location in SpellBook
             writer.Write(0x00000001);
-            writer.Write7BitEncodedInt64(timer); // recast time
+            writer.Write7BitEncodedInt64(timer*1000); // recast time
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
         }

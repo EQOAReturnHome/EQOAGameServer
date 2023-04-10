@@ -112,6 +112,20 @@ namespace ReturnHome.Server.Managers
 
         }
 
+        public static void FizzleSpell(Session session)
+        {
+            
+            string[] file = Directory.GetFiles("../../../Scripts", "fizzle.lua", SearchOption.AllDirectories);
+
+            //Call the Lua script found by the Directory Find above
+            LuaState.State.DoFile(file[0]);
+
+            //Call Lua function for initial interaction
+            LuaFunction callFunction = LuaState.State.GetFunction("startSpell");
+            callFunction.Call();
+
+        }
+
         public static void CastSpell(Session session, uint whereOnBar, uint target)
         {
             Spell spell = session.MyCharacter.MySpellBook.GetSpell(whereOnBar, session);

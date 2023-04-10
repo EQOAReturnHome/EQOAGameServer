@@ -1,7 +1,7 @@
 -- Return Home
 local spellFX = 0x8FB28233  --Spell Effect
-local recast = 300000 --Recast Time
-local castTime = 30000
+local recast = 300 --Recast Time
+local castTime = 30
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)
@@ -9,12 +9,10 @@ function startSpell()
 end
 
 function completeSpell()
-   print("Teleporting player")
    TeleportPlayer(session, boundWorld,boundX,boundY,boundZ,boundFacing)
 end
 
 function useItem()
-    print("Using Return Home Item")
     LearnSpell(session, GetSpell(1))
 end
 

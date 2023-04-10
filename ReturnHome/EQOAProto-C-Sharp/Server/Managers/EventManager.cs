@@ -108,8 +108,7 @@ namespace ReturnHome.Server.Managers
             {
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = LuaState.State.GetFunction("event_say");
-
-                mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
+                 mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
                 Console.WriteLine($"Choice Option is: {choiceOption}");
                 callFunction.Call(choiceOption);
             }
