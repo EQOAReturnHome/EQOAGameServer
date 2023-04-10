@@ -39,7 +39,7 @@ namespace ReturnHome.Server.Network
         public void GenerateUpdate()
         {
             //See if character and current message has changed
-            if (!_baseXOR.Span.SequenceEqual(_session.MyCharacter.StatUpdate.Span))
+            if (!_baseXOR.Span.SequenceEqual(_session.MyCharacter.BuffUpdate.Span))
             {
                 Memory<byte> temp = new Memory<byte>(new byte[4 + (8 * (4 + 4 + 128))]);
                 CoordinateConversions.Xor_data(temp, _session.MyCharacter.BuffUpdate, _baseXOR, 4 + (8 * (4 + 4 + 128)));
