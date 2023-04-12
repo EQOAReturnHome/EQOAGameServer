@@ -7,6 +7,5 @@ function completeSpell()
 end
 
 function useItem()
-    print("Minor Healing") 
-    StatusEffect("Minor Healing", 3575790706)
+    StatusEffect(effects.MINOR_HEALING, "Minor Healing", 3575790706, 3, 30, 0)
 end

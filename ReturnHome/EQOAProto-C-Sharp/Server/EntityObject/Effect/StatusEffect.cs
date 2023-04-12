@@ -12,7 +12,7 @@ namespace ReturnHome.Server.EntityObject.Effect
     public class StatusEffect
     {
 
-        public Effects id;
+        public int id;
         public string name;
         public uint icon;
         public uint tick;
@@ -27,7 +27,7 @@ namespace ReturnHome.Server.EntityObject.Effect
 
 
         //Status effect contructor for players(need name and icon for 43 unreliable message)
-        public StatusEffect(Effects id, string name, uint icon, uint tick, uint duration, uint tier)
+        public StatusEffect(int id, string name, uint icon, uint tick, uint duration, uint tier)
         {
             this.id = id;
             this.name = name;
@@ -38,7 +38,7 @@ namespace ReturnHome.Server.EntityObject.Effect
         }
 
         //Status effect constructor for non-players
-        public StatusEffect(Effects id, uint tick, uint duration, uint tier)
+        public StatusEffect(int id, uint tick, uint duration, uint tier)
         {
             this.id = id;
             this.tick = tick;

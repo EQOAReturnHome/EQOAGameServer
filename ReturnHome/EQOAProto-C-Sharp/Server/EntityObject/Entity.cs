@@ -207,6 +207,8 @@ namespace ReturnHome.Server.EntityObject
         {
             BuffUpdate.Span.Fill(0);
             BufferWriter writer = new(BuffUpdate.Span);
+            BufferReader bufferReader = new(BuffUpdate.Span);
+
             int size;
             if (EntityStatusEffects.Count >= 8)
                 size = 8;
@@ -217,24 +219,25 @@ namespace ReturnHome.Server.EntityObject
             {
                 writer.Write(EntityStatusEffects[i].icon);
                 writer.WriteString(Encoding.Unicode, EntityStatusEffects[i].name);
+
+                Console.WriteLine($"Buffer Writer icon {bufferReader.Read<uint>()}");
+                Console.WriteLine($"Buffer Writer name {bufferReader.ReadString(Encoding.Unicode, bufferReader.Read<int>())}");
             }
 
-            BufferReader bufferReader = new(BuffUpdate.Span);
 
-            Console.WriteLine(bufferReader.Read<uint>());
-            Console.WriteLine(bufferReader.ReadString(Encoding.Unicode, 16));
+
+
+
         }
 
-        public void CreateStatusEffect(string name, uint effectIcon)
+        public void CreateStatusEffect(int id, string name, uint effectIcon, uint tick, uint duration, uint tier)
         {
             Console.WriteLine($"Created Status Effect {name}");
 
-            StatusEffect statusEffect = new StatusEffect(name, effectIcon);
+            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, tick, duration, tier);
 
             EntityStatusEffects.Add(statusEffect);
             WriteBuffArray();
-
-
 
         }
 
@@ -242,7 +245,6 @@ namespace ReturnHome.Server.EntityObject
         {
 
             //EntityStatusEffects.Add(effect);
-            //ServerBuffUpdate buffUpdate = new ServerBuffUpdate(mySession, 43);
         }
 
         public bool CanAttack()

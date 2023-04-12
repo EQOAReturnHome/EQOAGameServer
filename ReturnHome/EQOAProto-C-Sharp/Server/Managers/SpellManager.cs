@@ -64,13 +64,11 @@ namespace ReturnHome.Server.Managers
 
         public static void GetSpell(Session session, uint whereOnBar, uint target)
         {
-            Console.WriteLine($"Activating spell on bar slot: {whereOnBar} - GetSpell");
             Spell spell = session.MyCharacter.MySpellBook.GetSpell(whereOnBar, session);
 
             int addedOrder = spell.AddedOrder;
             string spellName = spell.SpellName.Replace(" ", "_");
             int spellID = spell.SpellID;
-            Console.WriteLine(spellName);
             //Find Lua script recursively through scripts directory by class
             string[] file = Directory.GetFiles("../../../Scripts", spellName + ".lua", SearchOption.AllDirectories);
 
@@ -140,7 +138,6 @@ namespace ReturnHome.Server.Managers
             int addedOrder = spell.AddedOrder;
             string spellName = spell.SpellName.Replace(" ", "_");
             int spellID = spell.SpellID;
-            Console.WriteLine(spellName);
             //Find Lua script recursively through scripts directory by class
             string[] file = Directory.GetFiles("../../../Scripts", spellName + ".lua", SearchOption.AllDirectories);
 

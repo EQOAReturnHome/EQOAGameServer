@@ -1038,7 +1038,6 @@ namespace ReturnHome.Database.SQL
 
         public void CreateDefaultSpell(int playerID, int spellID, int addedOrder)
         {
-            Console.WriteLine($"Writing player spell {spellID}");
             //Create new sql connection calling stored proc to update data
             using var Cmd = new MySqlCommand("CreateDefaultSpell", con);
             Cmd.CommandType = CommandType.StoredProcedure;
@@ -1058,7 +1057,6 @@ namespace ReturnHome.Database.SQL
         {
 
             ItemPattern item = ItemManager.GetItemPattern(itemID);
-            Console.WriteLine("Adding default gear");
             //Create new sql connection calling stored proc to update data
             using var Cmd = new MySqlCommand("AddPlayerItem", con);
             Cmd.CommandType = CommandType.StoredProcedure;

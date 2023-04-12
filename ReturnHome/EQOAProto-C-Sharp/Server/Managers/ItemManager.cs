@@ -61,9 +61,7 @@ namespace ReturnHome.Server.Managers
 
         public static void UseItem(int itemID, Session session)
         {
-            //Console.WriteLine($"Activating item with itemID {itemID}");
             ItemPattern item = GetItemPattern(itemID);
-            Console.WriteLine($"This should be {item.ItemName}");
 
             string itemName = item.ItemName.Replace(" ", "_");
 

@@ -45,21 +45,16 @@ namespace ReturnHome.Server.EntityObject.Spells
             {
                 if (spell.OnHotBar == 1)
                     _spellHotbar.Span[spell.WhereOnHotBar] = spell;
-                Console.WriteLine($"Putting spell {spell.SpellName} on hotbar in slot {spell.WhereOnHotBar}");
             }
         }
 
         public Spell GetSpellFromBook(int AddedOrder, Session session)
         {
             Spell spell = new Spell();
-            //AddedOrder = _spellList.Count();
-            Console.WriteLine($"Added order is {AddedOrder}");
             foreach (Spell foundSpell in session.MyCharacter.MySpellBook._spellList)
             {
-                Console.WriteLine($"Found Spell in spellbook {foundSpell.SpellName} that has addedOrder of {foundSpell.AddedOrder}");
                 if (foundSpell.AddedOrder == AddedOrder)
                 {
-                    Console.WriteLine($"Returning spell with name {foundSpell.SpellName}");
                     return foundSpell;
                 }
             }
@@ -78,14 +73,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         public Spell GetSpell(uint hotbarLocation, Session session)
         {
 
-            Console.WriteLine($"Trying to get spell from hotbar in slot {hotbarLocation}.");
             Spell spell = session.MyCharacter.MySpellBook._spellHotbar.Span[(int)hotbarLocation];
-            Console.WriteLine(spell.SpellName);
-            try
-            {
-                Console.WriteLine(_spellHotbar.Span[(int)hotbarLocation].SpellID);
-            }
-            catch (Exception e) { }
 
 
             return spell;
@@ -94,7 +82,6 @@ namespace ReturnHome.Server.EntityObject.Spells
         //Is this right? Maybe we need some kind of Spell Scroll to Spell dictionary? Where we can pull the expected spell against the spell scroll and verify class/race etc is correct?
         public bool AddSpellToBook(Spell spell)
         {
-            Console.WriteLine($"Adding spell {spell.SpellName} to book with Addedorder {_spellList.Count()}");
             //Check Level, Race and Class to make sure it's acceptable to have this spell from said scroll
             if (true)
                 //AddSpell to Spell book by doing something like
@@ -109,7 +96,6 @@ namespace ReturnHome.Server.EntityObject.Spells
 
         public void AddSpellToHotbar(int hotbarSlot, Spell spell)
         {
-            Console.WriteLine($"Putting spell {spell.SpellName} on hotbar in slot {hotbarSlot}");
             Span<Spell> temp = _spellHotbar.Span;
             temp[hotbarSlot] = spell;
             spell.OnHotBar = 1;
@@ -122,11 +108,9 @@ namespace ReturnHome.Server.EntityObject.Spells
         public bool UseSpell(int hotBarLocation)
         {
             Spell spell = _spellHotbar.Span[hotBarLocation];
-            Console.WriteLine($"Starting to use spell {spell.SpellName}");
             //When we go to use a spell, perform range checks, LOS, and if target is attackable, if good start casting spell
             if (spell.StartSpellCast(_e, hotBarLocation))
             {
-                Console.WriteLine("Starting spell cast, adding casting and cooldown.");
                 _spellCasting.Add(spell);
                 _spellCoolDown.Add(spell);
                 return true;

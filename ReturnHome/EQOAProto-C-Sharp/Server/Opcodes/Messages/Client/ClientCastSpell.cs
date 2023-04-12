@@ -13,7 +13,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             //First 4 bytes is targeting counter, just discarding for now
             _ = reader.Read<uint>();
             int spell = reader.Read<byte>(); // WhereOnHotBar Value
-            Console.WriteLine($"Got spell from client in hotbar slot {spell}");
             //uint spellTarget = reader.Read<uint>(); // Spell Target
 
             session.MyCharacter.MySpellBook.UseSpell(spell);

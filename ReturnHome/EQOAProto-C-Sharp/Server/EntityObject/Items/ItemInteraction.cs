@@ -61,8 +61,6 @@ namespace ReturnHome.Server.EntityObject.Items
             else
             {
                 ItemManager.UseItem(item.Pattern.ItemID, ((Character)e).characterSession);
-                //ServerLearnSpell.LearnSpell(((Character)e).characterSession);
-                Console.WriteLine("Interacting with a consumable item?");
             }
         }
     }

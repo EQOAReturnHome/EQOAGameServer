@@ -69,7 +69,6 @@ namespace ReturnHome.Server.EntityObject.Spells
             SType = (SpellType)spellType;
             //SpellEffect = thisSpellEffect;
 
-            Console.WriteLine(SpellName);
         }
 
 
@@ -101,7 +100,6 @@ namespace ReturnHome.Server.EntityObject.Spells
 
         public bool StartSpellCast(Entity e, int hotbarlocation)
         {
-            Console.WriteLine($"In Spell Cast Start Method");
             //If Target is within expected spell range and required power is available and Spell isn't on cooldown (Any other considerations?), start casting the spell
             //Should also use CurrentPower here, and return true to spell book so it can pass to cast and cool down list
             //Also need to consider sharing this to all nearby players so they see you casting... keep it simple for now
@@ -122,7 +120,6 @@ namespace ReturnHome.Server.EntityObject.Spells
                 //If entity is a player, make sure they see their own spell
                 if (e.isPlayer)
                 {
-                    Console.WriteLine($"Entity is player so can see spell.");
                     SpellManager.GetSpell(((Character)e).characterSession,(uint)hotbarlocation, e.Target);
 
                     //TODO: May need to be different here?
@@ -142,7 +139,6 @@ namespace ReturnHome.Server.EntityObject.Spells
             }
             else
             {
-                Console.WriteLine("Didn't meet requirements to cast");
                 SpellManager.FizzleSpell(((Character)e).characterSession);
                 return false;
 
@@ -154,7 +150,6 @@ namespace ReturnHome.Server.EntityObject.Spells
         //verify whether the spells target is valid for the caster type
         public bool IsValidTarget(Entity e)
         {
-            Console.WriteLine($"Scope is {Scope}");
             EntityManager.QueryForEntity(e.Target, out Entity ent);
 
             if(Scope == (byte)SpellScope.Self)
