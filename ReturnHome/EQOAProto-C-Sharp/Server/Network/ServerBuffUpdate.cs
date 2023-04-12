@@ -12,7 +12,7 @@ namespace ReturnHome.Server.Network
         private Session _session;
 
         //Stores our base data to xor against
-        private Memory<byte> _baseXOR = new Memory<byte>(new byte[4 + (8 * (4 + 4 + 128))]);
+        private Memory<byte> _baseXOR = new Memory<byte>(new byte[1092]);
 
         //This is when the client ack's a specific message, we then set this to that ack'd message # to help generate our xor
         private ushort _baseMessageCounter = 0;
@@ -41,8 +41,8 @@ namespace ReturnHome.Server.Network
             //See if character and current message has changed
             if (!_baseXOR.Span.SequenceEqual(_session.MyCharacter.BuffUpdate.Span))
             {
-                Memory<byte> temp = new Memory<byte>(new byte[4 + (8 * (4 + 4 + 128))]);
-                CoordinateConversions.Xor_data(temp, _session.MyCharacter.BuffUpdate, _baseXOR, 4 + (8 * (4 + 4 + 128)));
+                Memory<byte> temp = new Memory<byte>(new byte[1092]);
+                CoordinateConversions.Xor_data(temp, _session.MyCharacter.BuffUpdate, _baseXOR, 1092);
                 _currentXORResults.Add(_messageCounter, temp);
                 _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
                 _messageCounter++;
@@ -58,7 +58,7 @@ namespace ReturnHome.Server.Network
                 return;
 
             //xor base against this message
-            CoordinateConversions.Xor_data(_baseXOR, tempMemory, 0xC9);
+            CoordinateConversions.Xor_data(_baseXOR, tempMemory, 0x43);
 
             //Clear Dictionary
             _currentXORResults.Clear();

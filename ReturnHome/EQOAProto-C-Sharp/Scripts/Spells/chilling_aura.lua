@@ -1,7 +1,7 @@
 -- Chilling Aura
-local spellFX = 0x66CD778B  --Spell Effect
-local recast = 10000 --Recast Time
-local castTime = 20000
+local spellFX = 0xF3C09208  --Spell Effect
+local recast = 1 --Recast Time
+local castTime = 2
 duration
 
 function startSpell()

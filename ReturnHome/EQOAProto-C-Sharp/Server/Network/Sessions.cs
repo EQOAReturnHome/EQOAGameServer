@@ -148,6 +148,7 @@ namespace ReturnHome.Server.Network
 
                 rdpCommIn.connectionData.clientStatUpdate.GenerateUpdate();
                 rdpCommIn.connectionData.serverGroupUpdate.GenerateUpdate();
+                rdpCommIn.connectionData.serverBuffUpdate.GenerateUpdate();
             }
 
             PendingTermination = inGame ? _pingCount >= 50 ? true : false : _pingCount >= 10 ? true : false;

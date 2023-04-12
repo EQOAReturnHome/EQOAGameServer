@@ -1,7 +1,9 @@
--- Return Home
-local spellFX = 0x66CD778B  --Spell Effect
-local recast = 300000 --Recast Time
-local castTime = 30000
+--Unstable Mixture
+local items = require('Scripts/items')
+local spellFX = 0xA8C2C199     --Spell Effect
+local recast = 2 --Recast Time
+local castTime = 1
+local potionsCreated = 3
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)
@@ -9,6 +11,7 @@ function startSpell()
 end
 
 function completeSpell()
+    GrantItem(session, items.UNSTABLE_MUTATION, potionsCreated)
 end
 
 function useItem()

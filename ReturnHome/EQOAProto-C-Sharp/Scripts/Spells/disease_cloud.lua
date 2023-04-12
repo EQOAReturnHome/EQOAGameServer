@@ -1,7 +1,7 @@
--- Return Home
-local spellFX = 0x66CD778B  --Spell Effect
-local recast = 300000 --Recast Time
-local castTime = 30000
+-- Disease Cloud
+local spellFX = 0x052EF90F  --Spell Effect
+local recast = 1 --Recast Time
+local castTime = 1
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)

@@ -9,6 +9,7 @@ using System.ServiceModel.Channels;
 using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.EntityObject.Items;
 using System.Collections.Concurrent;
+using ReturnHome.Server.EntityObject.Effect;
 
 namespace ReturnHome.Server.Managers
 {
@@ -80,7 +81,8 @@ namespace ReturnHome.Server.Managers
 
             //Create handles for the lua script to access some c# variables and methods
             LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
-            LuaState.State["Damage"] = ServerDamage.Damage;
+            LuaState.State["Damage"] = ServerChangeHealth.Damage;
+            LuaState.State["Heal"] = ServerChangeHealth.Heal;
             LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
             LuaState.State["session"] = session;
             LuaState.State["target"] = target;
@@ -88,6 +90,11 @@ namespace ReturnHome.Server.Managers
             LuaState.State["spellID"] = spellID;
             LuaState.State["addedOrder"] = addedOrder;
             LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
+            LuaState.State["GrantItem"] = ItemManager.GrantItem;
+            LuaState.State["AddStatusEffect"] = session.MyCharacter.AddStatusEffect;
+            LuaState.State["WriteBuffArray"] = session.MyCharacter.WriteBuffArray;
+            LuaState.State["StatusEffect"] = session.MyCharacter.CreateStatusEffect;
+
 
             LuaState.State["boundWorld"] = session.MyCharacter.boundWorld;
             LuaState.State["boundX"] = session.MyCharacter.boundX;
@@ -144,7 +151,7 @@ namespace ReturnHome.Server.Managers
 
             //Create handles for the lua script to access some c# variables and methods
             LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
-            LuaState.State["Damage"] = ServerDamage.Damage;
+            LuaState.State["Damage"] = ServerChangeHealth.Damage;
             LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
             LuaState.State["session"] = session;
             LuaState.State["target"] = target;

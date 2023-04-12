@@ -1,7 +1,7 @@
 --Minor Healing
 local spellFX = 0xC2B700FA  --Spell Effect
-local recast = 300000 --Recast Time
-local castTime = 30000
+local recast = 1 --Recast Time
+local castTime = 2
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)

@@ -1,7 +1,8 @@
--- Return Home
-local spellFX = 0x66CD778B  --Spell Effect
-local recast = 300000 --Recast Time
-local castTime = 30000
+-- Hide
+local spellFX = 0x4280E1DA  --Spell Effect
+local recast = 6 --Recast Time
+local castTime = 0
+local duration = 300
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)

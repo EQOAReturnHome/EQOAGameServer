@@ -1,8 +1,8 @@
 ﻿-- Kick
 local spellFX = 0x0A286E2E  --Spell Effect
-local recast = 300 --Recast Time
-local castTime = 10
-local damage = -115
+local recast = 6 --Recast Time
+local castTime = 0
+local damage = 16 + (mySession.MyCharacter.Strength*.40)
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)

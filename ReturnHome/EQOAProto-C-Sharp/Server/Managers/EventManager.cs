@@ -29,8 +29,6 @@ namespace ReturnHome.Server.Managers
         {
 
             CharacterSQL charDefaults = new CharacterSQL();
-
-            Console.WriteLine("Creating player defaults");
             
             string[] file = Directory.GetFiles("../../../Scripts", "character_defaults.lua", SearchOption.AllDirectories);
 

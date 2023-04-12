@@ -1,7 +1,8 @@
 -- Return Home
-local spellFX = 0x66CD778B  --Spell Effect
-local recast = 300000 --Recast Time
-local castTime = 30000
+local spellFX = 0xC2B700FA   --Spell Effect
+local recast = 90 --Recast Time
+local castTime = 1
+local health = 45 + (session.MyCharacter.Wisdom * .10)
 
 function startSpell()
     CastSpell(session, spellFX, target, castTime)
@@ -9,6 +10,7 @@ function startSpell()
 end
 
 function completeSpell()
+    Heal(session, health, target)
 end
 
 function useItem()

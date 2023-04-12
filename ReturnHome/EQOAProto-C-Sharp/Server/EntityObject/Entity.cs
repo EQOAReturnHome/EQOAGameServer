@@ -5,6 +5,10 @@ using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.EntityObject.Effect;
+using System.Collections.Generic;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -15,6 +19,7 @@ namespace ReturnHome.Server.EntityObject
         //Implies if object is visible or not
         public bool Invisible = false;
 
+        public List<StatusEffect> EntityStatusEffects = new List<StatusEffect>();
         public SpellBook MySpellBook;
         private int _level;
         private uint _objectID;
@@ -34,7 +39,7 @@ namespace ReturnHome.Server.EntityObject
         public Memory<byte> StatUpdate = new Memory<byte>(new byte[0xEC]);
         public Memory<byte> GroupUpdate = new Memory<byte>(new byte[0X27]);
         //TODO: Need to calculate the variable length for this later. Max length for now for testing
-        public Memory<byte> BuffUpdate = new Memory<byte>(new byte[4 + (8 * (4 + 4 + 128))]);
+        public Memory<byte> BuffUpdate = new Memory<byte>(new byte[1092]);
 
 
         /* These are all values for character creation, likely don't need to be attributes of the character object at all*/
@@ -196,7 +201,48 @@ namespace ReturnHome.Server.EntityObject
 
         public void IsValidTarget()
         {
+        }
 
+        public void WriteBuffArray()
+        {
+            BuffUpdate.Span.Fill(0);
+            BufferWriter writer = new(BuffUpdate.Span);
+            int size;
+            if (EntityStatusEffects.Count >= 8)
+                size = 8;
+            else
+                size = EntityStatusEffects.Count;
+
+            for (int i = 0; i < size; ++i)
+            {
+                writer.Write(EntityStatusEffects[i].icon);
+                writer.WriteString(Encoding.Unicode, EntityStatusEffects[i].name);
+            }
+
+            BufferReader bufferReader = new(BuffUpdate.Span);
+
+            Console.WriteLine(bufferReader.Read<uint>());
+            Console.WriteLine(bufferReader.ReadString(Encoding.Unicode, 16));
+        }
+
+        public void CreateStatusEffect(string name, uint effectIcon)
+        {
+            Console.WriteLine($"Created Status Effect {name}");
+
+            StatusEffect statusEffect = new StatusEffect(name, effectIcon);
+
+            EntityStatusEffects.Add(statusEffect);
+            WriteBuffArray();
+
+
+
+        }
+
+        public void AddStatusEffect(StatusEffect effect, Session mySession)
+        {
+
+            //EntityStatusEffects.Add(effect);
+            //ServerBuffUpdate buffUpdate = new ServerBuffUpdate(mySession, 43);
         }
 
         public bool CanAttack()
@@ -312,7 +358,7 @@ namespace ReturnHome.Server.EntityObject
 
         public void GetTP()
         {
-            
+
         }
 
         public int GetMaxMP()
@@ -344,7 +390,7 @@ namespace ReturnHome.Server.EntityObject
         // todo: the following functions are virtuals since we want to check hidden item bonuses etc on player for certain conditions
         public virtual void AddHP(int hp)
         {
-            
+
         }
 
         public Class GetClass()

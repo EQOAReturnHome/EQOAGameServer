@@ -58,6 +58,7 @@
   <ItemGroup>
     <None Remove="Scripts\bobble_by_water\Delwin_Stitchfinger.lua" />
     <None Remove="Scripts\character_defaults.lua" />
+    <None Remove="Scripts\effects.lua" />
     <None Remove="Scripts\freeport\FreeportQuests.lua" />
     <None Remove="Scripts\freeport\Magician_start.lua" />
     <None Remove="Scripts\freeport\Quests.json" />
@@ -77,6 +78,7 @@
   <ItemGroup>
     <Content Include="Scripts\bobble_by_water\Delwin_Stitchfinger.lua" />
     <Content Include="Scripts\character_defaults.lua" />
+    <Content Include="Scripts\effects.lua" />
     <Content Include="Scripts\FreeportQuests.lua" />
     <Content Include="Scripts\freeport\FreeportQuests.lua" />
     <Content Include="Scripts\freeport\Magician_start.lua" />

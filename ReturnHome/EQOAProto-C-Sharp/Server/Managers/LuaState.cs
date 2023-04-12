@@ -44,7 +44,7 @@ namespace ReturnHome.Server.Managers
             State["AddTunar"] = Entity.AddTunar;
 
             State["CastSpell"] = ServerCastSpell.CastSpell;
-            State["Damage"] = ServerDamage.Damage;
+            State["Damage"] = ServerChangeHealth.Damage;
             State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
             State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
             State["ServerLearnSpell"] = ServerLearnSpell.LearnSpell;
