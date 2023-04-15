@@ -1,12 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ReturnHome.Server.EntityObject.Effect
 {
     public class StatusEffect
@@ -18,6 +10,7 @@ namespace ReturnHome.Server.EntityObject.Effect
         public uint tick;
         public uint duration;
         public uint tier;
+        public Status status;
 
         //default constructor
         public StatusEffect()
@@ -29,9 +22,8 @@ namespace ReturnHome.Server.EntityObject.Effect
         //Status effect contructor for players(need name and icon for 43 unreliable message)
         public StatusEffect(int id, string name, uint icon, uint tick, uint duration, uint tier)
         {
+            status = new(icon, name);
             this.id = id;
-            this.name = name;
-            this.icon = icon;
             this.tick = tick;
             this.duration = duration;
             this.tier = tier;
