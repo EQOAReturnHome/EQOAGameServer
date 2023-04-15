@@ -6,6 +6,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject.Effect;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -23,7 +24,7 @@ namespace ReturnHome.Server.Network.Managers
         public static void ProcessPacket(ServerListener listener, ClientPacket packet, IPEndPoint ClientIPEndPoint)
         ///public static void ProcessSession(List<byte> myPacket, bool NewSession)
         {
-			Session ClientSession;
+            Session ClientSession;
 
             //Remove session
             if ((packet.segmentHeader.flags & SegmentHeaderFlags.ResetConnection) != 0)
@@ -56,15 +57,15 @@ namespace ReturnHome.Server.Network.Managers
                     //Success, keep processing data
                     ClientSession.rdpCommIn.ProcessPacket(packet);
                 }
-			}
+            }
 
             else
             {
-				//Find session, if it returns true, outputs session
+                //Find session, if it returns true, outputs session
                 if (findSession(ClientIPEndPoint, out ClientSession))
                 {
-					//Checks if IP/Port matches expected session to incoming packet
-					//This might not be needed?
+                    //Checks if IP/Port matches expected session to incoming packet
+                    //This might not be needed?
                     if (ClientSession.MyIPEndPoint.Equals(ClientIPEndPoint))
                         ClientSession.rdpCommIn.ProcessPacket(packet);
 
@@ -78,7 +79,7 @@ namespace ReturnHome.Server.Network.Managers
 
                 else
                 {
-                    Logger.Info($"Unsolicited Packet from {ClientIPEndPoint} with Id { packet.Local_Endpoint}");
+                    Logger.Info($"Unsolicited Packet from {ClientIPEndPoint} with Id {packet.Local_Endpoint}");
                 }
             }
         }
@@ -168,8 +169,8 @@ namespace ReturnHome.Server.Network.Managers
             ServerOpcode0x07D1.Opcode0x07D1(session);
             ServerOpcode0x07F5.Opcode0x07F5(session);
         }
-		
-		/// <summary>
+
+        /// <summary>
         /// Dispatches all outgoing messages.<para />
         /// Removes dead sessions.
         /// </summary>
@@ -197,7 +198,13 @@ namespace ReturnHome.Server.Network.Managers
             foreach (Session session in SessionHash)
             {
                 if (session.inGame)
+                {
                     session.MyCharacter.MySpellBook.CheckCoolDownAndCast();
+                    foreach (StatusEffect effect in session.MyCharacter.EntityStatusEffects)
+                    {
+                        session.MyCharacter.MySpellBook.TickEffect(effect);
+                    }
+                }
             }
 
             return sessionCount;

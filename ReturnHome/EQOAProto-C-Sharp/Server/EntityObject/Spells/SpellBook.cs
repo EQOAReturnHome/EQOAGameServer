@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using ReturnHome.Server.EntityObject.Effect;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
@@ -158,6 +159,12 @@ namespace ReturnHome.Server.EntityObject.Spells
                 _spellCoolDown.RemoveAt(i);
 
             _spellCoolDownIndex.Clear();
+        }
+
+        public void TickEffect(StatusEffect effect)
+        {
+           
+
         }
 
         public void DumpSpellBook(ref BufferWriter writer)

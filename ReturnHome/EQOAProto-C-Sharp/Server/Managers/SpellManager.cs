@@ -31,7 +31,6 @@ namespace ReturnHome.Server.Managers
 
         public static void LearnSpell(Session session, SpellPattern Spell)
         {
-            Console.Write("Trying to learn spell");
             Spell newSpell = CreateSpell(Spell);
             newSpell.AddedOrder = (byte)session.MyCharacter.MySpellBook.Count;
             session.MyCharacter.MySpellBook.AddSpellToBook(newSpell);
@@ -149,6 +148,7 @@ namespace ReturnHome.Server.Managers
             //Create handles for the lua script to access some c# variables and methods
             LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
             LuaState.State["Damage"] = ServerChangeHealth.Damage;
+            LuaState.State["Heal"] = ServerChangeHealth.Heal;
             LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
             LuaState.State["session"] = session;
             LuaState.State["target"] = target;
@@ -156,18 +156,6 @@ namespace ReturnHome.Server.Managers
             LuaState.State["spellID"] = spellID;
             LuaState.State["addedOrder"] = addedOrder;
             LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
-
-            LuaState.State["boundWorld"] = session.MyCharacter.boundWorld;
-            LuaState.State["boundX"] = session.MyCharacter.boundX;
-            LuaState.State["boundY"] = session.MyCharacter.boundY;
-            LuaState.State["boundZ"] = session.MyCharacter.boundZ;
-            LuaState.State["boundFacing"] = session.MyCharacter.boundFacing;
-
-            LuaState.State["playerWorld"] = session.MyCharacter.World;
-            LuaState.State["playerX"] = session.MyCharacter.x;
-            LuaState.State["playerY"] = session.MyCharacter.y;
-            LuaState.State["playerZ"] = session.MyCharacter.z;
-            LuaState.State["playerFacing"] = session.MyCharacter.Facing;
 
 
             //Call the Lua script found by the Directory Find above
@@ -177,7 +165,44 @@ namespace ReturnHome.Server.Managers
             LuaFunction callFunction = LuaState.State.GetFunction("completeSpell");
             callFunction.Call();
 
+        }
+
+        public static void TickSpell(Session session, uint whereOnBar, uint target)
+        {
+            Spell spell = session.MyCharacter.MySpellBook.GetSpell(whereOnBar, session);
+
+            int addedOrder = spell.AddedOrder;
+            string spellName = spell.SpellName.Replace(" ", "_");
+            int spellID = spell.SpellID;
+            //Find Lua script recursively through scripts directory by class
+            string[] file = Directory.GetFiles("../../../Scripts/Effects", spellName + ".lua", SearchOption.AllDirectories);
+
+
+            //TODO: work around for a spell with no scripts etc? Investigate more eventually
+            if (file.Length < 1 || file == null)
+                return;
+
+            //Create handles for the lua script to access some c# variables and methods
+            LuaState.State["CastSpell"] = ServerCastSpell.CastSpell;
+            LuaState.State["Damage"] = ServerChangeHealth.Damage;
+            LuaState.State["Heal"] = ServerChangeHealth.Heal;
+            LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
+            LuaState.State["session"] = session;
+            LuaState.State["target"] = target;
+            LuaState.State["spellBookLoc"] = whereOnBar;
+            LuaState.State["spellID"] = spellID;
+            LuaState.State["addedOrder"] = addedOrder;
+
+
+            //Call the Lua script found by the Directory Find above
+            LuaState.State.DoFile(file[0]);
+
+            //Call Lua function for initial interaction
+            LuaFunction callFunction = LuaState.State.GetFunction("tickSpell");
+            callFunction.Call();
 
         }
+
+
     }
 }

@@ -39,7 +39,7 @@ namespace ReturnHome.Server.EntityObject
         public Memory<byte> StatUpdate = new Memory<byte>(new byte[0xEC]);
         public Memory<byte> GroupUpdate = new Memory<byte>(new byte[0X27]);
         //TODO: Need to calculate the variable length for this later. Max length for now for testing
-        public Memory<byte> BuffUpdate = new Memory<byte>(new byte[1060]);
+        public Memory<byte> BuffUpdate = new Memory<byte>(new byte[400]);
 
 
         /* These are all values for character creation, likely don't need to be attributes of the character object at all*/
@@ -205,6 +205,8 @@ namespace ReturnHome.Server.EntityObject
 
         public void WriteBuffArray()
         {
+
+
             BuffUpdate.Span.Fill(0);
             BufferWriter writer = new(BuffUpdate.Span);
 
