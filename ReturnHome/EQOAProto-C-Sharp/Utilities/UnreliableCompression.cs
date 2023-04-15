@@ -30,6 +30,17 @@ namespace ReturnHome.Utilities
                         thisReal = 0;
                     }
 
+                    if(thisCompress == 0xFF)
+                    {
+                        writer.Write((byte)(thisReal | 0x80));
+                        writer.Write((byte)thisCompress);
+                        writer.Write(span.Slice((i - thisReal), thisReal));
+
+                        //Reset counters
+                        thisCompress = 0;
+                        thisReal = 0;
+                    }
+
                     thisCompress += 1;
                     continue;
                 }
@@ -53,38 +64,33 @@ namespace ReturnHome.Utilities
             Memory<byte> messageBuf = new Memory<byte>(new byte[length]);
             Span<byte> temp = messageBuf.Span;
 
-            byte local_70;
+            int local_70;
             int counter = 0;
-
             //real bytes
-            uint len_00;
-
-            //null byte count
-            int uVar2;
+            int len_00;
 
             while (true)
             {
+                //Console.WriteLine($"Counter: " + counter);
                 local_70 = reader.Read<byte>();
                 if (local_70 == 0) break;
-                len_00 = (uint)local_70 & 0x7f;
+                len_00 = local_70 & 0x7f;
+
                 if ((local_70 & 0x80) == 0)
                 {
-                    len_00 = (uint)(local_70 >> 4);
-                    uVar2 = local_70 & 0xf;
+                    len_00 = (local_70 >> 4);
+                    local_70 &= 0xf;
                 }
 
                 else
-                    uVar2 = reader.Read<byte>();
+                    local_70 = reader.Read<byte>();
 
-                if (len_00 != 0)
-                {
-                    counter += uVar2;
-                    for (int i = 0; i < len_00; i++)
-                    {
-                        temp[counter] = reader.Read<byte>();
-                        counter += 1;
-                    }
-                }
+                if (local_70 != 0)
+                    counter += local_70;
+
+                reader.Buffer[reader.Position..(reader.Position + len_00)].CopyTo(temp[counter..]);
+                counter += len_00;
+                reader.Advance(len_00);
             }
             return messageBuf;
         }

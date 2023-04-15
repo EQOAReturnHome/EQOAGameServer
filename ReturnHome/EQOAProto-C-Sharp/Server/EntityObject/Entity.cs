@@ -220,7 +220,7 @@ namespace ReturnHome.Server.EntityObject
             {
                 writer.Write(EntityStatusEffects[i].icon);
                 writer.WriteString(Encoding.Unicode, EntityStatusEffects[i].name);
-                writer.Advance(124 - (EntityStatusEffects[i].name.Length *2));
+                writer.Position += 124 - (EntityStatusEffects[i].name.Length * 2);
             }
         }
 
@@ -234,10 +234,22 @@ namespace ReturnHome.Server.EntityObject
 
             StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, tick, duration, tier);
 
-            Console.WriteLine($"Status effect has name {statusEffect.name}, and icon {statusEffect.icon}");
+            //Console.WriteLine($"Status effect has name {statusEffect.name}, and icon {statusEffect.icon}");
 
             EntityStatusEffects.Add(statusEffect);
-            WriteBuffArray();
+            
+            BufferWriter writer = new(BuffUpdate.Span);
+
+            int size;
+            if (EntityStatusEffects.Count >= 8)
+                size = 8;
+            else
+                size = EntityStatusEffects.Count;
+
+            writer.Write(size);
+
+            for (int i = 0; i < size; ++i)
+                writer.Write(EntityStatusEffects[i].status);
 
         }
 

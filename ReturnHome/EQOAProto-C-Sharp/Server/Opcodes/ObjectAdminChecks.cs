@@ -25,6 +25,12 @@ namespace ReturnHome.Server.Opcodes.Chat
 
                 switch(changes[1])
                 {
+                    case "effect":
+                        MySession.MyCharacter.CreateStatusEffect(10, "test 1", 0xEE64D72D, 10, 1, 3);
+                        MySession.MyCharacter.CreateStatusEffect(11, "test 2", 0xFD0C297F, 10, 1, 3);
+                        MySession.MyCharacter.CreateStatusEffect(12, "test 3", 0x03CD177D, 10, 1, 3);
+                        break;
+
                     case "test":
                         ServerClientMenu.ChangeMenu(MySession, 0x23, 0x80);
                         break;
