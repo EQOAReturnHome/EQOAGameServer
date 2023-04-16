@@ -17,6 +17,7 @@ namespace ReturnHome.Server.Managers
 
         private static Stopwatch gameTimer;
         private static int serverTick = 1000 / 10;
+        public static SemaphoreSlim Sema = new SemaphoreSlim(1);
 
         static WorldServer()
         {
@@ -96,7 +97,11 @@ namespace ReturnHome.Server.Managers
             {
                 gameTimer.Restart();
 
+                await Sema.WaitAsync();
+
                 SessionManager.BeginSessionWork();
+
+                Sema.Release();
 
                 gameTimer.Stop();
 
