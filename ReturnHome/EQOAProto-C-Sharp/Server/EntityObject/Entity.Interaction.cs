@@ -18,6 +18,7 @@ using System.Collections.Concurrent;
 using ReturnHome.Server.EntityObject.Actors;
 using System.Text.RegularExpressions;
 using ReturnHome.Database.SQL;
+using ReturnHome.Server.Opcodes.Messages.Client;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -516,22 +517,26 @@ namespace ReturnHome.Server.EntityObject
             session.MyCharacter.Inventory.AddItem(default);
         }
 
-        public void TakeDamage(uint playerID, int dmg)
+        public void TakeDamage(Session session, uint playerID, int dmg)
         {
 
             if (CurrentHP > 0)
             {
-                if (dmg > this.CurrentHP)
+                if (dmg > CurrentHP)
                 {
-                    this.CurrentHP = 0;
+                    CurrentHP = 0;
                 }
                 else
                 {
-                    this.CurrentHP -= dmg;
+                    CurrentHP -= dmg;
                 }
             }
-            //TODO: We have Character entities here causing casting exceptions
-            ((Actor)this).EvaluateAggro(dmg, playerID);
+
+            ServerChangeHealth.Damage(session, dmg, ObjectID);
+
+
+                //TODO: We have Character entities here causing casting exceptions
+                ((Actor)this).EvaluateAggro(dmg, playerID);
         }
 
         public static void UpdateAnim(uint ServerID, AnimationState animation)

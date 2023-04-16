@@ -18,7 +18,6 @@ function  event_say(choice)
         else
             diagOptions = {"Actually, Malsis sent me."}
             npcDialogue = "Kellina: I don't have time for chit chat, dear."
-            SendDialogue(mySession, npcDialogue, diagOptions)
         end
     elseif (GetPlayerFlags(mySession, "10012") == "1") then
         if (CheckQuestItem(mySession, items.CRACKED_ANT_PINCER, 2)) then

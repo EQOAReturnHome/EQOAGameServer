@@ -17,8 +17,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             
             if (EntityManager.QueryForEntity(targetID, out Entity npc))
             {
-                npc.TakeDamage((uint)session.MyCharacter.ServerID, 500);
-                
+                npc.TakeDamage(session, (uint)session.MyCharacter.ServerID, 500);
                 //Blacksmith starts on 0x0008, 0x0018
 
                 if (npc.CurrentHP <= 0)
