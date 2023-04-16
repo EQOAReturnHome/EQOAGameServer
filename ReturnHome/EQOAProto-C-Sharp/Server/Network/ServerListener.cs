@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Utilities;
 
@@ -66,9 +67,11 @@ namespace ReturnHome.Server.Network
 
                 if (buffer != null)
                 {
+                    await WorldServer.Sema.WaitAsync();
                     ClientPacket clientPacket = new();
                     if (clientPacket.ProcessPacket(new Memory<byte>(buffer)))
                         SessionManager.ProcessPacket(this, clientPacket, (IPEndPoint)result.RemoteEndPoint);
+                    WorldServer.Sema.Release();
                 }
             }
         }
