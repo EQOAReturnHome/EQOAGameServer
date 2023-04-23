@@ -3,7 +3,7 @@ using System;
 using System.Threading.Tasks;
 using AuthServer.Account;
 using AuthServer.Server;
-using Authserver.Utility;
+using AuthServer.Utility;
 
 namespace AuthServer
 {
