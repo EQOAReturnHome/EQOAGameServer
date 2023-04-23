@@ -1,9 +1,12 @@
-﻿using System;
+﻿using System.Security.AccessControl;
+using System;
+using System.IO;
 using System.Timers;
 
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.Opcodes.Messages.Client;
+using ReturnHome.Utilities;
 
 namespace ReturnHome.Server
 {
@@ -15,6 +18,10 @@ namespace ReturnHome.Server
     {
         public static void Main(string[] args)
         {
+            var root = Directory.GetCurrentDirectory();
+            var dotenv = Path.Combine(root, ".env");
+            DotEnv.Load(dotenv);
+
             Console.WriteLine("Starting Server...");
 			//Load config for ServerListManager and start it
 			ServerListManager.ReadConfig();
