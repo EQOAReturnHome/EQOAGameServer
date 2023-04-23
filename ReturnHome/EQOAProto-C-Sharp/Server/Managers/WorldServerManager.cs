@@ -117,10 +117,7 @@ namespace ReturnHome.Server.Managers
                 //Console.WriteLine(entityList.Count);
                 for (int i = 0; i < entityList.Count; i++)
                 {
-                    if (entityList[i].canDespawn)
-                    {
-                        entityList[i] = null;
-                    }
+                    
                     if (entityList[i].EntityStatusEffects.Count > 0)
                     {
                         for (int j = 0; j < entityList[i].EntityStatusEffects.Count; j++)
