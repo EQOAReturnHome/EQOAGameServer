@@ -92,7 +92,7 @@ namespace ReturnHome.Server.EntityObject
                 //This shouldn't happen, but to be safe? Eventually could be an expired object that was originally target?
                 //if (ent == null)
                 //  return;
-                SpellManager.GetSpell(((Character)this).characterSession, spell, _target);
+                SpellManager.GetSpell(((Character)this), spell, _target);
 
             }
         }

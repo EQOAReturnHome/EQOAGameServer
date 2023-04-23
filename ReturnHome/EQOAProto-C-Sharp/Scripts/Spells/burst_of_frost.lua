@@ -11,6 +11,9 @@ end
 
 function completeSpell()
     Damage(session, damage, target)
+    entityTarget.CurrentHP = (entityTarget.CurrentHP-damage)
+
+
 end
 
 function useItem()

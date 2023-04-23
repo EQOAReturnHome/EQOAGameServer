@@ -23,7 +23,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             byte spell = reader.Read<byte>(); // WhereOnHotBar Value
             byte hotbarSlot = reader.Read<byte>();
 
-            session.MyCharacter.MySpellBook.AddSpellToHotbar(hotbarSlot, session.MyCharacter.MySpellBook.GetSpellFromBook(spell, session));
+            session.MyCharacter.MySpellBook.AddSpellToHotbar(hotbarSlot, session.MyCharacter.MySpellBook.GetSpellFromBook(spell));
             ServerMemorizeSpell.MemorizeSpell(session, _counter, spell, hotbarSlot);
         }
     }

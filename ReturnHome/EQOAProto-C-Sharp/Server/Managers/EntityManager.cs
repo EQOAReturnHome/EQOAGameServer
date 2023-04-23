@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Items;
+using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.Network;
 
 namespace ReturnHome.Server.Managers
 {
@@ -43,14 +46,22 @@ namespace ReturnHome.Server.Managers
         public static bool RemoveEntity(Entity entity)
         {
             if (!entityList.Contains(entity))
+            {
+                Console.WriteLine("Entity not found in list");
                 return false;
-            entityList.Remove(entity);
-            return true;   
+            }
+            else
+            {
+                Console.WriteLine("Entity found in list");
+                entity.canDespawn = true;
+                entityList.RemoveAll(s => s.ObjectID == entity.ObjectID);
+                return true;
+            }
         }
 
         public static bool QueryForEntity(uint ObjectID, out Entity e)
         {
-            if(_idCreator.QueryEntity(ObjectID, out Entity ent))
+            if (_idCreator.QueryEntity(ObjectID, out Entity ent))
             {
                 e = ent;
                 return true;
@@ -90,6 +101,8 @@ namespace ReturnHome.Server.Managers
             return false;
         }
 
+        //TODO: Later this maybe should be folded into the state machine, or probably folded in to the shard server rewrite
+        //As we don't need to query every entity for every zone nonstop when the zone is unoccupied, etc
         public static List<Entity> QueryForAllEntitys()
         {
             return entityList;

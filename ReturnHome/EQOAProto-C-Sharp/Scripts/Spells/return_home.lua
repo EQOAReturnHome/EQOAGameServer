@@ -4,6 +4,7 @@ local recast = 300 --Recast Time
 local castTime = 30
 
 function startSpell()
+    print(session)
     CastSpell(session, spellFX, target, castTime)
     CoolDown(session, addedOrder, recast)
 end
@@ -13,6 +14,5 @@ function completeSpell()
 end
 
 function useItem()
-    LearnSpell(session, GetSpell(1))
 end
 

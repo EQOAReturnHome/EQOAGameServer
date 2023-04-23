@@ -3,18 +3,9 @@ using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using NLua;
 using ReturnHome.Server.Network;
-using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject;
-using ReturnHome.Utilities;
-using System;
-using System.Text.Json;
-using System.Collections;
-using System.Collections.Generic;
 using ReturnHome.Database.SQL;
 using System.Data;
-using ReturnHome.Server.EntityObject.Items;
-using System.ServiceModel.Channels;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ReturnHome.Server.Managers
 {
@@ -107,7 +98,6 @@ namespace ReturnHome.Server.Managers
                 //Call Lua function for initial interaction
                 LuaFunction callFunction = LuaState.State.GetFunction("event_say");
                  mySession.MyCharacter.TurnToPlayer((int)mySession.MyCharacter.Target);
-                Console.WriteLine($"Choice Option is: {choiceOption}");
                 callFunction.Call(choiceOption);
             }
         }

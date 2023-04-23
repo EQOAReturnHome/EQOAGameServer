@@ -12,7 +12,7 @@ namespace ReturnHome.Server.Network
         private Session _session;
 
         //Stores our base data to xor against
-        private Memory<byte> _baseXOR = new Memory<byte>(new byte[400]);
+        private Memory<byte> _baseXOR = new Memory<byte>(new byte[1060]);
 
         //This is when the client ack's a specific message, we then set this to that ack'd message # to help generate our xor
         private ushort _baseMessageCounter = 0;
@@ -42,16 +42,16 @@ namespace ReturnHome.Server.Network
             if (!_baseXOR.Span.SequenceEqual(_session.MyCharacter.BuffUpdate.Span))
             {
 
-                Console.Write("Buffer: ");
-                foreach (byte b in _session.MyCharacter.BuffUpdate.Span)
-                    Console.Write(b.ToString("X2") + " ");
-                Console.WriteLine();
+                //Console.Write("Buffer: ");
+               // foreach (byte b in _session.MyCharacter.BuffUpdate.Span)
+                   // Console.Write(b.ToString("X2") + " ");
+                //Console.WriteLine();
 
                 Memory<byte> temp = new Memory<byte>(new byte[1060]);
                 CoordinateConversions.Xor_data(temp, _session.MyCharacter.BuffUpdate, _baseXOR, 1060);
                 _currentXORResults.Add(_messageCounter, temp);
                 _session.sessionQueue.Add(new Message((MessageType)_objectChannel, _messageCounter, _baseMessageCounter == 0 ? (byte)0 : (byte)(_messageCounter - _baseMessageCounter), temp));
-                Console.WriteLine($"XOR: {(byte)(_messageCounter - _baseMessageCounter)}");
+               // Console.WriteLine($"XOR: {(byte)(_messageCounter - _baseMessageCounter)}");
                 _messageCounter++;
             }
         }
@@ -70,10 +70,10 @@ namespace ReturnHome.Server.Network
             //Clear Dictionary
             _currentXORResults.Clear();
 
-            Console.Write("Base: ");
-            foreach (byte b in _baseXOR.Span)
-                Console.Write(b.ToString("X2") + " ");
-            Console.WriteLine();
+            //Console.Write("Base: ");
+            //foreach (byte b in _baseXOR.Span)
+                //Console.Write(b.ToString("X2") + " ");
+            //Console.WriteLine();
 
             //Ensure this is new base
             _baseMessageCounter = msgCounter;

@@ -9,6 +9,7 @@ using ReturnHome.Server.EntityObject.Effect;
 using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Text;
+using System.Xml.Linq;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -28,7 +29,8 @@ namespace ReturnHome.Server.EntityObject
         public int ServerID;
         public AIContainer aiContainer;
         public int _respawnTime;
-        public bool canRespawn { get; private set; } = true;
+        public bool canDespawn { get; set; }
+        public bool canRespawn { get;  set; } = true;
 
 
         public byte chatMode = 0; //Default to 0, say = 0, Shout = 3 NPC's can technically talk in chat too?
@@ -39,7 +41,7 @@ namespace ReturnHome.Server.EntityObject
         public Memory<byte> StatUpdate = new Memory<byte>(new byte[0xEC]);
         public Memory<byte> GroupUpdate = new Memory<byte>(new byte[0X27]);
         //TODO: Need to calculate the variable length for this later. Max length for now for testing
-        public Memory<byte> BuffUpdate = new Memory<byte>(new byte[400]);
+        public Memory<byte> BuffUpdate = new Memory<byte>(new byte[1060]);
 
 
         /* These are all values for character creation, likely don't need to be attributes of the character object at all*/
@@ -203,43 +205,12 @@ namespace ReturnHome.Server.EntityObject
         {
         }
 
-        public void WriteBuffArray()
+
+        public void RemoveStatusEffect(string effectName)
         {
 
+            EntityStatusEffects.RemoveAll(s => s.name == effectName);
 
-            BuffUpdate.Span.Fill(0);
-            BufferWriter writer = new(BuffUpdate.Span);
-
-            int size;
-            if (EntityStatusEffects.Count >= 8)
-                size = 8;
-            else
-                size = EntityStatusEffects.Count;
-
-            writer.Write(size);
-
-            for (int i = 0; i < size; ++i)
-            {
-                writer.Write(EntityStatusEffects[i].icon);
-                writer.WriteString(Encoding.Unicode, EntityStatusEffects[i].name);
-                writer.Position += 124 - (EntityStatusEffects[i].name.Length * 2);
-            }
-        }
-
-        public void RemoveStatusEffect(Session mySession, int effectID)
-        {
-
-        }
-
-        public void CreateStatusEffect(int id, string name, uint effectIcon, uint tick, uint duration, uint tier)
-        {
-
-            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, tick, duration, tier);
-
-            //Console.WriteLine($"Status effect has name {statusEffect.name}, and icon {statusEffect.icon}");
-
-            EntityStatusEffects.Add(statusEffect);
-            
             BufferWriter writer = new(BuffUpdate.Span);
 
             int size;
@@ -252,13 +223,29 @@ namespace ReturnHome.Server.EntityObject
 
             for (int i = 0; i < size; ++i)
                 writer.Write(EntityStatusEffects[i].status);
-
         }
 
-        public void AddStatusEffect(StatusEffect effect, Session mySession)
-        {
 
-            //EntityStatusEffects.Add(effect);
+        public void AddStatusEffect(int id, string name, uint effectIcon, uint duration, uint tier)
+        {
+            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, duration, tier);
+
+            //Console.WriteLine($"Status effect has name {statusEffect.name}, and icon {statusEffect.icon}");
+
+            EntityStatusEffects.Add(statusEffect);
+
+            BufferWriter writer = new(BuffUpdate.Span);
+
+            int size;
+            if (EntityStatusEffects.Count >= 8)
+                size = 8;
+            else
+                size = EntityStatusEffects.Count;
+
+            writer.Write(size);
+
+            for (int i = 0; i < size; ++i)
+                writer.Write(EntityStatusEffects[i].status);
         }
 
         public bool CanAttack()

@@ -49,10 +49,10 @@ namespace ReturnHome.Server.EntityObject.Spells
             }
         }
 
-        public Spell GetSpellFromBook(int AddedOrder, Session session)
+        public Spell GetSpellFromBook(int AddedOrder)
         {
             Spell spell = new Spell();
-            foreach (Spell foundSpell in session.MyCharacter.MySpellBook._spellList)
+            foreach (Spell foundSpell in _e.MySpellBook._spellList)
             {
                 if (foundSpell.AddedOrder == AddedOrder)
                 {
@@ -63,18 +63,17 @@ namespace ReturnHome.Server.EntityObject.Spells
         }
 
 
-        public int GetSpellID(uint hotbarLocation, Session session)
+        public int GetSpellID(uint hotbarLocation)
         {
-            int spellID = session.MyCharacter.MySpellBook._spellHotbar.Span[(int)hotbarLocation].SpellID;
+            int spellID = _e.MySpellBook._spellHotbar.Span[(int)hotbarLocation].SpellID;
 
 
             return spellID;
         }
 
-        public Spell GetSpell(uint hotbarLocation, Session session)
+        public Spell GetSpell(uint hotbarLocation)
         {
-
-            Spell spell = session.MyCharacter.MySpellBook._spellHotbar.Span[(int)hotbarLocation];
+            Spell spell = _e.MySpellBook._spellHotbar.Span[(int)hotbarLocation];
 
 
             return spell;
@@ -132,7 +131,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                 //Check if cast is completing
                 if (_spellCasting[i].CastCompleted())
                 {
-                    SpellManager.CastSpell(((Character)_e).characterSession, (uint)_spellCasting[i].WhereOnHotBar, ((Character)_e).characterSession.MyCharacter.Target);                    //Calculate damage and disperse server side
+                    SpellManager.CastSpell(_e, (uint)_spellCasting[i].WhereOnHotBar, ((Character)_e).characterSession.MyCharacter.Target);                    //Calculate damage and disperse server side
                     _spellCastingIndex.Add(i);
                 }
             }
@@ -163,8 +162,7 @@ namespace ReturnHome.Server.EntityObject.Spells
 
         public void TickEffect(StatusEffect effect)
         {
-           
-
+            SpellManager.TickSpell(((Character)_e).characterSession, effect);
         }
 
         public void DumpSpellBook(ref BufferWriter writer)

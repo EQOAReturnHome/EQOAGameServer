@@ -83,8 +83,6 @@ namespace ReturnHome.Server.Managers
             LuaState.State["session"] = session;
             LuaState.State["target"] = session.MyCharacter.Target;
             LuaState.State["AddStatusEffect"] = session.MyCharacter.AddStatusEffect;
-            LuaState.State["WriteBuffArray"] = session.MyCharacter.WriteBuffArray;
-            LuaState.State["StatusEffect"] = session.MyCharacter.CreateStatusEffect;
 
 
             //Call the Lua script found by the Directory Find above

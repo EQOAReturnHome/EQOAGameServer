@@ -6,5 +6,6 @@
     {
         Offensive = 0,
         Defensive = 1,
+        Friendly = 3
     }
 }

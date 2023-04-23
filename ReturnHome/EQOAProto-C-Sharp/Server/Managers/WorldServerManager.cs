@@ -9,6 +9,7 @@ using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Managers
 {
@@ -110,6 +111,45 @@ namespace ReturnHome.Server.Managers
                     Console.WriteLine("Server can't keep up");
                 }
 
+               List<Entity> entityList =  EntityManager.QueryForAllEntitys();
+
+                uint globalTick = 6;
+                //Console.WriteLine(entityList.Count);
+                for (int i = 0; i < entityList.Count; i++)
+                {
+                    if (entityList[i].canDespawn)
+                    {
+                        entityList[i] = null;
+                    }
+                    if (entityList[i].EntityStatusEffects.Count > 0)
+                    {
+                        for (int j = 0; j < entityList[i].EntityStatusEffects.Count; j++)
+                        {
+                            {
+                                //Console.WriteLine(effect.name);
+                                if (entityList[i].EntityStatusEffects[j].duration > 0)
+                                {
+                                    if ((DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= entityList[i].EntityStatusEffects[j].lastTick + 6))
+                                    {
+                                        Console.WriteLine(entityList[i].EntityStatusEffects[j].lastTick);
+                                        if (entityList[i].isPlayer)
+                                        {
+                                            //entityList[i].MySpellBook.TickEffect(((Character)entityList[i]).characterSession, entityList[i].EntityStatusEffects[j]);
+                                            entityList[i].MySpellBook.TickEffect(entityList[i].EntityStatusEffects[j]);
+                                            entityList[i].EntityStatusEffects[j].lastTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                                            entityList[i].EntityStatusEffects[j].duration -= globalTick;
+                                        }
+
+                                    }
+                                }
+                                else
+                                {
+                                    entityList[i].RemoveStatusEffect(entityList[i].EntityStatusEffects[j].name);
+                                }
+                            }
+                        }
+                    }
+                }
                 await Task.Delay(Math.Max(0, serverTick - (int)gameTimer.ElapsedMilliseconds));
             }
         }

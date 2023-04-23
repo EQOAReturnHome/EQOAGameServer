@@ -7,6 +7,7 @@ using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Effect;
+using System;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -200,12 +201,10 @@ namespace ReturnHome.Server.Network.Managers
                 if (session.inGame)
                 {
                     session.MyCharacter.MySpellBook.CheckCoolDownAndCast();
-                    foreach (StatusEffect effect in session.MyCharacter.EntityStatusEffects)
-                    {
-                        session.MyCharacter.MySpellBook.TickEffect(effect);
-                    }
+                    
                 }
             }
+
 
             return sessionCount;
         }

@@ -12,29 +12,29 @@ namespace ReturnHome.Server.EntityObject.Spells
     //
     public class Spell
     {
-        public bool coolDownCompleted { get;  set; } = true;
-        public bool spellCastingCompleted { get;  set; } = true;
-        public long SpellLastUsed { get;  set; }
-        public int SpellID { get;  set; }
+        public bool coolDownCompleted { get; set; } = true;
+        public bool spellCastingCompleted { get; set; } = true;
+        public long SpellLastUsed { get; set; }
+        public int SpellID { get; set; }
         public byte AddedOrder { get; set; }
-        public int OnHotBar { get;  set; }
-        public int WhereOnHotBar { get;  set; }
-        public int Unk1 { get;  set; }
-        public int ShowHide { get;  set; }
-        public int AbilityLevel { get;  set; }
-        public int Unk2 { get;  set; }
-        public int Unk3 { get;  set; }
-        public float SpellRange { get;  set; }
-        public int CastTime { get;  set; }
-        public int RequiredPower { get;  set; }
-        public int IconColor { get;  set; }
-        public int Icon { get;  set; }
-        public int Scope { get;  set; }
-        public int Recast { get;  set; }
-        public int EqpRequirement { get;  set; }
-        public string SpellName { get;  set; }
-        public string SpellDesc { get;  set; }
-        public long SpellEffect { get;  set; }
+        public int OnHotBar { get; set; }
+        public int WhereOnHotBar { get; set; }
+        public int Unk1 { get; set; }
+        public int ShowHide { get; set; }
+        public int AbilityLevel { get; set; }
+        public int Unk2 { get; set; }
+        public int Unk3 { get; set; }
+        public float SpellRange { get; set; }
+        public int CastTime { get; set; }
+        public int RequiredPower { get; set; }
+        public int IconColor { get; set; }
+        public int Icon { get; set; }
+        public int Scope { get; set; }
+        public int Recast { get; set; }
+        public int EqpRequirement { get; set; }
+        public string SpellName { get; set; }
+        public string SpellDesc { get; set; }
+        public long SpellEffect { get; set; }
         public SpellType SType { get; set; }
 
         public Spell()
@@ -45,7 +45,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         //Only items really needed are (int thisSpellID, int thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide) rest of data could be acquired from scripting
         public Spell(int thisSpellID, byte thisAddedOrder, int thisOnHotBar, int thisWhereOnHotBar, int thisUnk1, int thisShowHide,
             int thisAbilityLevel, int thisUnk2, int thisUnk3, float thisRange, int thisCastTime, int thisPower, int thisIconColor, int thisIcon,
-            int thisScope, int thisRecast, int thisEqpRequirement,string thisSpellName, string thisSpellDesc, int spellType)
+            int thisScope, int thisRecast, int thisEqpRequirement, string thisSpellName, string thisSpellDesc, int spellType)
         {
             SpellID = thisSpellID;
             AddedOrder = thisAddedOrder;
@@ -105,28 +105,45 @@ namespace ReturnHome.Server.EntityObject.Spells
             //Also need to consider sharing this to all nearby players so they see you casting... keep it simple for now
             if (e.IsWithinRange(SpellRange) && (e.CurrentPower >= RequiredPower) && coolDownCompleted && e.isPlayer && IsValidTarget(e))
             {
-                //TODO: Expand on this later  to include more functionality
+                //TODO: Expand on this later  to include more functionality.
+                //Is there a way to switch and re-assign target based on spell scope without fully writing all the method calls?
                 switch (Scope)
                 {
                     case (byte)SpellScope.Self:
-                        e.Target = e.ObjectID;
+                        if (e.isPlayer)
+                        {
+                            SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.ObjectID);
+
+                            //TODO: May need to be different here?
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.ObjectID, CastTime);
+                            ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
+
+                        }
                         break;
                     case (byte)SpellScope.Pet:
+                        if (e.isPlayer)
+                        {
+                            SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.Target);
+
+                            //TODO: May need to be different here?
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);
+                            ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
+
+                        }
                         break;
                     case (byte)SpellScope.Group:
+                        if (e.isPlayer)
+                        {
+                            SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.Target);
+
+                            //TODO: May need to be different here?
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);
+                            ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
+
+                        }
                         break;
                 }
 
-                //If entity is a player, make sure they see their own spell
-                if (e.isPlayer)
-                {
-                    SpellManager.GetSpell(((Character)e).characterSession,(uint)hotbarlocation, e.Target);
-
-                    //TODO: May need to be different here?
-                    ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);
-                    ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
-
-                }
                 //Keep this commented out for now or you run out of power
                 //e.CurrentPower -= RequiredPower;
                 SpellLastUsed = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -152,7 +169,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         {
             EntityManager.QueryForEntity(e.Target, out Entity ent);
 
-            if(Scope == (byte)SpellScope.Self)
+            if (Scope == (byte)SpellScope.Self)
             {
                 return true;
             }
@@ -163,7 +180,8 @@ namespace ReturnHome.Server.EntityObject.Spells
             {
                 switch (SType)
                 {
-                    case SpellType.Offensive: return false;
+                    case SpellType.Friendly: return true;
+                    case SpellType.Offensive: return true;
                     case SpellType.Defensive: return true;
                 }
             }
@@ -172,6 +190,7 @@ namespace ReturnHome.Server.EntityObject.Spells
             {
                 switch (SType)
                 {
+                    case SpellType.Friendly: return true;
                     case SpellType.Defensive: return false;
                     case SpellType.Offensive: return true;
                 }
@@ -189,6 +208,7 @@ namespace ReturnHome.Server.EntityObject.Spells
         public bool CastCompleted()
         {
             spellCastingCompleted = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= (SpellLastUsed + (CastTime * 1000)) ? true : false;
+
             return spellCastingCompleted;
         }
     }

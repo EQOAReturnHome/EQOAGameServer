@@ -1,7 +1,10 @@
 using System;
 
 using ReturnHome.Server.EntityObject.Actors;
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -167,8 +170,8 @@ namespace ReturnHome.Server.EntityObject
                 {
                     Dead = true;
                     //Move npc inventory to Loot Object for npc's
-                    if(!isPlayer)
-                        if(Inventory != null)
+                    if (!isPlayer)
+                        if (Inventory != null)
                             ((Actor)this).corpse.UpdateCorpseOnDeath(Inventory.itemContainer);
                 }
 
@@ -177,6 +180,7 @@ namespace ReturnHome.Server.EntityObject
 
                 //Update HP bar for the object update message
                 ObjectUpdateHPBar();
+
             }
         }
 

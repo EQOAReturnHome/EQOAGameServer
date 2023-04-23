@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace ReturnHome.Server.EntityObject.Effect
 {
     public class StatusEffect
@@ -7,7 +9,7 @@ namespace ReturnHome.Server.EntityObject.Effect
         public int id;
         public string name;
         public uint icon;
-        public uint tick;
+        public long lastTick;
         public uint duration;
         public uint tier;
         public Status status;
@@ -20,11 +22,12 @@ namespace ReturnHome.Server.EntityObject.Effect
 
 
         //Status effect contructor for players(need name and icon for 43 unreliable message)
-        public StatusEffect(int id, string name, uint icon, uint tick, uint duration, uint tier)
+        public StatusEffect(int id, string name, uint icon, uint duration, uint tier)
         {
             status = new(icon, name);
+            this.name = name;
             this.id = id;
-            this.tick = tick;
+            this.lastTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             this.duration = duration;
             this.tier = tier;
         }
@@ -33,7 +36,7 @@ namespace ReturnHome.Server.EntityObject.Effect
         public StatusEffect(int id, uint tick, uint duration, uint tier)
         {
             this.id = id;
-            this.tick = tick;
+            this.lastTick = tick;
             this.duration = duration;
             this.tier = tier;
         }
