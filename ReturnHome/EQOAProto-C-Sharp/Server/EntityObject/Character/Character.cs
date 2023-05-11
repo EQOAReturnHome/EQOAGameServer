@@ -7,6 +7,8 @@ using ReturnHome.Server.EntityObject.Stats;
 using System;
 using System.Text.Json;
 using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.Managers;
+using ReturnHome.Server.Opcodes.Messages.Server;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -81,7 +83,7 @@ namespace ReturnHome.Server.EntityObject.Player
             FacingF = facing;
             World = (World)world;
             ModelID = modelID;
-            MyHotkeys= hotkeys;
+            MyHotkeys = hotkeys;
             //Base HPFactor calculated in Character
             switch (EntityClass)
             {
@@ -217,12 +219,12 @@ namespace ReturnHome.Server.EntityObject.Player
                 this.playerFlags = JsonSerializer.Deserialize<Dictionary<string, string>>(playerFlags);
             }
 
-            if(completedQuests != null)
+            if (completedQuests != null)
             {
                 this.completedQuests = JsonSerializer.Deserialize<List<Quest>>(completedQuests);
             }
 
-            if(activeQuests != null)
+            if (activeQuests != null)
             {
                 this.activeQuests = JsonSerializer.Deserialize<List<Quest>>(activeQuests);
             }
@@ -298,16 +300,28 @@ namespace ReturnHome.Server.EntityObject.Player
             Logger.Info($"Flag {mySession.MyCharacter.playerFlags[flagKey]} set for {mySession.MyCharacter.CharName}");
         }
 
-        public void SetPlayerBinding()
+        public void SetPlayerBinding(uint entityID)
         {
-            this.boundWorld = (World)World;
-            this.boundX= x;
-            this.boundY= y;
-            this.boundZ= z;
-            this.boundFacing= Facing;
+            //Casts the spiritmaster animation whenever you're bound. Might need a second method specfiically for setting player binding by Spiritmaster since it's in theory
+            //possible to want to bind the player without the use of the spiritmaster.
+            ServerCastSpell.CastSpell(characterSession, 0x08F3B955, entityID, ObjectID, 2);
+            boundWorld = (World)World;
+            boundX = x;
+            boundY = y;
+            boundZ = z;
+            boundFacing = Facing;
         }
 
         public Character Copy() => (Character)MemberwiseClone();
+
+        public void OnPlayerDeath()
+        {
+            if (EntityManager.QueryForEntityByServerID(ObjectID, out Entity entity))
+            {
+                entity.Animation = (byte)AnimationState.Die;
+                ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
+            }
+        }
 
     }
 }

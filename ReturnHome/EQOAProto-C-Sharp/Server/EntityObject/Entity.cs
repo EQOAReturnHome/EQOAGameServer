@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using static System.Net.Mime.MediaTypeNames;
 using System.Text;
 using System.Xml.Linq;
+using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -24,13 +26,15 @@ namespace ReturnHome.Server.EntityObject
         public SpellBook MySpellBook;
         private int _level;
         private uint _objectID;
-        private long _killTime;
+        public long _killTime;
+        public long deathTime;
         private EntityType _npcType = 0;
         public int ServerID;
         public AIContainer aiContainer;
-        public int _respawnTime;
-        public bool canDespawn { get; set; }
-        public bool canRespawn { get;  set; } = true;
+        public int _respawnTime = 30;
+        public bool despawn { get; set; } = false;
+        public bool canRespawn { get; set; } = true;
+        public bool respawn { get; set; } = false;
 
 
         public byte chatMode = 0; //Default to 0, say = 0, Shout = 3 NPC's can technically talk in chat too?
@@ -340,7 +344,12 @@ namespace ReturnHome.Server.EntityObject
 
         public bool IsAlive()
         {
-            return !aiContainer.IsDead();// && GetHP() > 0;
+            if (CurrentHP > 0)
+            {
+                return true;
+            }
+            else { return false; }
+            //return !aiContainer.IsDead();// && GetHP() > 0;
         }
 
         public int GetHP()
@@ -351,7 +360,7 @@ namespace ReturnHome.Server.EntityObject
 
         public int GetMaxHP()
         {
-            return this.HPMax;
+            return HPMax;
         }
 
         public int GetMP()

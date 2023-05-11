@@ -115,7 +115,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                             SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.ObjectID);
 
                             //TODO: May need to be different here?
-                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.ObjectID, CastTime);
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.ObjectID, e.ObjectID, CastTime);
                             ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
 
                         }
@@ -126,7 +126,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                             SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.Target);
 
                             //TODO: May need to be different here?
-                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.ObjectID, e.Target, CastTime);
                             ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
 
                         }
@@ -137,7 +137,18 @@ namespace ReturnHome.Server.EntityObject.Spells
                             SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.Target);
 
                             //TODO: May need to be different here?
-                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.Target, CastTime);
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.ObjectID, e.Target, CastTime);
+                            ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
+
+                        }
+                        break;
+                    case (byte)SpellScope.Target:
+                        if (e.isPlayer)
+                        {
+                            SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.Target);
+
+                            //TODO: May need to be different here?
+                            ServerCastSpell.CastSpell(((Character)e).characterSession, SpellEffect, e.ObjectID, e.Target, CastTime);
                             ServerSpellCoolDown.SpellCoolDown(((Character)e).characterSession, AddedOrder, Recast);
 
                         }

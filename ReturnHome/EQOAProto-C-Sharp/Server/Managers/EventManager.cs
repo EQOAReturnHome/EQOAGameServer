@@ -48,7 +48,6 @@ namespace ReturnHome.Server.Managers
             LuaState.State["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);
             LuaState.State["level"] = Entity.GetLevel(mySession);
 
-
             LuaState.State["SendDialogue"] = mySession.MyCharacter.SendDialogue;
             LuaState.State["SendMultiDialogue"] = mySession.MyCharacter.SendMultiDialogue;
             LuaState.State["mySession"] = mySession;
@@ -60,6 +59,7 @@ namespace ReturnHome.Server.Managers
 
             string[] file;
             EntityManager.QueryForEntity(mySession.MyCharacter.Target, out Entity targetNPC);
+            LuaState.State["thisEntity"] = targetNPC;
 
             if (mySession.MyCharacter.MyDialogue.npcName == null)
                 return;

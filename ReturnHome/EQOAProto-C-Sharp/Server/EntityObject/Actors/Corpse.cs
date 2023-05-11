@@ -63,13 +63,19 @@ namespace ReturnHome.Server.EntityObject.Actors
                 }
         }
 
+        public bool CheckLoot()
+        {
+            if (Loot is null) return false;
+            else return true;
+        }
+
         public void ExitCorpse(Session session)
         {
             _lootee = null;
 
-            if (Loot is null)
+            if (Loot is null || Loot.Count <= 0)
             {
-                EntityManager.RemoveEntity(_npc);
+                _npc.despawn = true;
             }
         }
     }

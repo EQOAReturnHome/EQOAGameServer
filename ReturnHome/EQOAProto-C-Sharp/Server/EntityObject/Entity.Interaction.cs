@@ -519,6 +519,18 @@ namespace ReturnHome.Server.EntityObject
 
         public void TakeDamage(Session session, uint playerID, int dmg)
         {
+            if (!isPlayer)
+            {
+                ((Actor)this).EvaluateAggro(dmg, session.MyCharacter);
+                ServerChangeHealth.Damage(session, dmg, session.MyCharacter.ObjectID, ObjectID);
+            }
+            else
+            {
+                if (EntityManager.QueryForEntityByServerID(session.MyCharacter.Target, out Entity entity))
+                    ServerChangeHealth.Damage(session, dmg, entity.ObjectID, session.MyCharacter.ObjectID);
+
+
+            }
 
             if (CurrentHP > 0)
             {
@@ -532,11 +544,7 @@ namespace ReturnHome.Server.EntityObject
                 }
             }
 
-            ServerChangeHealth.Damage(session, dmg, ObjectID);
-
-
-                //TODO: We have Character entities here causing casting exceptions
-                ((Actor)this).EvaluateAggro(dmg, playerID);
+            //TODO: We have Character entities here causing casting exceptions
         }
 
         public static void UpdateAnim(uint ServerID, AnimationState animation)
@@ -547,13 +555,6 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public static void UpdateAnimByte(uint ServerID, byte animation)
-        {
-            if (EntityManager.QueryForEntityByServerID(ServerID, out Entity entity))
-            {
-                entity.Animation = animation;
-            }
-        }
 
         public static void AddTunar(Session session, int tunar) => session.MyCharacter.Inventory.AddTunar(tunar);
 

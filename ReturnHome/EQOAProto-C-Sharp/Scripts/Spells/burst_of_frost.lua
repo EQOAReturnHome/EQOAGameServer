@@ -5,15 +5,13 @@ local castTime = 2
 local damage = 46 + (session.MyCharacter.Dexterity*.05)
 
 function startSpell()
-    CastSpell(session, spellFX, target, castTime)
+    CastSpell(session, spellFX, entity.ObjectID, target, castTime)
     CoolDown(session, addedOrder, recast)
 end
 
 function completeSpell()
-    Damage(session, damage, target)
+    Damage(session, damage, entity.ObjectID, target)
     entityTarget.CurrentHP = (entityTarget.CurrentHP-damage)
-
-
 end
 
 function useItem()

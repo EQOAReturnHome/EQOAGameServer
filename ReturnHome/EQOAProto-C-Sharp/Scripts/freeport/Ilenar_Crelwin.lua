@@ -4,7 +4,7 @@ function  event_say(choice)
     local questText = ""
     local npcDialogue = ""
     local quests = require("Scripts/FreeportQuests")
-    if (GetPlayerFlags(mySession, "10017") == "1") then
+    if (GetPlayerFlags(mySession, "100108") == "1") then
         if (choice:find("day")) then
             multiDialogue = {
                 "Ilenar Crelwin: Oh I am not having a pleasant time at all. Not one bit I tell you. First my robe was damaged on the way here, and now I find sand everywhere in my quarters...",
@@ -16,18 +16,18 @@ function  event_say(choice)
             }
             SendMultiDialogue(mySession, multiDialogue)
             GrantItem(mySession, 8457, 1)
-            ContinueQuest(mySession, 10017, quests[10017][1].log)
+            ContinueQuest(mySession, 100108, quests[100108][1].log)
         else
             diagOptions = {"...And how is your day?", "Oh sorry, I must be in the wrong building."}
             npcDialogue =
                 "Ilenar Crelwin: You had better be the one sent from The Academy of Arcane Science. I must me tended to at once!"
             SendDialogue(mySession, npcDialogue, diagOptions)
         end
-    elseif (GetPlayerFlags(mySession, "10017") == "5") then
+    elseif (GetPlayerFlags(mySession, "100108") == "5") then
         if (CheckQuestItem(mySession, 8458, 1)) then
             multiDialogue = {
                 "Ilenar Crelwin: Where have you been? While you have been taking your sweet time, I've had to deal with the indecency of being seen without my official robe!",
-                "Ilenar Crelwin: ...I'll take my robe now�.What is this? It is covered in chocolate! This is preposterous! What idiot ruined my precious robe?",
+                "Ilenar Crelwin: ...I'll take my robe now. What is this? It is covered in chocolate! This is preposterous! What idiot ruined my precious robe?",
                 "Ilenar Crelwin: This is the sloppy work of Delwin Stitchfinger! I am furious!...He will soon know what it means to cross me.",
                 "Ilenar Crelwin: I have another mission for you. One even more serious. We will send him a 'thank you'' along with something he holds so dear.",
                 "Ilenar Crelwin: Please return to Delwin with this box of 'special' chocolates. Be sure to let him know Ilenar 'appreciates' his service. Return to me when this is done.",
@@ -39,13 +39,13 @@ function  event_say(choice)
             SendMultiDialogue(mySession, multiDialogue)
             TurnInItem(mySession, 8458, 1)
             GrantItem(mySession, 8337, 1)
-            ContinueQuest(mySession, 10017, quests[10017][5].log)
+            ContinueQuest(mySession, 100108, quests[100108][5].log)
         else
             multiDialogue =
                 "Ilenar Crelwin: Where have you been? Why have you returned empty handed? You must bring me my robe at once!"
             SendMultiDialogue(mySession, multiDialogue)
         end
-    elseif (GetPlayerFlags(mySession, "10017") == "7") then
+    elseif (GetPlayerFlags(mySession, "100108") == "7") then
         if (choice:find("chocolate")) then
             multiDialogue = {
                 "Ilenar Crelwin: Ah yes. The sweet taste of revenge. These moments must be savored, you know. They wont come often enough.",
@@ -56,7 +56,7 @@ function  event_say(choice)
             }
             SendMultiDialogue(mySession, multiDialogue)
             GrantItem(mySession, 8450, 1)
-            CompleteQuest(mySession, 10017, quests[10017][7].xp)
+            CompleteQuest(mySession, 100108, quests[100108][7].xp)
         elseif (choice:find("mad")) then
             multiDialogue = {
                 "Ilenar Crelwin: If you think you can escape my command, I assure you, I will have you hunted, and brought to justice. My justice."
@@ -67,11 +67,11 @@ function  event_say(choice)
             npcDialogue = "Tell me at once what you have done."
             SendDialogue(mySession, npcDialogue, diagOptions)
         end
-    elseif (GetPlayerFlags(mySession, "10018") == "0") then
+    elseif (GetPlayerFlags(mySession, "100109") == "0") then
         if (level >= 15) then
             if (choice:find("back")) then
                 multiDialogue = {
-                    "Ilenar Crelwin: You served me well before, so I will forgive your tardiness, but don�t let it happen again.",
+                    "Ilenar Crelwin: You served me well before, so I will forgive your tardiness, but don't let it happen again.",
                     "Ilenar Crelwin: I am working on a new spell, something never before attempted. But I need some rare ingredients.",
                     "Ilenar Crelwin: Nightworm roots are banned in most cities. It is a rare plant that grows only in the fetid marshes of the south, and their poisonous properties make them illegal.",
                     "Ilenar Crelwin: Fortunately I have a contact, Dagget Klem, who can get some. Klem runs a smuggling ring in a small fishing village called Temby, along the coast not far north of Freeport.",
@@ -79,7 +79,7 @@ function  event_say(choice)
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                StartQuest(mySession, 10018, quests[10018][0].log)
+                StartQuest(mySession, 100109, quests[100109][0].log)
             elseif (choice:find("rather")) then
                 multiDialogue = {
                     "Ilenar Crelwin: If you think you can escape my command, I assure you, I will have you hunted, and brought to justice. My justice."
@@ -91,7 +91,7 @@ function  event_say(choice)
                 SendDialogue(mySession, npcDialogue, diagOptions)
             end
         end
-    elseif (GetPlayerFlags(mySession, "10018") == "4") then
+    elseif (GetPlayerFlags(mySession, "100109") == "4") then
         if (CheckQuestItem(mySession, 8340, 1)) then
             multiDialogue = {
                 "Ilenar Crelwin: The roots! You have them. I would recognize that smell anywhere. No one saw you with them right?",
@@ -104,16 +104,16 @@ function  event_say(choice)
             }
             SendMultiDialogue(mySession, multiDialogue)
             TurnInItem(mySession, 8340, 1)
-            ContinueQuest(mySession, 10018, quests[10018][4].log)
+            ContinueQuest(mySession, 100109, quests[100109][4].log)
         else
             multiDialogue =
                 "Ilenar Crelwin: I need nightworm root from Dagget Klem in Temby. What are you doing wasting time here?"
             SendMultiDialogue(mySession, multiDialogue)
         end
-    elseif (GetPlayerFlags(mySession, "10018") == "5") then
+    elseif (GetPlayerFlags(mySession, "100109") == "5") then
         if (CheckQuestItem(mySession, 8341, 1)) then
             multiDialogue = {
-                "Ilenar Crelwin: I can see by the sand on your boots that you�ve been to the desert. And there it is...Blood of madmen.",
+                "Ilenar Crelwin: I can see by the sand on your boots that you've been to the desert. And there it is...Blood of madmen.",
                 "Ilenar Crelwin: Once again, you returned to me alive, when almost any other young assistant would have perished.",
                 "Ilenar Crelwin: These items you have brought me will do wonders for my research. My magic will one day be the talk of Tunaria. You may take pride in knowing that you have played a small part in that story.",
                 "Ilenar Crelwin: I am done with you. I believe Kellina has something for you at this moment. Be gone with you now!",
@@ -123,7 +123,7 @@ function  event_say(choice)
             }
             SendMultiDialogue(mySession, multiDialogue)
             TurnInItem(mySession, 8341, 1)
-            ContinueQuest(mySession, 10018, quests[10018][5].log)
+            ContinueQuest(mySession, 100109, quests[100109][5].log)
         else
             multiDialogue =
                 "Ilenar Crelwin:  Find madmen at ruins south of Freeport. Return to me with some of their blood. Stop dallying!"

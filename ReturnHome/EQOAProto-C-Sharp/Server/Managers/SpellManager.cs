@@ -106,12 +106,14 @@ namespace ReturnHome.Server.Managers
             LuaState.State["playerFacing"] = ((Character)entity).Facing;
 
 
+
             //Call the Lua script found by the Directory Find above
             LuaState.State.DoFile(file[0]);
 
             //Call Lua function for initial interaction
             LuaFunction callFunction = LuaState.State.GetFunction("startSpell");
             callFunction.Call();
+           
 
 
         }
@@ -133,7 +135,7 @@ namespace ReturnHome.Server.Managers
         public static void CastSpell(Entity entity, uint whereOnBar, uint target)
         {
             Spell spell = (((Character)entity).MySpellBook.GetSpell(whereOnBar));
-            Console.WriteLine(spell.SpellName);
+            Console.WriteLine($"Trying to cast spell {spell.SpellName}");
 
 
             int addedOrder = spell.AddedOrder;

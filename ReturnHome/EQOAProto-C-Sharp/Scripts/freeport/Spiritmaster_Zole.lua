@@ -5,7 +5,7 @@ local diagOptions = {}
 function event_say(choice)
     if (choice:find("bind")) then
         npcDialogue = "Your soul will now return here, playerName."
-        BindPlayer()
+        BindPlayer(thisEntity.ObjectID)
     elseif (choice:find("Not")) then
         npcDialogue = "Please come back if you change your mind."
     else

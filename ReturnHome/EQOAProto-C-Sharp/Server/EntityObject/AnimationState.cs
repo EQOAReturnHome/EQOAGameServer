@@ -10,6 +10,7 @@
         Cheer = 0x3d,
         Crouching = 0x07,
         Die = 0x0e,
+        Default = 0x00,
         Falling = 0x06,
         FightingStance = 0x11,
         HighKick = 0x35,

@@ -53,9 +53,7 @@ namespace ReturnHome.Server.Managers
             else
             {
                 Console.WriteLine("Entity found in list");
-                entity.canDespawn = true;
-                entityList.RemoveAll(s => s.ObjectID == entity.ObjectID);
-                entity = null;
+                entity.despawn = true;
                 return true;
             }
         }

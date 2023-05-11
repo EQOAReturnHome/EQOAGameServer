@@ -11,7 +11,7 @@ SetPlayerFlags(mySession, "admin", "true")
 local dialogueOptions = {}
 function event_say(choice)
    --Magician                          --Enchanter
-   if ((GetPlayerFlags(mySession, "10011") or GetPlayerFlags(mySession, "12011")) == "2") then
+   if ((GetPlayerFlags(mySession, "100102") or GetPlayerFlags(mySession, "120102")) == "2") then
       npcDialogue = "What do you want?"
       diagOptions = {"Spiritmaster Alshan sent me.", "Nothing"}
       if (choice:find("Alshan")) then
@@ -25,11 +25,11 @@ function event_say(choice)
          }
          SendMultiDialogue(mySession, multiDialogue)
          --Magician
-         if (GetPlayerFlags(mySession, "10011") == "2") then
-            ContinueQuest(mySession, 10011, quests[10011][2].log)
+         if (GetPlayerFlags(mySession, "100102") == "2") then
+            ContinueQuest(mySession, 100102, quests[100102][2].log)
             --Enchanter
          elseif (GetPlayerFlags(mySession, "12011") == "2") then
-            ContinueQuest(mySession, 12011, quests[12011][2].log)
+            ContinueQuest(mySession, 120102, quests[120102][2].log)
          end
          SetPlayerFlags(mySession, "freeport_coach", "true")
          npcDialogue = ""
@@ -39,7 +39,7 @@ function event_say(choice)
       end
       SendDialogue(mySession, npcDialogue, diagOptions)
       SetPlayerFlags(mySession, "freeport_coach", "true")
-   elseif ((GetPlayerFlags(mySession, "11011") or GetPlayerFlags(mySession, "09011")) == "2") then
+   elseif ((GetPlayerFlags(mySession, "110102") or GetPlayerFlags(mySession, "090102")) == "2") then
       npcDialogue = "What do you want?"
       diagOptions = {"Spiritmaster Keika sent me.", "Nothing"}
       if (choice:find("Keika")) then
@@ -53,11 +53,11 @@ function event_say(choice)
          }
          SendMultiDialogue(mySession, multiDialogue)
          --Necromancer
-      if (GetPlayerFlags(mySession, "11011") == "2") then
-         ContinueQuest(mySession, 11011, quests[11011][2].log)
+      if (GetPlayerFlags(mySession, "110102") == "2") then
+         ContinueQuest(mySession, 110102, quests[110102][2].log)
          --Cleric
       elseif (GetPlayerFlags(mySession, "09011") == "2") then
-         ContinueQuest(mySession, 09011, quests[09011][2].log)
+         ContinueQuest(mySession, 090102, quests[090102][2].log)
       end
       SetPlayerFlags(mySession, "freeport_coach", "true")
       npcDialogue = ""
@@ -67,7 +67,7 @@ function event_say(choice)
       end
    SendDialogue(mySession, npcDialogue, diagOptions)
    SetPlayerFlags(mySession, "freeport_coach", "true")
-elseif (GetPlayerFlags(mySession, "10011") ~= "1") then
+elseif (GetPlayerFlags(mySession, "100102") ~= "1") then
    if (GetPlayerFlags(mySession, "freeport_coach") == "true") then
       if (choice:find("Highpass")) then
          TeleportPlayer(

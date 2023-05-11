@@ -1,10 +1,9 @@
- 
 local quests = require('Scripts/FreeportQuests')
 function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
-    if (GetPlayerFlags(mySession, "10011") == "1")
+    if (GetPlayerFlags(mySession, "100102") == "1")
     then
         if(choice:find("Good")) then
         diagOptions = {}
@@ -19,12 +18,13 @@ function  event_say(choice)
             "Spiritmaster Alshan: You can find him just passed the southern exit of Freeport. Head out the doorway southeast of here, then south along the midroad, then southwest to the stables."
             }
             SendMultiDialogue(mySession, multiDialogue)
-            ContinueQuest(mySession, 10011, quests[10011][1].log)
+            BindPlayer(thisEntity.ObjectID)
+            ContinueQuest(mySession, 100102, quests[100102][1].log)
         else
         npcDialogue = "Hello."
         diagOptions = { "Sorry to bother, but Malsis sent me.", "Good day!" }
         end
-    elseif (GetPlayerFlags(mySession, "12011") == "1")
+    elseif (GetPlayerFlags(mySession, "120102") == "1")
     then
         npcDialogue = "Hello."
         diagOptions = { "Sorry to bother, but Azlynn sent me.", "Farewell" }
@@ -36,11 +36,18 @@ function  event_say(choice)
             "Spiritmaster Alshan: The body will rematerialize there along with all of it's equipment. I will bind your spirit to this location now.",
             "Spiritmaster Alshan: Before I send you back to Azlynn you must speak with Coachman Ronks. He runs the stables to the south.",
             "Spiritmaster Alshan: You can find him just passed the southern exit of Freeport. Head out the doorway southeast of here, then south along the midroad, then southwest to the stables."
-            ContinueQuest(mySession, 10011, quests[12011][1].log)
+            ContinueQuest(mySession, 120102, quests[120102][1].log)
         end
+    elseif (choice:find("bind")) then
+        npcDialogue = "Your soul will now return here, playerName."
+        BindPlayer(thisEntity.ObjectID)
+    elseif (choice:find("Not")) then
+        npcDialogue = "Please come back if you change your mind."
     else
         npcDialogue = "Would you like me to bind your spirit to this location, child?"
+        diagOptions = {"Yes, please bind my soul.", "Not at this time."}
     end
     SendDialogue(mySession, npcDialogue, diagOptions)
 end
+
 

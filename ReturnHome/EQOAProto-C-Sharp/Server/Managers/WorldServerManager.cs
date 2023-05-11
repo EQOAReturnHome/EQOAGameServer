@@ -20,6 +20,7 @@ namespace ReturnHome.Server.Managers
         private static int serverTick = 1000 / 10;
         public static SemaphoreSlim Sema = new SemaphoreSlim(1);
 
+
         static WorldServer()
         {
 
@@ -111,13 +112,31 @@ namespace ReturnHome.Server.Managers
                     Console.WriteLine("Server can't keep up");
                 }
 
-               List<Entity> entityList =  EntityManager.QueryForAllEntitys();
+                List<Entity> entityList = EntityManager.QueryForAllEntitys();
 
                 uint globalTick = 6;
+                uint attackTick = 3;
                 //Console.WriteLine(entityList.Count);
                 for (int i = 0; i < entityList.Count; i++)
                 {
-                    
+                    if (!entityList[i].isPlayer)
+                    {
+                        if (((Actor)entityList[i]).aggroTable.Count > 0)
+                        {
+                            if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= ((Actor)entityList[i]).lastAtkTick + attackTick || ((Actor)entityList[i]).lastAtkTick == 0)
+                            {
+                                ((Actor)entityList[i]).EvaluateAggroTable();
+                            }
+                        }
+                    }
+
+                    if (entityList[i].Dead is true && DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= (entityList[i]._killTime + entityList[i]._respawnTime))
+                    {
+                        entityList[i].respawn = true;
+                        Respawn.ResetActor((Actor)entityList[i]);
+                    }
+
+
                     if (entityList[i].EntityStatusEffects.Count > 0)
                     {
                         for (int j = 0; j < entityList[i].EntityStatusEffects.Count; j++)
@@ -152,3 +171,4 @@ namespace ReturnHome.Server.Managers
         }
     }
 }
+

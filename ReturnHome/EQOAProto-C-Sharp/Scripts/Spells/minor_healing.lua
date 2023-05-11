@@ -11,7 +11,7 @@ local heal = 16 + (entity.Charisma*.25)
 local tier = 0
 
 function startSpell()
-   CastSpell(session, spellFX, target, castTime)
+   CastSpell(session, spellFX, entity.ObjectID, target, castTime)
    CoolDown(session, addedOrder, recast)
 end
 

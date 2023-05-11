@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject;
 using System.Linq;
+using ReturnHome.Server.EntityObject.Actors;
 
 namespace ReturnHome.Server.Network
 {
@@ -76,9 +77,13 @@ namespace ReturnHome.Server.Network
             if (IsActive)
             {
                 //If entity becomes null, disable channel?
-                if (entity == null)
+                if (entity.despawn == true)
                 {
+                    entity.despawn = false;
                     IsActive = false;
+                    return;
+                }else if(entity.respawn == true) {
+                    IsActive = true;
                     return;
                 }
 

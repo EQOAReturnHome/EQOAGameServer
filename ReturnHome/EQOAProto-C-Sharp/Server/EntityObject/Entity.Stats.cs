@@ -3,6 +3,7 @@ using System;
 using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 
@@ -18,7 +19,7 @@ namespace ReturnHome.Server.EntityObject
         public readonly int BaseMaxStat;
         private int _minimumStat = -100;
         private int _randoValue = 0x64;
-        public bool Dead { get; private set; } = false;
+        public bool Dead { get; set; } = false;
         private int _unk2;
 
         //Our most current stats. This is stat totals influenced by gear, buff's, CM's and TP's.
@@ -168,11 +169,16 @@ namespace ReturnHome.Server.EntityObject
                 //TODO: Trigger dying stuff here?
                 if (value <= 0)
                 {
-                    Dead = true;
-                    //Move npc inventory to Loot Object for npc's
                     if (!isPlayer)
-                        if (Inventory != null)
-                            ((Actor)this).corpse.UpdateCorpseOnDeath(Inventory.itemContainer);
+                    {
+                        _currentHP = 0;
+                        Console.WriteLine($"Health value is {_currentHP}");
+                        ((Actor)this).OnMobDeath();
+                    }
+                    else
+                    {
+                        ((Character)this).OnPlayerDeath();
+                    }
                 }
 
                 //Update HP for stat message

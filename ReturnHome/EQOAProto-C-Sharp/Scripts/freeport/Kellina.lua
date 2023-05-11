@@ -5,7 +5,7 @@ function  event_say(choice)
     local diagOptions = {}
     local questText = ""
     local npcDialogue = ""
-    if (GetPlayerFlags(mySession, "10012") == "0") then
+    if (GetPlayerFlags(mySession, "100103") == "0") then
         if (choice:find("Malsis")) then
             multiDialogue = {
                 "Kellina: Oohh, now that isn't that disappointing. Well I suppose I should instruct you. But first you must prove your worth.",
@@ -14,12 +14,12 @@ function  event_say(choice)
                 "Kellina: Now be off. I've wasted enough of my time with you."
             }
             SendMultiDialogue(mySession, multiDialogue)
-            StartQuest(mySession, 10012, quests[10012][0].log)
+            StartQuest(mySession, 100103, quests[100103][0].log)
         else
             diagOptions = {"Actually, Malsis sent me."}
             npcDialogue = "Kellina: I don't have time for chit chat, dear."
         end
-    elseif (GetPlayerFlags(mySession, "10012") == "1") then
+    elseif (GetPlayerFlags(mySession, "100103") == "1") then
         if (CheckQuestItem(mySession, items.CRACKED_ANT_PINCER, 2)) then
             if (choice:find("nevermind")) then
                 npcDialogue =
@@ -37,7 +37,7 @@ function  event_say(choice)
                 SendMultiDialogue(mySession, multiDialogue)
                 TurnInItem(mySession, items.CRACKED_ANT_PINCER, 2)
                 GrantItem(mySession, items.SMOLDERING_AURA, 1)
-                CompleteQuest(mySession, 10012, quests[10012][1].xp)
+                CompleteQuest(mySession, 100103, quests[100103][1].xp)
             else
                 npcDialogue = "I don't remember calling for you."
                 diagOptions = {"I apologize Lady, but I have the pincers.", "Yes, but...I...nevermind, sorry."}
@@ -46,7 +46,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: It's important that you bring me what I have asked for. What was it now...Ah yes, I need two cracked ant pincers."
         end
-    elseif (GetPlayerFlags(mySession, "10013") == "0") then
+    elseif (GetPlayerFlags(mySession, "100104") == "0") then
         if (level >= 4) then
             if (choice:find("continue")) then
                 multiDialogue = {
@@ -67,9 +67,7 @@ function  event_say(choice)
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                questText =
-                    "Kellina needs a plain robe from Merchant Yulia, a silk cord from Merchant Yesam, and a ruined bat wing."
-                StartQuest(mySession, 10013, quests[10013][0].log)
+                StartQuest(mySession, 100104, quests[100104][0].log)
             else
                 npcDialogue = "I don't have time for chit chat, dear."
                 diagOptions = {"I wish to continue my apprenticeship."}
@@ -78,7 +76,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
-    elseif (GetPlayerFlags(mySession, "10013") == "1") then
+    elseif (GetPlayerFlags(mySession, "100104") == "1") then
         if
             (CheckQuestItem(mySession, items.PLAIN_ROBE, 1) and CheckQuestItem(mySession, items.SILK_CORD, 1) and
                 CheckQuestItem(mySession, items.RUINED_BAT_WING, 1))
@@ -105,7 +103,7 @@ function  event_say(choice)
                 TurnInItem(mySession, items.SILK_CORD, 1)
                 TurnInItem(mySession, items.RUINED_BAT_WING, 1)
                 GrantItem(mySession, items.BLUE_ROBE, 1)
-                CompleteQuest(mySession, 10013, quests[10013][1].xp)
+                CompleteQuest(mySession, 100104, quests[100104][1].xp)
             else
                 npcDialogue = "Have you collected the components?"
                 diagOptions = {"I have.", "No."}
@@ -114,7 +112,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: You'll need to prove yourself by gathering these items. I need 1 plain robe, 1 silk cord, and 1 ruined bat wing."
         end
-    elseif (GetPlayerFlags(mySession, "10014") == "0") then
+    elseif (GetPlayerFlags(mySession, "100105") == "0") then
         if (level >= 5) then
             if (choice:find("task")) then
                 multiDialogue = {
@@ -141,7 +139,7 @@ function  event_say(choice)
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                StartQuest(mySession, 10014, quests[10014][0].log)
+                StartQuest(mySession, 100105, quests[100105][0].log)
             else
                 npcDialogue = "I don't have time for chit chat, dear."
                 diagOptions = {"I am ready for my next task."}
@@ -150,7 +148,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
-    elseif (GetPlayerFlags(mySession, "10014") == "1") then
+    elseif (GetPlayerFlags(mySession, "100105") == "1") then
         if
             (CheckQuestItem(mySession, items.STOLEN_GOODS, 1))
          then
@@ -170,7 +168,7 @@ function  event_say(choice)
                 SendMultiDialogue(mySession, multiDialogue)
                 TurnInItem(mySession, items.STOLEN_GOODS, 1)
                 GrantItem(mySession, items.MOTIVATE, 1)
-                CompleteQuest(mySession, 10014, quests[10014][1].xp)
+                CompleteQuest(mySession, 100105, quests[100105][1].xp)
             else
                 npcDialogue = "Have you retrieved the stolen goods?"
                 diagOptions = {"I have. Here they are...", "Not quite yet."}
@@ -179,7 +177,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Get your head together, and focus on the task at hand. Find the highwaymen and retrieve from them the stolen goods."
         end
-    elseif (GetPlayerFlags(mySession, "10015") == "0") then
+    elseif (GetPlayerFlags(mySession, "100107") == "0") then
         if (level >= 7) then
             if (choice:find("Nothing")) then
                 multiDialogue = {
@@ -196,7 +194,7 @@ function  event_say(choice)
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                StartQuest(mySession, 10015, quests[10015][0].log)
+                StartQuest(mySession, 100107, quests[100107][0].log)
             else
                 npcDialogue = "I am quite busy, what could you possibly need?"
                 diagOptions = {"I am ready for my next assignment.", "Nothing, really."}
@@ -205,7 +203,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
-    elseif (GetPlayerFlags(mySession, "10015") == "1") then
+    elseif (GetPlayerFlags(mySession, "100107") == "1") then
         if (CheckQuestItem(mySession, items.EEL_VENOM_SAC, 1)) then
             if (choice:find("sorry")) then
                 npcDialogue =
@@ -225,7 +223,7 @@ function  event_say(choice)
                 TurnInItem(mySession, items.EEL_VENOM_SAC, 1)
                 GrantItem(mySession, items.INFUSION, 1)
                 GrantItem(mySession, items.BLACKENED_LEGGINGS, 1)
-                CompleteQuest(mySession, 10015, quests[10015][1].xp)
+                CompleteQuest(mySession, 100107, quests[100107][1].xp)
             else
                 npcDialogue = "Do you have the venom sac?"
                 diagOptions = {"It is right here.", "Oh sorry, not yet."}
@@ -234,7 +232,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Do you have the eel venom sac yet?!"
         end
-    elseif (GetPlayerFlags(mySession, "10016") == "0") then
+    elseif (GetPlayerFlags(mySession, "100110") == "0") then
         if (level >= 10) then
             if (choice:find("later")) then
                 multiDialogue = {
@@ -249,7 +247,7 @@ function  event_say(choice)
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                StartQuest(mySession, 10016, quests[10016][0].log)
+                StartQuest(mySession, 100110, quests[100110][0].log)
             else
                 npcDialogue = "Please tell me you are here to help..."
                 diagOptions = {"I am.", "Maybe later..."}
@@ -258,7 +256,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
-    elseif (GetPlayerFlags(mySession, "10017") == "0") then
+    elseif (GetPlayerFlags(mySession, "100108") == "0") then
         if (level >= 13) then
             if (choice:find("nevermind")) then
                 multiDialogue = {
@@ -275,7 +273,7 @@ function  event_say(choice)
                     "You have received a quest!"
                 }
                 SendMultiDialogue(mySession, multiDialogue)
-                StartQuest(mySession, 10017, quests[10017][0].log)
+                StartQuest(mySession, 100108, quests[100108][0].log)
             else
                 npcDialogue = "What do you want? I really can't..."
                 diagOptions = {"I have returned to learn more.", "Oh nevermind..."}
@@ -284,7 +282,7 @@ function  event_say(choice)
             npcDialogue =
                 "Kellina: Unfortunately I must assign you another task, but I haven't the energy to deal with a novice right now. Come back later."
         end
-    elseif (GetPlayerFlags(mySession, "10018") == "6") then
+    elseif (GetPlayerFlags(mySession, "100109") == "6") then
         multiDialogue = {"Kellina: I've received word that the venerable Ilenar Crelwin is pleased with your work as of late. You have proved yourself a worthy agent.",
         "Kellina: For all of your accomplishments, it is time you wore something befitting of your rank. I therefore award you with a Summoners Garb.",
         "Kellina: I also award you with this Endure Fire Scroll. May these things protect you, in dangerous places.",
@@ -296,7 +294,7 @@ function  event_say(choice)
         SendMultiDialogue(mySession, multiDialogue)
         GrantItem(mySession, items.ENDURE_FIRE, 1)
         GrantItem(mySession, items.SUMMONERS_GARB, 1)
-        CompleteQuest(mySession, 10018, quests[10018][6].xp)
+        CompleteQuest(mySession, 100109, quests[100109][6].xp)
     else
         npcDialogue = "I am quite busy with my students right now. Are you sure you're in the right place?"
     end

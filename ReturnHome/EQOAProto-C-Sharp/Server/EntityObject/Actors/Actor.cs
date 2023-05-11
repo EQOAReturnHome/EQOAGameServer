@@ -1,8 +1,12 @@
- using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.EntityObject.AI.Helpers;
+using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
+using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace ReturnHome.Server.EntityObject.Actors
@@ -12,7 +16,8 @@ namespace ReturnHome.Server.EntityObject.Actors
         public long killtime = 0;
         public int Tunar = 0;
         public Corpse corpse;
-        public Dictionary<uint, int> aggroTable = new Dictionary<uint, int>();
+        public Dictionary<Character, int> aggroTable = new Dictionary<Character, int>();
+        public long lastAtkTick = 0;
 
         public Actor() : base(false, 0)
         {
@@ -51,60 +56,74 @@ namespace ReturnHome.Server.EntityObject.Actors
             Target = 0xFFFFFFFF;
             EntityType = npcType;
             ServerID = serverID;
-
             corpse = new(this);
 
             //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
             //Inventory = new(3000);
         }
 
-        public async void AttackPlayer(int damage, uint targetID)
+        public void AttackPlayer(int damage, uint targetID)
         {
 
-            if(PlayerManager.QueryForPlayer(targetID, out Character player))
+            if (PlayerManager.QueryForPlayer(targetID, out Character player))
             {
-                //Console.WriteLine($"Found player to attack: {player.CharName}");
-                player.Animation = 0x2b;
-                player.CurrentHP -= 5;
+
             }
-
-            this.Animation = 0x17;
-            this.Animation = 0x22;
-
-
 
         }
 
-        public void EvaluateAggro(int damage, uint playerID)
+        public void EvaluateAggroTable()
+        {
+            int damage = 3;
+            lastAtkTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var c = aggroTable.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
+            ServerCastSpell.CastSpell(c.characterSession, 0xDA9BEA11, ObjectID, c.ObjectID, 0);
+            if (EntityManager.QueryForEntity(c.ObjectID, out Entity player))
+            {
+                player.TakeDamage(c.characterSession, (uint)c.characterSession.MyCharacter.ObjectID, damage);
+                //Blacksmith starts on 0x0008, 0x0018
+            }
+        }
+
+        public void EvaluateAggro(int damage, Character c)
         {
 
             int mostAggro = damage;
             int aggro = 0;
-            uint targetPlayer = 0;
             aggro += damage;
 
-            if (aggroTable.ContainsKey(playerID))
+            if (aggroTable.ContainsKey(c))
             {
-                aggroTable[playerID] += damage;
+                aggroTable[c] += damage;
                 //Console.WriteLine($"Aggro table already contains playerID {playerID}");
             }
             else
             {
-                aggroTable.Add(playerID, damage);
-                //Console.WriteLine($"Adding player with playerID {playerID} to aggro Table.");
+                aggroTable.Add(c, damage);
             }
+        }
 
+        public void OnMobDeath()
+        {
+            Dead = true;
+            _killTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            Animation = (byte)AnimationState.Die;
+            //Move npc inventory to Loot Object for npc's
+            if (!isPlayer)
+                if (Inventory != null)
+                    corpse.UpdateCorpseOnDeath(Inventory.itemContainer);
 
-            foreach (KeyValuePair<uint, int> player in aggroTable)
+            foreach (KeyValuePair<Character, int> c in aggroTable)
             {
-                if (player.Value > mostAggro)
-                {
-                    mostAggro = player.Value;
-                    targetPlayer = player.Key;
-                }
+                GrantXP(c.Key.characterSession, ExperienceCalculations.CalculateMobXP(Level, c.Key.Level));
             }
+            aggroTable.Clear();
 
-            //AttackPlayer(damage, playerID);
+
+        }
+
+        public void OnMobSpawn()
+        {
 
         }
     }

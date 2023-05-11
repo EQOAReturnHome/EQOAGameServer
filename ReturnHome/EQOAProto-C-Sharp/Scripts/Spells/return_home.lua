@@ -4,8 +4,7 @@ local recast = 300 --Recast Time
 local castTime = 30
 
 function startSpell()
-    print(session)
-    CastSpell(session, spellFX, target, castTime)
+    CastSpell(session, spellFX, entity.ObjectID, target, castTime)
     CoolDown(session, addedOrder, recast)
 end
 
