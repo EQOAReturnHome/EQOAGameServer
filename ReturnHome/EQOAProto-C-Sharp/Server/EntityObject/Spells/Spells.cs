@@ -145,6 +145,7 @@ namespace ReturnHome.Server.EntityObject.Spells
                     case (byte)SpellScope.Target:
                         if (e.isPlayer)
                         {
+                            Console.WriteLine("In a target spell");
                             SpellManager.GetSpell(((Character)e), (uint)hotbarlocation, e.Target);
 
                             //TODO: May need to be different here?
@@ -199,6 +200,8 @@ namespace ReturnHome.Server.EntityObject.Spells
             //If the player is not targeting a player allow offensive spells only
             else if (((Character)e).isPlayer && !ent.isPlayer)
             {
+                Console.WriteLine("targeting enemy with spell");
+
                 switch (SType)
                 {
                     case SpellType.Friendly: return true;

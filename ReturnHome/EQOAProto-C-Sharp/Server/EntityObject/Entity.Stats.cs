@@ -172,7 +172,6 @@ namespace ReturnHome.Server.EntityObject
                     if (!isPlayer)
                     {
                         _currentHP = 0;
-                        Console.WriteLine($"Health value is {_currentHP}");
                         ((Actor)this).OnMobDeath();
                     }
                     else

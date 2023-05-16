@@ -56,7 +56,7 @@ namespace ReturnHome.Server.Managers
             LuaState.State["GetPlayerFlags"] = mySession.MyCharacter.GetPlayerFlags;
             LuaState.State["SetPlayerFlags"] = mySession.MyCharacter.SetPlayerFlag;
 
-
+            
             string[] file;
             EntityManager.QueryForEntity(mySession.MyCharacter.Target, out Entity targetNPC);
             LuaState.State["thisEntity"] = targetNPC;
