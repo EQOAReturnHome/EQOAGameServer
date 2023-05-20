@@ -8,6 +8,7 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.EntityObject.Effect;
 using System;
+using ReturnHome.Server.EntityObject;
 
 namespace ReturnHome.Server.Network.Managers
 {
@@ -186,6 +187,15 @@ namespace ReturnHome.Server.Network.Managers
                 {
                     session.DropSession();
                     continue;
+                }
+
+                if (session.MyCharacter != null)
+                {
+                    if (session.MyCharacter.deathTime != 0 && DateTime.UtcNow.Second > session.MyCharacter.respawnTime)
+                    {
+                        session.MyCharacter.deathTime = 0;
+                        ServerMemoryDump.MemoryDump(session, true);
+                    }
                 }
                 sessionCount++;
             }

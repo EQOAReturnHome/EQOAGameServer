@@ -4,29 +4,51 @@ using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Spells;
+using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
     class ServerMemoryDump
     {
-        public static void MemoryDump(Session session)
+        public static void MemoryDump(Session session, bool respawn = false)
         {
             Message message = new Message(MessageType.SegmentReliableMessage, GameOpcode.MemoryDump);
             BufferWriter writer = new BufferWriter(message.Span);
 
-            //Perform SQl stuff
-            CharacterSQL charDump = new CharacterSQL();
-
-            //Probably change this to only pass in character ServerID
-            charDump.GetPlayerHotkeys(session);
-            charDump.GetPlayerWeaponHotbar(session);
-            charDump.GetPlayerSpells(session);
-            //charDump.GetPlayerSpellIDs(session);
-
             //Toss opcode in
             writer.Write(message.Opcode);
 
-            session.MyCharacter.DumpCharacter(ref writer);
+            if (respawn)
+            {
+                session.MyCharacter.CurrentHP = session.MyCharacter.GetMaxHP();
+                session.MyCharacter.Animation = (byte)AnimationState.Default;
+                session.MyCharacter.ExpectedWorld = session.MyCharacter.boundWorld;
+
+                MapManager.RemoveObject(session.MyCharacter);
+
+                writer.Write((byte)2);
+                session.MyCharacter.DumpCharacter(ref writer, true);
+
+                session.rdpCommIn.connectionData.serverObjects.Span[0].IsActive = false;
+            }
+
+            else
+            {
+                writer.Write((byte)0);
+
+                //Perform SQl stuff
+                CharacterSQL charDump = new CharacterSQL();
+
+                //Probably change this to only pass in character ServerID
+                charDump.GetPlayerHotkeys(session);
+                charDump.GetPlayerWeaponHotbar(session);
+                charDump.GetPlayerSpells(session);
+                //charDump.GetPlayerSpellIDs(session);
+
+                session.MyCharacter.DumpCharacter(ref writer);
+            }
+
             writer.Write7BitEncodedInt64(session.MyCharacter.MyHotkeys.Count);
 
             //cycle over all our hotkeys and append them
@@ -50,7 +72,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write7BitEncodedInt64(session.MyCharacter.Inventory.Count);
             writer.Write(session.MyCharacter.Inventory.Count);
 
-            for(int i = 0; i < session.MyCharacter.Inventory.Count; i++)
+            for (int i = 0; i < session.MyCharacter.Inventory.Count; i++)
                 session.MyCharacter.Inventory.itemContainer[i].item.DumpItem(ref writer, session.MyCharacter.Inventory.itemContainer[i].key);
 
             foreach (WeaponHotbar wb in session.MyCharacter.WeaponHotbars)
@@ -178,17 +200,14 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                                       0x00, // CM Wisdom Max
                                       0x00, // CM Intelligence Max
                                       0x00 }); // CM Charisma Max
-
-            ServerTime.Time(session);
+            if (!respawn)
+            {
+                ServerTime.Time(session);
+                ServerPlayerIgnoreList.PlayerIgnoreList(session);
+            }
 
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
-
-            //Put player into channel 0?
-            session.rdpCommIn.connectionData.serverObjects.Span[0].AddObject(session.MyCharacter);
-
-            ServerPlayerIgnoreList.PlayerIgnoreList(session);
-            //ServerPlayerSpeed.PlayerSpeed(session);
         }
     }
 }

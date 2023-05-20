@@ -61,6 +61,8 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.RequestRepair, ClientBlackSmith.BlackSmithRepairGear },
             { GameOpcode.CastSpell, ClientCastSpell.CastSpell },
             { GameOpcode.ClientMemorizeSpell, ClientMemorizeSpell.MemorizeSpell },
+            { GameOpcode.CharacterInWorld, ClientLoadedWorld.LoadedWorld },
+
 
 
         };

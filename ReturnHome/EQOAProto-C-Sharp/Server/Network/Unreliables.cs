@@ -87,22 +87,8 @@ namespace ReturnHome.Server.Network
 
             //Would likely need some checks here eventually? Shouldn't blindly trust client
             //First 4029 means we are ingame
-            if (!Mysession.inGame)
-            {
-                PlayerManager.AddPlayer(Mysession.MyCharacter);
-                EntityManager.AddEntity(Mysession.MyCharacter);
-                MapManager.Add(Mysession.MyCharacter);
 
-                Mysession.inGame = true;
-                //This is just a shim for the player intro.
-                if (Mysession.MyCharacter.GetPlayerFlags(Mysession, "NewPlayerIntro") == "0")
-                {
-                    Mysession.MyCharacter.MyDialogue.npcName = "NewPlayerIntro";
-                    EventManager.GetNPCDialogue(GameOpcode.DialogueBox, Mysession);
-                }
-            }
-
-            else
+            if(Mysession.inGame)
                 MapManager.UpdatePosition(Mysession.MyCharacter);
         }
     }
