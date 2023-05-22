@@ -32,30 +32,43 @@ These have been done on a seperate version, as this interfaces with the encrypti
 UDP server implementing the packet framework to handle packet requests.
 This includes:
 
--   World Select Screen
--   Character Select Screen (Character creation and deletion)
--   Memory Dump
--   running around in the world
+List of things that currently work/soon to work. Some may have small bugs that I haven't listed.
 
-#_New Changes_
-
--   Able to now see other players running around, very rudimentary state. Little choppy but it's something to start with
--   Ingame chat, local say along with a (currently) global shout.
--   Ingame "admin" system via chat just for adjusting some character states, eventually to be used with NPC testing.
--   World fully populated with NPCs.
--   Save characters upon logging off/disconnecting.
--   Other small, minor things.
+- Creating new account works and logging in.
+- Server listing and logging in to world works.
+- Creating new characters work.
+- Buying and Selling with Merchants. Many main city merchants have semi-correct inventory.
+- Banking your items and tunar and withdrawing
+- Repairing items via the Blacksmith
+- Equipping, un-equipping, using, rearranging inventory and destroying items in inventory
+- "Most" npcs in world have some dialogue. Many have unique dialogue written by @Alutra and team. World fully populated with NPCs.
+- Some quests work. Freeport quests are primarily under construction but that process is dramatically speeding up. Can delete quest from quest log. An example is Freeport Magician quests currently work up to about level 20.
+- You can attack and kill enemies in game, loot them once dead and they will respawn. They do not move or follow you.
+- "Playing" with other real players works.
+- Enemies will do a basic attack against you if you engage them. They will not cast spells or abilities yet. They have a rudimentary aggro evaluation but needs expanding on a lot.
+- You can cast some spells. Cooldowns work. More are being added. Can learn spells from scrolls if the spell is implemented in game. Current spell list includes all starter spells for all classes and Return Home. This includes being able to cast spells on friendly targets as well as enemies. Buffs work. Can assign spells from book to hotbar.
+- You can group up with other players. Creating groups, leaving groups, disbanding, etc
+- You can gain XP and level up. Mobs give XP, but currently most leveling is done via questing. Nothing in theory stopping you from leveling to 60 aside from it's not very convenient until more combat functionality and quests exist.
+- Chat works.
+- Who list works.
+- Spiritmaster binding works.
+- If you "quit" out of the game your character's current information is saved. Periodic save will be added in the future.
+- Coaching works including signing the coachman's ledger on first interaction.
+- Looting enemies works. This isn't currently dynamic yet as I'm working on dynamic loot tables still. A lot of content work will need to go into this still.
+- Stat allocation works.
+- Dying and respawning works.
+- Conning enemies works and shows their color circle relative to your level. Conning players works but also allows you to hold square to see their details.
+- Ingame "admin" system via chat just for adjusting some character states.
 
 #TO-DO List
 
--   Scripting for NPC pathing, interactions,etc
--   Combat
--   Various player op codes for interacting. Spells, etc.
+-   Scripting for NPC pathing, interactions,etc. A lot of scripting work done, TONS to still implement.
+-   Expanding on basic combat
+-   Various player op codes for interacting. Most op codes implemented at this point.
 -   Begin work with Recast Tool
 -   Incorporate the stat update type
 -   Implement Tells/Replies
--   Look into grouping mechanisms and the group unreliable type
-
+-   
 # Docker Quick Start
 
 For rolling up a server quickly, locally.
