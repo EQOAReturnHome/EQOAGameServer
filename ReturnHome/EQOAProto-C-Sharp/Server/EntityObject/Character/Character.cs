@@ -242,10 +242,9 @@ namespace ReturnHome.Server.EntityObject.Player
             MySession.MyCharacter = this;
         }
 
-        public void DumpCharacter(ref BufferWriter writer)
+        public void DumpCharacter(ref BufferWriter writer, bool respawn = false)
         {
             //Start pulling data together
-            writer.Write((byte)0);
             writer.WriteString(Encoding.UTF8, Tunaria);
             writer.Write7BitEncodedInt64(ServerID);
             writer.WriteString(Encoding.UTF8, CharName);
@@ -259,12 +258,23 @@ namespace ReturnHome.Server.EntityObject.Player
             writer.Write7BitEncodedInt64(Bank.Tunar);
             writer.Write7BitEncodedInt64(PlayerTrainingPoints.RemainingTrainingPoints);
             writer.Write7BitEncodedInt64(BaseMaxStat);
-            writer.Write7BitEncodedInt64((byte)World);
-            writer.Write(x);
-            writer.Write(y);
-            writer.Write(z);
-            writer.Write(FacingF);
+            if (respawn)
+            {
+                writer.Write7BitEncodedInt64((byte)boundWorld);
+                writer.Write(boundX);
+                writer.Write(boundY);
+                writer.Write(boundZ);
+                writer.Write(boundFacing);
+            }
 
+            else
+            {
+                writer.Write7BitEncodedInt64((byte)World);
+                writer.Write(x);
+                writer.Write(y);
+                writer.Write(z);
+                writer.Write(FacingF);
+            }
             //Two unknown values must be packed on the end, can be updated later to
             //include database values when we figure out what it does.
             writer.Write(0.0f);
@@ -330,7 +340,13 @@ namespace ReturnHome.Server.EntityObject.Player
             CurrentHP = GetMaxHP();
             ServerMemoryDump.MemoryDump(characterSession);
             //ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
-        }
+            Animation = (byte)AnimationState.Die;
+            ServerCharacterDied.CharacterDied(characterSession);
+            deathTime = DateTime.UtcNow.Second;
+            respawnTime = DateTime.UtcNow.AddSeconds(5).Second;
+            //disableTime = DateTime.UtcNow.AddSeconds(2).Second;
 
+            //ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
+        }
     }
 }

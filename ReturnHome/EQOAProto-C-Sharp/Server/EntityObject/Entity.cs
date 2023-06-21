@@ -27,7 +27,9 @@ namespace ReturnHome.Server.EntityObject
         private int _level;
         private uint _objectID;
         public long _killTime;
-        public long deathTime;
+        public long deathTime = 0;
+        public long respawnTime = 0;
+
         private EntityType _npcType = 0;
         public int ServerID;
         public AIContainer aiContainer;

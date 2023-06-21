@@ -115,7 +115,8 @@ namespace ReturnHome.Server.Zone
                 _qtree.Remove(e);
                 if (e.isPlayer)
                     if (!_playerList.Remove(e.ServerID, out Character c))
-                        Console.WriteLine($"Failed to Character {c.CharName}");
+                        return;
+                        //Console.WriteLine($"Failed to Character {c.CharName}");
             }
 
             _removeBuffer.Clear();

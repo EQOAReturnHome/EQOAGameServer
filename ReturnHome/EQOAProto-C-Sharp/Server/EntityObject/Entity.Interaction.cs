@@ -101,6 +101,8 @@ namespace ReturnHome.Server.EntityObject
 
         public bool IsWithinRange(float distance = 10.0f)
         {
+            if (_ourTarget == null)
+                return false;
             //What should be the distance check against interacting with NPC's?
             //Should this distance check be farther or shorter for attacking in combat, too? Such as auto attack
             if (Vector3.Distance(Position, _ourTarget.Position) <= distance)
