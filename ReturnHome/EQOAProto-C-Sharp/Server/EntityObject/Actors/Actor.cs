@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ReturnHome.Server.EntityObject.AI.Helpers;
+using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
@@ -8,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace ReturnHome.Server.EntityObject.Actors
 {
@@ -15,20 +18,27 @@ namespace ReturnHome.Server.EntityObject.Actors
     {
         public long killtime = 0;
         public int Tunar = 0;
-        public Corpse corpse;
+        public Corpse corpse = null;
         public Dictionary<Character, int> aggroTable = new Dictionary<Character, int>();
         public long lastAtkTick = 0;
+        public int spawnPointID;
+        public int chance;
+        public int aggroRadius = 0;
+        public int minLevel = 0;
+        public int maxLevel = 0;
+        public bool see_invis = false;
+        public int factionID;
+        public int lootTableID;
 
         public Actor() : base(false, 0)
         {
 
         }
 
-        public Actor(string charName, float xCoord, float yCoord, float zCoord, int facing, int world, int modelid, float size,
+        public Actor(string charName, float xCoord, float yCoord, float zCoord, float facing, int world, int modelid, float size,
             int primary, int secondary, int shield, int hair_color, int hair_length, int hair_style, int level, int torso, int forearms,
             int gloves, int legs, int feet, int head, EntityType npcType, int serverID) : base(false, level)
         {
-
             CharName = charName;
             x = xCoord;
             y = yCoord;
@@ -57,9 +67,11 @@ namespace ReturnHome.Server.EntityObject.Actors
             EntityType = npcType;
             ServerID = serverID;
             corpse = new(this);
+            spawnPointID = -999;
 
-            //staticly assign tunar onhand to a npc for now, only really relevant for when mobs die and money goes around
-            //Inventory = new(3000);
+
+            Inventory = new(0, this);
+
         }
 
         public void AttackPlayer(int damage, uint targetID)
@@ -74,8 +86,21 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public void EvaluateAggroTable()
         {
+            for (int i = 0; i < aggroTable.Count; i++)
+            {
+                if (aggroTable.ElementAt(i).Key.CurrentHP == 0 || aggroTable.ElementAt(i).Key is null)
+                {
+                    aggroTable.Remove(aggroTable.ElementAt(i).Key);
+                }
+            }
+
+            if (aggroTable.Count <= 0) { return; }
+
             int damage = 3;
             lastAtkTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            //find character object that has dealt the most damage. This needs to be expanded on later to include
+            //things like heals adding aggro, taunts, etc.
+            //There's likely a conversion of dmg amount -> aggro value that needs to happen as well.
             var c = aggroTable.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
             ServerCastSpell.CastSpell(c.characterSession, 0xDA9BEA11, ObjectID, c.ObjectID, 0);
             if (EntityManager.QueryForEntity(c.ObjectID, out Entity player))
@@ -87,7 +112,6 @@ namespace ReturnHome.Server.EntityObject.Actors
 
         public void EvaluateAggro(int damage, Character c)
         {
-
             int mostAggro = damage;
             int aggro = 0;
             aggro += damage;
@@ -108,10 +132,11 @@ namespace ReturnHome.Server.EntityObject.Actors
             Dead = true;
             _killTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             Animation = (byte)AnimationState.Die;
+            ItemManager.GetMobLoot(this);
             //Move npc inventory to Loot Object for npc's
-            if (!isPlayer)
-                if (Inventory != null)
-                    corpse.UpdateCorpseOnDeath(Inventory.itemContainer);
+
+            if (Inventory != null)
+                corpse.UpdateCorpseOnDeath(Inventory.itemContainer);
 
             foreach (KeyValuePair<Character, int> c in aggroTable)
             {

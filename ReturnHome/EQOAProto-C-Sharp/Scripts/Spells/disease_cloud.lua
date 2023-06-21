@@ -1,31 +1,30 @@
 -- Disease Cloud
+local effects = require("Scripts/effects")
 local spellFX = 0x052EF90F  --Spell Effect
+local buffIcon = 0xCF3C577B
 local recast = 1 --Recast Time
 local castTime = 1
 local buffName = "Disease Cloud"
-local effectID = effects.MINOR_HEALING
-local duration = 18
-local heal = 16
+local effectID = effects.DISEASE_CLOUD
+local duration = 24
+local damage = 4
+local powerCost = 8
 local tier = 0
 
 function startSpell()
-    CastSpell(session, spellFX, target, castTime)
+    CastSpell(session, spellFX, entity.ObjectID, target, castTime)
     CoolDown(session, addedOrder, recast)
 end
 
 function completeSpell()
-    if(session.MyCharacter.CurrentHP ~= session.MyCharacter.HPMax)then
-    Heal(session, heal, target)
-    session.MyCharacter.CurrentHP = (heal+session.MyCharacter.CurrentHP)
-    end
-    StatusEffect(effectID, buffName, buffIcon, duration, tier)
+    AddStatusEffect(effectID, buffName, buffIcon, duration, tier, entity.ObjectID)
 end
 
-function tickSpell()
-     if(session.MyCharacter.CurrentHP ~= session.MyCharacter.HPMax)then
-     Heal(session, heal, target)
-     session.MyCharacter.CurrentHP = (heal+session.MyCharacter.CurrentHP)
-     end
+function tickSpell(entity)
+    print("Ticking")
+    Damage(session, damage, Effect.casterID, entity.ObjectID)
+    entity.CurrentHP = (entity.CurrentHP-damage)
+    print(entity.CharName)
 end
 
 function useItem()

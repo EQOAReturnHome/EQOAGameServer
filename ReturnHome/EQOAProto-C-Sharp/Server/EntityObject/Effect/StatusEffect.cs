@@ -12,6 +12,7 @@ namespace ReturnHome.Server.EntityObject.Effect
         public long lastTick;
         public uint duration;
         public uint tier;
+        public uint casterID;
         public Status status;
 
         //default constructor
@@ -22,7 +23,7 @@ namespace ReturnHome.Server.EntityObject.Effect
 
 
         //Status effect contructor for players(need name and icon for 43 unreliable message)
-        public StatusEffect(int id, string name, uint icon, uint duration, uint tier)
+        public StatusEffect(int id, string name, uint icon, uint duration, uint tier, uint casterID)
         {
             status = new(icon, name);
             this.name = name;
@@ -30,6 +31,7 @@ namespace ReturnHome.Server.EntityObject.Effect
             this.lastTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             this.duration = duration;
             this.tier = tier;
+            this.casterID = casterID;
         }
 
         //Status effect constructor for non-players

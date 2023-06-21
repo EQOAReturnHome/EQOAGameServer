@@ -138,6 +138,8 @@ namespace ReturnHome.Server.Managers
             Console.WriteLine($"Trying to cast spell {spell.SpellName}");
 
 
+
+
             int addedOrder = spell.AddedOrder;
             string spellName = spell.SpellName.Replace(" ", "_");
             int spellID = spell.SpellID;
@@ -160,14 +162,15 @@ namespace ReturnHome.Server.Managers
             LuaState.State["spellID"] = spellID;
             LuaState.State["addedOrder"] = addedOrder;
             LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
-            LuaState.State["AddStatusEffect"] = entity.AddStatusEffect;
             LuaState.State["entity"] = entity;
 
             EntityManager.QueryForEntity(entity.Target, out Entity entTarget);
             LuaState.State["entityTarget"] = entTarget;
-            
+            LuaState.State["AddStatusEffect"] = entTarget.AddStatusEffect;
 
-            
+
+
+
 
 
 
@@ -181,10 +184,11 @@ namespace ReturnHome.Server.Managers
 
         }
 
-        public static void TickSpell(Session session, StatusEffect effect)
+        public static void TickSpell(Entity entity, StatusEffect effect)
         {
 
-            Console.WriteLine("In the tick cast");
+            Console.WriteLine($"Entity ticking is {entity.CharName}");
+
 
             string effectName = effect.name.Replace(" ", "_");
             Console.WriteLine(effectName);
@@ -201,7 +205,9 @@ namespace ReturnHome.Server.Managers
             LuaState.State["Damage"] = ServerChangeHealth.Damage;
             LuaState.State["Heal"] = ServerChangeHealth.Heal;
             LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
-            LuaState.State["session"] = session;
+            LuaState.State["Effect"] = effect;
+            
+            //LuaState.State["Entity"] = entity;
 
 
             //Call the Lua script found by the Directory Find above
@@ -209,7 +215,7 @@ namespace ReturnHome.Server.Managers
 
             //Call Lua function for initial interaction
             LuaFunction callFunction = LuaState.State.GetFunction("tickSpell");
-            callFunction.Call();
+            callFunction.Call(entity);
 
         }
 

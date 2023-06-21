@@ -15,6 +15,8 @@ using ReturnHome.Server.EntityObject.Stats;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.EntityObject.Spells;
 using System.Numerics;
+using System.Runtime.Intrinsics.Arm;
+using ReturnHome.Server.Items;
 
 namespace ReturnHome.Database.SQL
 {
@@ -1158,7 +1160,7 @@ namespace ReturnHome.Database.SQL
             //Read through results from query populating character data needed for character select
             while (rdr.Read())
             {
-                if(rdr.GetString(1) == charCreation.CharName)
+                if (rdr.GetString(1) == charCreation.CharName)
                     serverID = rdr.GetInt32(0);
             }
             rdr.Close();
@@ -1171,7 +1173,7 @@ namespace ReturnHome.Database.SQL
 
             using var ThirdCmd = new MySqlCommand("CreateHotkeys", con);
             ThirdCmd.CommandType = CommandType.StoredProcedure;
-            for(int i = 0; i < charCreation.MyHotkeys.Count; i++)
+            for (int i = 0; i < charCreation.MyHotkeys.Count; i++)
             {
                 ThirdCmd.Parameters.Clear();
                 ThirdCmd.Parameters.AddWithValue("Serverid", serverID);
@@ -1237,6 +1239,230 @@ namespace ReturnHome.Database.SQL
                 ItemManager.nextItemID = (int)GetItemIDCmd.ExecuteScalar() + 1;
             }
             Console.WriteLine($"Next Item ID available: {ItemManager.nextItemID}");
+        }
+
+        public List<SpawnPoint> GetSpawnPoints()
+        {
+            List<SpawnPoint> points = new();
+
+            using var cmd = new MySqlCommand("GetSpawnPoints", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                SpawnPoint spawnPoint = new(
+                     //SpawnPointID
+                     rdr.GetInt32(0),
+                     //SpawnGroupID
+                     rdr.GetInt32(1),
+                     //x
+                     rdr.GetFloat(2),
+                     //y
+                     rdr.GetFloat(3),
+                     //z
+                     rdr.GetFloat(4),
+                     //facing
+                     rdr.GetFloat(5),
+                     //Cast Time
+                     rdr.GetInt32(6),
+                     //Power
+                     rdr.GetInt32(7),
+                     //enabled
+                     rdr.GetInt32(8));
+
+                points.Add(spawnPoint);
+            }
+
+            rdr.Close();
+            return points;
+
+        }
+
+        public List<SpawnGroup> GetSpawnGroups()
+        {
+            List<SpawnGroup> groups = new();
+
+            using var cmd = new MySqlCommand("GetSpawnGroups", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                SpawnGroup group = new(
+                    //GroupID
+                    rdr.GetInt32(0),
+                    //ZoneID
+                    rdr.GetInt32(1),
+                    //SpawnLimit
+                    rdr.GetInt32(2),
+                    //MinX
+                    rdr.GetFloat(3),
+                    //MaxX
+                    rdr.GetFloat(4),
+                    //MinY
+                    rdr.GetFloat(5),
+                    //MaxY
+                    rdr.GetFloat(6));
+
+                groups.Add(group);
+            }
+            return groups;
+        }
+
+        public List<SpawnEntry> GetSpawnEntries()
+        {
+            List<SpawnEntry> entries = new();
+
+            using var cmd = new MySqlCommand("GetSpawnEntries", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                SpawnEntry entry = new(
+                    rdr.GetInt32(0),
+                    rdr.GetInt32(1),
+                    rdr.GetInt32(2),
+                    rdr.GetInt32(3));
+
+                entries.Add(entry);
+            }
+
+            return entries;
+
+
+        }
+
+
+        //pull all mob patterns that actors can respawn as
+        public List<MobPattern> GetMobPatterns()
+        {
+
+            List<MobPattern> mobs = new();
+
+            using var cmd = new MySqlCommand("GetMobPatterns", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                MobPattern mob = new(
+                    //PatternID
+                    rdr.GetInt32(0),
+                    //MobPatternName
+                    rdr.GetString(1),
+                    //MinLevel
+                    rdr.GetInt32(2),
+                    //MaxLevel
+                    rdr.GetInt32(3),
+                    //LootTableID
+                    rdr.GetInt32(4),
+                    //FactionID
+                    rdr.GetInt32(5),
+                    //AggroRadius
+                    rdr.GetInt32(6),
+                    //See_Invis
+                    rdr.GetInt32(7),
+                    //MobClass
+                    rdr.GetInt32(8),
+                    //MobSize
+                    rdr.GetInt32(9),
+                    //ModelID
+                    rdr.GetInt32(10),
+                    //Hair_Color
+                    rdr.GetInt32(11),
+                    //Hair_Length
+                    //Should be a ushort but throws an overflow error, needs to be looked at eventually, cast to ushort in Actor.cs
+                    rdr.GetInt32(12),
+                    //Hair_Style
+                    rdr.GetInt32(13),
+                    //Face
+                    rdr.GetInt32(14));
+                mobs.Add(mob);
+            }
+
+            return mobs;
+
+        }
+
+        public void UpdateNPCs()
+        {
+            int sgID = 3;
+
+            int respawn = 5;
+            int enabled = 1;
+
+
+
+            using var cmd = new MySqlCommand("SELECT x_coord, y_coord, z_coord, facing, world FROM npcs where npc_id = 0;", con);
+
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                float x;
+                float y;
+                float z;
+                int facing;
+                int world;
+
+                //PatternID
+                x = rdr.GetFloat(0);
+                //MobPatternName
+                y = rdr.GetFloat(1);
+                //MinLevel
+                z = rdr.GetFloat(2);
+                //MaxLevel
+                facing = rdr.GetInt32(3);
+                //LootTableID
+                world = rdr.GetInt32(4);
+
+                //For creating spawn points from NPC coordinates.
+                MySqlConnection con2 = new MySqlConnection("server=192.168.6.70;userid=fooUser;password=fooPass;database=eqoabase;Allow User Variables=True");
+                con2.Open();
+                using var cmd2 = new MySqlCommand("INSERT INTO spawnpoints(spawngroup_id, x,y,z,facing,world,respawn_time,enabled) VALUES (@spawngroup_id, @x, @y, @z, @facing, @world, @respawn_time, @enabled);", con2);
+                cmd2.Parameters.AddWithValue("@spawngroup_id", sgID);
+                cmd2.Parameters.AddWithValue("@x", x);
+                cmd2.Parameters.AddWithValue("@y", y);
+                cmd2.Parameters.AddWithValue("@z", z);
+                cmd2.Parameters.AddWithValue("@facing", facing);
+                cmd2.Parameters.AddWithValue("@world", world);
+                cmd2.Parameters.AddWithValue("@respawn_time", respawn);
+                cmd2.Parameters.AddWithValue("@enabled", enabled);
+
+                cmd2.ExecuteNonQuery();
+                con2.Close();
+                sgID++;
+
+            }
+
+            //Console.WriteLine($"Next Item ID available: {ItemManager.nextItemID}");
+        }
+
+        public List<LootTable> GetLootTables()
+        {
+
+            List<LootTable> pool = new();
+
+            using var cmd = new MySqlCommand("GetLootTables", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+
+            while (rdr.Read())
+            {
+                LootTable lt = new(
+                    //itempool_id
+                    rdr.GetInt32(1),
+                    //itemid
+                    rdr.GetInt32(2),
+                    //item_rate
+                    rdr.GetInt32(3));
+                pool.Add(lt);
+            }
+
+            return pool;
+
         }
     }
 }

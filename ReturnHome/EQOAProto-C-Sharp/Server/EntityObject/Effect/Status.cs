@@ -8,7 +8,7 @@ namespace ReturnHome.Server.EntityObject.Effect
 
         private readonly uint _resourceId;
         private readonly int _size;
-        private fixed char _name[MAX_SIZE];
+        private fixed char _name[MAX_SIZE * 2];
 
         public Status(uint resourceId, string name)
         {

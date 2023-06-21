@@ -10,6 +10,7 @@ using ReturnHome.Server.Network.Managers;
 using ReturnHome.Server.EntityObject.Items;
 using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.EntityObject;
+using ReturnHome.Server.Items;
 
 namespace ReturnHome.Server.Managers
 {
@@ -37,37 +38,84 @@ namespace ReturnHome.Server.Managers
             Console.WriteLine("Collecting Spell Patterns...");
             List<SpellPattern> mySpellPatterns = npcList.SpellPatterns();
 
+            Console.WriteLine("Collecting Mob Patterns...");
+            List<MobPattern> myMobPatterns = npcList.GetMobPatterns();
 
-            npcList.CloseConnection();
+
+
+            Console.WriteLine("Adding Mob Patterns...");
+            for (int i = 0; i < myMobPatterns.Count; ++i)
+                EntityManager.mobPatterns.Add(myMobPatterns[i]);
+
             Console.WriteLine("Total Item Pattern's Acquired: " + myItemPatterns.Count);
             Console.WriteLine("Adding Item Patterns...");
             for (int i = 0; i < myItemPatterns.Count; ++i)
                 ItemManager.AddItem(myItemPatterns[i]);
 
+            Console.WriteLine("Collecting Loot Tables...");
+            List<LootTable> myLootTables = npcList.GetLootTables();
+
+            Console.WriteLine("Adding Loot Tables...");
+            for (int i = 0; i < myLootTables.Count; ++i)
+            {
+                ItemManager.lootTables.Add(myLootTables[i]);
+                Console.WriteLine($"Adding loot table {ItemManager.lootTables[i]._itemid}");
+            }
 
             Console.WriteLine("Adding Spell Patterns...");
             for (int i = 0; i < mySpellPatterns.Count; ++i)
                 SpellManager.AddSpell(mySpellPatterns[i]);
 
-            npcList = new();
             Console.WriteLine("Collecting Actors...");
             //Calls sql query function that fills list full of NPCs
             List<Actor> myNpcList = npcList.WorldActors();
 
-            //Closing DB connection
-            npcList.CloseConnection();
             MapManager.Initialize();
 
+            Console.WriteLine("Adding Spawn Points...");
+            List<SpawnPoint> points = npcList.GetSpawnPoints();
+            foreach (SpawnPoint sp in points)
+            {
+                EntityManager.spawnPoints.Add(sp);
+            }
             Console.WriteLine("Done.");
+
+            Console.WriteLine("Adding Spawn Groups...");
+            List<SpawnGroup> groups = npcList.GetSpawnGroups();
+            foreach (SpawnGroup group in groups)
+            {
+                EntityManager.spawnGroups.Add(group);
+            }
+            Console.WriteLine("Done.");
+
+            Console.WriteLine("Adding Spawn Entries...");
+            List<SpawnEntry> entries = npcList.GetSpawnEntries();
+            foreach (SpawnEntry entry in entries)
+            {
+                EntityManager.spawnEntries.Add(entry);
+            }
+            Console.WriteLine("Done.");
+
+            //Only used for pulling NPCs and shoving them into the spawn points table.
+            //npcList.UpdateNPCs();
+
+            npcList.CloseConnection();
+
             //Loops through each npc in list and sets their position, adds them to the entity manager, and mapmanager
             Console.WriteLine("Adding NPCs...");
-
             foreach (Actor myActor in myNpcList)
             {
                 EntityManager.AddEntity(myActor);
                 MapManager.Add(myActor);
-
             }
+
+            foreach (SpawnPoint sp in EntityManager.spawnPoints)
+            {
+                EntityManager.SpawnMob(sp._pointID);
+            }
+
+            
+
 
             Console.WriteLine("Done.");
             Console.WriteLine("Getting itemID seed.");
@@ -82,6 +130,8 @@ namespace ReturnHome.Server.Managers
 
 
             Console.WriteLine("Done...");
+
+
             var thread = new Thread(() =>
             {
                 UpdateWorld();
@@ -116,7 +166,6 @@ namespace ReturnHome.Server.Managers
 
                 uint globalTick = 6;
                 uint attackTick = 3;
-                //Console.WriteLine(entityList.Count);
                 for (int i = 0; i < entityList.Count; i++)
                 {
                     if (!entityList[i].isPlayer)
@@ -142,20 +191,14 @@ namespace ReturnHome.Server.Managers
                         for (int j = 0; j < entityList[i].EntityStatusEffects.Count; j++)
                         {
                             {
-                                //Console.WriteLine(effect.name);
                                 if (entityList[i].EntityStatusEffects[j].duration > 0)
                                 {
                                     if ((DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= entityList[i].EntityStatusEffects[j].lastTick + 6))
                                     {
-                                        Console.WriteLine(entityList[i].EntityStatusEffects[j].lastTick);
-                                        if (entityList[i].isPlayer)
-                                        {
-                                            //entityList[i].MySpellBook.TickEffect(((Character)entityList[i]).characterSession, entityList[i].EntityStatusEffects[j]);
-                                            entityList[i].MySpellBook.TickEffect(entityList[i].EntityStatusEffects[j]);
+                                        Console.WriteLine(entityList[i].CharName);
+                                            Spell.TickEffect(entityList[i], entityList[i].EntityStatusEffects[j]);
                                             entityList[i].EntityStatusEffects[j].lastTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                                             entityList[i].EntityStatusEffects[j].duration -= globalTick;
-                                        }
-
                                     }
                                 }
                                 else

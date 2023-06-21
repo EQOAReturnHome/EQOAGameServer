@@ -29,7 +29,7 @@ namespace ReturnHome.Server.Opcodes.Chat
                         MySession.MyCharacter.CurrentHP -= 20;
                         break;
                     case "effect":
-                        MySession.MyCharacter.AddStatusEffect(10, "test 1", 0xEE64D72D, 1, 3);
+                        //MySession.MyCharacter.AddStatusEffect(10, "test 1", 0xEE64D72D, 1, 3);
                         break;
 
                     case "test":

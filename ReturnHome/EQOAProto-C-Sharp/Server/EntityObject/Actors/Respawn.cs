@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReturnHome.Server.Managers;
 
 namespace ReturnHome.Server.EntityObject.Actors
 {
@@ -16,6 +17,8 @@ namespace ReturnHome.Server.EntityObject.Actors
         public static void ResetActor(Actor actor)
         {
             Console.WriteLine($"Resetting actor - {actor.CharName}");
+            EntityManager.SpawnMob(actor.spawnPointID);
+
             actor._killTime = 0;
             actor.despawn = false;
             actor.CurrentHP = actor.GetMaxHP();
@@ -24,9 +27,6 @@ namespace ReturnHome.Server.EntityObject.Actors
             actor.HPFlag = true;
             actor.Animation = (byte)AnimationState.Default;
             actor.aggroTable.Clear();
-            Console.WriteLine(actor.killtime);
-            Console.WriteLine(actor.CurrentHP);
-            Console.WriteLine(actor.Animation);
 
 
         }

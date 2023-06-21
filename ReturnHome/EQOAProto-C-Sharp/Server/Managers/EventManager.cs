@@ -40,9 +40,9 @@ namespace ReturnHome.Server.Managers
         }
         public static void GetNPCDialogue(GameOpcode opcode, Session mySession)
         {
-
-            string choiceOption = "Test";
-
+            //placeholder for choice
+            string choiceOption = "abjkej";
+            
             LuaState.State["race"] = Entity.GetRace(mySession.MyCharacter.EntityRace);
             LuaState.State["class"] = Entity.GetClass(mySession.MyCharacter.EntityClass);
             LuaState.State["humanType"] = Entity.GetHumanType(mySession.MyCharacter.EntityHumanType);

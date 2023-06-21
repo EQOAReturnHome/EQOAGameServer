@@ -221,10 +221,7 @@ namespace ReturnHome.Server.EntityObject
             {
                 foreach (KeyValuePair<object, object> k in diagOptions)
                     session.MyCharacter.MyDialogue.diagOptions.Add(k.Value.ToString());
-                //If it's not a yes/no choice then sort alphabetically.
-                //This forces it to return choices the same every time.
-                if (!session.MyCharacter.MyDialogue.diagOptions.Contains("Yes"))
-                    session.MyCharacter.MyDialogue.diagOptions.Sort();
+
             }
 
 
@@ -243,6 +240,7 @@ namespace ReturnHome.Server.EntityObject
                 {
                     choicesLength += (uint)choice.Length;
                 }
+
 
                 //count the number of textOptions
                 textOptions = (byte)session.MyCharacter.MyDialogue.diagOptions.Count;

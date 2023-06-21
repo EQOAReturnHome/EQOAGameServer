@@ -50,6 +50,8 @@ namespace ReturnHome.Server.Managers
             State["ServerLearnSpell"] = ServerLearnSpell.LearnSpell;
             State["LearnSpell"] = SpellManager.LearnSpell;
             State["GetSpell"] = SpellManager.GetSpellPattern;
+            State["TriggerMerchantMenu"] = ServerTriggerMerchantMenu.TriggerMerchantMenu;
+            State["GetEntity"] = EntityManager.QueryForEntityLua;
 
 
 

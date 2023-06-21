@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using ReturnHome.Server.EntityObject.Effect;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Opcodes.Messages.Server;
@@ -173,6 +174,11 @@ namespace ReturnHome.Server.EntityObject.Spells
 
             }
 
+        }
+
+        public static void TickEffect(Entity e, StatusEffect effect)
+        {
+            SpellManager.TickSpell(e, effect);
         }
 
         //TODO: Flesh out for enemies as well as players? This may not be quite right

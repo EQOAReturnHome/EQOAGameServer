@@ -3,6 +3,7 @@ using System.Buffers.Binary;
 using System.Text;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
@@ -79,6 +80,13 @@ namespace ReturnHome.Server.Opcodes.Chat
 
             if (temp[0] == "!c")
                 MySession.CoordinateUpdate();
+
+            if (temp[0] == "!item" && temp.Length > 1)
+            {
+                int itemID = int.Parse(temp[1]);
+                int qty = int.Parse(temp[2]);
+                ItemManager.GrantItem(MySession, itemID, qty);
+            }
 
             if (temp[0] == "!xp" && temp.Length > 1)
             {

@@ -16,15 +16,15 @@ function startSpell()
 end
 
 function completeSpell()
-   if(entityTarget.CurrentHP <= entityTarget.HPMax)then
-      entityTarget.CurrentHP = (heal+entityTarget.CurrentHP)
+   if(entity.CurrentHP <= entity.HPMax)then
+      entity.CurrentHP = (heal+entity.CurrentHP)
    end
-   AddStatusEffect(effectID, buffName, buffIcon, duration, tier)
+   AddStatusEffect(effectID, buffName, buffIcon, duration, tier, entity.ObjectID)
 end
 
-function tickSpell()
-   if(entityTarget.CurrentHP <= entityTarget.HPMax)then
-      entityTarget.CurrentHP = (heal+entityTarget.CurrentHP)
+function tickSpell(entity)
+   if(entity.CurrentHP <= entity.HPMax)then
+      entity.CurrentHP = (heal+entity.CurrentHP)
    end
 end
 

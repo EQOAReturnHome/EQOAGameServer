@@ -29,6 +29,7 @@ namespace ReturnHome.Server.EntityObject.Spells
 
         public int Count => _spellList.Count;
 
+
         //Verify Spells are in order and add them to our spellbook
         //Need to eventually check if any of these spells here are on cool down, too
         public SpellBook(Entity e, List<Spell> SpellList)
@@ -160,9 +161,9 @@ namespace ReturnHome.Server.EntityObject.Spells
             _spellCoolDownIndex.Clear();
         }
 
-        public void TickEffect(StatusEffect effect)
+        public void TickEffect(Entity e, StatusEffect effect)
         {
-            SpellManager.TickSpell(((Character)_e).characterSession, effect);
+            SpellManager.TickSpell(e, effect);
         }
 
         public void DumpSpellBook(ref BufferWriter writer)

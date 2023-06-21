@@ -31,7 +31,7 @@ namespace ReturnHome.Server.EntityObject
         private EntityType _npcType = 0;
         public int ServerID;
         public AIContainer aiContainer;
-        public int _respawnTime = 30;
+        public int _respawnTime = 10;
         public bool despawn { get; set; } = false;
         public bool canRespawn { get; set; } = true;
         public bool respawn { get; set; } = false;
@@ -230,9 +230,9 @@ namespace ReturnHome.Server.EntityObject
         }
 
 
-        public void AddStatusEffect(int id, string name, uint effectIcon, uint duration, uint tier)
+        public void AddStatusEffect(int id, string name, uint effectIcon, uint duration, uint tier, uint casterID)
         {
-            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, duration, tier);
+            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, duration, tier, casterID);
 
             //Console.WriteLine($"Status effect has name {statusEffect.name}, and icon {statusEffect.icon}");
 

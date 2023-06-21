@@ -63,9 +63,12 @@ namespace ReturnHome.Server.EntityObject.Player
         //Potentially part of new Quest framework, still being worked on.
         public static void ContinueQuest(Session session, int questID, string questText)
         {
+            Console.WriteLine("TEST");
             Quest quest = session.MyCharacter.activeQuests.Find(x => x.questID == questID);
             quest.questStep++;
             quest.log = questText;
+            Console.WriteLine(quest.log);
+
             ServerDeleteQuest.DeleteQuest(session, quest.questIndex);
 
             if (session.MyCharacter.activeQuests.Count > 0)
@@ -101,7 +104,7 @@ namespace ReturnHome.Server.EntityObject.Player
 
 
         //Only for when the player actually completes the quest. Potentially part of new Quest framework, still being worked on.
-        public static void CompleteQuest(Session session, int questID, int questXP)
+        public static void CompleteQuest(Session session, int questID, int questXP, int nextQuestID)
         {
 
             Quest thisQuest = null;
@@ -121,7 +124,7 @@ namespace ReturnHome.Server.EntityObject.Player
                 session.MyCharacter.completedQuests.Add(thisQuest);
                 session.MyCharacter.activeQuests.Remove(thisQuest);
                 session.MyCharacter.SetPlayerFlag(session, questID.ToString(), "99");
-                session.MyCharacter.SetPlayerFlag(session, (++questID).ToString(), "0");
+                session.MyCharacter.SetPlayerFlag(session, (nextQuestID).ToString(), "0");
                 if (questXP > 0)
                     Entity.GrantXP(session, questXP);
 

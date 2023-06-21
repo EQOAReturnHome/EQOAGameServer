@@ -11,7 +11,8 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
             CharacterSQL deletedCharacter = new CharacterSQL();
 
             BufferReader reader = new(ClientPacket.message.Span);
-            //Passes in packet with ServerID on it, will grab, transform and return ServerID while also removing packet bytes
+            //Passes in packet with
+            //on it, will grab, transform and return ServerID while also removing packet bytes
             int clientServID = (int)reader.Read7BitEncodedInt64();
 
             //Call SQL delete method to actually process the delete.

@@ -9,6 +9,7 @@ using System.Text.Json;
 using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Opcodes.Messages.Server;
+using ReturnHome.Server.EntityObject.Actors;
 
 namespace ReturnHome.Server.EntityObject.Player
 {
@@ -316,11 +317,19 @@ namespace ReturnHome.Server.EntityObject.Player
 
         public void OnPlayerDeath()
         {
-            if (EntityManager.QueryForEntityByServerID(ObjectID, out Entity entity))
+            List<Entity> entityList = EntityManager.QueryForAllEntitys();
+
+            for (int i = 0; i < entityList.Count; i++)
             {
-                entity.Animation = (byte)AnimationState.Die;
-                ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
+                if (!entityList[i].isPlayer)
+                {
+                    ((Actor)entityList[i]).aggroTable.Remove(this);
+                }
             }
+
+            CurrentHP = GetMaxHP();
+            ServerMemoryDump.MemoryDump(characterSession);
+            //ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
         }
 
     }

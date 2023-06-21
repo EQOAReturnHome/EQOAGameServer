@@ -19,9 +19,9 @@ namespace ReturnHome.Server.EntityObject.Actors
         private Group _lootingGroup;
         private Entity _npc;
         //To track entity Death
-        private long _timeOfDeath;
+        public long _timeOfDeath;
         //To track when someone entered the loot window, important as this "refreshes" the corpse
-        private long _lootingTime;
+        public long _lootingTime;
         public List<ClientItemWrapper> Loot { private set; get; }
 
         //When we create the corpse, entity has died and we toss a time stamp to it
@@ -31,6 +31,7 @@ namespace ReturnHome.Server.EntityObject.Actors
         {
             Loot = loot;
             _timeOfDeath = DateTime.UtcNow.Millisecond;
+
         }
         public void LootCorpse(Session session)
         {
@@ -78,5 +79,7 @@ namespace ReturnHome.Server.EntityObject.Actors
                 _npc.despawn = true;
             }
         }
+
+        public static explicit operator Corpse(Entity v) => throw new NotImplementedException();
     }
 }
