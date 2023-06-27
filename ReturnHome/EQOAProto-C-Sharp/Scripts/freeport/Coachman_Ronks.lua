@@ -253,6 +253,7 @@ function event_say(choice)
                     coaches.highpass.facing
                 )
             elseif (choice:find("Tea")) then
+                print(mySession)
                 TeleportPlayer(
                     mySession,
                     GetWorld(coaches.muniels_tea_garden.world),

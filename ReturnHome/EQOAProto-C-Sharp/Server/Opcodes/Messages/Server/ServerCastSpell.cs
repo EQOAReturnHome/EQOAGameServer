@@ -1,4 +1,5 @@
-﻿using ReturnHome.Server.Network;
+﻿using ReturnHome.Server.EntityObject.Player;
+using ReturnHome.Server.Network;
 using ReturnHome.Utilities;
 using System.Diagnostics;
 
@@ -19,6 +20,9 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             writer.Write(time*1000); // Cast time
             writer.Write(spellFx); // SpellFX
             message.Size = writer.Position;
+            foreach(ServerObjectUpdate s in session.rdpCommIn.connectionData.serverObjects.Span)
+                if (s.entity is Character)
+                    ((Character)s.entity).characterSession.sessionQueue.Add(message);
             session.sessionQueue.Add(message);
         }
     }

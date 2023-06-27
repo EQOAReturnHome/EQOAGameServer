@@ -337,16 +337,11 @@ namespace ReturnHome.Server.EntityObject.Player
                 }
             }
 
-            CurrentHP = GetMaxHP();
-            ServerMemoryDump.MemoryDump(characterSession);
-            //ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
             Animation = (byte)AnimationState.Die;
             ServerCharacterDied.CharacterDied(characterSession);
             deathTime = DateTime.UtcNow.Second;
             respawnTime = DateTime.UtcNow.AddSeconds(5).Second;
-            //disableTime = DateTime.UtcNow.AddSeconds(2).Second;
 
-            //ServerTeleportPlayer.TeleportPlayer(characterSession, boundWorld, boundX, boundY, boundZ, boundFacing);
         }
     }
 }
