@@ -918,11 +918,16 @@ namespace ReturnHome.Database.SQL
             CheckNameCmd.Parameters.AddWithValue("@CharacterName", CharName);
             //Executes the SQL reader
             using MySqlDataReader CheckNameRdr = CheckNameCmd.ExecuteReader();
-
-            //Reads through the returned rows(should only be 1 or none) and sets variable to returned value
-            while (CheckNameRdr.Read())
             {
-                TestCharName = CheckNameRdr.GetString(0);
+                if (CheckNameRdr.HasRows)
+                {
+                    //Reads through the returned rows(should only be 1 or none) and sets variable to returned value
+                    while (CheckNameRdr.Read())
+                    {
+
+                        TestCharName = CheckNameRdr.GetString(0);
+                    }
+                }                                              
             }
 
             //Return the matched name if it existed in the DB.
@@ -933,10 +938,10 @@ namespace ReturnHome.Database.SQL
         public void CreateCharacter(Session session, Character charCreation)
         {
             charCreation.playerFlags = new Dictionary<string, string>()
-{
-{ "NewPlayerIntro", "0" },
+            {
+                { "NewPlayerIntro", "0" },
                 {"admin", "true" }
-};
+            };
             string serializedPlayerFlags = (string)JsonSerializer.Serialize(charCreation.playerFlags);
 
             //Create second command using second connection and char insert query string

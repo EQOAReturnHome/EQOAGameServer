@@ -4,6 +4,7 @@ using System.Text;
 using AuthServer.Server;
 using MySql.Data.MySqlClient;
 using EQOACryptoLibrary;
+using System.Reflection.PortableExecutable;
 
 namespace AuthServer.Account.Database
 {
@@ -13,7 +14,9 @@ namespace AuthServer.Account.Database
         {
             //See if account exists
             if (AccountExists(Client.Username, out int _))
+            {
                 return false;
+            }
 
             Span<byte> t = Password.Span;
 
@@ -53,37 +56,54 @@ namespace AuthServer.Account.Database
                 Console.WriteLine(e);
             }
 
-            finally
-            {
-                Console.WriteLine("Error occured writing to database");
-            }
             t.Fill(0);
+
             //See if account exists
             if (AccountExists(Client.Username, out int _))
+            {
+                Console.WriteLine("Account created");
                 return true;
-            return false;
+            }
+            else
+            {
+                Console.WriteLine("Could not create account. Account name already exists.");
+                return false;
+            }
+            
         }
 
-        //Check is account name exists in the database
-        public bool AccountExists(string AccountName, out int AccountID)
+        // Check if account name exists in the database
+        public bool AccountExists(string accountName, out int accountID)
         {
-            AccountID = -1;
+            accountID = -1;
+            bool exists = false;
+
             using var cmd = new MySqlCommand("DoesAccountExist", con);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@Uname", AccountName);
+            cmd.Parameters.AddWithValue("@Uname", accountName);
+
             using MySqlDataReader rdr = cmd.ExecuteReader();
-            bool isTrue = false;
-            while(rdr.Read())
             {
-                if (rdr.GetString(0) == AccountName)
+                if (rdr.HasRows)
                 {
-                    isTrue = true;
-                    AccountID = rdr.GetInt32(1);
+                    while (rdr.Read())
+                    {
+                        string username = rdr.GetString(0);
+                        if (string.Equals(username, accountName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            exists = true;
+                            accountID = rdr.GetInt32(1);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    exists = false;
                 }
             }
 
-            rdr.Close();
-            return isTrue;
+            return exists;
         }
 
         public bool VerifyAccount(string Client, Memory<byte> Password, out int AccountID)
@@ -102,22 +122,22 @@ namespace AuthServer.Account.Database
             }
 
             //Query hashed password
+            bool isMatch = false;
             using var cmd = new MySqlCommand("QueryHash", con);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@Uname", Client);
             using MySqlDataReader rdr = cmd.ExecuteReader();
-            bool isMatch = false;
-            //Should only return 1 result technically
-            while (rdr.Read())
             {
-                byte[] temp = new byte[66];
-                rdr.GetBytes(0, 0, temp, 0, 66);
-                string data = Encoding.Default.GetString(temp);
-                isMatch = PasswordHash.ValidatePassword(Password, data);
-                AccountID = rdr.GetInt32(1);
+                //Should only return 1 result technically
+                while (rdr.Read())
+                {
+                    byte[] temp = new byte[66];
+                    rdr.GetBytes(0, 0, temp, 0, 66);
+                    string data = Encoding.Default.GetString(temp);
+                    isMatch = PasswordHash.ValidatePassword(Password, data);
+                    AccountID = rdr.GetInt32(1);
+                }
             }
-
-            rdr.Close();
 
             Password.Span.Fill(0);
             return isMatch;

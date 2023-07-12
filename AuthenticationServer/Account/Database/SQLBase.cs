@@ -1,5 +1,7 @@
 ﻿using System.Configuration;
 using MySql.Data.MySqlClient;
+using System;
+using System.Data;
 
 namespace AuthServer.Account.Database
 {

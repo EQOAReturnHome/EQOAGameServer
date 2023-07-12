@@ -74,11 +74,17 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
                 else
                 {
                     if (sql.AccountExists(AccountName, out int accountID))
+                    {
                         session.AccountID = accountID;
+                        Console.WriteLine("Account verified");
+                    }
 
                     else
-                        //Verifications failed, drop session?
+                    {
+                        //Verifications failed, drop session
+                        Console.WriteLine("Account can not be verified");
                         session.DropSession();
+                    }
                 }
 
                 sql.CloseConnection();
