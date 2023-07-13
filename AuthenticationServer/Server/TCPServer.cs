@@ -30,7 +30,7 @@ namespace AuthServer.Server
             while (true)
             {
                 Socket socket = await _listener.AcceptAsync();
-                await Task.Run(() => ProcessAsync(socket));         //CHANGED - Added await
+                await Task.Run(() => ProcessAsync(socket));
             }
         }
 

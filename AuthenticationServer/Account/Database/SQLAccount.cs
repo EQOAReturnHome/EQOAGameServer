@@ -61,12 +61,10 @@ namespace AuthServer.Account.Database
             //See if account exists
             if (AccountExists(Client.Username, out int _))
             {
-                Console.WriteLine("Account created");
-                return true;
+                 return true;
             }
             else
             {
-                Console.WriteLine("Could not create account. Account name already exists.");
                 return false;
             }
             
