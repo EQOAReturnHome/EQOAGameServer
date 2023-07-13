@@ -197,7 +197,7 @@ multiDialogue = { "Azlynn: Take this bag of coins to Agent Wilkenson. He is on t
     "You have received a quest!"
 }
 StartQuest(mySession, 120113, quests[120113][0].log)
-GrantItem(mySession, items.COINS, 1)
+GrantItem(mySession, items.BAG_OF_COINS, 1)
 else
     npcDialogue = "I have important work for you, playerName."
     diagOptions = { "I have returned to learn more.", "Is it something that will try to kill me again?" }
@@ -213,10 +213,12 @@ elseif (choice:find("Louhmanta")) then
 multiDialogue = { "Azlynn: The Mark of Louhmanta! This has been missing since my colleague went missing recently. It seems you have thwarted a plot against the Academy of Arcane Science.",
     "Azlynn: I am quite pleased with your performance. And I sense a great power within you. Perhaps it will serve you well if you continue on this path.",
     "Azlynn: I will have more work for you after I've sorted a few things out, so check back with me later. For your reward, take this powerful scroll.",
+"You have given away a Mark of Louhmanta.",
 "You have received a Lumbering Arms Scroll.",
     "You have finished a quest!"
 }
 CompleteQuest(mySession, 120113, quests[120113][4].xp, 120115 )
+TurnInItem(mySession, items.MARK_OF_LOUHMANTA, 1)
 GrantItem(mySession, items.LUMBERING_ARMS, 1)
 else
     npcDialogue = "Have you completed the mission?"
@@ -271,8 +273,6 @@ end
 elseif (GetPlayerFlags(mySession, "120120") == "0") then
 if (level >=20) then
 if (choice:find("never")) then
-multiDialogue = { "Azlynn: All good things do end, playerName. But they can live forever in your heart, as long as you aren't corrupted with your own self created illusions."
- } 
 elseif (choice:find("am")) then
 multiDialogue = { "Azlynn: You have done well for yourself. I expected nothing less as my assistant. Soon, you will fly from me, but I have one final mission for you to complete.",
     "Azlynn: It took some time to discover, but the mark you retrieved before is a fake.",
@@ -300,6 +300,7 @@ multiDialogue = { "Azlynn: Oh my...That is very interesting. She...is going to..
     "Azlynn: Once again, you have proven yourself worthy as an enchanter of The Academy of Arcane Science.",
     "Azlynn: As payment for your services, you've earned a set of rewards. The first is a Spacious Mind Scroll, which increases how much power you have for a short time. It comes with a Magic Scepter.",
     "Azlynn: I also reward you with this Power Boon Scroll, which gives your target a boost in how much power they have for a short time. It comes with a Magic Book.",
+"You have given away a note from Telina.",
 "You have received a Spacious Mind Scroll.",
 "You have received a Magic Scepter.",
 "You have received a Power Boon Scroll.",
@@ -309,6 +310,7 @@ multiDialogue = { "Azlynn: Oh my...That is very interesting. She...is going to..
 "Azlynn: I have no doubt you are going to go out into the world and seek out new skills. Beware your own illusions, and you will have the clarity to achieve your greatest desires. Farewell."
 }
 CompleteQuest(mySession, 120120, quests[120120][6].xp, 120121 )
+TurnInItem(mySession, items.NOTE_FROM_TELINA, 1)
 GrantItem(mySession, items.SPACIOUS_MIND, 1)
 GrantItem(mySession, items.MAGIC_SCEPTER, 1)
 GrantItem(mySession, items.POWER_BOON, 1)

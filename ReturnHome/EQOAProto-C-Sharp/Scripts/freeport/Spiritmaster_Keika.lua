@@ -87,6 +87,34 @@ end
 "Spiritmaster Keika: I suppose you'd like your spirit bound to this location?"
     end
 ------
+--Shadowknight(3) Human(0) Eastern(1)
+if (GetPlayerFlags(mySession, "30102") == "1") then
+if (choice:find("Nevermind")) then
+multiDialogue = { "Spiritmaster Keika: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
+ } 
+elseif (choice:find("Crimsonhand")) then
+BindPlayer(thisEntity.ObjectID)
+multiDialogue = { "Spiritmaster Keika: A new shadowknight to take the trials are you? Well I hope you do better than the last one, hearing his screams was unpleasant.",
+    "Spiritmaster Keika: I am a Spiritmaster, trained in the sacred art of binding ones soul to a specific location.",
+    "Spiritmaster Keika: When you are slain, your spirit will return to where it is bound. There your body and possessions will rematerialize.",
+    "Spiritmaster Keika: Only when ones destiny by the gods is fulfilled will they truly die. I shall now bind your spirit here for the time being.",
+    "Spiritmaster Keika: As per Malethai Crimsonhand's request, I will bind you as I bind all new shadowknights.",
+    "Spiritmaster Keika: Before I send you back to your master you must speak with Coachman Ronks.",
+    "Spiritmaster Keika: You can find him just west of here past the docks.",
+    "You have finished a quest!",
+    "You have received a quest!"
+}
+ContinueQuest(mySession, 30102, quests[30102][1].log)
+else
+    npcDialogue = "Hello."
+    diagOptions = { "Malethai Crimsonhand sent me.", "Nevermind." }
+end
+  else
+        npcDialogue =
+"Spiritmaster Keika: I suppose you'd like your spirit bound to this location?"
+    end
+------
+
 
 
 SendDialogue(mySession, npcDialogue, diagOptions)

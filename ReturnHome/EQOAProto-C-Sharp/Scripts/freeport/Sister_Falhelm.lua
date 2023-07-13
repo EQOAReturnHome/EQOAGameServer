@@ -21,7 +21,7 @@ else
     diagOptions = { "Denouncer Alshea sent me to you." }
 end
 elseif (GetPlayerFlags(mySession, "90103") == "1") then
-if (CheckQuestItem(mySession, items.TARANTULA_LEG_TIP, 2))
+if (CheckQuestItem(mySession, items.TARANTULA_LEG_TIPS, 2))
  then
 if (choice:find("nevermind")) then
 npcDialogue = "Sister Falhelm: It's important that you bring me what I have asked from you. I need two tarantula leg tips."
@@ -29,13 +29,13 @@ elseif (choice:find("have")) then
 multiDialogue = { "Sister Falhelm: I see that you do well in following instruction. Perhaps there is hope for you.",
     "Sister Falhelm: As I said, you will be rewarded. Take this scroll and study it well. The spell is trivial compared to my power, but it's a start.",
     "You have finished a quest!",
-"You have given away a tarantula leg tip.",
-"You have given away a tarantula leg tip.",
+"You have given away a tarantula leg tips.",
+"You have given away a tarantula leg tips.",
 "You have received a Minor Blessing Scroll.",
 "Sister Falhelm: I'd like you to take a moment to meditate and clear your mind. I will have another task for you shortly."
 }
 CompleteQuest(mySession, 90103, quests[90103][1].xp, 90104 )
-TurnInItem(mySession, items.TARANTULA_LEG_TIP, 2)
+TurnInItem(mySession, items.TARANTULA_LEG_TIPS, 2)
 GrantItem(mySession, items.MINOR_BLESSING, 1)
 else
     npcDialogue = "Do you have what I asked for?"
