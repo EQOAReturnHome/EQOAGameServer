@@ -1,0 +1,1 @@
+merchantDialogue = "Cloth armor for sale! Only merchant with it in town! Don't miss out!"

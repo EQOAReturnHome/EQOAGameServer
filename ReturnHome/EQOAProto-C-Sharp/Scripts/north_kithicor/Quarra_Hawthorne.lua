@@ -1,0 +1,1 @@
+merchantDialogue = "Refreshing drink and food for sale! We may be a tiny village in the middle of the sticks, but our food keeps folks com'n round."

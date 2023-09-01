@@ -1,1 +1,1 @@
-merchantDialogue = "Take your time to browse, and let me know if I can help you to anything."
+merchantDialogue = "A wizard is never too late, as they may acquire my scrolls anytime…"

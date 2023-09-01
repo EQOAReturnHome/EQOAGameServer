@@ -1,1 +1,1 @@
-merchantDialogue = "If you're looking for fine metalwork, you've come to the right place!"
+merchantDialogue = "Spears and daggers keep you light on your feet. How about a gander?"

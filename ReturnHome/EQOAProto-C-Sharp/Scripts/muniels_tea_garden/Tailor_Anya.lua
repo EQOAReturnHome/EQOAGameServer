@@ -1,0 +1,1 @@
+merchantDialogue = "Cloth equipment for sale! Stitched by hand by the elves of Fayspire! I've even managed a fine robe. Prices subject to change."

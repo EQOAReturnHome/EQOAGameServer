@@ -1,1 +1,1 @@
-merchantDialogue = "Are you looking to add a little flight to your arsenal?"
+merchantDialogue = "Authentic bows and arrows, crafted right here in Tethelin, care to browse?"

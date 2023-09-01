@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "There's nothing in this world like the sun shining and the birds chirping."
+    npcDialogue = "Welcome to the Church of Tunare. In this temple our holy clerics learn to call forth the healing powers of the Goddess."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

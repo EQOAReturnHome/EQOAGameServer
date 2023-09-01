@@ -1,0 +1,1 @@
+merchantDialogue = "Daggers, spears, and all manner of pointy weapons for sale! Make sure the pointy end is always aimed away from you."

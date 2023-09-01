@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "I'm sure you didn't notice, but I am really busy right now.  Come back some other time."
+    npcDialogue = "Greetings, playerName. If you seek a master tailor, then I would give the suggestion of seeking out my father."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

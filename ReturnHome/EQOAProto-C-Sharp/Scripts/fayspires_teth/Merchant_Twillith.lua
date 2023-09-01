@@ -1,1 +1,1 @@
-merchantDialogue = "How can I help you?"
+merchantDialogue = "These elvish smithing supplies will help you create the most pristine armor."

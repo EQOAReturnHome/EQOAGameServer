@@ -1,1 +1,1 @@
-merchantDialogue = "Help yourself to anything you like!!"
+merchantDialogue = "To construct a solid piece of armor, you must strike true with a armorsmithing hammer of this caliber. Please observe…"

@@ -1,1 +1,1 @@
-merchantDialogue = "Take your time to browse, and let me know if I can help you to anything."
+merchantDialogue = "Only the finest elvish materials are traded here. Would you care to see them?"

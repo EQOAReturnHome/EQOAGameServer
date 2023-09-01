@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Get out of my sight!"
+    npcDialogue = "These tears were released by the wild drakes that roam Tunaria. Careful with the bottle, one tiny drop will burn right through your flesh."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Something must have gone terribly wrong during your birth for you to think I would actually speak with you."
+    npcDialogue = "There must be more to this job than just standing here. Perhaps I could join you on your quests playerName..."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

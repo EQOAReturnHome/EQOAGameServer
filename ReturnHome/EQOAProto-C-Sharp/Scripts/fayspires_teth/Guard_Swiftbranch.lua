@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "As you were, citizen."
+    npcDialogue = "Just what is that monstrosity up on the mountain in the west? Something called a telescope? Whatever is going on there can not be of this natural world."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

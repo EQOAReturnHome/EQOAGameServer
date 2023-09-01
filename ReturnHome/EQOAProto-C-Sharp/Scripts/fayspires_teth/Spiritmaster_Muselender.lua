@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Would you like me to bind your spirit to this location, child?"
+    npcDialogue = "It may be wise to bind yourself to the safety of this forest, playerName. Shall I do this for you?"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

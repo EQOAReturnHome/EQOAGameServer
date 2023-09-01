@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Keep away from me!!  You reek of Troll!"
+    npcDialogue = "I once dueled the stone golem in the next room. It is a slow but formidable foe. It's attacks may be easily dodged, but one small mistake and you will be knocked out for a day."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

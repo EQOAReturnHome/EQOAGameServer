@@ -1,1 +1,1 @@
-merchantDialogue = "Something I can get for you??"
+merchantDialogue = "Might there be anything in particular I may get for you playerName?"

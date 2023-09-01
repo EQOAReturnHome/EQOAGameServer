@@ -1,0 +1,1 @@
+merchantDialogue = "Even this close to the ocean, it gets awful hot and dry here at the Garden. I have delicious foods and healthy drinks for sale!"

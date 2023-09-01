@@ -1,0 +1,1 @@
+merchantDialogue = "Fine cloth armor and robes for sale! Silk, cotton, and hemp!"

@@ -1,1 +1,1 @@
-merchantDialogue = "Take your time to browse, and let me know if I can help you to anything."
+merchantDialogue = "These weapon molds were fashioned long ago in the Elddar Forest. I will show them to you if you desire."

@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Keep away from me!!  You reek of Troll!"
+    npcDialogue = "A recent expedition around Winter's Deep revealed a gathering of bandits in a small fort on the north side of the lake. If you insist on going in that direction, I suggest you bring a company of friends with you."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

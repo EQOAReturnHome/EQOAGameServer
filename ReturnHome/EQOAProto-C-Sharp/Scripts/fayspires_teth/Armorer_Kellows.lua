@@ -1,1 +1,1 @@
-merchantDialogue = "Can I interest you in some metalwork?"
+merchantDialogue = "Much protection you will find in this variety of chain mail."

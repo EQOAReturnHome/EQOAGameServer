@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Is there a reason you are so rudely interrupting me?"
+    npcDialogue = "Here at the Emerald Lodge we strive to guide our rangers through a life changing journey. Hopefully they will use this experience to become wise in the ways of the world. May they help guide our kind to unite with nature, and eventually return to the Goddess Tunare."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

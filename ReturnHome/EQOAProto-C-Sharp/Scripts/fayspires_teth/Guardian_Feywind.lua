@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "What's your problem?  Can you not see I am busy?"
+    npcDialogue = "Welcome to Paragon Keep. Here we train elven paladins to become guardians, and great keepers of the peace."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

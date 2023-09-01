@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Why are you bothering me?"
+    npcDialogue = "I am here to maintain trade between the two elven cities. Though we have our separate ways of life, we benefit greatly by sharing knowledge and supplies."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

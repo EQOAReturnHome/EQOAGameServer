@@ -1,0 +1,1 @@
+merchantDialogue = "Leather armor imported from Halas! Durable but light weight! Guaranteed to help you duck and dive better!"

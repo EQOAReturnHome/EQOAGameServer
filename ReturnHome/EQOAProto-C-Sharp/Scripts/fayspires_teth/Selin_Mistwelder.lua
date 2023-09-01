@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "We're deep in discussion, please leave us."
+    npcDialogue = "An earie fog rolls into Tethelin at night. There is something unnatural about it. I must investigate further."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "I am extremely busy at the moment."
+    npcDialogue = "I have many journals to attend to at the moment. Perhaps you and I could speak later?"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

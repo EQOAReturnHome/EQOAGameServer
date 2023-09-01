@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Greetings, love.  Always a pleasure to speak with you, but I really don't have time to talk right now."
+    npcDialogue = "A band of our dearest elven kin were recently killed by a pack of hatebone orc thieves! They've stolen the Elddar Tomes. For the safety of all elves, we must have those tomes returned!"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

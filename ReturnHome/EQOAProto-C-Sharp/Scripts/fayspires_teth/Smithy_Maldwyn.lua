@@ -1,1 +1,1 @@
-merchantDialogue = "If you're looking for fine metalwork, you've come to the right place!"
+merchantDialogue = "These are the most elegantly crafted spears and daggers in all of Tunaria."

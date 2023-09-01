@@ -1,0 +1,1 @@
+merchantDialogue = "Care to browse my banded and plate armor? So new that it hasn't even fully cooled from the forge!"

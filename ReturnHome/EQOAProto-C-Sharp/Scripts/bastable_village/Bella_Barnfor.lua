@@ -1,0 +1,1 @@
+merchantDialogue = "It must have been a long journey for you. I know our village is in the middle of nowhere. How about some food and drink?"

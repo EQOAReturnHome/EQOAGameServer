@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Nothing to say to you."
+    npcDialogue = "How do we rangers travel so quickly? Spirit of the Wolf grants impeccable running speed, and can save you when a battle of glory turns sour."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

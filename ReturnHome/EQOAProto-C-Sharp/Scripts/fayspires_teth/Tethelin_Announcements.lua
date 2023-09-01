@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Purchase the Boon of Hagley?"
+    npcDialogue = " "
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

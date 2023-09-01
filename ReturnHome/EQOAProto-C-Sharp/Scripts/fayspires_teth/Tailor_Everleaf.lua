@@ -1,1 +1,1 @@
-merchantDialogue = "Take your time and browse some of my finer tailoring and leatherwork."
+merchantDialogue = "For the young adventurer, this cloth armor might help. Would you like to see it playerName?"

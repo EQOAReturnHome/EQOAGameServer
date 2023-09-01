@@ -1,1 +1,1 @@
-merchantDialogue = "There's nothing like a strong pole to catch your fish with, am I right?"
+merchantDialogue = "I have an agreeable selection of poles here for your next catch."

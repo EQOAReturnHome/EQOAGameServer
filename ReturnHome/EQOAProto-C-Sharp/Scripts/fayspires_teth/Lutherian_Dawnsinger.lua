@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "I wish I could help you but I don't have the time."
+    npcDialogue = "We may deliver rewards to those who are willing to strike down the foes of Tunare's children. When you are ready to serve, Adrwyiel Niteshyre shall guide you."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

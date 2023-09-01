@@ -1,0 +1,1 @@
+merchantDialogue = "Just received a new shipment of chainmail equipment from Moradhim. Guaranteed no rust from the ocean air."

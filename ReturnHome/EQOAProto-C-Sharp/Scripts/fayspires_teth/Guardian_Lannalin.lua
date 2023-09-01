@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Stay out of trouble or I'll have your head on a post."
+    npcDialogue = "My greatest reward is serving the church. May Tunare bless us all!"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

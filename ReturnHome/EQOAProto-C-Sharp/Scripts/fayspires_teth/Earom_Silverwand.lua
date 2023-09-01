@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "What do you want?"
+    npcDialogue = "As a caster of magic, it is quite important to know your place in battle. If you release all of your powers at once, you may draw the unwanted attention of your foe. Be cautious and time your spells carefully."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

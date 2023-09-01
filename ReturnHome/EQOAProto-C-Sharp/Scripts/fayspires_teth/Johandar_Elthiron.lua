@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "A pleasure, but I don't have time to talk."
+    npcDialogue = "To express their unwavering devotion, paladins of Paragon Keep are equipped with the Sword of Faith. This sword is a conduit through which a paladin will deliver the will and protection of the goddess."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

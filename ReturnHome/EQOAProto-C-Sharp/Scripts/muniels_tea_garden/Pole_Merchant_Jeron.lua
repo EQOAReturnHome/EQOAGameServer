@@ -1,0 +1,1 @@
+merchantDialogue = "Fish'n in the ocean requires poles made of sturdier stuff. Don't ya worry though, I've got just what ya need for sale."

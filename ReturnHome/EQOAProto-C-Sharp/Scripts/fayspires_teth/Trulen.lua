@@ -1,5 +1,1 @@
-function  event_say(choice)
-diagOptions = {}
-    npcDialogue = "Did you need something?"
-SendDialogue(mySession, npcDialogue, diagOptions)
-end
+merchantDialogue = "This locking book safe is likely all you need to keep your writings protected."

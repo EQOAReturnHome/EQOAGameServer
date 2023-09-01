@@ -1,1 +1,1 @@
-merchantDialogue = "Feel free to browse my wares, and tell me if anything catches your eye!"
+merchantDialogue = "A true crafter becomes one with their tool. One of these armorsmithing hammers is all you need…"

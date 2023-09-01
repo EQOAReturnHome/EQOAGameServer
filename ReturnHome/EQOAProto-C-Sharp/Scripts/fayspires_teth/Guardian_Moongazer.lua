@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "If there's nothing you need, then please be on your way."
+    npcDialogue = "The more I observe the moon at night, the more I am certain someone lives there. How can there be this whole other world in the sky, yet no being roam the surface?"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

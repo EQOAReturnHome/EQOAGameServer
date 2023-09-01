@@ -1,0 +1,1 @@
+merchantDialogue = "Leather equipment for sale! Recently tanned and sculpted!"

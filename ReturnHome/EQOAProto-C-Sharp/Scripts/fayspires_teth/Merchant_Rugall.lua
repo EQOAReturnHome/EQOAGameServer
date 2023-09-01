@@ -1,1 +1,1 @@
-merchantDialogue = "Help yourself to anything you like!!"
+merchantDialogue = "I have many fine metals here, from the frozen north, to the mountains of Rathe."

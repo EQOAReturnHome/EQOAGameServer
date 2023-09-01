@@ -1,1 +1,1 @@
-merchantDialogue = "Looking to purchase some bait for your hook?"
+merchantDialogue = "I know what these fish like. How about some proper bait for your hook?"

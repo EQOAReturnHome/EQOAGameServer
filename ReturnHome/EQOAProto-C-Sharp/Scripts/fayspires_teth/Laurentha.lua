@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Lovely seeing you, but I really should stay busy."
+    npcDialogue = "Through some special enchantments, we test the lake water, and then filter out all poisons and impurities. This does require some water to be obtained from the Plane of Sky, then blessed by our clerics. Surprisingly, just a few drops of this holy water is enough for the entire lake."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

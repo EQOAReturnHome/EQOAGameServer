@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Mind yourself and you won't have to deal with me."
+    npcDialogue = "Welcome to the city of Fayspires, the last bastion of hope for the elves of Tunaria!"
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

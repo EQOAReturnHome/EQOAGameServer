@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Hail, adventurer!"
+    npcDialogue = "Many undead have been spotted just north of the lake, near an old fallen spire. I pray you do not go near there, playerName."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

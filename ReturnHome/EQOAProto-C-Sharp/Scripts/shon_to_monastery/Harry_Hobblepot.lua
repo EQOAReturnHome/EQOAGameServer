@@ -1,0 +1,1 @@
+merchantDialogue = "Welcome to Last Inn! Care for a slice of pie or a refreshing drink?"

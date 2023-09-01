@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "They say that history repeats itself.  Let's hope that isn't true."
+    npcDialogue = "A collection of totems I have coveted, have been scattered and lost. If we can find them, something great and terrible awaits us in the end."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

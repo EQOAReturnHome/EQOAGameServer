@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Get away from me."
+    npcDialogue = "With due diligence, the mastery of alchemy can be very rewarding, as long as the pupil does not disable themselves in the process of using dangerous chemicals. Many young minds have I seen destroyed by a simple moment of carelessness. Don't let this be you, playerName."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

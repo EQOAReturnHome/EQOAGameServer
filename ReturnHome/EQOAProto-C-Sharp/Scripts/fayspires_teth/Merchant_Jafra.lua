@@ -1,1 +1,1 @@
-merchantDialogue = "Take your time to browse, and let me know if I can help you to anything."
+merchantDialogue = "No one will know your true identity with these spells of enchantment…"

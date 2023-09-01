@@ -1,0 +1,1 @@
+merchantDialogue = "Bows and arrows for sale! Fresh arrow stock delivered every Monday!"

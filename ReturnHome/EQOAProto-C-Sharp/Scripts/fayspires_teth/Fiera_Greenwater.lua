@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Everyone here seems to love the sky during the day, but have you seen its beauty at night?"
+    npcDialogue = "Winter's Deep Lake is a perfect source for our tonics and healing waters. In fact, something mysterious about the lake has actually improved the results of our recipes, but I haven't yet figured out why."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

@@ -1,1 +1,1 @@
-merchantDialogue = "Something I can get for you??"
+merchantDialogue = "You cannot consider yourself a powerful wizard without the knowledge of these scrolls."

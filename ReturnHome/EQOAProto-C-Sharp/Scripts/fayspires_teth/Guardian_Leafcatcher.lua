@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "Stay out of trouble or I'll have your head on a post."
+    npcDialogue = "Here the students who seek to become enchanters, magicians, wizards and alchemists find their way through the many trials. Those that survive are amongst the most powerful spellcasters in all of Tunaria."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

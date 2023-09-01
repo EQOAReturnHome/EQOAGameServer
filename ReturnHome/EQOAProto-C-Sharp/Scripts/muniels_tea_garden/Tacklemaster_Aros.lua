@@ -1,0 +1,1 @@
+merchantDialogue = "The right pole is only the first step. Gotta have the right bait or you'll be leav'n empty handed, tired, and belly rumbl'n."

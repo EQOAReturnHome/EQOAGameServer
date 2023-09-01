@@ -1,0 +1,1 @@
+merchantDialogue = "The trout sure are delicious from the river but you can't use any ole fishing pole. You need a fly rod for this place."

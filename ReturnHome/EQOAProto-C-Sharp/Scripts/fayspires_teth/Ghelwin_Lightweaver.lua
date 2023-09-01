@@ -1,5 +1,5 @@
-function  event_say(choice)
+function event_say()
 diagOptions = {}
-    npcDialogue = "I simply do not have the time for idle prattle.  Please leave me alone."
+    npcDialogue = "Slow and careful work goes into making items of sorcery. It takes days to even create the simplest artifact."
 SendDialogue(mySession, npcDialogue, diagOptions)
 end

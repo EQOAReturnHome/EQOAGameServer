@@ -1,0 +1,1 @@
+merchantDialogue = "Durable hammers, clubs, and other weapons to bash your foes to pieces with! Have a look at my stock."

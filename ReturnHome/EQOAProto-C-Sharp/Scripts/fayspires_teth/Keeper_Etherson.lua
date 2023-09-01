@@ -1,1 +1,1 @@
-merchantDialogue = "Was there something you needed?"
+merchantDialogue = "For only the most devout clerics, I will train you in these holy magics."

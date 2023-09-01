@@ -1,0 +1,1 @@
+merchantDialogue = "Shields for sale! Imported straight from the forges of Moradhim! Modestly priced and rust free."
