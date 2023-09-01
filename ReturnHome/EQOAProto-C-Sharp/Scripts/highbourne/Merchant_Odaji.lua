@@ -1,0 +1,1 @@
+merchantDialogue = "You can't progress as a weaponsmith without the proper tools. Purchase your weaponsmithing hammers here!"

@@ -1,0 +1,1 @@
+merchantDialogue = "May the Light guide you and my spells assist your actions. Young clerics must remember who they serve and study the texts well."

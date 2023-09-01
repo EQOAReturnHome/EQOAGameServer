@@ -1,0 +1,1 @@
+merchantDialogue = "Daggers and spears for sale! Imported from Freeport at my expense for your convenience!"

@@ -1,0 +1,1 @@
+merchantDialogue = "I am thrilled you have made it this far on your journey to enlightenment. Controlling these spells will push you to your limit."

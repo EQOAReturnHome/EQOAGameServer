@@ -1,0 +1,1 @@
+merchantDialogue = "This robe will help your early elementals recognize you and hopefully keep them from attacking you."

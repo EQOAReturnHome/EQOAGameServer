@@ -1,0 +1,1 @@
+merchantDialogue = "Hatchets and knives for sale! Imported from Tethelin!"

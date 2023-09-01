@@ -1,0 +1,1 @@
+merchantDialogue = "Spells for the budding alchemist. Learn to make your first draughts and concoctions!"

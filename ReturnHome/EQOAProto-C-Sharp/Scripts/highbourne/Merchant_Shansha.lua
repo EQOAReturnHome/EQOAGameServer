@@ -1,0 +1,1 @@
+merchantDialogue = "Don't ask where the garments come from…put them on like your guildmaster instructed you to. Nothing I can do about the smell."

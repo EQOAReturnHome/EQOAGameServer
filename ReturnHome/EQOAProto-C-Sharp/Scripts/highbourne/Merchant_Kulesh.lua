@@ -1,0 +1,1 @@
+merchantDialogue = "The ring is to remind young clerics of their chosen path. The belt is for paladins to well, hold their trousers up."

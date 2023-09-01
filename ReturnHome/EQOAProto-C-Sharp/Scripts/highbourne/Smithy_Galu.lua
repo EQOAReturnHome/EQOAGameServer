@@ -1,0 +1,1 @@
+merchantDialogue = "Elven steel for sale! Sharpened at the forgers of Fayspires!"

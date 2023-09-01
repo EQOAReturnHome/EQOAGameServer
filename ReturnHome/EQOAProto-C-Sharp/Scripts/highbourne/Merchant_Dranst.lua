@@ -1,0 +1,1 @@
+merchantDialogue = "I pray that the light held within these scrolls guides your actions and early steps along the path of righteousness."

@@ -1,0 +1,1 @@
+merchantDialogue = "Jewelcrafting supplies sold here! Stock up so you can have an extensive crafting session rather than returning few attempts."

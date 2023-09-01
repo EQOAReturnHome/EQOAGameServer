@@ -1,0 +1,1 @@
+merchantDialogue = "Armorsmithing hammers sold here! Make sure you have the appropriate tool for the task at hand."

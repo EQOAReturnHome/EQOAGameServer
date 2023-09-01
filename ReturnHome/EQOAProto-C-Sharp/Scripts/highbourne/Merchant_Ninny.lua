@@ -1,0 +1,1 @@
+merchantDialogue = "I am an alchemist by trade but my travels ended some time ago. Now I create this Helnorm Lotion to help with various poisons."

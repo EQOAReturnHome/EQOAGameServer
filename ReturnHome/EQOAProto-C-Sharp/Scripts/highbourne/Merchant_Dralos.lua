@@ -1,0 +1,1 @@
+merchantDialogue = "Training to be able to utilize spells of this caliber takes dedication. I encourage you to continue on the path before you."

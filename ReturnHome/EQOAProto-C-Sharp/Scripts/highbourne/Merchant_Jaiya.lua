@@ -1,0 +1,1 @@
+merchantDialogue = "A budding enchanter, wonderful. I am tasked with the refining and selling of your most basic spells through your 12th level."

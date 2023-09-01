@@ -1,0 +1,1 @@
+merchantDialogue = "If my arrows miss their mark, it is due to the operator not the tool. I would put my bows against any made by an elf."

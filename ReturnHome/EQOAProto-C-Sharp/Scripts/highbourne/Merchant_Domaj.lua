@@ -1,0 +1,1 @@
+merchantDialogue = "Jewelcrafting kits for sale. Make sure to stock up to allow for more time to practice."

@@ -1,0 +1,1 @@
+merchantDialogue = "Blacksmithing molds and patterns sold here. Buy what you need so you don't interrupt me again."

@@ -1,0 +1,1 @@
+merchantDialogue = "These robes are the mark of the young wizard. Wear it with humility and the desire to learn."

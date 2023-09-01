@@ -1,0 +1,1 @@
+merchantDialogue = "These spells are the most challenging you will come across. Be careful with Ice Comet…it is really cold."

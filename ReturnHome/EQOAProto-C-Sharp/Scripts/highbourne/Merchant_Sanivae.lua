@@ -1,0 +1,1 @@
+merchantDialogue = "Weaponsmithing molds here! Every mold you'll need for your path of learning."

@@ -1,0 +1,1 @@
+merchantDialogue = "My spells are for wizards that have just begun the path to enlightenment. Some advice, watch out for the area of effect spells."

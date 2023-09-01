@@ -1,0 +1,1 @@
+merchantDialogue = "Cured leather armor for sale! Crafted in the frozen halls of Halas! I buy in bulk and pass the savings on to you."

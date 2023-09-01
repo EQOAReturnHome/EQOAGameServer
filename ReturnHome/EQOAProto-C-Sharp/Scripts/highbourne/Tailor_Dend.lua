@@ -1,0 +1,1 @@
+merchantDialogue = "Cloth armor for sale! Imported from the cloth spinners of Qeynos!"

@@ -1,0 +1,1 @@
+merchantDialogue = "My skills are suited for the seasoned shadowknight. Use them to spread chaos and darkness."

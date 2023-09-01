@@ -1,0 +1,1 @@
+merchantDialogue = "Have you ever wondered what Prexus holds on Odus for us? This banded armor can you help traverse the unknown seas safely there."

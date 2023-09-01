@@ -1,0 +1,1 @@
+merchantDialogue = "Now that you have advanced your understanding and abilities as a magician, you may be able to discern my spells."

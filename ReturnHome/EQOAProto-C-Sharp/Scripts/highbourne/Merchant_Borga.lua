@@ -1,0 +1,1 @@
+merchantDialogue = "Purchase tailoring patterns from me and check with Yini for the supplies you'll need to progress your tailoring skill."

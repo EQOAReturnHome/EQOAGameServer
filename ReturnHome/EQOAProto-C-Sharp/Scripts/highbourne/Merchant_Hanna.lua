@@ -1,0 +1,1 @@
+merchantDialogue = "These uniforms are made for young alchemists. Each has a corrosion resistant coating for when you inevitably make mistakes."

@@ -1,0 +1,1 @@
+merchantDialogue = "Advanced leather armor sold here! Imported directly from Halas and a few pieces made right here in Highbourne."

@@ -1,0 +1,1 @@
+merchantDialogue = "Shields for sale! Get your shields here! Imported from the dwarven city of Moradhim."

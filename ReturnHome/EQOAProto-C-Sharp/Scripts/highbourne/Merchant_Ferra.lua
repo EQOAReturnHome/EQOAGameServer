@@ -1,0 +1,1 @@
+merchantDialogue = "These skills are more challenging to master than what Dranst offers. Prepare yourself through practice and meditation."

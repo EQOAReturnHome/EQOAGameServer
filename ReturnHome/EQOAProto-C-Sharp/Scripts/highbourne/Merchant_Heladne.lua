@@ -1,0 +1,1 @@
+merchantDialogue = "Blacksmithing metals sold here! The result of decades of refinement. Prices are not negotiable."

@@ -1,0 +1,1 @@
+merchantDialogue = "I miss the old ways, when new recruits paid for spells with blood. Now I have to buy blood for my research with your tunar."

@@ -1,0 +1,1 @@
+merchantDialogue = "A fresh shadowknight eh, just don't kill yourself while learning one of my skills. Keep your mind focused and senses open."

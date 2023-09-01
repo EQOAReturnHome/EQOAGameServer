@@ -1,0 +1,1 @@
+merchantDialogue = "I assume you were sent by a guild leader. Make your purchase and return to them. Do not mention me outside of your guild."

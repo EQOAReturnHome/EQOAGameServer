@@ -1,0 +1,1 @@
+merchantDialogue = "Swords and axes for sale! Edges made in the frozen halls of Halas and imported for your defensive needs!"

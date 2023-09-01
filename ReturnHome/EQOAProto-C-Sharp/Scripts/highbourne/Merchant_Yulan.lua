@@ -1,0 +1,1 @@
+merchantDialogue = "Summoning undead minions can be intoxicating and lead one to not utilize other talents. A disease can make things interesting."

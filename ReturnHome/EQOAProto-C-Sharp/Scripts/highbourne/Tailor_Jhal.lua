@@ -1,0 +1,1 @@
+merchantDialogue = "Woolen armor for sale! We only import the best, directly for Moradhim itself."

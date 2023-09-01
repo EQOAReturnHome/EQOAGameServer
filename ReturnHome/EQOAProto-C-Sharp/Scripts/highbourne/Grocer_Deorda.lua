@@ -1,0 +1,1 @@
+merchantDialogue = "You can't reach enlightenment on an empty stomach. Consider purchasing some of my nourishing foods to quiet your hunger."

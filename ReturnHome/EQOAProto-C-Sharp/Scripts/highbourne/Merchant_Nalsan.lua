@@ -1,0 +1,1 @@
+merchantDialogue = "I have rewritten these spells numerous times to suit those of your experience. Use them to surpass your current limitations."

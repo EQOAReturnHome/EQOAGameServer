@@ -1,0 +1,1 @@
+merchantDialogue = "My spells will help you on your path to enlightenment, there is no doubt about that. The question is, can you afford them?"

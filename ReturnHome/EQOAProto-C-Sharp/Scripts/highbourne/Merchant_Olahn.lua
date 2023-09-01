@@ -1,0 +1,1 @@
+merchantDialogue = "I focus on the scholarly aspect of being a magician. Each spell is written with my hand and is for the inexperienced magician."

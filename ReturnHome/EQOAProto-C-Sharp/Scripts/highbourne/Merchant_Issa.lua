@@ -1,0 +1,1 @@
+merchantDialogue = "Simplicities sold here! Get your cloth and thread while you can."

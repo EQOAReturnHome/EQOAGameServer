@@ -1,0 +1,1 @@
+merchantDialogue = "I've been crafting bows for quite some time and made the conscience choice to help out the less knowledgeable, like you."
