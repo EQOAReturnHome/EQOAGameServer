@@ -327,7 +327,7 @@ end
 "Azlynn: Hmm, where is my sparkling green gem… I know I had it here somewhere."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

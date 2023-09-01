@@ -1,5 +1,5 @@
 function  event_say(choice)
 diagOptions = {}
     npcDialogue = "What business do you have here?"
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

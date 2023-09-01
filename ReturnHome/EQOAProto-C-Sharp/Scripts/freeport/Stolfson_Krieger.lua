@@ -148,7 +148,7 @@ end
 "Stolfson Krieger: Malice must be channeled to order to shape the mind of a young shadowknight. Without it, they just become weak, frustrated young persons running around in dark armor."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

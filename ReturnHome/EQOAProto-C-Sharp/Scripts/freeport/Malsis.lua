@@ -76,7 +76,7 @@ end
         npcDialogue =
 "Malsis: I have no time to offer odd jobs to every transient that decides to waltz into the Academy!!! I'll have you know, we are quite busy."
     end
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

@@ -273,7 +273,7 @@ GrantItem(mySession, items.MAGIC_RAPIER, 1)
 "Athera: I am much too tied up in my own affairs to consider anything you have to say. Unless you want to pay me an absurd amount of tunar. No? I didn't think so."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

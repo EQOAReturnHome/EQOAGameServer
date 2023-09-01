@@ -1,5 +1,5 @@
 function  event_say(choice)
 diagOptions = {}
     npcDialogue = "A dense fog of cloud presides over the city, and rarely do we see the sun in our open air. "
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

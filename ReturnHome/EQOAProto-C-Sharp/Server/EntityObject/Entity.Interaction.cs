@@ -191,12 +191,13 @@ namespace ReturnHome.Server.EntityObject
         }
 
         //Method used to send any in game dialogue to player. Works for option box or regular dialogue box
-        public void SendDialogue(Session session, string dialogue, LuaTable diagOptions)
+        public void SendDialogue(Session session, string dialogue, LuaTable diagOptions, string npcName)
         {
             if (dialogue != null)
             {
                 dialogue = dialogue.Replace("playerName", session.MyCharacter.CharName);
             }
+
 
             if (dialogue == "")
             {
@@ -206,15 +207,21 @@ namespace ReturnHome.Server.EntityObject
             {
                 string splitRegex = @"(?<=[.?!]\s)";
                 string[] newDialogue = Regex.Split(dialogue, splitRegex);
+                //for(int i=0; i < newDialogue.Length; i++) {
                 foreach (string s in newDialogue)
                 {
-                    SendDialogue(session, s, diagOptions);
+                    //newDialogue[i] = npcName + ": " + newDialogue[i];
+                    SendDialogue(session, s, diagOptions, npcName);
                 }
                 return;
-
             }
             //Clear player's previous dialogue options before adding new ones.
             session.MyCharacter.MyDialogue.diagOptions.Clear();
+            if (npcName != null)
+            {
+                dialogue = npcName + ": " + dialogue;
+            }
+
 
 
             //loop over luatable, assigning every value to an element of the players diagOptions list
@@ -456,7 +463,7 @@ namespace ReturnHome.Server.EntityObject
                 if (session.MyCharacter._newTrainingPoints > 0)
                 {
                     session.MyCharacter.PlayerTrainingPoints.EarnTrainingPoints(session.MyCharacter._newTrainingPoints);
-                    session.MyCharacter.SendDialogue(session, "You have received more training points!", null);
+                    session.MyCharacter.SendDialogue(session, "You have received more training points!", null, null);
 
                     //Since we are adding training points, we have to indicate a negative value to the client so it will add it to the total. it's weird...
                     ServerAdjustTrainingPoints.AdjustTrainingPoints(session, session.MyCharacter._newTrainingPoints * -1);

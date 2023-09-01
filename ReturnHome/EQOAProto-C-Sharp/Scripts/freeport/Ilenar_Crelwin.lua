@@ -846,7 +846,7 @@ end
 
 
 
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

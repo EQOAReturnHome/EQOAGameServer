@@ -1,5 +1,5 @@
 function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I've just returned from the swamps in the southeast. It is terrifyingly overrun with undead. I've never seen anything like it."
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

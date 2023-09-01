@@ -79,7 +79,7 @@ end
 "Commander Nothard: A warrior must control the enemies focus, and when that fails, they spill their own blood so that others may survive. They put others lives before their own. I will expect nothing less from the warriors trained here at the Freeport Militia."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

@@ -79,7 +79,7 @@ end
 "Necorik the Ghost: Well, don't think you can just walk in here and learn our skills and use our supplies without paying for it."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

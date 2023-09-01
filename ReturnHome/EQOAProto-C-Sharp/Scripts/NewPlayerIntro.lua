@@ -434,6 +434,6 @@ function  event_say(choice)
         end
     end
     SetPlayerFlags(mySession, "NewPlayerIntro", "1")
-    SendDialogue(mySession, npcDialogue, diagOptions)
+    SendDialogue(mySession, npcDialogue, diagOptions, null)
     SendMultiDialogue(mySession, multiDialogue)
 end

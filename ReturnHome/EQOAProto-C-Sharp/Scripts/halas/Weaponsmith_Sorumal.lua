@@ -1,5 +1,5 @@
 function  event_say(choice)
 diagOptions = {}
     npcDialogue = "There is no such thing as metal that has been folded enough. Remember, slag is the enemy of all blades. Interested in learning the art of weaponsmithing?"
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

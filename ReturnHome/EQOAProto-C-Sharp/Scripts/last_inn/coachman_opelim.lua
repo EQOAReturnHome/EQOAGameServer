@@ -22,20 +22,20 @@ function  event_say(choice)
                table.insert(dialogueOptions, diag)
             end
          end
-         SendDialogue(mySession, npcDialogue, dialogueOptions)
+         SendDialogue(mySession, npcDialogue, dialogueOptions, thisEntity.CharName)
       end
    else
       if (choice:find("Yes")) then
          npcDialogue = "Excellent, you can now use this coach any time."
          SetPlayerFlags(mySession, "last_inn_coach","true")
-         SendDialogue(mySession, npcDialogue, dialogueOptions)
+         SendDialogue(mySession, npcDialogue, dialogueOptions, thisEntity.CharName)
       elseif (choice:find("No")) then
          npcDialogue = "If you aren't interested then why are you wasting my time."
-         SendDialogue(mySession, npcDialogue, dialogueOptions)
+         SendDialogue(mySession, npcDialogue, dialogueOptions, thisEntity.CharName)
       else
          npcDialogue = "Would you like to sign the coachman's ledger?"
          dialogueOptions = {"Yes", "No"}
-         SendDialogue(mySession, npcDialogue, dialogueOptions)
+         SendDialogue(mySession, npcDialogue, dialogueOptions, thisEntity.CharName)
       end
    end
 end

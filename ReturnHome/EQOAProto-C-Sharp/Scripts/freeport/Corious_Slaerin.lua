@@ -329,7 +329,7 @@ end
 "Corious Slaerin: Away with you! Go now, or I will turn your corpse into a mound of bone and flesh!"
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

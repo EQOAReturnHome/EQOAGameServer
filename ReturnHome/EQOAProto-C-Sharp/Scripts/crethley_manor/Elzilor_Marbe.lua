@@ -1,5 +1,5 @@
 function  event_say(choice)
 diagOptions = {}
     npcDialogue = "The hauntings of Crethley are destroying our farms. I believe that the Crethleys are drawing power from a collection of ancient runes. If I could get my hands on these runes, I may be able to weaken their powers."
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

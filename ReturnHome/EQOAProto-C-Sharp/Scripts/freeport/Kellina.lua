@@ -279,7 +279,7 @@ GrantItem(mySession, items.MYSTICAL_TOME, 1)
         npcDialogue =
 "Kellina: I am quite busy with my students right now. Are you sure you're in the right place playerName?"
     end
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

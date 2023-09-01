@@ -274,7 +274,7 @@ GrantItem(mySession, items.ENCHANTED_MACE, 1)
 "Sister Falhelm: To survive as a cleric here you must endure many painful trials. Don't think that just because you have a healing spell means that getting wounded in battle isn't still agonizingly painful."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

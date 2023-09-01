@@ -18,6 +18,6 @@ diagOptions = {}
     else
         npcDialogue = "Where would you like to go?"
         dialogueOptions = {"I would like passage bound for Hazinak."}
-        SendDialogue(mySession, npcDialogue, dialogueOptions)
+        SendDialogue(mySession, npcDialogue, dialogueOptions, thisEntity.CharName)
     end
 end

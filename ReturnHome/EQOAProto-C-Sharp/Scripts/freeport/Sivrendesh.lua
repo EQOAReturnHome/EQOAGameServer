@@ -326,7 +326,7 @@ end
 "Sivrendesh: We wizards must know when to hold back our dangerous spells, especially when we become aggravated at the constant rabble that traipse through here."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

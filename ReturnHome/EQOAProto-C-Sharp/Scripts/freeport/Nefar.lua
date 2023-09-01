@@ -148,7 +148,7 @@ end
 "Nefar: Hello playerName. I'm not sure why you would come back here to visit me in this corner of the academy, but I am thrilled to be sure. I do enjoy conversation, especially discussion of arcane wizardry."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

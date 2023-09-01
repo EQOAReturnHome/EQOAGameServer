@@ -150,7 +150,7 @@ end
 "Opanheim: Hmm, you don't look like one of my playthings. I am not interested in you at all. Begone with you."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

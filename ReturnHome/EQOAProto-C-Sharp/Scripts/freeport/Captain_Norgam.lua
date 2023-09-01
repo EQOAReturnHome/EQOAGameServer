@@ -278,7 +278,7 @@ GrantItem(mySession, items.ENSORCELLED_LONGSWORD, 1)
 "Captain Norgam: The last cadet that failed me cried so loudly due to his punishment that he could be heard all throughout the city. I most certainly do not tolerate deviation from my code."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

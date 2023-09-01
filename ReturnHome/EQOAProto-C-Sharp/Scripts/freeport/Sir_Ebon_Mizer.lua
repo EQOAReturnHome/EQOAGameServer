@@ -7,5 +7,5 @@ function event_say(choice)
     npcDialogue =
         "No it isn't a good day! Everyone here is simply trying to relieve me of my coin! You will keep your distance, before I call the guard!"
     testing()
-    SendDialogue(mySession, npcDialogue, diagOptions)
+    SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

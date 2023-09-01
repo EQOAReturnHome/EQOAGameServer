@@ -30,7 +30,7 @@ end
         npcDialogue =
 "Spiritmaster Imaryn: Would you like me to bind your spirit to this location, playerName?"
     end
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

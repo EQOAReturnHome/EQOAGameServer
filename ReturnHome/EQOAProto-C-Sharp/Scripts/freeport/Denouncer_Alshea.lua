@@ -77,7 +77,7 @@ end
         npcDialogue =
 "Denouncer Alshea: The darkness will eventually overtake us, playerName. However, in the absence of light, the truth may be revealed, and our true power will then emerge."
     end
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

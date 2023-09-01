@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
     npcDialogue = "The days are hot and dry but at least it is a dry heat."
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

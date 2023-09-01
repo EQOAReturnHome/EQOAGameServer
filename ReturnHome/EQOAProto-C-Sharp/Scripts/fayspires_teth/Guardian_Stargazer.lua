@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
     npcDialogue = "Welcome to the College of High Magic. Those willing to learn are welcomed."
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

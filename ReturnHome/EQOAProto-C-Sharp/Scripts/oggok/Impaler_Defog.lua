@@ -1,5 +1,5 @@
 function  event_say(choice)
 diagOptions = {}
     npcDialogue = "I cannot remember too many dark magic words, so I serve this hall with pride, and would pierce any enemy with my great spear without hesitation. Such is the life of impalers."
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

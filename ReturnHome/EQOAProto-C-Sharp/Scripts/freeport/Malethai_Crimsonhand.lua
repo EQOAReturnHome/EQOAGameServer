@@ -329,7 +329,7 @@ end
 "Malethai Crimsonhand: Most who seek the path of the shadowknight do not realize how much that they will be trading in their old life for a new one. They must give themselves freely to the dark powers."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

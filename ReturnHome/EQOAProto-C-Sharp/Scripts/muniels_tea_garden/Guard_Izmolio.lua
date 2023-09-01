@@ -1,5 +1,5 @@
 function event_say()
 diagOptions = {}
     npcDialogue = "Patrol duty is for the gulls. Keep your nose clean and hands to yerself."
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 end

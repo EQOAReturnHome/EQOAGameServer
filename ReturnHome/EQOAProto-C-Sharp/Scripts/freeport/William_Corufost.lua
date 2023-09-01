@@ -77,7 +77,7 @@ end
         npcDialogue =
 "William Corufost: Though trained as entertainers, bards are more powerful than they appear. They're one of the most versatile classes, they can take on many different roles."
     end
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 

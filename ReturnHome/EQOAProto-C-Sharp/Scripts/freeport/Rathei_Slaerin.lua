@@ -148,7 +148,7 @@ end
 "Rathei Slaerin: You are too weak and feeble to be useful for my purposes. Be gone with you, and don't come back unless you wish to become one of my pets."
     end
 ------
-SendDialogue(mySession, npcDialogue, diagOptions)
+SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
 
