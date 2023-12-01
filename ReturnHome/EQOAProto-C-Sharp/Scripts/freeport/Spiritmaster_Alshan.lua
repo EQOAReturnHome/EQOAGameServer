@@ -76,14 +76,16 @@ else
     npcDialogue = "Hello."
     diagOptions = { "Sorry to bother, but Sivrendesh sent me.", "Farewell." }
 end
-  else
-        npcDialogue =
-"Spiritmaster Alshan: Shall I bind your spirit to this location, playerName?"
+elseif (choice:find("bind")) then
+    npcDialogue = "Your soul will now return here, playerName."
+    BindPlayer(thisEntity.ObjectID)
+elseif (choice:find("Not")) then
+    npcDialogue = "Please come back if you change your mind."
+else
+    npcDialogue = "Would you like me to bind your spirit to this location, child?"
+    diagOptions = {"Yes, please bind my soul.", "Not at this time."}
     end
 ------
-
-
-
 SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end

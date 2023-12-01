@@ -65,7 +65,7 @@ namespace ReturnHome.Server.Managers
 
             Console.WriteLine($"Getting initial spell {spell.SpellName}");
             int addedOrder = spell.AddedOrder;
-            string spellName = spell.SpellName.Replace(" ", "_");
+            string spellName = spell.SpellName.ToLower().Replace(" ", "_");
             int spellID = spell.SpellID;
             //Find Lua script recursively through scripts directory by class
             string[] file = Directory.GetFiles("../../../Scripts", spellName + ".lua", SearchOption.AllDirectories);
@@ -141,7 +141,7 @@ namespace ReturnHome.Server.Managers
 
 
             int addedOrder = spell.AddedOrder;
-            string spellName = spell.SpellName.Replace(" ", "_");
+            string spellName = spell.SpellName.ToLower().Replace(" ", "_");
             int spellID = spell.SpellID;
             //Find Lua script recursively through scripts directory by class
             string[] file = Directory.GetFiles("../../../Scripts", spellName + ".lua", SearchOption.AllDirectories);
@@ -190,7 +190,7 @@ namespace ReturnHome.Server.Managers
             Console.WriteLine($"Entity ticking is {entity.CharName}");
 
 
-            string effectName = effect.name.Replace(" ", "_");
+            string effectName = effect.name.ToLower().Replace(" ", "_");
             Console.WriteLine(effectName);
             //Find Lua script recursively through scripts directory by class
             string[] file = Directory.GetFiles("../../../Scripts", effectName + ".lua", SearchOption.AllDirectories);

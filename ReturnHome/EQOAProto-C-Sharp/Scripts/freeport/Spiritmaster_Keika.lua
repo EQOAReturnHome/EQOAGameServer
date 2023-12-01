@@ -28,13 +28,9 @@ else
     npcDialogue = "Hello."
     diagOptions = { "Sorry to bother, but Denouncer Alshea sent me.", "Farewell." }
 end
-  else
-        npcDialogue =
-"Spiritmaster Keika: I suppose you'd like your spirit bound to this location?"
-    end
 -----
 --Rogue(6) Human(0) Eastern(1)
-if (GetPlayerFlags(mySession, "60102") == "1") then
+elseif (GetPlayerFlags(mySession, "60102") == "1") then
 if (choice:find("Farewell")) then
 multiDialogue = { "Spiritmaster Keika: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
  } 
@@ -55,13 +51,9 @@ else
     npcDialogue = "Hello."
     diagOptions = { "Sorry to bother, but Necorik the Ghost sent me.", "Farewell." }
 end
-  else
-        npcDialogue =
-"Spiritmaster Keika: I suppose you'd like your spirit bound to this location?"
-    end
 ------
 --Necromancer(11) Human(0) Eastern(1)
-if (GetPlayerFlags(mySession, "110102") == "1") then
+elseif (GetPlayerFlags(mySession, "110102") == "1") then
 if (choice:find("Goodbye")) then
 multiDialogue = { "Spiritmaster Keika: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
  } 
@@ -82,13 +74,9 @@ else
     npcDialogue = "Hello."
     diagOptions = { "Corious Slaerin sent me.", "Goodbye." }
 end
-  else
-        npcDialogue =
-"Spiritmaster Keika: I suppose you'd like your spirit bound to this location?"
-    end
 ------
 --Shadowknight(3) Human(0) Eastern(1)
-if (GetPlayerFlags(mySession, "30102") == "1") then
+elseif (GetPlayerFlags(mySession, "30102") == "1") then
 if (choice:find("Nevermind")) then
 multiDialogue = { "Spiritmaster Keika: It is best that you not wonder off if your guildmaster has put you to a task. Guildmasters expect focus and punctuality."
  } 
@@ -109,14 +97,16 @@ else
     npcDialogue = "Hello."
     diagOptions = { "Malethai Crimsonhand sent me.", "Nevermind." }
 end
-  else
-        npcDialogue =
-"Spiritmaster Keika: I suppose you'd like your spirit bound to this location?"
+elseif (choice:find("bind")) then
+    npcDialogue = "Your soul will now return here, playerName."
+    BindPlayer(thisEntity.ObjectID)
+elseif (choice:find("Not")) then
+    npcDialogue = "Please come back if you change your mind."
+else
+    npcDialogue = "Would you like me to bind your spirit to this location, child?"
+    diagOptions = {"Yes, please bind my soul.", "Not at this time."}
     end
 ------
-
-
-
 SendDialogue(mySession, npcDialogue, diagOptions, thisEntity.CharName)
 SendMultiDialogue(mySession, multiDialogue)
 end
