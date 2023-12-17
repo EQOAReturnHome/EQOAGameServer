@@ -204,7 +204,6 @@ namespace ReturnHome.Server.Managers
                     //Just for effects that need to be checked every 6s tick. Might be able to simplify effect check a bit nesting better
                     if (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= otTick + globalTick)
                     {
-                        //lastTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                         otTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                         Console.WriteLine("Ticking " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
