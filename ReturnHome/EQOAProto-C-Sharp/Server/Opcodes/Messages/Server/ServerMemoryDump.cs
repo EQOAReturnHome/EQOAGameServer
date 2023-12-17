@@ -6,6 +6,7 @@ using ReturnHome.Utilities;
 using ReturnHome.Server.EntityObject.Spells;
 using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.Managers;
+using System;
 
 namespace ReturnHome.Server.Opcodes.Messages.Server
 {
@@ -24,6 +25,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
                 session.MyCharacter.CurrentHP = session.MyCharacter.GetMaxHP();
                 session.MyCharacter.Animation = (byte)AnimationState.Default;
                 session.MyCharacter.ExpectedWorld = session.MyCharacter.boundWorld;
+                Console.WriteLine($"Players location on respawn x{session.MyCharacter.x}, y{session.MyCharacter.y}, z{session.MyCharacter.z}");
 
                 MapManager.RemoveObject(session.MyCharacter);
 

@@ -37,6 +37,7 @@ namespace ReturnHome.Server.Managers
             State["GetRace"] = Utility_Funcs.GetEnumObjectByValue<Race>;
             State["GetHumanType"] = Utility_Funcs.GetEnumObjectByValue<HumanType>;
             State["UpdateAnim"] = Entity.UpdateAnim;
+            State["UpdateInvis"] = Entity.UpdateInvis;
             //wont actually return npc object to update, only npcid
             State["GrantItem"] = ItemManager.GrantItem;
             State["TurnInItem"] = ItemManager.UpdateQuantity;
@@ -54,7 +55,7 @@ namespace ReturnHome.Server.Managers
             State["GetEntity"] = EntityManager.QueryForEntityLua;
 
 
-
+            
 
 
 

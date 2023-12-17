@@ -7,5 +7,7 @@ function completeSpell()
 end
 
 function useItem()
-    StatusEffect(effects.MINOR_HEALING, "Minor Healing", 2189779887, 30, 0)
+    --StatusEffect(effects.MINOR_HEALING, "Minor Healing", 2189779887, 30, 0)
+    --GetSpell(977)
+    LearnSpell(session, GetSpell(977))
 end

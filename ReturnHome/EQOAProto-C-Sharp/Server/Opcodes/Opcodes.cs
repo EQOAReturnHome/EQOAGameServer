@@ -84,6 +84,7 @@
         ServerDisbandGroup = 0x062F,
         Loot = 0x0018, 
         LootOptions = 0x85, //1 Corpse being looted by another player 2 entity not lootable 3 Corpse belongs to another player/group
+        LootAll = 0x1A,
         CharacterDied = 0x5E,
         AdjustItemHP = 0x60,
         ErrorMessage = 0xCE, //Sends red error message to client in chat box

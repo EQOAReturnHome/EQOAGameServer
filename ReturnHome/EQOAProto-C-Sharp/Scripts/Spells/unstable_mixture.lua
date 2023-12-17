@@ -6,12 +6,12 @@ local castTime = 1
 local potionsCreated = 3
 
 function startSpell()
-    CastSpell(session, spellFX, target, castTime)
+    CastSpell(session, spellFX, entity.ObjectID, target, castTime)
     CoolDown(session, addedOrder, recast)
 end
 
 function completeSpell()
-    GrantItem(session, items.UNSTABLE_MUTATION, potionsCreated)
+    GrantItem(session, items.UNSTABLE_POTION, potionsCreated)
 end
 
 function useItem()

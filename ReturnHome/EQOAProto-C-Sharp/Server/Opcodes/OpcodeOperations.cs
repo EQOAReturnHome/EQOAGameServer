@@ -62,6 +62,7 @@ namespace ReturnHome.Server.Opcodes
             { GameOpcode.CastSpell, ClientCastSpell.CastSpell },
             { GameOpcode.ClientMemorizeSpell, ClientMemorizeSpell.MemorizeSpell },
             { GameOpcode.CharacterInWorld, ClientLoadedWorld.LoadedWorld },
+            { GameOpcode.LootAll, ClientLoot.ClientLootAllRequest},
 
 
 

@@ -28,10 +28,11 @@ namespace ReturnHome.Server.Managers
 
         public static void GrantItem(Session mySession, int itemID, int qty)
         {
+            Console.WriteLine(itemID);
             Item newItem = CreateItem(itemID, qty, mySession.MyCharacter);
             mySession.MyCharacter.Inventory.AddItem(newItem);
         }
-
+        
 
         public static Item CreateItem(int itemID, int qty, Entity entity)
         {
@@ -39,6 +40,7 @@ namespace ReturnHome.Server.Managers
             if (entity is Character)
             {
                 newItem = new(qty, itemList[itemID].Maxhp, 0, (int)EquipSlot.NotEquipped, ItemLocation.Inventory, 0, itemList[itemID], nextItemID);
+                Console.WriteLine(newItem.RemainingHP);
                 nextItemID++;
                 
             }

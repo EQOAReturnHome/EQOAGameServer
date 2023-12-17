@@ -8,6 +8,7 @@ using ReturnHome.Server.EntityObject.Spells;
 using System.Collections.Concurrent;
 using ReturnHome.Server.EntityObject.Effect;
 using ReturnHome.Server.EntityObject;
+using System.Linq.Expressions;
 
 namespace ReturnHome.Server.Managers
 {
@@ -31,7 +32,11 @@ namespace ReturnHome.Server.Managers
         {
             Spell newSpell = CreateSpell(Spell);
             newSpell.AddedOrder = (byte)session.MyCharacter.MySpellBook.Count;
+            Console.WriteLine($"{newSpell.SpellName} going in added order {newSpell.AddedOrder}");
             session.MyCharacter.MySpellBook.AddSpellToBook(newSpell);
+
+            Spell checkSpell = session.MyCharacter.MySpellBook.GetSpellFromBook(newSpell.AddedOrder);
+            Console.WriteLine($"Spell in spellbook slot {newSpell.AddedOrder} is {checkSpell.SpellName}");
             ServerLearnSpell.LearnSpell(session, GetSpellPattern(Spell.SpellID));
 
         }
@@ -113,7 +118,7 @@ namespace ReturnHome.Server.Managers
             //Call Lua function for initial interaction
             LuaFunction callFunction = LuaState.State.GetFunction("startSpell");
             callFunction.Call();
-           
+
 
 
         }
@@ -163,6 +168,9 @@ namespace ReturnHome.Server.Managers
             LuaState.State["addedOrder"] = addedOrder;
             LuaState.State["TeleportPlayer"] = ServerTeleportPlayer.TeleportPlayer;
             LuaState.State["entity"] = entity;
+            LuaState.State["UpdateInvis"] = Entity.UpdateInvis;
+            LuaState.State["UpdateSpeed"] = Entity.UpdateSpeed;
+
 
             EntityManager.QueryForEntity(entity.Target, out Entity entTarget);
             LuaState.State["entityTarget"] = entTarget;
@@ -173,25 +181,39 @@ namespace ReturnHome.Server.Managers
 
 
 
-
-
             //Call the Lua script found by the Directory Find above
             LuaState.State.DoFile(file[0]);
 
-            //Call Lua function for initial interaction
-            LuaFunction callFunction = LuaState.State.GetFunction("completeSpell");
-            callFunction.Call();
 
+            try
+            {
+                //Call Lua function for initial interaction
+                LuaFunction callFunction = LuaState.State.GetFunction("completeSpell");
+                callFunction.Call();
+            }
+            catch
+            {
+                return;
+            }
+
+        }
+
+        public static void OnEffectEnd(Entity entity)
+        {
+            if (entity is Character)
+            {
+                LuaState.State["session"] = ((Character)entity).characterSession;
+            }
+
+            //Call Lua function for initial interaction
+            LuaFunction callFunction = LuaState.State.GetFunction("onEffectEnd");
+            callFunction.Call(entity);
         }
 
         public static void TickSpell(Entity entity, StatusEffect effect)
         {
 
-            Console.WriteLine($"Entity ticking is {entity.CharName}");
-
-
             string effectName = effect.name.ToLower().Replace(" ", "_");
-            Console.WriteLine(effectName);
             //Find Lua script recursively through scripts directory by class
             string[] file = Directory.GetFiles("../../../Scripts", effectName + ".lua", SearchOption.AllDirectories);
 
@@ -206,8 +228,6 @@ namespace ReturnHome.Server.Managers
             LuaState.State["Heal"] = ServerChangeHealth.Heal;
             LuaState.State["CoolDown"] = ServerSpellCoolDown.SpellCoolDown;
             LuaState.State["Effect"] = effect;
-            
-            //LuaState.State["Entity"] = entity;
 
 
             //Call the Lua script found by the Directory Find above

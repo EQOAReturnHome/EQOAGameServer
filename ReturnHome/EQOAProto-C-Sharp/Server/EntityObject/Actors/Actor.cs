@@ -97,7 +97,7 @@ namespace ReturnHome.Server.EntityObject.Actors
             if (aggroTable.Count <= 0) { return; }
 
             int damage = 3;
-            lastAtkTick = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            lastAtkTick = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             //find character object that has dealt the most damage. This needs to be expanded on later to include
             //things like heals adding aggro, taunts, etc.
             //There's likely a conversion of dmg amount -> aggro value that needs to happen as well.
@@ -106,7 +106,6 @@ namespace ReturnHome.Server.EntityObject.Actors
             if (EntityManager.QueryForEntity(c.ObjectID, out Entity player))
             {
                 player.TakeDamage(c.characterSession, (uint)c.characterSession.MyCharacter.ObjectID, damage);
-                //Blacksmith starts on 0x0008, 0x0018
             }
         }
 
@@ -130,7 +129,7 @@ namespace ReturnHome.Server.EntityObject.Actors
         public void OnMobDeath()
         {
             Dead = true;
-            _killTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            _killTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             Animation = (byte)AnimationState.Die;
             ItemManager.GetMobLoot(this);
             //Move npc inventory to Loot Object for npc's

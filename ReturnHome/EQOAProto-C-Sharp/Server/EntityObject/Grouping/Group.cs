@@ -107,7 +107,7 @@ namespace ReturnHome.Server.EntityObject.Grouping
                     if(Vector3.Distance(charList[i].Position, charList[j].Position) < 100f)
                     {
                         temp[counter++] = 1;
-                        temp[counter++] = (byte)((255 * charList[i].CurrentHP) / charList[i].HPMax);
+                        temp[counter++] = (byte)((255 * charList[j].CurrentHP) / charList[j].HPMax);
                     }
 
                     else
@@ -117,9 +117,9 @@ namespace ReturnHome.Server.EntityObject.Grouping
                     }
 
                     temp[counter++] = 4;
-                    ushort x = (ushort)charList[i].x;
-                    ushort y = (ushort)charList[i].y;
-                    ushort z = (ushort)charList[i].z;
+                    ushort x = (ushort)charList[j].x;
+                    ushort y = (ushort)charList[j].y;
+                    ushort z = (ushort)charList[j].z;
 
                     MemoryMarshal.Write(temp[7..], ref x);
                     counter += 2;

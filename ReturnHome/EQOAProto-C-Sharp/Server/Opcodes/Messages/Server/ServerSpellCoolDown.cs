@@ -9,7 +9,6 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
     {
         public static void SpellCoolDown(Session session, byte addedOrder, int timer)
         {
-            Debug.WriteLine("start cooldown");
             //Send Spell Effect Packet with Target to Client
             Message message = Message.Create(MessageType.ReliableMessage, GameOpcode.SpellCoolDown);
             BufferWriter writer = new BufferWriter(message.Span);

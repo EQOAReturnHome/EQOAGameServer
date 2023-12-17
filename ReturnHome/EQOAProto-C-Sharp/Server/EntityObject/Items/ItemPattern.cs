@@ -13,7 +13,7 @@
         public int Unk4 { get;  set; }
         public int Attacktype { get;  set; }
         public int Weapondamage { get;  set; }
-        public int Unk5 { get;  set; }
+        public int ItemRange { get;  set; }
         public int Levelreq { get;  set; }
         public int Maxstack { get;  set; }
         public int Maxhp { get;  set; }
@@ -36,7 +36,7 @@
 
         public ItemPattern(int thisItemID, uint thisItemCost, int thisItemIcon, int thisItemSlot, int thisAttackType,
                     int thisWeaponDamage, int thisMaxHP, int thisLevelreq, int thisMaxStack, string thisItemName, string thisItemDesc, int thisDuration, int thisClassuse,
-                    int thisRaceuse, int thisProcanim, int[] stats, int model, uint color, ItemFlags flags)
+                    int thisRaceuse, int thisProcanim, int[] stats, int model, uint color, ItemFlags flags, int unk1, int unk2, int unk3, int unk4, int item_range, int unk6)
         {
             ItemID = thisItemID;
             ItemCost = thisItemCost;
@@ -56,6 +56,12 @@
             Model = model;
             Color = color;
             Flags = flags;
+            Unk1 = unk1;
+            Unk2 = unk2;
+            Unk3 = unk3;
+            Unk4 = unk4;
+            ItemRange = item_range;
+            Unk6 = unk6;
 
             Stats = stats;
 

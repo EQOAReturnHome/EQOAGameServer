@@ -24,6 +24,8 @@ namespace ReturnHome.Server.EntityObject.Actors
         public long _lootingTime;
         public List<ClientItemWrapper> Loot { private set; get; }
 
+        public int _lootExpiryTime = 300000;
+
         //When we create the corpse, entity has died and we toss a time stamp to it
         public Corpse(Entity npc) => _npc = npc;
 
@@ -36,12 +38,14 @@ namespace ReturnHome.Server.EntityObject.Actors
         public void LootCorpse(Session session)
         {
             //TODO: Add code to account for the owner of the corpse, Player/Group
-            if (_lootee != null && session.MyCharacter != _lootee)
+            if (_lootee != null && session.MyCharacter != _lootee && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < _lootingTime + _lootExpiryTime)
             {
                 ServerLoot.ServerLootOptions(session, LootOptions.CorpseBeingLootedByAnotherPlayer);
                 //Send corpse is already being looted opcode to this client
                 return;
             }
+
+            _lootingTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             //Designate looter request and send loot to client
             _lootee = session.MyCharacter;

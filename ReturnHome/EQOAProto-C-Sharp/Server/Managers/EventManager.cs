@@ -23,7 +23,7 @@ namespace ReturnHome.Server.Managers
             
             string[] file = Directory.GetFiles("../../../Scripts", "character_defaults.lua", SearchOption.AllDirectories);
 
-
+            
             LuaState.State["race"] = Entity.GetRace(charCreation.EntityRace);
             LuaState.State["class"] = Entity.GetClass(charCreation.EntityClass);
             LuaState.State["humanType"] = Entity.GetHumanType(charCreation.EntityHumanType);
@@ -115,8 +115,6 @@ namespace ReturnHome.Server.Managers
             {
                 return myString;
             }
-
-
             LuaState.State.DoFile(file[0]);
 
             myString = (string)LuaState.State["merchantDialogue"];

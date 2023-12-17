@@ -64,7 +64,7 @@ namespace ReturnHome.Server.EntityObject.Items
             writer.Write7BitEncodedInt64(Pattern.Unk4);
             writer.Write7BitEncodedInt64(Pattern.Attacktype);
             writer.Write7BitEncodedInt64(Pattern.Weapondamage);
-            writer.Write7BitEncodedInt64(Pattern.Unk5);
+            writer.Write7BitEncodedInt64(Pattern.ItemRange);
             writer.Write7BitEncodedInt64(Pattern.Levelreq);
             writer.Write7BitEncodedInt64(Pattern.Maxstack);
             writer.Write7BitEncodedInt64(Pattern.Maxhp);

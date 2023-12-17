@@ -7,6 +7,8 @@ using ReturnHome.Server.Opcodes;
 using ReturnHome.Server.EntityObject.Player;
 using ReturnHome.Server.Zone;
 using ReturnHome.Server.Opcodes.Chat;
+using ReturnHome.Server.Opcodes.Messages.Server;
+using System.Drawing.Printing;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -21,6 +23,7 @@ namespace ReturnHome.Server.EntityObject
         private ushort _velocityX = 0;
         private ushort _velocityY = 0;
         private ushort _velocityZ = 0;
+        public float baseSpeed = 8;
 
         //Set position to waypoint after initial position is set, should waypoint be assigned by the client update? Seems logical
         public Vector3 waypoint;
@@ -30,6 +33,7 @@ namespace ReturnHome.Server.EntityObject
         private byte _facing;
         private float _facingF;
         public float Speed;
+
         private byte _turning = 0;
 
         private byte _animation;
@@ -263,6 +267,12 @@ namespace ReturnHome.Server.EntityObject
             string message = $"X: {X} Y: {Y} Z: {Z}";
             ChatMessage.GenerateClientSpecificChat(((Character)this).characterSession, message);
             */
+        }
+
+        public static void UpdateSpeed(Entity entity, float speed)
+        {
+            entity.Speed = speed;
+            ServerPlayerSpeed.PlayerSpeed(((Character)entity).characterSession, speed);
         }
 
         public void UpdateFacing(byte facing, byte turning)

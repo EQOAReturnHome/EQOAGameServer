@@ -14,5 +14,3 @@ function completeSpell()
     entityTarget.CurrentHP = (entityTarget.CurrentHP-damage)
 end
 
-function useItem()
-end

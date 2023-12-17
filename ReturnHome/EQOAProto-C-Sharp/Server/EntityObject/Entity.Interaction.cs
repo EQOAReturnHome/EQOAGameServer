@@ -563,6 +563,7 @@ namespace ReturnHome.Server.EntityObject
         }
 
 
+
         public static void AddTunar(Session session, int tunar) => session.MyCharacter.Inventory.AddTunar(tunar);
 
         public static void RemoveTunar(Session session, int tunar) => session.MyCharacter.Inventory.RemoveTunar(tunar);
@@ -597,7 +598,7 @@ namespace ReturnHome.Server.EntityObject
                 float Lerp(float firstFloat, float secondFloat, float by)
                 {
                     return firstFloat * (1 - by) + secondFloat * by;
-                }
+                } 
 
             }
         }

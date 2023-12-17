@@ -9,7 +9,7 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
         public static void ProcessClientFaction(Session session, Message ClientPacket)
         {
             BufferReader reader = new(ClientPacket.message.Span);
-            ServerFaction.ServerSendFaction(session);
+            //ServerFaction.ServerSendFaction(session);
         }
     }
 }

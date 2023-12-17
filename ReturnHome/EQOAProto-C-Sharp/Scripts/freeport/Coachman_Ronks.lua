@@ -149,7 +149,7 @@ function event_say(choice)
             SetPlayerFlags(mySession, "freeport_coach", "true")
         else
             npcDialogue = "What do you want?"
-            diagptions = {"Spiritmaster Alshan sent me.", "Nothing."}
+            diagOptions = {"Spiritmaster Alshan sent me.", "Nothing."}
         end
     elseif (GetPlayerFlags(mySession, "110102") == "2") then
         --Enchanter(12) Human(0) Eastern(1)

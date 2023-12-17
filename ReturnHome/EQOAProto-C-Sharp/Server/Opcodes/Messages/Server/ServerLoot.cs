@@ -49,5 +49,16 @@ namespace ReturnHome.Server.Opcodes.Messages.Server
             message.Size = writer.Position;
             session.sessionQueue.Add(message);
         }
+
+        public static void ServerLootAll(Session session)
+        {
+            Message message = new Message(MessageType.ReliableMessage, GameOpcode.LootAll);
+            BufferWriter writer = new BufferWriter(message.Span);
+
+            writer.Write(message.Opcode);
+
+            message.Size = writer.Position;
+            session.sessionQueue.Add(message);
+        }
     }
 }

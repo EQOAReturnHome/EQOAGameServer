@@ -45,32 +45,9 @@ namespace ReturnHome.Server.EntityObject
             return lastActionTime;
         }
 
-        public void Update(DateTime tick)
+        public void Update()
         {
-            prevUpdate = latestUpdate;
-            latestUpdate = tick;
 
-            // todo: trigger listeners
-
-            /* if (controller == null && pathFind != null)
-             {
-                 pathFind.FollowPath();
-             }*/
-
-            // todo: action queues
-            if (controller != null && controller.canUpdate)
-                controller.Update(tick);
-
-            State top;
-
-            while (states.Count > 0 && (top = states.Peek()).Update(tick))
-            {
-                if (top == GetCurrentState())
-                {
-                    states.Pop().Cleanup();
-                }
-            }
-            owner.PostUpdate(tick);
         }
 
         public void CheckCompletedStates()

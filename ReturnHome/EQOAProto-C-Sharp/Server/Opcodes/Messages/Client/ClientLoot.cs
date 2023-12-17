@@ -4,6 +4,7 @@ using ReturnHome.Server.EntityObject;
 using ReturnHome.Server.EntityObject.Actors;
 using ReturnHome.Server.Managers;
 using ReturnHome.Server.Network;
+using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Utilities;
 
 namespace ReturnHome.Server.Opcodes.Messages.Client
@@ -43,6 +44,17 @@ namespace ReturnHome.Server.Opcodes.Messages.Client
 
             if (EntityManager.QueryForEntity(session.MyCharacter.Target, out Entity temp))
                 ((Actor)temp).corpse.ExitCorpse(session);
+        }
+
+        public static void ClientLootAllRequest(Session session, Message clientPacket)
+        {
+            //Add code to cycle through the Lootbox to loot, verifying everything can be looted.
+
+            //If it can all be looted send this =>
+            ServerLoot.ServerLootAll(session);
+
+            //If something can't be looted, loot everything else individually via => ServerLoot.ServerLootItem()
+            //And send an error generic error message related to not looting an item
         }
     }
 }

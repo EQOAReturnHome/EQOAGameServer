@@ -389,7 +389,13 @@ namespace ReturnHome.Database.SQL
                       rdr.GetInt32(37),
                       //Color
                       rdr.GetUInt32(38),
-                      (rdr.GetInt32(7) == 1 ? ItemFlags.NoTrade : 0) | (rdr.GetInt32(8) == 0 ? ItemFlags.NoRent : 0) | (rdr.GetInt32(9) == 1 ? ItemFlags.Craft : 0) | (rdr.GetInt32(10) == 1 ? ItemFlags.Lore : 0));
+                      (rdr.GetInt32(7) == 1 ? ItemFlags.NoTrade : 0) | (rdr.GetInt32(8) == 0 ? ItemFlags.NoRent : 0) | (rdr.GetInt32(9) == 1 ? ItemFlags.Craft : 0) | (rdr.GetInt32(10) == 1 ? ItemFlags.Lore : 0),
+                      rdr.GetInt32(39),
+                      rdr.GetInt32(40),
+                      rdr.GetInt32(41),
+                      rdr.GetInt32(42),
+                      rdr.GetInt32(43),
+                      rdr.GetInt32(44));
 
                 itemPatterns.Add(item);
             }

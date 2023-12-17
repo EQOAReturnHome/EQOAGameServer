@@ -75,6 +75,8 @@ namespace ReturnHome.Server.EntityObject.Spells
         public Spell GetSpell(uint hotbarLocation)
         {
             Spell spell = _e.MySpellBook._spellHotbar.Span[(int)hotbarLocation];
+            Console.WriteLine($"Hotbar location is {hotbarLocation}");
+            Console.WriteLine($"{spell.AddedOrder} is spell {spell.SpellName}");
 
 
             return spell;

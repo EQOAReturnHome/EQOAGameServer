@@ -12,6 +12,7 @@ using System.Text;
 using System.Xml.Linq;
 using ReturnHome.Server.Opcodes.Messages.Server;
 using ReturnHome.Server.Managers;
+using System.Reflection;
 
 namespace ReturnHome.Server.EntityObject
 {
@@ -202,11 +203,6 @@ namespace ReturnHome.Server.EntityObject
             }
         }
 
-        public void PostUpdate(DateTime tick)
-        {
-
-        }
-
         public void IsValidTarget()
         {
         }
@@ -232,11 +228,9 @@ namespace ReturnHome.Server.EntityObject
         }
 
 
-        public void AddStatusEffect(int id, string name, uint effectIcon, uint duration, uint tier, uint casterID)
+        public void AddStatusEffect(int id, string name, uint effectIcon, uint duration, uint tier, uint casterID, uint effectType)
         {
-            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, duration, tier, casterID);
-
-            //Console.WriteLine($"Status effect has name {statusEffect.name}, and icon {statusEffect.icon}");
+            StatusEffect statusEffect = new StatusEffect(id, name, effectIcon, duration, tier, casterID, effectType);
 
             EntityStatusEffects.Add(statusEffect);
 
@@ -264,11 +258,6 @@ namespace ReturnHome.Server.EntityObject
             return false;
         }
 
-
-        public void GetAttackDelayMs()
-        {
-        }
-
         public void GetAttackRange()
         {
         }
@@ -278,68 +267,39 @@ namespace ReturnHome.Server.EntityObject
             return false;
         }
 
-        public virtual bool Engage(Character target)
+        public bool Engage(Character target)
         {
-            aiContainer.Engage(target);
             return false;
         }
 
         public bool IsEngaged()
         {
-            return aiContainer.IsEngaged();
+            return false;
         }
 
         public bool Disengage()
         {
-            /*if (newMainState != 0xFFFF)
-            {
-                currentMainState = newMainState;// this.newMainState = newMainState;
-                updateFlags |= ActorUpdateFlags.State;
-            }
-            else*/
-            if (IsEngaged())
-            {
-                aiContainer.Disengage();
-                return true;
-            }
             return false;
         }
 
-        public virtual void Cast(uint spellId, uint targetId = 0)
+        public void Cast()
         {
-            /*if (aiContainer.CanChangeState())
-                aiContainer.Cast(zone.FindActorInArea<Character>(targetId == 0 ? currentTarget : targetId), spellId);*/
+
         }
 
-        public virtual void Ability(uint abilityId, uint targetId = 0)
+        public void Spawn()
         {
-            /*if (aiContainer.CanChangeState())
-                aiContainer.Ability(zone.FindActorInArea<Character>(targetId == 0 ? currentTarget : targetId), abilityId);*/
-        }
-
-        public virtual void WeaponSkill(uint skillId, uint targetId = 0)
-        {
-            /*if (aiContainer.CanChangeState())
-                aiContainer.WeaponSkill(zone.FindActorInArea<Character>(targetId == 0 ? currentTarget : targetId), skillId);*/
-        }
-
-        public virtual void Spawn(DateTime tick)
-        {
-            aiContainer.Reset();
-            // todo: reset hp/mp/tp etc here
-            //ChangeState(SetActorStatePacket.MAIN_STATE_PASSIVE);
             SetHP((uint)GetMaxHP());
             SetMP((uint)GetMaxMP());
 
         }
 
-        //AdditionalActions is the list of actions that EXP/Chain messages are added to
-        public virtual void Die(DateTime tick)
+        public void Die()
         {
-            // todo: actual despawn timer
+
         }
 
-        public virtual void Despawn(DateTime tick)
+        public void Despawn()
         {
 
         }
@@ -351,13 +311,11 @@ namespace ReturnHome.Server.EntityObject
                 return true;
             }
             else { return false; }
-            //return !aiContainer.IsDead();// && GetHP() > 0;
         }
 
         public int GetHP()
         {
-            // todo: 
-            return this.CurrentHP;
+            return CurrentHP;
         }
 
         public int GetMaxHP()
@@ -367,17 +325,12 @@ namespace ReturnHome.Server.EntityObject
 
         public int GetMP()
         {
-            return this.CurrentPower;
-        }
-
-        public void GetTP()
-        {
-
+            return CurrentPower;
         }
 
         public int GetMaxMP()
         {
-            return this.PowerMax;
+            return PowerMax;
         }
 
 
@@ -401,15 +354,24 @@ namespace ReturnHome.Server.EntityObject
 
         }
 
-        // todo: the following functions are virtuals since we want to check hidden item bonuses etc on player for certain conditions
-        public virtual void AddHP(int hp)
+        public static void UpdateInvis(Entity entity, int invisState)
         {
-
+            if (invisState == 1)
+            {
+                entity.Invisible = true;
+                entity.ObjectUpdateStatus(1);
+            }
+            else if (invisState == 0)
+            {
+                entity.Invisible = false;
+                entity.ObjectUpdateStatus(0);
+            }
         }
+
 
         public Class GetClass()
         {
-            return this.EntityClass;
+            return EntityClass;
         }
 
         public static int GetLevel(Session session)
