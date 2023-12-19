@@ -19,10 +19,12 @@ namespace ReturnHome.Server.EntityObject.Actors
         private Group _lootingGroup;
         private Entity _npc;
         //To track entity Death
-        private long _timeOfDeath;
+        public long _timeOfDeath;
         //To track when someone entered the loot window, important as this "refreshes" the corpse
-        private long _lootingTime;
+        public long _lootingTime;
         public List<ClientItemWrapper> Loot { private set; get; }
+
+        public int _lootExpiryTime = 300000;
 
         //When we create the corpse, entity has died and we toss a time stamp to it
         public Corpse(Entity npc) => _npc = npc;
@@ -31,16 +33,19 @@ namespace ReturnHome.Server.EntityObject.Actors
         {
             Loot = loot;
             _timeOfDeath = DateTime.UtcNow.Millisecond;
+
         }
         public void LootCorpse(Session session)
         {
             //TODO: Add code to account for the owner of the corpse, Player/Group
-            if (_lootee != null && session.MyCharacter != _lootee)
+            if (_lootee != null && session.MyCharacter != _lootee && DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() < _lootingTime + _lootExpiryTime)
             {
                 ServerLoot.ServerLootOptions(session, LootOptions.CorpseBeingLootedByAnotherPlayer);
                 //Send corpse is already being looted opcode to this client
                 return;
             }
+
+            _lootingTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             //Designate looter request and send loot to client
             _lootee = session.MyCharacter;
@@ -63,14 +68,23 @@ namespace ReturnHome.Server.EntityObject.Actors
                 }
         }
 
+        public bool CheckLoot()
+        {
+            if (Loot is null) return false;
+            else return true;
+        }
+
         public void ExitCorpse(Session session)
         {
             _lootee = null;
 
-            if (Loot.Count <= 0)
+            if (Loot is null || Loot.Count <= 0)
             {
-                //Destroy corpse somehow
+                _npc.despawn = true;
+                _
             }
         }
+
+        public static explicit operator Corpse(Entity v) => throw new NotImplementedException();
     }
 }
