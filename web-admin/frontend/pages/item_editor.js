@@ -381,6 +381,15 @@ const Items = () => {
         }
     }
 
+    function lookup_model_image(model) {
+        for (let i = 0; i < item_models.length; i++) {
+            if (model == item_models[i].model) {
+                console.log("found match for item model");
+                return item_models[i].label;
+            }
+        }
+    }
+
     async function postGetItem(url = "", data = {}) {
         const response = await fetch(url, {
             method: "POST",
@@ -399,6 +408,10 @@ const Items = () => {
         setSelectedIconValue(JSON.stringify(json["itemicon"]));
         setSelectedIconModel(
             lookup_icon_image({ selectedIconValue }.selectedIconValue)
+        );
+        setSelectedModelValue(JSON.stringify(json["model"]));
+        setSelectedModelModel(
+            lookup_model_image({selectedModelValue}.selectedModelValue)
         );
         // document.getElementById("icon").value = { selectedIconModel };
         document.getElementById("patternfam").value = json.patternfam;
