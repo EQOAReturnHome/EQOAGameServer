@@ -1,0 +1,167 @@
+name: Quest Bug Report
+description: Report an issue with a quest, item, or NPC
+title: "[Quest Bug]: "
+labels: ["bug", "quest"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Character Info
+
+  - type: input
+    id: char-level
+    attributes:
+      label: Level
+    validations:
+      required: false
+
+  - type: input
+    id: char-class
+    attributes:
+      label: Class
+    validations:
+      required: false
+
+  - type: input
+    id: char-race
+    attributes:
+      label: Race
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Quest Details
+
+  - type: input
+    id: quest-level
+    attributes:
+      label: Quest Level (if known)
+    validations:
+      required: false
+
+  - type: input
+    id: quest-part
+    attributes:
+      label: What part are you on?
+      placeholder: "e.g. Episode 1, Episode 2, Episode 3"
+    validations:
+      required: false
+
+  - type: input
+    id: zone
+    attributes:
+      label: Zone
+    validations:
+      required: false
+
+  - type: input
+    id: quest-giver
+    attributes:
+      label: Initial Quest Giver Name and Location
+    validations:
+      required: false
+
+  - type: input
+    id: last-npc
+    attributes:
+      label: Last NPC You Spoke To and Their Location
+    validations:
+      required: false
+
+  - type: input
+    id: next-npc
+    attributes:
+      label: Who You Think You're Supposed to Talk to Next and Their Location
+    validations:
+      required: false
+
+  - type: textarea
+    id: quest-log
+    attributes:
+      label: What Does Your Quest Log Say?
+      description: Copy the exact text from your quest log.
+    validations:
+      required: false
+
+  - type: input
+    id: item-name
+    attributes:
+      label: Item Name (if applicable)
+    validations:
+      required: false
+
+  - type: input
+    id: item-source
+    attributes:
+      label: Where Does the Item Come From?
+      placeholder: "e.g. mob drop, merchant, quest reward, ground spawn"
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## What You Did
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Step-by-Step — What Did You Do Before the Issue Happened?
+      placeholder: |
+        1. 
+        2. 
+        3.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## What Went Wrong
+
+  - type: textarea
+    id: what-went-wrong
+    attributes:
+      label: Describe the Issue
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## What Should Have Happened
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What Did You Expect to Happen Instead?
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Screenshots / Evidence
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Evidence
+      description: Paste images, links, or any other evidence here.
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Extra Info
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything Else That Might Help?
+      placeholder: "e.g. grouped, died, relogged, zoned, etc."
+    validations:
+      required: false
