@@ -1,5 +1,5 @@
 name: Quest Bug Report
-description: Report an issue with a quest, item, or NPC
+description: Report a bug or issue with a quest.
 title: "[Quest Bug]: "
 labels: ["bug", "quest"]
 body:
@@ -7,27 +7,42 @@ body:
     attributes:
       value: |
         ## Character Info
+        Please provide your character details so we can reproduce the issue.
 
   - type: input
-    id: char-level
+    id: character-level
     attributes:
       label: Level
+      placeholder: "e.g. 42"
     validations:
-      required: false
+      required: true
 
-  - type: input
-    id: char-class
+  - type: dropdown
+    id: character-class
     attributes:
       label: Class
+      options:
+        - Warrior
+        - Mage
+        - Rogue
+        - Cleric
+        - Ranger
+        - Paladin
+        - Bard
+        - Necromancer
+        - Monk
+        - Druid
+        - Other
     validations:
-      required: false
+      required: true
 
   - type: input
-    id: char-race
+    id: character-race
     attributes:
       label: Race
+      placeholder: "e.g. Human, Elf, Dwarf"
     validations:
-      required: false
+      required: true
 
   - type: markdown
     attributes:
@@ -37,106 +52,130 @@ body:
   - type: input
     id: quest-level
     attributes:
-      label: Quest Level (if known)
+      label: Quest Level (if you know it)
+      placeholder: "e.g. 25"
     validations:
-      required: false
+      required: true
 
   - type: input
     id: quest-part
     attributes:
       label: What part are you on?
-      placeholder: "e.g. Episode 1, Episode 2, Episode 3"
+      description: "e.g. Episode 1, Episode 2, Episode 3. If we can get admin-tool DB Flag look-up for testers, that would validate this as well."
+      placeholder: "e.g. Episode 2"
     validations:
-      required: false
+      required: true
 
   - type: input
     id: zone
     attributes:
       label: Zone
+      placeholder: "e.g. Darkwood Forest"
     validations:
       required: false
 
   - type: input
-    id: quest-giver
+    id: initial-quest-giver
     attributes:
-      label: Initial Quest Giver Name and Location
+      label: Initial Quest Giver Name and location
+      placeholder: "e.g. Captain Aldric in Thornhaven"
     validations:
-      required: false
+      required: true
 
   - type: input
     id: last-npc
     attributes:
-      label: Last NPC You Spoke To and Their Location
+      label: Last NPC you spoke to and their location
+      placeholder: "e.g. Merchant Lira at the East Gate"
     validations:
       required: false
 
   - type: input
     id: next-npc
     attributes:
-      label: Who You Think You're Supposed to Talk to Next and Their Location
+      label: Who you think you're supposed to talk to next and their location
+      placeholder: "e.g. Elder Maren in the Temple District"
     validations:
       required: false
 
   - type: textarea
     id: quest-log
     attributes:
-      label: What Does Your Quest Log Say?
-      description: Copy the exact text from your quest log.
+      label: What exactly does your quest log say?
+      description: Copy/paste or screenshot the quest log text.
+      placeholder: "Paste your quest log entry here..."
     validations:
-      required: false
+      required: true
 
-  - type: input
+  - type: dropdown
     id: item-name
     attributes:
-      label: Item Name (if applicable)
+      label: Item name
+      description: "Select N/A if no item is involved."
+      options:
+        - "N/A"
+    validations:
+      required: true
+
+  - type: input
+    id: item-name-text
+    attributes:
+      label: Item name (if not N/A, type it here)
+      placeholder: "e.g. Enchanted Amulet"
     validations:
       required: false
 
-  - type: input
+  - type: dropdown
     id: item-source
     attributes:
-      label: Where Does the Item Come From?
-      placeholder: "e.g. mob drop, merchant, quest reward, ground spawn"
+      label: Where does the item come from?
+      options:
+        - "N/A"
+        - Mob drop
+        - Merchant
+        - Quest reward
+        - Ground spawn
+        - Crafted
+        - Other
     validations:
       required: false
 
   - type: markdown
     attributes:
       value: |
-        ## What You Did
+        ## What you did
 
   - type: textarea
-    id: steps
+    id: steps-to-reproduce
     attributes:
-      label: Step-by-Step — What Did You Do Before the Issue Happened?
-      placeholder: |
+      label: Step by step, what did you do before the issue happened?
+      description: Be as specific as possible.
+      value: |
         1. 
         2. 
-        3.
+        3. 
     validations:
       required: true
 
   - type: markdown
     attributes:
       value: |
-        ## What Went Wrong
+        ## What went wrong
 
   - type: textarea
     id: what-went-wrong
     attributes:
-      label: Describe the Issue
+      label: Explain the issue
+      placeholder: "Describe what happened..."
     validations:
       required: true
 
-  - type: markdown
-    attributes:
-      value: |
-        ## What Should Have Happened
-
   - type: textarea
-    id: expected
+    id: expected-behavior
     attributes:
-      label: What Did You Expect to Happen Instead?
+      label: What should have happened
+      description: What you expected instead.
+      placeholder: "Describe what you expected..."
     validations:
       required: false
 
@@ -148,20 +187,22 @@ body:
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots or Evidence
-      description: Paste images, links, or any other evidence here.
+      label: If you have any, please include them.
+      description: Drag and drop images or paste links here.
+      placeholder: "Paste screenshots or links here..."
     validations:
       required: false
 
   - type: markdown
     attributes:
       value: |
-        ## Extra Info
+        ## Extra info
 
   - type: textarea
-    id: extra
+    id: extra-info
     attributes:
-      label: Anything Else That Might Help?
-      placeholder: "e.g. grouped, died, relogged, zoned, etc."
+      label: Anything else that might help
+      description: "e.g. grouped, died, relogged, etc."
+      placeholder: "Any additional context..."
     validations:
       required: false
