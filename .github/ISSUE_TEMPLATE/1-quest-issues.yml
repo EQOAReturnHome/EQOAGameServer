@@ -27,11 +27,16 @@ body:
         - Rogue
         - Cleric
         - Ranger
+        - Wizard
         - Paladin
+        - Enchanter
+        - Alchemist
+        - Shadowknight
         - Bard
         - Necromancer
         - Monk
         - Druid
+        - Shaman
         - Other
     validations:
       required: true
@@ -40,7 +45,18 @@ body:
     id: character-race
     attributes:
       label: Race
-      placeholder: "e.g. Human, Elf, Dwarf"
+      options:
+        - Barbarian
+        - Dark Elf
+        - Dwarf
+        - Elf
+        - Erudite
+        - Gnome
+        - Halfling
+        - Human - Eastern
+        - Human - Western
+        - Ogre
+        - Troll
     validations:
       required: true
 
