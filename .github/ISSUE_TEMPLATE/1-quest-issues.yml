@@ -41,7 +41,7 @@ body:
     validations:
       required: true
 
-  - type: input
+  - type: dropdown
     id: character-race
     attributes:
       label: Race
