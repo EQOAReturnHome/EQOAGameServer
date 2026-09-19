@@ -50,13 +50,12 @@ namespace AuthServer.Account.Database
 
             catch(MySqlException e)
             {
+                Console.WriteLine("Error occured writing to database");
                 Console.WriteLine(e);
+                t.Fill(0);
+                return false;
             }
 
-            finally
-            {
-                Console.WriteLine("Error occured writing to database");
-            }
             t.Fill(0);
             //See if account exists
             if (AccountExists(Client.Username, out int _))

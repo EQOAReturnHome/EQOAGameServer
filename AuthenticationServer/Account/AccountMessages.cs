@@ -75,11 +75,11 @@ namespace AuthServer.Account
                     Response = "Username or Password was incorrect.";
                     break;
 
-                case AccountMessageTypes.SUBMIT_ACCT_CREATE:
+                case AccountMessageTypes.ACCT_CREATE_RESPONSE:
                     Response = "An error occured or username is taken. Please try again and if unsuccessful, try another username. Thank you.";
                     break;
 
-                case AccountMessageTypes.CHANGE_PASSWORD:
+                case AccountMessageTypes.CHANGE_PASSWORD_RESPONSE:
                     Response = "An error occured. Please try again. If this persists try a new password.";
                     break;
 
